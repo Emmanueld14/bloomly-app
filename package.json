@@ -1,0 +1,27 @@
+{
+  "name": "bloomly",
+  "version": "1.0.0",
+  "description": "Mental wellbeing companion app with Supabase backend",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx serve . -p 3000",
+    "dev": "npx serve . -p 3000",
+    "build": "echo 'Static site - no build step required'",
+    "test": "node scripts/smoke-test.js",
+    "migrate": "node scripts/migrate.js",
+    "lint": "echo 'Linting skipped for static HTML project'"
+  },
+  "keywords": [
+    "wellness",
+    "mental-health",
+    "supabase"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@supabase/supabase-js": "^2.39.0",
+    "dotenv": "^16.3.1",
+    "serve": "^14.2.1"
+  }
+}
+

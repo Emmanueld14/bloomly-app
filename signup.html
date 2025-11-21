@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - Bloomly</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&family=Inter:wght@300;400;500;600;700&family=Quicksand:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Quicksand', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .butterfly-logo {
+            font-family: 'Dancing Script', cursive;
+            background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.3));
+            animation: butterfly-float 3s ease-in-out infinite;
+        }
+
+        @keyframes butterfly-float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(2deg); }
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            border-radius: 20px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #ffffff, #f0f0f0);
+            color: #667eea;
+            padding: 12px 24px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        input, select {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: #333;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: rgba(255, 255, 255, 0.6);
+            background: rgba(255, 255, 255, 0.95);
+        }
+    </style>
+</head>
+<body>
+    <div class="glass-card p-8 w-full max-w-md">
+        <div class="text-center mb-8">
+            <h1 class="butterfly-logo text-5xl font-bold mb-4">Bloomly</h1>
+            <p class="text-white text-lg opacity-90">Start your wellness journey today</p>
+        </div>
+
+        <form id="signupForm" class="space-y-6">
+            <div>
+                <label class="block text-white font-semibold mb-2">
+                    <i class="fas fa-user mr-2"></i>Full Name
+                </label>
+                <input 
+                    type="text" 
+                    id="name" 
+                    required 
+                    class="w-full p-3 rounded-lg"
+                    placeholder="Your full name"
+                />
+            </div>
+
+            <div>
+                <label class="block text-white font-semibold mb-2">
+                    <i class="fas fa-envelope mr-2"></i>Email
+                </label>
+                <input 
+                    type="email" 
+                    id="email" 
+                    required 
+                    class="w-full p-3 rounded-lg"
+                    placeholder="your.email@example.com"
+                />
+            </div>
+
+            <div>
+                <label class="block text-white font-semibold mb-2">
+                    <i class="fas fa-lock mr-2"></i>Password
+                </label>
+                <input 
+                    type="password" 
+                    id="password" 
+                    required 
+                    minlength="6"
+                    class="w-full p-3 rounded-lg"
+                    placeholder="Minimum 6 characters"
+                />
+            </div>
+
+            <div>
+                <label class="block text-white font-semibold mb-2">
+                    <i class="fas fa-user-tag mr-2"></i>Role (for testing)
+                </label>
+                <select id="role" class="w-full p-3 rounded-lg">
+                    <option value="user">User</option>
+                    <option value="admin">Admin (for testing)</option>
+                </select>
+                <p class="text-white text-xs opacity-70 mt-1">Admin role allows article publishing</p>
+            </div>
+
+            <div id="errorMessage" class="text-red-200 text-sm hidden"></div>
+            <div id="successMessage" class="text-green-200 text-sm hidden"></div>
+
+            <button type="submit" class="btn-primary w-full text-lg">
+                <i class="fas fa-user-plus mr-2"></i>Create Account
+            </button>
+        </form>
+
+        <div class="mt-6 text-center">
+            <p class="text-white opacity-80 mb-2">Already have an account?</p>
+            <a href="login.html" class="text-white font-semibold hover:underline">
+                <i class="fas fa-sign-in-alt mr-2"></i>Login
+            </a>
+        </div>
+
+        <div class="mt-6 text-center">
+            <a href="index.html" class="text-white opacity-70 hover:opacity-100 text-sm">
+                <i class="fas fa-arrow-left mr-2"></i>Back to Home
+            </a>
+        </div>
+    </div>
+
+    <!-- Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
+    <script src="script.supabase.js"></script>
+    <script type="module">
+        // Initialize Supabase
+        if (window.SupabaseClient) {
+            window.SupabaseClient.init();
+        }
+
+        // Flag to prevent immediate redirects
+        let userInteracting = false;
+        let redirectTimer = null;
+        let authStateUnsubscribe = null;
+
+        // Wait for DOM to be ready
+        document.addEventListener('DOMContentLoaded', () => {
+            // Check if already logged in - but with significant delay to allow user interaction
+            redirectTimer = setTimeout(async () => {
+                // Only check auth state if user hasn't started interacting
+                if (!userInteracting && window.SupabaseClient) {
+                    const user = await window.SupabaseClient.getCurrentUser();
+                    if (user && !userInteracting) {
+                        // Only redirect if we are on login/signup page
+                        const currentPath = window.location.pathname;
+                        if (currentPath.includes('login.html') || currentPath.includes('signup.html')) {
+                            // Additional delay to ensure user can see the page
+                            setTimeout(() => {
+                                if (!userInteracting) {
+                                    window.location.href = 'index.html';
+                                }
+                            }, 500);
+                        }
+                    }
+                }
+            }, 2000); // Wait 2 seconds before checking auth state - gives user time to interact
+
+            // Get form element
+            const signupForm = document.getElementById('signupForm');
+            const errorDiv = document.getElementById('errorMessage');
+            const successDiv = document.getElementById('successMessage');
+
+            if (!signupForm) {
+                console.error('Signup form not found');
+                return;
+            }
+
+            // Signup form event - VERY IMPORTANT: prevent default form submission
+            signupForm.addEventListener('submit', function(e) {
+                e.preventDefault(); // Stops page from reloading
+
+                // Clear any pending redirect timer
+                if (redirectTimer) {
+                    clearTimeout(redirectTimer);
+                }
+
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+                const role = document.getElementById('role')?.value || 'user';
+
+                // Hide previous messages
+                errorDiv.classList.add('hidden');
+                successDiv.classList.add('hidden');
+
+                // Create a new user in Supabase
+                if (window.SupabaseClient) {
+                    window.SupabaseClient.signUp(email, password, email.split('@')[0])
+                        .then(async ({ data, error }) => {
+                            if (error) {
+                                errorDiv.textContent = error.message || 'An error occurred during signup';
+                                errorDiv.classList.remove('hidden');
+                            } else {
+                                // Update profile with role if admin
+                                if (role === 'admin' && data?.user) {
+                                    await window.SupabaseClient.updateProfile({ role: 'admin' });
+                                }
+                                successDiv.textContent = 'Account created successfully! Please check your email to verify your account, then login.';
+                                successDiv.classList.remove('hidden');
+                                // Redirect to login page after short delay
+                                setTimeout(() => {
+                                    window.location.href = 'login.html';
+                                }, 2000);
+                            }
+                        })
+                        .catch(error => {
+                            errorDiv.textContent = error.message || 'An error occurred during signup';
+                            errorDiv.classList.remove('hidden');
+                        });
+                } else {
+                    errorDiv.textContent = 'Supabase client not initialized. Please check your configuration.';
+                    errorDiv.classList.remove('hidden');
+                }
+            });
+
+            // Prevent auto-redirect if user is interacting with the form
+            const nameInput = document.getElementById('name');
+            const emailInput = document.getElementById('email');
+            const passwordInput = document.getElementById('password');
+            
+            const preventRedirect = () => {
+                userInteracting = true;
+                if (redirectTimer) {
+                    clearTimeout(redirectTimer);
+                    redirectTimer = null;
+                }
+                if (authStateUnsubscribe) {
+                    authStateUnsubscribe();
+                    authStateUnsubscribe = null;
+                }
+            };
+            
+            [nameInput, emailInput, passwordInput].forEach(input => {
+                if (input) {
+                    input.addEventListener('focus', preventRedirect);
+                    input.addEventListener('input', preventRedirect);
+                    input.addEventListener('keydown', preventRedirect);
+                }
+            });
+
+            // Also prevent redirect on any click on the page
+            document.addEventListener('click', preventRedirect, { once: false });
+            document.addEventListener('mousemove', preventRedirect, { once: false });
+        });
+    </script>
+</body>
+</html>
