@@ -10,6 +10,8 @@
     "test": "node scripts/smoke-test.js",
     "migrate": "node scripts/migrate.js",
     "setup": "node scripts/auto-setup.js",
+    "setup:full": "node scripts/full-auto-setup.js",
+    "create-env": "node scripts/create-env.js",
     "lint": "echo 'Linting skipped for static HTML project'"
   },
   "keywords": [
