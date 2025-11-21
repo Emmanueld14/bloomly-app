@@ -3839,9 +3839,9 @@
                                 const data = doc.data();
                                 chatMessages.push({
                                     id: doc.id,
-                                    text: data.message,
+                                    text: data.text || data.message,
                                     sender: data.sender,
-                                    timestamp: data.date?.toDate ? data.date.toDate().getTime() : new Date(data.date).getTime()
+                                    timestamp: data.timestamp || (data.date?.toDate ? data.date.toDate().getTime() : new Date(data.date).getTime())
                                 });
                             });
                             
@@ -3855,19 +3855,19 @@
                             // Don't auto-scroll on initial load - only scroll when user sends messages
                         }, (error) => {
                             console.error('Error loading chat:', error);
-                            // If error is due to missing index, try without orderBy
-                            if (error.code === 'failed-precondition') {
-                                const chatsRef = collection(window.firebaseDb, 'aiChats');
-                                const q = query(chatsRef, where('userId', '==', user.uid));
-                                onSnapshot(q, (snapshot) => {
+                            // If error, try without orderBy as fallback
+                            try {
+                                const chatsRef = collection(window.firebaseDb, 'chatMessages');
+                                const q2 = queryFn(chatsRef, where('user_id', '==', user.uid));
+                                onSnapshot(q2, (snapshot) => {
                                     const chatMessages = [];
                                     snapshot.forEach((doc) => {
                                         const data = doc.data();
                                         chatMessages.push({
                                             id: doc.id,
-                                            text: data.message,
+                                            text: data.text || data.message,
                                             sender: data.sender,
-                                            timestamp: data.date?.toDate ? data.date.toDate().getTime() : new Date(data.date).getTime()
+                                            timestamp: data.timestamp || (data.date?.toDate ? data.date.toDate().getTime() : new Date(data.date).getTime())
                                         });
                                     });
                                     chatMessages.sort((a, b) => a.timestamp - b.timestamp);
@@ -3877,7 +3877,8 @@
                                     setMessages(chatMessages);
                                     setChatLoaded(true);
                                 });
-                            } else {
+                            } catch (fallbackError) {
+                                console.error('Fallback query also failed:', fallbackError);
                                 setMessages([{ text: getDeborahGreeting(), sender: 'deborah', timestamp: Date.now() }]);
                                 setChatLoaded(true);
                             }
@@ -3945,15 +3946,24 @@
                     timestamp: Date.now()
                 };
 
-                // Save user message to Firestore
+                // Save user message to Supabase
                 try {
-                    const { collection, addDoc, Timestamp } = window.firestore;
-                    await addDoc(collection(window.firebaseDb, 'aiChats'), {
-                        userId: user.uid,
-                        message: input,
-                        sender: 'user',
-                        date: Timestamp.now()
-                    });
+                    if (window.SupabaseClient) {
+                        await window.SupabaseClient.createChatMessage({
+                            text: input,
+                            sender: 'user',
+                            timestamp: Date.now()
+                        });
+                    } else {
+                        // Fallback to compatibility layer
+                        const { collection, addDoc, Timestamp } = window.firestore;
+                        await addDoc(collection(window.firebaseDb, 'chatMessages'), {
+                            user_id: user.uid,
+                            text: input,
+                            sender: 'user',
+                            timestamp: Date.now()
+                        });
+                    }
                 } catch (error) {
                     console.error('Error saving message:', error);
                 }
@@ -4004,15 +4014,24 @@
                         timestamp: Date.now()
                     };
                     
-                    // Save Deborah's response to Firestore
+                    // Save Deborah's response to Supabase
                     try {
-                        const { collection, addDoc, Timestamp } = window.firestore;
-                        await addDoc(collection(window.firebaseDb, 'aiChats'), {
-                            userId: user.uid,
-                            message: response,
-                            sender: 'Deborah',
-                            date: Timestamp.now()
-                        });
+                        if (window.SupabaseClient) {
+                            await window.SupabaseClient.createChatMessage({
+                                text: response,
+                                sender: 'deborah',
+                                timestamp: Date.now()
+                            });
+                        } else {
+                            // Fallback to compatibility layer
+                            const { collection, addDoc, Timestamp } = window.firestore;
+                            await addDoc(collection(window.firebaseDb, 'chatMessages'), {
+                                user_id: user.uid,
+                                text: response,
+                                sender: 'deborah',
+                                timestamp: Date.now()
+                            });
+                        }
                     } catch (error) {
                         console.error('Error saving Deborah response:', error);
                     }

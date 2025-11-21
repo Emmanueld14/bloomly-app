@@ -97,19 +97,22 @@
     
     window.firestore = {
         collection: function(db, collectionName) {
-            return {
+            const ref = {
                 _collection: collectionName,
-                _db: db
+                _db: db,
+                _type: 'collection'
             };
+            return ref;
         },
         
-        query: function(...args) {
-            return {
-                _collection: args[0]._collection,
-                _filters: [],
-                _orderBy: null,
-                _limit: null
+        query: function(collectionRef, ...constraints) {
+            const queryRef = {
+                _collection: collectionRef._collection,
+                _db: collectionRef._db,
+                _type: 'query',
+                _constraints: constraints || []
             };
+            return queryRef;
         },
         
         where: function(field, operator, value) {
@@ -125,7 +128,7 @@
             return {
                 _type: 'orderBy',
                 field,
-                direction
+                direction: direction || 'asc'
             };
         },
         
@@ -264,23 +267,32 @@
             // Fallback: direct Supabase query
             let query = supabase.from(collectionName).select('*');
             
-            // Apply filters, orderBy, limit from queryRef
-            if (queryRef._filters) {
-                queryRef._filters.forEach(filter => {
-                    if (filter._type === 'where') {
-                        query = query.eq(filter.field, filter.value);
+            // Apply constraints from queryRef
+            if (queryRef._constraints) {
+                queryRef._constraints.forEach(constraint => {
+                    if (constraint._type === 'where') {
+                        // Map Firestore operators to Supabase
+                        if (constraint.operator === '==') {
+                            query = query.eq(constraint.field, constraint.value);
+                        } else if (constraint.operator === '!=') {
+                            query = query.neq(constraint.field, constraint.value);
+                        } else if (constraint.operator === '>') {
+                            query = query.gt(constraint.field, constraint.value);
+                        } else if (constraint.operator === '>=') {
+                            query = query.gte(constraint.field, constraint.value);
+                        } else if (constraint.operator === '<') {
+                            query = query.lt(constraint.field, constraint.value);
+                        } else if (constraint.operator === '<=') {
+                            query = query.lte(constraint.field, constraint.value);
+                        }
+                    } else if (constraint._type === 'orderBy') {
+                        query = query.order(constraint.field, { 
+                            ascending: constraint.direction === 'asc' 
+                        });
+                    } else if (constraint._type === 'limit') {
+                        query = query.limit(constraint.count);
                     }
                 });
-            }
-            
-            if (queryRef._orderBy) {
-                query = query.order(queryRef._orderBy.field, { 
-                    ascending: queryRef._orderBy.direction === 'asc' 
-                });
-            }
-            
-            if (queryRef._limit) {
-                query = query.limit(queryRef._limit.count);
             }
             
             const { data, error } = await query;
@@ -288,14 +300,16 @@
             
             return {
                 forEach: function(callback) {
-                    data.forEach(doc => {
-                        callback({
-                            id: doc.id,
-                            data: () => doc
+                    if (data) {
+                        data.forEach(doc => {
+                            callback({
+                                id: doc.id,
+                                data: () => doc
+                            });
                         });
-                    });
+                    }
                 },
-                docs: data.map(doc => ({
+                docs: (data || []).map(doc => ({
                     id: doc.id,
                     data: () => doc
                 }))
@@ -352,24 +366,93 @@
             const collectionName = queryRef._collection;
             const supabase = window.SupabaseClient.getClient();
             
-            // Set up real-time subscription
-            const channel = supabase
-                .channel(`${collectionName}_changes`)
-                .on('postgres_changes', 
-                    { event: '*', schema: 'public', table: collectionName },
-                    (payload) => {
-                        // Fetch updated data
-                        window.firestore.getDocs(queryRef).then(snapshot => {
-                            onNext(snapshot);
-                        }).catch(err => {
-                            if (onError) onError(err);
+            // Build the query for real-time subscription
+            let query = supabase.from(collectionName).select('*');
+            
+            // Apply constraints
+            if (queryRef._constraints) {
+                queryRef._constraints.forEach(constraint => {
+                    if (constraint._type === 'where' && constraint.operator === '==') {
+                        query = query.eq(constraint.field, constraint.value);
+                    } else if (constraint._type === 'orderBy') {
+                        query = query.order(constraint.field, { 
+                            ascending: constraint.direction === 'asc' 
                         });
+                    } else if (constraint._type === 'limit') {
+                        query = query.limit(constraint.count);
+                    }
+                });
+            }
+            
+            // Set up real-time subscription
+            const channelName = `${collectionName}_${Date.now()}`;
+            const channel = supabase
+                .channel(channelName)
+                .on('postgres_changes', 
+                    { 
+                        event: '*', 
+                        schema: 'public', 
+                        table: collectionName 
+                    },
+                    async (payload) => {
+                        try {
+                            // Fetch updated data with same query
+                            const { data, error } = await query;
+                            if (error) {
+                                if (onError) onError(error);
+                                return;
+                            }
+                            
+                            // Transform to Firestore-like format
+                            const snapshot = {
+                                forEach: function(callback) {
+                                    if (data) {
+                                        data.forEach(doc => {
+                                            callback({
+                                                id: doc.id,
+                                                data: () => doc
+                                            });
+                                        });
+                                    }
+                                },
+                                docs: (data || []).map(doc => ({
+                                    id: doc.id,
+                                    data: () => doc
+                                }))
+                            };
+                            
+                            onNext(snapshot);
+                        } catch (err) {
+                            if (onError) onError(err);
+                        }
                     }
                 )
                 .subscribe();
             
             // Initial fetch
-            window.firestore.getDocs(queryRef).then(snapshot => {
+            query.then(({ data, error }) => {
+                if (error) {
+                    if (onError) onError(error);
+                    return;
+                }
+                
+                const snapshot = {
+                    forEach: function(callback) {
+                        if (data) {
+                            data.forEach(doc => {
+                                callback({
+                                    id: doc.id,
+                                    data: () => doc
+                                });
+                            });
+                        }
+                    },
+                    docs: (data || []).map(doc => ({
+                        id: doc.id,
+                        data: () => doc
+                    }))
+                };
+                
                 onNext(snapshot);
             }).catch(err => {
                 if (onError) onError(err);
