@@ -60,7 +60,7 @@ This will:
 
 **Option A: SQL Editor (Easiest)**
 1. Go to Supabase SQL Editor
-2. Open `supabase/supabase.sql`
+2. Open `sqsupabase/supabase.l`
 3. Copy all contents
 4. Paste in SQL Editor
 5. Click "Run"

@@ -2495,6 +2495,14 @@
 </head>
 <body class="theme-light">
     <div id="root"></div>
+    <!-- Global Loading Overlay -->
+    <div id="loading-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); z-index: 99999; flex-direction: column; align-items: center; justify-content: center; color: white;">
+        <div style="text-align: center;">
+            <i class="fas fa-spinner fa-spin" style="font-size: 48px; margin-bottom: 20px;"></i>
+            <h2 style="font-size: 24px; margin-bottom: 10px;">Loading...</h2>
+            <p style="font-size: 16px; opacity: 0.9;">Please wait</p>
+        </div>
+    </div>
     <div id="particles-container"></div>
 
     <script type="text/babel">
@@ -3432,18 +3440,49 @@
                 return lastCheckIn === today;
             },
 
-            shouldShowCheckIn: () => {
+            shouldShowCheckIn: async () => {
                 const timeOfDay = DailyCheckIn.getTimeOfDay();
                 if (!timeOfDay) return false;
                 
+                // Check localStorage first (fast check)
+                let hasCheckedIn = false;
                 if (timeOfDay === 'morning') {
-                    return !DailyCheckIn.hasCheckedInMorning();
+                    hasCheckedIn = DailyCheckIn.hasCheckedInMorning();
                 } else if (timeOfDay === 'afternoon') {
-                    return !DailyCheckIn.hasCheckedInAfternoon();
+                    hasCheckedIn = DailyCheckIn.hasCheckedInAfternoon();
                 } else if (timeOfDay === 'night') {
-                    return !DailyCheckIn.hasCheckedInNight();
+                    hasCheckedIn = DailyCheckIn.hasCheckedInNight();
                 }
-                return false;
+                
+                // If already checked in locally, return false
+                if (hasCheckedIn) return false;
+                
+                // Also check Supabase to ensure consistency
+                if (window.SupabaseClient) {
+                    try {
+                        const today = new Date().toISOString().split('T')[0];
+                        const { data } = await window.SupabaseClient.getDailyCheckIns(timeOfDay, 1);
+                        if (data && data.length > 0) {
+                            const latestCheckIn = data[0];
+                            if (latestCheckIn.date === today) {
+                                // Mark as checked in locally to avoid future checks
+                                if (timeOfDay === 'morning') {
+                                    DailyCheckIn.markMorningCheckedIn();
+                                } else if (timeOfDay === 'afternoon') {
+                                    DailyCheckIn.markAfternoonCheckedIn();
+                                } else if (timeOfDay === 'night') {
+                                    DailyCheckIn.markNightCheckedIn();
+                                }
+                                return false;
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Error checking Supabase for check-ins:', error);
+                        // Continue with localStorage check if Supabase fails
+                    }
+                }
+                
+                return true;
             },
 
             markMorningCheckedIn: () => {
@@ -3483,7 +3522,16 @@
             ],
 
             saveCheckIn: async (type, responses) => {
-                const user = window.firebaseAuth?.currentUser;
+                // Get current user from Supabase
+                let user = null;
+                if (window.SupabaseClient) {
+                    try {
+                        user = await window.SupabaseClient.getCurrentUser();
+                    } catch (error) {
+                        console.error('Error getting current user:', error);
+                    }
+                }
+                
                 if (!user) {
                     console.error('No user logged in');
                     return false;
@@ -3506,7 +3554,11 @@
                 // Save to Supabase
                 if (window.SupabaseClient) {
                     try {
-                        await window.SupabaseClient.saveDailyCheckIn(type, responses);
+                        const result = await window.SupabaseClient.saveDailyCheckIn(type, responses);
+                        if (result.error) {
+                            console.error('Error saving check-in to Supabase:', result.error);
+                            // Still return true if localStorage save worked
+                        }
                     } catch (error) {
                         console.error('Error saving check-in to Supabase:', error);
                         // Still return true if localStorage save worked
@@ -3795,61 +3847,150 @@
             const [moodGlow, setMoodGlow] = useState('rgba(102, 126, 234, 0.3)');
             const messagesEndRef = useRef(null);
             const [chatLoaded, setChatLoaded] = useState(false);
-            const [hasScrolled, setHasScrolled] = useState(false);
-
-            // Helper function for scrolling
+            // Helper function for scrolling (kept for potential manual scroll button)
             const scrollToBottom = () => {
                 messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
             };
 
-            // Check Firebase authentication - MUST BE BEFORE CONDITIONAL RETURNS
+            // Check Supabase authentication - MUST BE BEFORE CONDITIONAL RETURNS
             useEffect(() => {
                 let unsubscribe = null;
+                let mounted = true;
+                let hasChecked = false;
                 
-                // Wait for Firebase to be ready
-                const checkAuth = () => {
-                    if (!window.firebaseAuth || !window.onAuthStateChanged) {
-                        // If Firebase not ready yet, wait a bit and try again
-                        if (!window.firebaseReady) {
-                            setTimeout(checkAuth, 100);
-                            return;
+                const checkAuth = async () => {
+                    if (hasChecked) return;
+                    hasChecked = true;
+                    
+                    // First, check localStorage (what App component uses)
+                    const storedUser = storage.get('bloomly_current_user', null);
+                    if (storedUser && storedUser.id) {
+                        console.log('AITherapistPage: Found stored user in localStorage, setting authenticated');
+                        if (mounted) {
+                            setAuthChecking(false);
+                            setIsAuthenticated(true);
                         }
-                        console.error('Firebase Auth not initialized');
-                        setAuthChecking(false);
-                        window.location.href = 'login.html';
+                        // Still set up listener for future changes
+                        setupAuthListener();
                         return;
                     }
 
-                    unsubscribe = window.onAuthStateChanged(window.firebaseAuth, user => {
-                        console.log('AITherapistPage: Auth state changed', user ? 'User logged in' : 'No user');
-                        setAuthChecking(false);
-                        if (!user) {
-                            // No user logged in → redirect to login page
-                            window.location.href = 'login.html';
-                        } else {
-                            console.log('AITherapistPage: Setting authenticated to true');
-                            setIsAuthenticated(true);
+                    // If no stored user, check Supabase session
+                    if (!window.SupabaseClient) {
+                        console.log('AITherapistPage: Supabase Client not initialized yet, waiting...');
+                        // Wait longer for Supabase to initialize
+                        setTimeout(() => {
+                            if (mounted && !hasChecked) {
+                                hasChecked = false;
+                                checkAuth();
+                            }
+                        }, 1000);
+                        return;
+                    }
+
+                    try {
+                        const session = await window.SupabaseClient.getCurrentSession();
+                        console.log('AITherapistPage: Session check', session ? 'Session found' : 'No session');
+                        
+                        if (mounted) {
+                            setAuthChecking(false);
+                            if (session && session.user) {
+                                console.log('AITherapistPage: Setting authenticated to true from session');
+                                setIsAuthenticated(true);
+                                // Store user in localStorage for consistency
+                                const userData = {
+                                    id: session.user.id,
+                                    email: session.user.email,
+                                    name: session.user.user_metadata?.name || session.user.email?.split('@')[0] || 'User',
+                                    role: session.user.user_metadata?.role || 'user'
+                                };
+                                storage.set('bloomly_current_user', userData);
+                            } else {
+                                // Double-check localStorage one more time
+                                const storedUser2 = storage.get('bloomly_current_user', null);
+                                if (storedUser2 && storedUser2.id) {
+                                    console.log('AITherapistPage: Found stored user on second check, setting authenticated');
+                                    setIsAuthenticated(true);
+                                } else {
+                                    console.log('AITherapistPage: No session or stored user, redirecting to login');
+                                    // Only redirect if we're sure there's no user
+                                    setTimeout(() => {
+                                        if (mounted) {
+                                            const finalCheck = storage.get('bloomly_current_user', null);
+                                            if (!finalCheck || !finalCheck.id) {
+                                                window.location.href = 'login.html';
+                                            }
+                                        }
+                                    }, 1000);
+                                }
+                            }
                         }
-                    });
+                    } catch (error) {
+                        console.error('Error checking auth:', error);
+                        if (mounted) {
+                            // Final fallback: check localStorage one more time
+                            const storedUser3 = storage.get('bloomly_current_user', null);
+                            if (storedUser3 && storedUser3.id) {
+                                console.log('AITherapistPage: Error but found stored user, setting authenticated');
+                                setAuthChecking(false);
+                                setIsAuthenticated(true);
+                            } else {
+                                setAuthChecking(false);
+                                // Give it one more second before redirecting
+                                setTimeout(() => {
+                                    if (mounted) {
+                                        const finalCheck = storage.get('bloomly_current_user', null);
+                                        if (!finalCheck || !finalCheck.id) {
+                                            window.location.href = 'login.html';
+                                        }
+                                    }
+                                }, 1000);
+                            }
+                        }
+                    }
+
+                    setupAuthListener();
                 };
 
-                // Check immediately or wait for Firebase ready event
-                if (window.firebaseReady) {
-                    checkAuth();
-                } else {
-                    window.addEventListener('firebaseReady', checkAuth, { once: true });
-                    // Fallback timeout
-                    setTimeout(() => {
-                        if (authChecking) checkAuth();
-                    }, 2000);
-                }
+                const setupAuthListener = () => {
+                    // Listen to auth state changes
+                    if (window.SupabaseClient && window.SupabaseClient.onAuthStateChange) {
+                        unsubscribe = window.SupabaseClient.onAuthStateChange((event, session) => {
+                            console.log('AITherapistPage: Auth state changed', event, session ? 'Session found' : 'No session');
+                            if (mounted) {
+                                if (event === 'SIGNED_IN' && session && session.user) {
+                                    setIsAuthenticated(true);
+                                    // Store user in localStorage
+                                    const userData = {
+                                        id: session.user.id,
+                                        email: session.user.email,
+                                        name: session.user.user_metadata?.name || session.user.email?.split('@')[0] || 'User',
+                                        role: session.user.user_metadata?.role || 'user'
+                                    };
+                                    storage.set('bloomly_current_user', userData);
+                                } else if (event === 'SIGNED_OUT') {
+                                    setIsAuthenticated(false);
+                                    storage.set('bloomly_current_user', null);
+                                    window.location.href = 'login.html';
+                                }
+                            }
+                        });
+                    }
+                };
+
+                // Check auth after a delay to ensure everything is initialized
+                const timeoutId = setTimeout(checkAuth, 300);
 
                 return () => {
-                    if (unsubscribe) unsubscribe();
+                    mounted = false;
+                    clearTimeout(timeoutId);
+                    if (unsubscribe && typeof unsubscribe === 'function') {
+                        unsubscribe();
+                    }
                 };
             }, []);
 
-            // Load chat history from Firestore - MUST BE BEFORE CONDITIONAL RETURNS
+            // Load chat history from Supabase - MUST BE BEFORE CONDITIONAL RETURNS
             useEffect(() => {
                 if (!isAuthenticated) {
                     setMessages([{ text: getDeborahGreeting(), sender: 'deborah', timestamp: Date.now() }]);
@@ -3857,94 +3998,48 @@
                     return;
                 }
 
-                const loadChat = () => {
-                    const user = window.firebaseAuth?.currentUser;
-                    if (!user || !window.firestore) {
+                const loadChat = async () => {
+                    if (!window.SupabaseClient) {
                         setMessages([{ text: getDeborahGreeting(), sender: 'deborah', timestamp: Date.now() }]);
                         setChatLoaded(true);
                         return;
                     }
 
                     try {
-                        const { collection, query, where, orderBy, onSnapshot } = window.firestore;
-                        const chatsRef = collection(window.firebaseDb, 'aiChats');
-                        const q = query(chatsRef, where('userId', '==', user.uid), orderBy('date', 'asc'));
-
-                        // Real-time listener
-                        const unsubscribe = onSnapshot(q, (snapshot) => {
-                            const chatMessages = [];
-                            snapshot.forEach((doc) => {
-                                const data = doc.data();
-                                chatMessages.push({
-                                    id: doc.id,
-                                    text: data.text || data.message,
-                                    sender: data.sender,
-                                    timestamp: data.timestamp || (data.date?.toDate ? data.date.toDate().getTime() : new Date(data.date).getTime())
-                                });
-                            });
-                            
-                            // Add greeting if no messages
-                            if (chatMessages.length === 0) {
-                                chatMessages.push({ text: getDeborahGreeting(), sender: 'deborah', timestamp: Date.now() });
-                            }
-                            
-                            setMessages(chatMessages);
-                            setChatLoaded(true);
-                            // Don't auto-scroll on initial load - only scroll when user sends messages
-                        }, (error) => {
+                        const { data, error } = await window.SupabaseClient.getChatMessages(100);
+                        
+                        if (error) {
                             console.error('Error loading chat:', error);
-                            // If error, try without orderBy as fallback
-                            try {
-                                const chatsRef = collection(window.firebaseDb, 'chatMessages');
-                                const q2 = queryFn(chatsRef, where('user_id', '==', user.uid));
-                                onSnapshot(q2, (snapshot) => {
-                                    const chatMessages = [];
-                                    snapshot.forEach((doc) => {
-                                        const data = doc.data();
-                                        chatMessages.push({
-                                            id: doc.id,
-                                            text: data.text || data.message,
-                                            sender: data.sender,
-                                            timestamp: data.timestamp || (data.date?.toDate ? data.date.toDate().getTime() : new Date(data.date).getTime())
-                                        });
-                                    });
-                                    chatMessages.sort((a, b) => a.timestamp - b.timestamp);
-                                    if (chatMessages.length === 0) {
-                                        chatMessages.push({ text: getDeborahGreeting(), sender: 'deborah', timestamp: Date.now() });
-                                    }
-                                    setMessages(chatMessages);
-                                    setChatLoaded(true);
-                                });
-                            } catch (fallbackError) {
-                                console.error('Fallback query also failed:', fallbackError);
-                                setMessages([{ text: getDeborahGreeting(), sender: 'deborah', timestamp: Date.now() }]);
-                                setChatLoaded(true);
-                            }
-                        });
+                            setMessages([{ text: getDeborahGreeting(), sender: 'deborah', timestamp: Date.now() }]);
+                            setChatLoaded(true);
+                            return;
+                        }
 
-                        return () => unsubscribe();
+                        const chatMessages = (data || []).map(msg => ({
+                            id: msg.id,
+                            text: msg.text,
+                            sender: msg.sender,
+                            timestamp: msg.timestamp || new Date(msg.created_at).getTime()
+                        })).sort((a, b) => a.timestamp - b.timestamp);
+                        
+                        // Add greeting if no messages
+                        if (chatMessages.length === 0) {
+                            chatMessages.push({ text: getDeborahGreeting(), sender: 'deborah', timestamp: Date.now() });
+                        }
+                        
+                        setMessages(chatMessages);
+                        setChatLoaded(true);
                     } catch (error) {
-                        console.error('Error setting up chat listener:', error);
+                        console.error('Error loading chat:', error);
                         setMessages([{ text: getDeborahGreeting(), sender: 'deborah', timestamp: Date.now() }]);
                         setChatLoaded(true);
                     }
                 };
 
-                if (window.firebaseReady) {
-                    return loadChat();
-                } else {
-                    window.addEventListener('firebaseReady', loadChat, { once: true });
-                }
+                loadChat();
             }, [isAuthenticated]);
 
-            // Scroll effect - ONLY scroll when new messages are added, not on initial load
-            useEffect(() => {
-                // Only auto-scroll if user has already interacted (sent a message)
-                // Don't scroll on initial page load
-                if (chatLoaded && hasScrolled && messages.length > 0) {
-                    scrollToBottom();
-                }
-            }, [messages, chatLoaded, hasScrolled]);
+            // Removed auto-scroll effect - messages will scroll naturally
 
             // NOW WE CAN DO CONDITIONAL RETURNS - ALL HOOKS ARE ABOVE
             // Show loading state while checking auth
@@ -4096,15 +4191,6 @@
                                 sender: 'deborah',
                                 timestamp: Date.now()
                             });
-                        } else {
-                            // Fallback to compatibility layer
-                            const { collection, addDoc, Timestamp } = window.firestore;
-                            await addDoc(collection(window.firebaseDb, 'chatMessages'), {
-                                user_id: user.uid,
-                                text: response,
-                                sender: 'deborah',
-                                timestamp: Date.now()
-                            });
                         }
                     } catch (error) {
                         console.error('Error saving Deborah response:', error);
@@ -4112,8 +4198,7 @@
                     
                     setMessages(prev => [...prev, deborahMessage]);
                     setIsTyping(false);
-                    // Scroll to bottom after Deborah's response
-                    setTimeout(() => scrollToBottom(), 100);
+                    // Removed auto-scroll - let user scroll naturally
                 }, 1800 + Math.random() * 500); // Variable delay for natural feel
             };
 
@@ -4126,6 +4211,152 @@
                 { id: 'emotions-summary', name: 'Emotions Summary', icon: 'chart-line' }
             ];
 
+            // Tool implementations
+            const getToolContent = (toolId) => {
+                const memories = Deborah.getMemories();
+                const emotionalHistory = memories.emotionalHistory || [];
+                const recentMoods = storage.getUserData('moods', []).slice(0, 7);
+                
+                switch(toolId) {
+                    case 'emotion-scanner':
+                        const lastMessage = messages.filter(m => m.sender === 'user').pop();
+                        if (!lastMessage) {
+                            return {
+                                title: 'Emotion Scanner',
+                                content: 'Share how you\'re feeling, and I\'ll help you identify and understand your emotions.',
+                                action: null
+                            };
+                        }
+                        const analysis = Deborah.analyzeEmotion(lastMessage.text, messages);
+                        const emotionEmojis = {
+                            sad: '😢',
+                            anxious: '😰',
+                            happy: '😊',
+                            stressed: '😓',
+                            angry: '😠',
+                            neutral: '😐'
+                        };
+                        return {
+                            title: 'Emotion Scanner Results',
+                            content: `Based on your recent message, I detect:\n\n**Primary Emotion:** ${analysis.primary} ${emotionEmojis[analysis.primary] || '😐'}\n**Intensity:** ${(analysis.intensity * 100).toFixed(0)}%\n\n${analysis.triggers.length > 0 ? `**Possible Triggers:** ${analysis.triggers.join(', ')}\n\n` : ''}${analysis.needs.length > 0 ? `**What You Might Need:** ${analysis.needs.join(', ')}` : ''}`,
+                            action: null
+                        };
+                        
+                    case 'thought-reframer':
+                        return {
+                            title: 'Thought Reframer',
+                            content: 'This tool helps you reframe negative thoughts into more balanced perspectives.\n\n**How it works:**\n1. Share a thought that\'s troubling you\n2. I\'ll help you identify cognitive distortions\n3. Together, we\'ll create a more balanced perspective\n\n**Example:**\n"I always mess things up" → "I sometimes make mistakes, and that\'s human. I also have many successes."',
+                            action: () => {
+                                if (!input.trim()) {
+                                    return 'Please share a thought you\'d like to reframe. For example: "I always fail at everything" or "Nobody cares about me."';
+                                }
+                                const negativePatterns = [
+                                    { pattern: /always|never|everyone|nobody|nothing|everything/gi, type: 'All-or-nothing thinking' },
+                                    { pattern: /should|must|have to/gi, type: 'Should statements' },
+                                    { pattern: /worst|terrible|awful|horrible/gi, type: 'Catastrophizing' }
+                                ];
+                                const detected = negativePatterns.find(p => p.pattern.test(input));
+                                if (detected) {
+                                    return `I notice **${detected.type}** in your thought. Let's reframe it:\n\n**Original:** "${input}"\n\n**Reframed:** Try thinking: "${input.replace(/always|never|everyone|nobody/gi, 'sometimes').replace(/should|must|have to/gi, 'could').replace(/worst|terrible|awful|horrible/gi, 'challenging')}"\n\nRemember: Thoughts are not facts. You have the power to choose how you interpret situations.`;
+                                }
+                                return `Let's reframe your thought: "${input}"\n\n**Questions to consider:**\n- Is this thought 100% true?\n- What evidence supports this? What contradicts it?\n- How would you advise a friend with this thought?\n- What's a more balanced way to see this?`;
+                            }
+                        };
+                        
+                    case 'coping-strategies':
+                        const currentAnalysis = messages.length > 0 ? Deborah.analyzeEmotion(messages.filter(m => m.sender === 'user').pop()?.text || '', messages) : null;
+                        const strategies = {
+                            sad: [
+                                'Practice self-compassion: "I\'m going through a difficult time, and that\'s okay."',
+                                'Connect with someone you trust',
+                                'Engage in gentle movement or stretching',
+                                'Write about your feelings in a journal',
+                                'Listen to calming music',
+                                'Practice gratitude: list 3 things you\'re grateful for'
+                            ],
+                            anxious: [
+                                '4-7-8 breathing: Inhale 4 counts, hold 7, exhale 8',
+                                '5-4-3-2-1 grounding: Name 5 things you see, 4 you touch, 3 you hear, 2 you smell, 1 you taste',
+                                'Progressive muscle relaxation',
+                                'Take a walk in nature',
+                                'Practice mindfulness meditation',
+                                'Write down your worries and set them aside for later'
+                            ],
+                            stressed: [
+                                'Break tasks into smaller, manageable steps',
+                                'Take regular breaks (Pomodoro technique: 25 min work, 5 min break)',
+                                'Practice time management and prioritize',
+                                'Say "no" to non-essential commitments',
+                                'Engage in physical activity',
+                                'Practice deep breathing exercises'
+                            ],
+                            angry: [
+                                'Take a timeout: step away from the situation',
+                                'Express your feelings in writing',
+                                'Use "I" statements: "I feel..." instead of "You always..."',
+                                'Practice assertive communication',
+                                'Engage in physical activity to release tension',
+                                'Practice forgiveness (for yourself and others)'
+                            ],
+                            default: [
+                                'Practice deep breathing',
+                                'Engage in physical activity',
+                                'Connect with supportive people',
+                                'Practice mindfulness or meditation',
+                                'Engage in a hobby you enjoy',
+                                'Get adequate rest and sleep'
+                            ]
+                        };
+                        const emotion = currentAnalysis?.primary || 'default';
+                        return {
+                            title: 'Coping Strategies',
+                            content: `Here are personalized coping strategies for **${emotion}** feelings:\n\n${strategies[emotion]?.map((s, i) => `${i + 1}. ${s}`).join('\n\n') || strategies.default.map((s, i) => `${i + 1}. ${s}`).join('\n\n')}\n\n**Remember:** Different strategies work for different people. Try a few and see what resonates with you.`,
+                            action: null
+                        };
+                        
+                    case 'daily-reflection':
+                        const today = new Date().toISOString().split('T')[0];
+                        const todayMood = recentMoods.find(m => m.date === today);
+                        return {
+                            title: 'Daily Reflection',
+                            content: `**Today's Reflection Guide**\n\n${todayMood ? `Your mood today: ${['😢', '😔', '😐', '😊', '😄'][todayMood.mood]}\n\n` : ''}**Questions to reflect on:**\n\n1. What am I grateful for today?\n2. What challenged me today, and how did I handle it?\n3. What did I learn about myself today?\n4. How did I show myself kindness today?\n5. What would I like to do differently tomorrow?\n\nTake your time with these questions. There are no right or wrong answers.`,
+                            action: null
+                        };
+                        
+                    case 'grounding':
+                        return {
+                            title: 'Quick Grounding Exercise',
+                            content: '**5-4-3-2-1 Grounding Technique**\n\nWhen you feel overwhelmed, use this technique:\n\n**5** things you can **SEE**\n- Look around and name 5 things you see\n\n**4** things you can **TOUCH**\n- Notice 4 different textures or surfaces\n\n**3** things you can **HEAR**\n- Listen for 3 distinct sounds\n\n**2** things you can **SMELL**\n- Identify 2 different scents\n\n**1** thing you can **TASTE**\n- Notice the taste in your mouth or take a sip of water\n\n**Breathing Exercise:**\n- Inhale slowly for 4 counts\n- Hold for 4 counts\n- Exhale slowly for 4 counts\n- Repeat 3-5 times\n\nThis helps bring you back to the present moment.',
+                            action: null
+                        };
+                        
+                    case 'emotions-summary':
+                        if (emotionalHistory.length === 0 && recentMoods.length === 0) {
+                            return {
+                                title: 'Emotions Summary',
+                                content: 'I don\'t have enough data yet to provide a summary. Keep tracking your moods and chatting with me, and I\'ll be able to show you patterns and insights.',
+                                action: null
+                            };
+                        }
+                        const emotionCounts = {};
+                        emotionalHistory.forEach(e => {
+                            emotionCounts[e.emotion] = (emotionCounts[e.emotion] || 0) + 1;
+                        });
+                        const mostCommon = Object.entries(emotionCounts).sort((a, b) => b[1] - a[1])[0];
+                        const avgIntensity = emotionalHistory.length > 0 
+                            ? (emotionalHistory.reduce((sum, e) => sum + (e.intensity || 0.5), 0) / emotionalHistory.length * 100).toFixed(0)
+                            : 'N/A';
+                        return {
+                            title: 'Emotions Summary',
+                            content: `**Your Emotional Patterns**\n\n**Total conversations analyzed:** ${emotionalHistory.length}\n**Mood entries tracked:** ${recentMoods.length}\n\n**Most common emotion:** ${mostCommon ? `${mostCommon[0]} (${mostCommon[1]} times)` : 'Not enough data'}\n**Average intensity:** ${avgIntensity}%\n\n**Recent trend:** ${recentMoods.length >= 3 ? (recentMoods.slice(-3).reduce((sum, m) => sum + m.mood, 0) / 3 > 2.5 ? 'Improving 📈' : 'Needs attention 📉') : 'Not enough data'}\n\n**Insights:**\n${mostCommon && mostCommon[0] === 'anxious' ? '- You may benefit from more grounding exercises and stress management techniques.' : mostCommon && mostCommon[0] === 'sad' ? '- Consider exploring what\'s contributing to these feelings and what support you need.' : '- Keep tracking to see more patterns emerge.'}`,
+                            action: null
+                        };
+                        
+                    default:
+                        return null;
+                }
+            };
+
             const modes = [
                 { id: 'therapist', name: 'Therapist Mode', icon: 'comments', description: 'Deep emotional support and guidance' },
                 { id: 'journaling', name: 'Journaling Guide', icon: 'book', description: 'Reflective writing support' },
@@ -4135,16 +4366,41 @@
             ];
 
             return React.createElement('div', {
-                className: 'min-h-screen p-8',
+                className: 'h-screen flex flex-col overflow-hidden',
                 style: {
                     background: `radial-gradient(circle at center, ${moodGlow}, transparent 70%)`,
                     transition: 'background 1s ease'
                 }
             },
-                React.createElement('div', { className: 'max-w-7xl mx-auto' },
-                    React.createElement('div', { className: 'grid grid-cols-1 lg:grid-cols-4 gap-6' },
-                        // Sidebar Tools
-                        React.createElement('div', { className: 'lg:col-span-1 space-y-4' },
+                // Header - Fixed at top
+                React.createElement('div', { className: 'flex-shrink-0 bg-white bg-opacity-90 backdrop-blur-sm border-b border-gray-200 p-4' },
+                    React.createElement('div', { className: 'flex items-center justify-between' },
+                        React.createElement('div', { className: 'flex items-center gap-3' },
+                            React.createElement('div', { className: 'w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center text-white text-lg' }, '🦋'),
+                            React.createElement('div', null,
+                                React.createElement('h2', { className: 'text-xl font-bold' }, 'Deborah'),
+                                React.createElement('p', { className: 'text-xs text-gray-600' }, 'Your AI Wellness Companion')
+                            )
+                        ),
+                        React.createElement('div', { className: 'flex gap-2 flex-wrap' },
+                            modes.map(mode =>
+                                React.createElement('button', {
+                                    key: mode.id,
+                                    onClick: () => setCurrentMode(mode.id),
+                                    className: `px-2 py-1 rounded-lg text-xs font-semibold transition-all ${currentMode === mode.id ? 'bg-purple-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`,
+                                    title: mode.description
+                                },
+                                    React.createElement('i', { className: `fas fa-${mode.icon} mr-1` }),
+                                    mode.name
+                                )
+                            )
+                        )
+                    )
+                ),
+                // Main content area - flex to fill space
+                React.createElement('div', { className: 'flex-1 flex overflow-hidden' },
+                    // Sidebar Tools - Hidden on mobile, visible on desktop
+                    React.createElement('div', { className: 'hidden lg:block w-64 flex-shrink-0 overflow-y-auto bg-white bg-opacity-50 backdrop-blur-sm border-r border-gray-200 p-4 space-y-4' },
                             React.createElement('div', { className: 'glass-card p-6' },
                                 React.createElement('h3', { className: 'text-xl font-bold mb-4' }, 'Tools & Insights'),
                                 React.createElement('div', { className: 'space-y-2' },
@@ -4174,33 +4430,46 @@
                             )
                         ),
 
-                        // Chat Panel
-                        React.createElement('div', { className: 'lg:col-span-3' },
-                            React.createElement('div', { className: 'glass-card p-6 h-[calc(100vh-200px)] flex flex-col' },
-                                React.createElement('div', { className: 'flex items-center justify-between mb-6' },
-                                    React.createElement('div', { className: 'flex items-center gap-3' },
-                                        React.createElement('div', { className: 'w-12 h-12 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center text-white text-xl' }, '🦋'),
-                                        React.createElement('div', null,
-                                            React.createElement('h2', { className: 'text-2xl font-bold' }, 'Deborah'),
-                                            React.createElement('p', { className: 'text-sm text-gray-600' }, 'Your AI Wellness Companion')
-                                        )
-                                    ),
-                                    React.createElement('div', { className: 'flex gap-2' },
-                                        modes.map(mode =>
-                        React.createElement('button', {
-                                                key: mode.id,
-                                                onClick: () => setCurrentMode(mode.id),
-                                                className: `px-3 py-1 rounded-lg text-xs font-semibold transition-all ${currentMode === mode.id ? 'bg-purple-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`,
-                                                title: mode.description
-                                            },
-                                                React.createElement('i', { className: `fas fa-${mode.icon} mr-1` }),
-                                                mode.name
-                                            )
-                                        )
-                                    )
-                                ),
-
-                                React.createElement('div', { className: 'flex-1 overflow-y-auto mb-4 space-y-4' },
+                    // Chat Panel - Full width, fills remaining space
+                    React.createElement('div', { className: 'flex-1 flex flex-col min-w-0' },
+                        React.createElement('div', { className: 'flex-1 flex flex-col overflow-hidden bg-white bg-opacity-90 backdrop-blur-sm' },
+                            // Messages area - scrollable, fills available space
+                            React.createElement('div', { className: 'flex-1 overflow-y-auto p-4 space-y-4' },
+                                    // Show tool content if a tool is active
+                                    activeTool && (() => {
+                                        const toolContent = getToolContent(activeTool);
+                                        if (!toolContent) return null;
+                                        return React.createElement('div', {
+                                            key: 'tool-content',
+                                            className: 'mb-4 p-4 bg-purple-50 border-2 border-purple-300 rounded-lg'
+                                        },
+                                            React.createElement('div', { className: 'flex items-center justify-between mb-2' },
+                                                React.createElement('h3', { className: 'text-lg font-bold text-purple-700' }, toolContent.title),
+                                                React.createElement('button', {
+                                                    onClick: () => setActiveTool(null),
+                                                    className: 'text-purple-500 hover:text-purple-700'
+                                                }, React.createElement('i', { className: 'fas fa-times' }))
+                                            ),
+                                            React.createElement('div', {
+                                                className: 'text-gray-700 whitespace-pre-line',
+                                                style: { lineHeight: '1.6' }
+                                            }, toolContent.content),
+                                            toolContent.action && React.createElement('button', {
+                                                onClick: () => {
+                                                    const result = toolContent.action();
+                                                    if (result) {
+                                                        const toolMessage = {
+                                                            text: result,
+                                                            sender: 'deborah',
+                                                            timestamp: Date.now()
+                                                        };
+                                                        setMessages(prev => [...prev, toolMessage]);
+                                                    }
+                                                },
+                                                className: 'mt-3 btn-primary text-sm'
+                                            }, 'Use This Tool')
+                                        );
+                                    })(),
                                     messages.map((msg, idx) =>
                                 React.createElement('div', {
                                             key: idx,
@@ -4224,12 +4493,13 @@
                             )
                         )
                 ),
-                                    React.createElement('div', { ref: messagesEndRef })
-                                ),
-
+                                React.createElement('div', { ref: messagesEndRef })
+                            ),
+                            // Input area - Fixed at bottom
+                            React.createElement('div', { className: 'flex-shrink-0 border-t border-gray-200 bg-white bg-opacity-95 backdrop-blur-sm p-4' },
                                 React.createElement('div', { className: 'flex gap-2' },
-                            React.createElement('input', {
-                                type: 'text',
+                                    React.createElement('input', {
+                                        type: 'text',
                                         value: input,
                                         onChange: (e) => setInput(e.target.value),
                                         onKeyPress: (e) => e.key === 'Enter' && handleSend(),
@@ -4290,13 +4560,20 @@
                                 setCurrentUser(userData);
                                 
                                 // Check if we should show daily check-in modal
-                                setTimeout(() => {
-                                    if (DailyCheckIn.shouldShowCheckIn()) {
-                                        const timeOfDay = DailyCheckIn.getTimeOfDay();
-                                        setCheckInType(timeOfDay);
-                                        setShowCheckInModal(true);
+                                setTimeout(async () => {
+                                    try {
+                                        const shouldShow = await DailyCheckIn.shouldShowCheckIn();
+                                        if (shouldShow) {
+                                            const timeOfDay = DailyCheckIn.getTimeOfDay();
+                                            if (timeOfDay) {
+                                                setCheckInType(timeOfDay);
+                                                setShowCheckInModal(true);
+                                            }
+                                        }
+                                    } catch (error) {
+                                        console.error('Error checking if should show check-in:', error);
                                     }
-                                }, 1000); // Small delay to ensure UI is ready
+                                }, 1500); // Small delay to ensure UI is ready
                             } else {
                                 // User is logged out
                                 storage.set('bloomly_current_user', null);
@@ -5030,9 +5307,6 @@
             const moodHistory = currentUser ? storage.getUserData('moods', []) : [];
             const journalEntries = currentUser ? storage.getUserData('journal', []) : [];
             const [dailyMessage, setDailyMessage] = useState('');
-            const [checkInPrompt, setCheckInPrompt] = useState('');
-            const [showCheckIn, setShowCheckIn] = useState(false);
-            const [checkInResponse, setCheckInResponse] = useState('');
             const [earnedBadges, setEarnedBadges] = useState([]);
 
             useEffect(() => {
@@ -5057,14 +5331,8 @@
                 
                 setDailyMessage(getTodaysMessage());
                 
-                // Load daily check-in prompt
-                if (currentUser && !DailyCheckIn.hasCheckedInToday()) {
-                    const prompt = DailyCheckIn.getTodaysPrompt();
-                    if (prompt && typeof prompt === 'string' && prompt.trim().length > 0) {
-                        setCheckInPrompt(prompt);
-                        setShowCheckIn(true);
-                    }
-                }
+                // Daily check-in is now handled by the modal system in App component
+                // This old check-in prompt is deprecated in favor of time-based check-ins
                 
                 // Load earned badges
                 if (currentUser) {
@@ -5108,51 +5376,8 @@
                 ),
 
                 React.createElement('div', { className: 'max-w-7xl mx-auto px-8 py-12' },
-                    // Daily Check-In Prompt
-                    showCheckIn && checkInPrompt && typeof checkInPrompt === 'string' && checkInPrompt.trim().length > 0 && currentUser && React.createElement('div', { className: 'glass-card p-6 mb-8 bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200' },
-                        React.createElement('div', { className: 'flex items-start justify-between gap-4' },
-                            React.createElement('div', { className: 'flex items-start gap-4 flex-1' },
-                                React.createElement('div', { className: 'text-4xl' }, '☀️'),
-                                React.createElement('div', { className: 'flex-1' },
-                                    React.createElement('h3', { className: 'text-lg font-bold mb-2 text-blue-700' }, 'Daily Check-In'),
-                                    React.createElement('p', { className: 'text-gray-700 mb-4 font-semibold' }, checkInPrompt.trim()),
-                                    React.createElement('textarea', {
-                                        value: checkInResponse,
-                                        onChange: (e) => setCheckInResponse(e.target.value),
-                                        placeholder: 'Share your thoughts...',
-                                        className: 'w-full p-3 border border-blue-200 rounded-lg mb-3',
-                                        rows: 3
-                                    }),
-                                    React.createElement('div', { className: 'flex gap-3' },
-                                        React.createElement('button', {
-                                            onClick: () => {
-                                                if (checkInResponse.trim()) {
-                                                    DailyCheckIn.markCheckedIn();
-                                                    setShowCheckIn(false);
-                                                    Celebration.show('Check-in saved! 🌟');
-                                                }
-                                            },
-                                            className: 'btn-primary px-4 py-2 text-sm'
-                                        }, 'Save Check-In'),
-                                        React.createElement('button', {
-                                            onClick: () => {
-                                                DailyCheckIn.markCheckedIn();
-                                                setShowCheckIn(false);
-                                            },
-                                            className: 'btn-secondary px-4 py-2 text-sm'
-                                        }, 'Skip for Today')
-                                    )
-                                )
-                            ),
-                            React.createElement('button', {
-                                onClick: () => {
-                                    DailyCheckIn.markCheckedIn();
-                                    setShowCheckIn(false);
-                                },
-                                className: 'text-gray-400 hover:text-gray-600'
-                            }, React.createElement('i', { className: 'fas fa-times' }))
-                        )
-                    ),
+                    // Daily Check-In is now handled by DailyCheckInModal component
+                    // This old inline check-in UI has been removed
 
                     // Achievement Badges Display
                     earnedBadges.length > 0 && currentUser && React.createElement('div', { className: 'glass-card p-6 mb-8' },
@@ -7926,7 +8151,7 @@
                                 type === 'afternoon' ? '🌤️ Good Afternoon!' : 
                                 '🌙 Good Evening!'
                             ),
-                            React.createElement('p', { className: 'text-gray-600' },
+                            React.createElement('p', { className: 'text-gray-600 dark:text-gray-300' },
                                 type === 'morning' 
                                     ? 'Let\'s start your day with a quick check-in'
                                     : type === 'afternoon'
@@ -7944,7 +8169,7 @@
                         questions.map((question, idx) =>
                             React.createElement('div', { key: question.id },
                                 React.createElement('label', {
-                                    className: 'block text-lg font-semibold mb-2 text-gray-800'
+                                    className: 'block text-lg font-semibold mb-2 text-gray-800 dark:text-gray-200'
                                 }, question.label),
                                 React.createElement('textarea', {
                                     value: responses[question.id] || '',

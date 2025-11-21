@@ -5,7 +5,7 @@
  */
 
 const BytezClient = {
-    apiKey: '7b2126049f04e196d885fdcbb247a136',
+    apiKey: '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',
     model: 'Qwen/Qwen3-0.6B',
     // Bytez API endpoint - update if you know the correct base URL
     baseUrl: window.BYTEZ_API_URL || 'https://api.bytez.com',

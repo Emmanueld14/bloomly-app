@@ -126,17 +126,6 @@
                 />
             </div>
 
-            <div>
-                <label class="block text-white font-semibold mb-2">
-                    <i class="fas fa-user-tag mr-2"></i>Role (for testing)
-                </label>
-                <select id="role" class="w-full p-3 rounded-lg">
-                    <option value="user">User</option>
-                    <option value="admin">Admin (for testing)</option>
-                </select>
-                <p class="text-white text-xs opacity-70 mt-1">Admin role allows article publishing</p>
-            </div>
-
             <div id="errorMessage" class="text-red-200 text-sm hidden"></div>
             <div id="successMessage" class="text-green-200 text-sm hidden"></div>
 
@@ -244,7 +233,7 @@
 
                 const email = document.getElementById('email').value.trim();
                 const password = document.getElementById('password').value;
-                const role = document.getElementById('role')?.value || 'user';
+                const role = 'user'; // Always create user accounts, no admin signup allowed
                 const name = document.getElementById('name')?.value.trim() || email.split('@')[0];
 
                 // Validate inputs
@@ -290,49 +279,20 @@
                         submitButton.disabled = false;
                         submitButton.innerHTML = originalButtonText;
                     } else if (data) {
-                        // Update profile with role if admin
-                        if (role === 'admin' && data.user) {
-                            try {
-                                await window.SupabaseClient.updateProfile({ role: 'admin' });
-                            } catch (profileError) {
-                                console.warn('Could not update profile role:', profileError);
-                            }
-                        }
+                        // All accounts are created as 'user' role
+                        // Admin accounts must be created manually in Supabase dashboard if needed
                         
                         successDiv.textContent = 'Account created successfully! Redirecting to login...';
                         successDiv.classList.remove('hidden');
                         submitButton.innerHTML = '<i class="fas fa-check mr-2"></i>Success!';
                         
-                        // Create and show loading screen
-                        const loadingScreen = document.createElement('div');
-                        loadingScreen.id = 'loading-screen';
-                        loadingScreen.style.cssText = `
-                            position: fixed;
-                            top: 0;
-                            left: 0;
-                            width: 100%;
-                            height: 100%;
-                            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                            z-index: 99999;
-                            display: flex;
-                            flex-direction: column;
-                            align-items: center;
-                            justify-content: center;
-                            color: white;
-                        `;
-                        loadingScreen.innerHTML = `
-                            <div style="text-align: center;">
-                                <i class="fas fa-check-circle" style="font-size: 48px; margin-bottom: 20px; color: #10b981;"></i>
-                                <h2 style="font-size: 24px; margin-bottom: 10px;">Account Created!</h2>
-                                <p style="font-size: 16px; opacity: 0.9;">Redirecting to login...</p>
-                            </div>
-                        `;
-                        document.body.appendChild(loadingScreen);
+                        // Set flag to show loading overlay on next page
+                        sessionStorage.setItem('showLoadingOverlay', 'true');
                         
                         // Redirect to login page after short delay
                         setTimeout(() => {
                             window.location.href = 'login.html';
-                        }, 1500);
+                        }, 1000);
                     } else {
                         throw new Error('No data returned from sign up');
                     }
