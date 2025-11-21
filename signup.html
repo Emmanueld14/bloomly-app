@@ -159,14 +159,42 @@
         </div>
     </div>
 
+    <!-- Supabase Configuration -->
+    <script>
+        // Supabase configuration - loaded from config file or environment
+        window.SUPABASE_URL = window.SUPABASE_URL || '';
+        window.SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || '';
+    </script>
+    <!-- Load config file if it exists -->
+    <script src="supabase-config.js" onerror="console.warn('supabase-config.js not found - check configuration')"></script>
     <!-- Supabase JS Client -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
     <script src="script.supabase.js"></script>
+    <script>
+        // Initialize Supabase when ready
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!window.SUPABASE_URL || !window.SUPABASE_ANON_KEY) {
+                console.error('❌ Supabase configuration missing!');
+                console.error('Make sure supabase-config.js exists with your credentials.');
+                const errorDiv = document.getElementById('errorMessage');
+                if (errorDiv) {
+                    errorDiv.textContent = 'Configuration error: Supabase credentials not found. Please check console.';
+                    errorDiv.classList.remove('hidden');
+                }
+                return;
+            }
+            
+            if (window.SupabaseClient) {
+                const client = window.SupabaseClient.init();
+                if (client) {
+                    console.log('✅ Supabase initialized successfully');
+                } else {
+                    console.error('❌ Failed to initialize Supabase');
+                }
+            }
+        });
+    </script>
     <script type="module">
-        // Initialize Supabase
-        if (window.SupabaseClient) {
-            window.SupabaseClient.init();
-        }
 
         // Flag to prevent immediate redirects
         let userInteracting = false;
@@ -206,7 +234,7 @@
             }
 
             // Signup form event - VERY IMPORTANT: prevent default form submission
-            signupForm.addEventListener('submit', function(e) {
+            signupForm.addEventListener('submit', async function(e) {
                 e.preventDefault(); // Stops page from reloading
 
                 // Clear any pending redirect timer
@@ -214,41 +242,80 @@
                     clearTimeout(redirectTimer);
                 }
 
-                const email = document.getElementById('email').value;
+                const email = document.getElementById('email').value.trim();
                 const password = document.getElementById('password').value;
                 const role = document.getElementById('role')?.value || 'user';
+                const name = document.getElementById('name')?.value.trim() || email.split('@')[0];
+
+                // Validate inputs
+                if (!email || !password) {
+                    errorDiv.textContent = 'Please fill in all required fields';
+                    errorDiv.classList.remove('hidden');
+                    return;
+                }
+
+                if (password.length < 6) {
+                    errorDiv.textContent = 'Password must be at least 6 characters';
+                    errorDiv.classList.remove('hidden');
+                    return;
+                }
 
                 // Hide previous messages
                 errorDiv.classList.add('hidden');
                 successDiv.classList.add('hidden');
 
-                // Create a new user in Supabase
-                if (window.SupabaseClient) {
-                    window.SupabaseClient.signUp(email, password, email.split('@')[0])
-                        .then(async ({ data, error }) => {
-                            if (error) {
-                                errorDiv.textContent = error.message || 'An error occurred during signup';
-                                errorDiv.classList.remove('hidden');
-                            } else {
-                                // Update profile with role if admin
-                                if (role === 'admin' && data?.user) {
-                                    await window.SupabaseClient.updateProfile({ role: 'admin' });
-                                }
-                                successDiv.textContent = 'Account created successfully! Please check your email to verify your account, then login.';
-                                successDiv.classList.remove('hidden');
-                                // Redirect to login page after short delay
-                                setTimeout(() => {
-                                    window.location.href = 'login.html';
-                                }, 2000);
+                // Disable form during submission
+                const submitButton = signupForm.querySelector('button[type="submit"]');
+                const originalButtonText = submitButton.innerHTML;
+                submitButton.disabled = true;
+                submitButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Creating account...';
+
+                try {
+                    // Wait for Supabase to be ready
+                    if (!window.SupabaseClient) {
+                        throw new Error('Supabase client not initialized. Please refresh the page.');
+                    }
+
+                    // Initialize if needed
+                    if (!window.SupabaseClient.getClient()) {
+                        window.SupabaseClient.init();
+                    }
+
+                    // Create a new user in Supabase
+                    const { data, error } = await window.SupabaseClient.signUp(email, password, name);
+                    
+                    if (error) {
+                        errorDiv.textContent = error.message || 'An error occurred during signup';
+                        errorDiv.classList.remove('hidden');
+                        submitButton.disabled = false;
+                        submitButton.innerHTML = originalButtonText;
+                    } else if (data) {
+                        // Update profile with role if admin
+                        if (role === 'admin' && data.user) {
+                            try {
+                                await window.SupabaseClient.updateProfile({ role: 'admin' });
+                            } catch (profileError) {
+                                console.warn('Could not update profile role:', profileError);
                             }
-                        })
-                        .catch(error => {
-                            errorDiv.textContent = error.message || 'An error occurred during signup';
-                            errorDiv.classList.remove('hidden');
-                        });
-                } else {
-                    errorDiv.textContent = 'Supabase client not initialized. Please check your configuration.';
+                        }
+                        
+                        successDiv.textContent = 'Account created successfully! Redirecting to login...';
+                        successDiv.classList.remove('hidden');
+                        submitButton.innerHTML = '<i class="fas fa-check mr-2"></i>Success!';
+                        
+                        // Redirect to login page after short delay
+                        setTimeout(() => {
+                            window.location.href = 'login.html';
+                        }, 1500);
+                    } else {
+                        throw new Error('No data returned from sign up');
+                    }
+                } catch (error) {
+                    console.error('Signup error:', error);
+                    errorDiv.textContent = error.message || 'An error occurred during signup. Please try again.';
                     errorDiv.classList.remove('hidden');
+                    submitButton.disabled = false;
+                    submitButton.innerHTML = originalButtonText;
                 }
             });
 

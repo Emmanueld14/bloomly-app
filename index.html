@@ -361,7 +361,7 @@
             content: '';
             position: absolute;
             top: 0;
-            left: 0;
+                left: 0;
             right: 0;
             bottom: 0;
             background: rgba(255, 255, 255, 0.12);
@@ -2466,6 +2466,14 @@
                 console.error('1. Create supabase-config.js with your credentials, or');
                 console.error('2. Set window.SUPABASE_URL and window.SUPABASE_ANON_KEY before this script runs, or');
                 console.error('3. Run: npm run setup (after creating .env file)');
+                // Show error on page if on login/signup pages
+                if (window.location.pathname.includes('login.html') || window.location.pathname.includes('signup.html')) {
+                    const errorDiv = document.getElementById('errorMessage');
+                    if (errorDiv) {
+                        errorDiv.textContent = 'Supabase not configured. Please check console for details.';
+                        errorDiv.classList.remove('hidden');
+                    }
+                }
                 return;
             }
             
@@ -2473,6 +2481,7 @@
                 const client = window.SupabaseClient.init();
                 if (client) {
                     console.log('✅ Supabase initialized successfully');
+                    console.log('URL:', window.SUPABASE_URL);
                 } else {
                     console.error('❌ Failed to initialize Supabase. Check your credentials.');
                 }
@@ -4081,7 +4090,7 @@
                                 React.createElement('h3', { className: 'text-xl font-bold mb-4' }, 'Tools & Insights'),
                                 React.createElement('div', { className: 'space-y-2' },
                                     sidebarTools.map(tool =>
-                            React.createElement('button', {
+                                React.createElement('button', {
                                             key: tool.id,
                                             onClick: () => setActiveTool(activeTool === tool.id ? null : tool.id),
                                             className: `w-full text-left p-3 rounded-lg transition-all ${activeTool === tool.id ? 'bg-purple-100 border-2 border-purple-500' : 'hover:bg-gray-50'}`,
@@ -4561,7 +4570,7 @@
         // Header Component
         function AppHeader({ onToggleSidebar, sidebarOpen }) {
             return React.createElement('header', { className: 'app-header' },
-                React.createElement('button', {
+                        React.createElement('button', {
                     onClick: onToggleSidebar,
                     className: 'hamburger-menu',
                     'aria-label': 'Toggle menu'
@@ -4597,7 +4606,7 @@
             const visibleItems = navItems.filter(item => item.public || currentUser);
 
             return React.createElement(React.Fragment, null,
-                React.createElement('div', {
+                                React.createElement('div', {
                     className: `sidebar-overlay ${isOpen ? 'active' : ''}`,
                     onClick: onToggle
                 }),
@@ -4606,7 +4615,7 @@
                 },
                     React.createElement('nav', { className: 'flex-1 p-4' },
                         visibleItems.map(item =>
-                            React.createElement('button', {
+                                        React.createElement('button', {
                                 key: item.key,
                                 onClick: () => {
                                     if (!item.public && !currentUser) {
@@ -5016,11 +5025,11 @@
                         React.createElement('div', { className: 'flex flex-wrap gap-4 justify-center' },
                             currentUser ? 
                                 React.createElement(React.Fragment, null,
-                    React.createElement('button', {
+                                React.createElement('button', {
                                         onClick: () => onNavigate('journal'),
                                         className: 'btn-primary text-lg px-8 py-4 bg-white text-purple-600 hover:bg-gray-100'
                                     }, React.createElement('i', { className: 'fas fa-book mr-2' }), 'Start Journaling'),
-                                    React.createElement('button', {
+                                React.createElement('button', {
                                         onClick: () => onNavigate('deborah'),
                                         className: 'btn-secondary text-lg px-8 py-4 bg-white bg-opacity-20 backdrop-blur-sm text-white border-2 border-white hover:bg-opacity-30'
                                     }, React.createElement('i', { className: 'fas fa-comments mr-2' }), 'Talk to Deborah')
@@ -5729,7 +5738,7 @@
                                                 year: 'numeric' 
                                             })
                                         ),
-                        React.createElement('button', {
+                            React.createElement('button', {
                                             onClick: (e) => {
                                                 e.stopPropagation();
                                                 setSelectedEntry(entry.id);
@@ -5758,10 +5767,10 @@
                             )
                         )
                         )
+                        )
                     )
-                )
-            );
-        }
+                );
+            }
 
         function MoodTrackingPage() {
             // ALL HOOKS MUST BE DECLARED AT THE TOP - BEFORE ANY CONDITIONAL LOGIC
@@ -6049,7 +6058,7 @@
                         React.createElement('h2', { className: 'text-2xl font-bold mb-6 text-center' }, 'How are you feeling today?'),
                         React.createElement('div', { className: 'grid grid-cols-5 gap-4 mb-6' },
                             moods.map((mood, idx) =>
-                                React.createElement('button', {
+                            React.createElement('button', {
                                     key: idx,
                                     onClick: () => {
                                         setSelectedMood(idx);
@@ -6209,7 +6218,7 @@
                         ),
                         React.createElement('div', { className: 'flex justify-center gap-4' },
                             !isActive ? 
-                            React.createElement('button', {
+                    React.createElement('button', {
                                     onClick: () => setIsActive(true),
                                     className: 'btn-primary px-8 py-4 text-lg'
                                 }, React.createElement('i', { className: 'fas fa-play mr-2' }), 'Start') :
@@ -6374,7 +6383,7 @@
                                 React.createElement('h1', { className: 'text-3xl font-bold mb-2' }, exercise.name),
                                 React.createElement('p', { className: 'text-gray-600 mb-4' }, exercise.benefits),
                                 React.createElement('div', { className: 'w-full bg-gray-200 rounded-full h-3 mb-4' },
-                                    React.createElement('div', {
+                            React.createElement('div', {
                                         className: 'bg-purple-600 h-3 rounded-full transition-all duration-300',
                                         style: { width: `${progress}%` }
                                     })
@@ -6451,14 +6460,14 @@
                                     React.createElement('div', { className: 'w-16 h-16 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center text-white text-2xl' },
                                         React.createElement('i', { className: `fas fa-${exercise.icon}` })
                                     ),
-                                    React.createElement('div', null,
+                                        React.createElement('div', null,
                                         React.createElement('h3', { className: 'text-xl font-bold' }, exercise.name),
                                         React.createElement('p', { className: 'text-sm text-gray-500' }, exercise.duration)
                                     )
-                                ),
+                                        ),
                                 React.createElement('p', { className: 'text-gray-600 mb-4' }, exercise.description),
                                 React.createElement('p', { className: 'text-sm text-purple-600 mb-4' }, exercise.benefits),
-                                React.createElement('button', {
+                                            React.createElement('button', {
                                     onClick: () => setSelectedExercise(exercise.id),
                                     className: 'btn-primary w-full'
                                 }, 'Start Exercise')
@@ -7170,7 +7179,7 @@
                 } else {
                     window.addEventListener('firebaseReady', loadArticles, { once: true });
                     // Fallback timeout
-                    setTimeout(() => {
+                setTimeout(() => {
                         if (loading) {
                             setLoading(false);
                         }
@@ -7441,7 +7450,7 @@
                     ),
                     React.createElement('div', { className: 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6' },
                         articles.map(article =>
-                React.createElement('div', {
+                                React.createElement('div', {
                                 key: article.id,
                                 className: 'article-card glass-card p-6'
                             },
@@ -7493,7 +7502,7 @@
                     React.createElement('h1', { className: 'text-4xl font-bold mb-8 text-center' }, 'Habit Tracker'),
                     React.createElement('div', { className: 'glass-card p-6 mb-6' },
                         React.createElement('label', { className: 'block text-sm font-semibold mb-2' }, 'Select Date'),
-                        React.createElement('input', {
+                            React.createElement('input', {
                             type: 'date',
                             value: selectedDate,
                             onChange: (e) => setSelectedDate(e.target.value),
@@ -7510,7 +7519,7 @@
                             },
                                 React.createElement('div', { className: 'flex items-center justify-between mb-4' },
                                     React.createElement('div', { className: 'text-4xl' }, habit.icon),
-                                    React.createElement('button', {
+                            React.createElement('button', {
                                         onClick: () => toggleHabit(habit.id),
                                         className: `w-8 h-8 rounded-full border-2 flex items-center justify-center ${completed ? 'bg-green-500 border-green-500 text-white' : 'border-gray-300'}`,
                                         title: completed ? 'Completed' : 'Mark as complete'
@@ -7579,7 +7588,7 @@
                                 React.createElement('label', { className: 'block text-sm font-semibold mb-2' }, 'Quality'),
                                 React.createElement('div', { className: 'flex gap-2' },
                                     [1, 2, 3, 4, 5].map(q =>
-                                        React.createElement('button', {
+                        React.createElement('button', {
                                             key: q,
                                             onClick: () => setQuality(q),
                                             className: `w-12 h-12 rounded-lg ${quality === q ? 'bg-purple-500 text-white' : 'bg-gray-100'}`,
@@ -7588,7 +7597,7 @@
                                     )
                                 )
                             ),
-                            React.createElement('button', {
+                        React.createElement('button', {
                                 onClick: saveSleep,
                                 className: 'btn-primary w-full'
                             }, 'Save Sleep Log')
@@ -7891,7 +7900,7 @@
                     'aria-label': 'Crisis Resources',
                     title: 'Crisis Resources'
                 }, React.createElement('i', { className: 'fas fa-life-ring' })),
-                
+
                 React.createElement('div', {
                     className: `crisis-panel ${isOpen ? '' : 'hidden'}`,
                     role: 'dialog',

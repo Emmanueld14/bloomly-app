@@ -13,7 +13,7 @@
             padding: 0;
             box-sizing: border-box;
         }
-
+        
         body {
             font-family: 'Inter', 'Quicksand', sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
@@ -33,12 +33,12 @@
             filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.3));
             animation: butterfly-float 3s ease-in-out infinite;
         }
-
+        
         @keyframes butterfly-float {
             0%, 100% { transform: translateY(0) rotate(0deg); }
             50% { transform: translateY(-10px) rotate(2deg); }
         }
-
+        
         .glass-card {
             background: rgba(255, 255, 255, 0.15);
             backdrop-filter: blur(20px);
@@ -47,7 +47,7 @@
             box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
             border-radius: 20px;
         }
-
+        
         .btn-primary {
             background: linear-gradient(135deg, #ffffff, #f0f0f0);
             color: #667eea;
@@ -59,18 +59,18 @@
             transition: all 0.3s ease;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
         }
-
+        
         .btn-primary:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
         }
-
+        
         input {
             background: rgba(255, 255, 255, 0.9);
             border: 1px solid rgba(255, 255, 255, 0.3);
             color: #333;
         }
-
+        
         input:focus {
             outline: none;
             border-color: rgba(255, 255, 255, 0.6);
@@ -83,49 +83,49 @@
         <div class="text-center mb-8">
             <h1 class="butterfly-logo text-5xl font-bold mb-4">Bloomly</h1>
             <p class="text-white text-lg opacity-90">Welcome back to your wellness journey</p>
-        </div>
-
+    </div>
+    
         <form id="loginForm" class="space-y-6">
             <div>
                 <label class="block text-white font-semibold mb-2">
                     <i class="fas fa-envelope mr-2"></i>Email
                 </label>
-                <input 
-                    type="email" 
+                            <input 
+                                type="email" 
                     id="email" 
-                    required 
+                                required
                     class="w-full p-3 rounded-lg"
                     placeholder="your.email@example.com"
                 />
-            </div>
-
+                    </div>
+                    
             <div>
                 <label class="block text-white font-semibold mb-2">
                     <i class="fas fa-lock mr-2"></i>Password
-                </label>
-                <input 
-                    type="password" 
+                        </label>
+                            <input 
+                                type="password" 
                     id="password" 
-                    required 
+                                required
                     class="w-full p-3 rounded-lg"
                     placeholder="Enter your password"
                 />
-            </div>
-
+                    </div>
+                    
             <div id="errorMessage" class="text-red-200 text-sm hidden"></div>
-
+                    
             <button type="submit" class="btn-primary w-full text-lg">
                 <i class="fas fa-sign-in-alt mr-2"></i>Login
-            </button>
-        </form>
-
+                    </button>
+            </form>
+            
         <div class="mt-6 text-center">
             <p class="text-white opacity-80 mb-2">Don't have an account?</p>
             <a href="signup.html" class="text-white font-semibold hover:underline">
                 <i class="fas fa-user-plus mr-2"></i>Sign Up
-            </a>
+                </a>
         </div>
-
+        
         <div class="mt-6 text-center">
             <a href="index.html" class="text-white opacity-70 hover:opacity-100 text-sm">
                 <i class="fas fa-arrow-left mr-2"></i>Back to Home
@@ -133,20 +133,48 @@
         </div>
     </div>
 
+    <!-- Supabase Configuration -->
+    <script>
+        // Supabase configuration - loaded from config file or environment
+        window.SUPABASE_URL = window.SUPABASE_URL || '';
+        window.SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || '';
+    </script>
+    <!-- Load config file if it exists -->
+    <script src="supabase-config.js" onerror="console.warn('supabase-config.js not found - check configuration')"></script>
     <!-- Supabase JS Client -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
     <script src="script.supabase.js"></script>
+    <script>
+        // Initialize Supabase when ready
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!window.SUPABASE_URL || !window.SUPABASE_ANON_KEY) {
+                console.error('❌ Supabase configuration missing!');
+                console.error('Make sure supabase-config.js exists with your credentials.');
+                const errorDiv = document.getElementById('errorMessage');
+                if (errorDiv) {
+                    errorDiv.textContent = 'Configuration error: Supabase credentials not found. Please check console.';
+                    errorDiv.classList.remove('hidden');
+                }
+                return;
+            }
+            
+            if (window.SupabaseClient) {
+                const client = window.SupabaseClient.init();
+                if (client) {
+                    console.log('✅ Supabase initialized successfully');
+                } else {
+                    console.error('❌ Failed to initialize Supabase');
+                }
+            }
+        });
+    </script>
     <script type="module">
-        // Initialize Supabase
-        if (window.SupabaseClient) {
-            window.SupabaseClient.init();
-        }
 
         // Flag to prevent immediate redirects
         let userInteracting = false;
         let redirectTimer = null;
         let authStateUnsubscribe = null;
-
+                
         // Wait for DOM to be ready
         document.addEventListener('DOMContentLoaded', () => {
             // Check if already logged in - but with significant delay to allow user interaction
@@ -164,7 +192,7 @@
                                     window.location.href = 'index.html';
                                 }
                             }, 500);
-                        }
+        }
                     }
                 }
             }, 2000); // Wait 2 seconds before checking auth state - gives user time to interact
@@ -172,14 +200,14 @@
             // Get form element
             const loginForm = document.getElementById('loginForm');
             const errorDiv = document.getElementById('errorMessage');
-
+            
             if (!loginForm) {
                 console.error('Login form not found');
                 return;
             }
-
+            
             // Login form event - VERY IMPORTANT: prevent default form submission
-            loginForm.addEventListener('submit', function(e) {
+            loginForm.addEventListener('submit', async function(e) {
                 e.preventDefault(); // Stops page from reloading
 
                 // Clear any pending redirect timer
@@ -187,31 +215,59 @@
                     clearTimeout(redirectTimer);
                 }
 
-                const email = document.getElementById('email').value;
+                const email = document.getElementById('email').value.trim();
                 const password = document.getElementById('password').value;
+
+                // Validate inputs
+                if (!email || !password) {
+                    errorDiv.textContent = 'Please fill in all fields';
+                    errorDiv.classList.remove('hidden');
+                    return;
+                }
 
                 // Hide previous error messages
                 errorDiv.classList.add('hidden');
 
-                // Sign in with Supabase
-                if (window.SupabaseClient) {
-                    window.SupabaseClient.signIn(email, password)
-                        .then(({ data, error }) => {
-                            if (error) {
-                                errorDiv.textContent = error.message || 'Invalid email or password';
-                                errorDiv.classList.remove('hidden');
-                            } else {
-                                // Login successful - redirect to home page
-                                window.location.href = 'index.html';
-                            }
-                        })
-                        .catch(error => {
-                            errorDiv.textContent = error.message || 'An error occurred during login';
-                            errorDiv.classList.remove('hidden');
-                        });
-                } else {
-                    errorDiv.textContent = 'Supabase client not initialized. Please check your configuration.';
+                // Disable form during submission
+                const submitButton = loginForm.querySelector('button[type="submit"]');
+                const originalButtonText = submitButton.innerHTML;
+                submitButton.disabled = true;
+                submitButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Logging in...';
+
+                try {
+                    // Wait for Supabase to be ready
+                    if (!window.SupabaseClient) {
+                        throw new Error('Supabase client not initialized. Please refresh the page.');
+                    }
+
+                    // Initialize if needed
+                    if (!window.SupabaseClient.getClient()) {
+                        window.SupabaseClient.init();
+                    }
+
+                    // Sign in with Supabase
+                    const { data, error } = await window.SupabaseClient.signIn(email, password);
+                    
+                    if (error) {
+                        errorDiv.textContent = error.message || 'Invalid email or password';
+                        errorDiv.classList.remove('hidden');
+                        submitButton.disabled = false;
+                        submitButton.innerHTML = originalButtonText;
+                    } else if (data) {
+                        // Login successful - redirect to home page
+                        submitButton.innerHTML = '<i class="fas fa-check mr-2"></i>Success! Redirecting...';
+                        setTimeout(() => {
+                            window.location.href = 'index.html';
+                        }, 500);
+                    } else {
+                        throw new Error('No data returned from sign in');
+                    }
+                } catch (error) {
+                    console.error('Login error:', error);
+                    errorDiv.textContent = error.message || 'An error occurred during login. Please try again.';
                     errorDiv.classList.remove('hidden');
+                    submitButton.disabled = false;
+                    submitButton.innerHTML = originalButtonText;
                 }
             });
 
@@ -224,7 +280,7 @@
                 if (redirectTimer) {
                     clearTimeout(redirectTimer);
                     redirectTimer = null;
-                }
+        }
                 if (authStateUnsubscribe) {
                     authStateUnsubscribe();
                     authStateUnsubscribe = null;
