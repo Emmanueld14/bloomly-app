@@ -2441,6 +2441,15 @@
         }
     </style>
 
+    <!-- Supabase Configuration (auto-generated or from environment) -->
+    <script>
+        // Supabase configuration - loaded from environment or config file
+        // Priority: 1. window.SUPABASE_* (set by build/injection), 2. supabase-config.js, 3. empty (will show error)
+        window.SUPABASE_URL = window.SUPABASE_URL || '';
+        window.SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || '';
+    </script>
+    <!-- Load config file if it exists (created by auto-setup.js) -->
+    <script src="supabase-config.js" onerror="console.warn('supabase-config.js not found - using environment variables or manual configuration')"></script>
     <!-- Supabase JS Client -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
     <!-- Supabase Client Helper Functions -->
@@ -2448,30 +2457,27 @@
     <!-- Firebase to Supabase Compatibility Layer -->
     <script src="script.firebase-compat.js"></script>
     <script>
-        // Supabase configuration from environment variables
-        // These should be set in your deployment environment (Vercel/Netlify)
-        // For local development, create a .env file or set window.SUPABASE_* variables
-        // In production, these should be injected at build time or set as environment variables
-        
-        // Try to get from various sources
-        window.SUPABASE_URL = window.SUPABASE_URL || 
-            (typeof process !== 'undefined' && process.env?.SUPABASE_URL) ||
-            '';
-        window.SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || 
-            (typeof process !== 'undefined' && process.env?.SUPABASE_ANON_KEY) ||
-            '';
-        
         // Initialize Supabase when DOM is ready
         document.addEventListener('DOMContentLoaded', function() {
+            // Validate configuration
+            if (!window.SUPABASE_URL || !window.SUPABASE_ANON_KEY) {
+                console.error('❌ Supabase configuration missing!');
+                console.error('Please set SUPABASE_URL and SUPABASE_ANON_KEY:');
+                console.error('1. Create supabase-config.js with your credentials, or');
+                console.error('2. Set window.SUPABASE_URL and window.SUPABASE_ANON_KEY before this script runs, or');
+                console.error('3. Run: npm run setup (after creating .env file)');
+                return;
+            }
+            
             if (window.SupabaseClient) {
                 const client = window.SupabaseClient.init();
                 if (client) {
-                    console.log('Supabase initialized successfully');
+                    console.log('✅ Supabase initialized successfully');
                 } else {
-                    console.error('Failed to initialize Supabase. Check your SUPABASE_URL and SUPABASE_ANON_KEY.');
+                    console.error('❌ Failed to initialize Supabase. Check your credentials.');
                 }
             } else {
-                console.error('Supabase client helper not loaded. Make sure script.supabase.js is included.');
+                console.error('❌ Supabase client helper not loaded. Make sure script.supabase.js is included.');
             }
         });
     </script>

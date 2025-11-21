@@ -9,6 +9,9 @@ yarn-error.log*
 .env.local
 .env.*.local
 
+# Auto-generated config (contains secrets)
+supabase-config.js
+
 # Build outputs
 dist/
 build/

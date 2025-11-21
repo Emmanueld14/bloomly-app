@@ -9,6 +9,7 @@
     "build": "echo 'Static site - no build step required'",
     "test": "node scripts/smoke-test.js",
     "migrate": "node scripts/migrate.js",
+    "setup": "node scripts/auto-setup.js",
     "lint": "echo 'Linting skipped for static HTML project'"
   },
   "keywords": [
@@ -19,9 +20,8 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
-    "@supabase/supabase-js": "^2.39.0",
-    "dotenv": "^16.3.1",
+    "@supabase/supabase-js": "^2.84.0",
+    "dotenv": "^16.6.1",
     "serve": "^14.2.1"
   }
 }
-
