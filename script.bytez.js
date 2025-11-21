@@ -7,7 +7,9 @@
 const BytezClient = {
     apiKey: '7b2126049f04e196d885fdcbb247a136',
     model: 'Qwen/Qwen3-0.6B',
-    baseUrl: 'https://api.bytez.com', // Will try multiple possible endpoints
+    // Bytez API endpoint - update if you know the correct base URL
+    baseUrl: window.BYTEZ_API_URL || 'https://api.bytez.com',
+    enabled: true, // Set to false to disable Bytez and use fallback only
     
     /**
      * Call Bytez API to generate AI response
@@ -15,8 +17,13 @@ const BytezClient = {
      * @returns {Promise<{output: string, error: any}>}
      */
     async generateResponse(messages) {
+        if (!this.enabled) {
+            return { output: null, error: new Error('Bytez API is disabled') };
+        }
+
         try {
             // Convert messages to Bytez format (matching Python SDK structure)
+            // Based on Python: model.run([{"role": "user", "content": "Hello"}])
             const payload = {
                 model: this.model,
                 messages: messages.map(msg => ({
@@ -25,46 +32,61 @@ const BytezClient = {
                 }))
             };
 
-            // Try different possible API endpoints
+            // Try different possible API endpoints and formats
             const endpoints = [
-                `${this.baseUrl}/v1/chat/completions`,
-                `${this.baseUrl}/api/v1/chat/completions`,
-                `${this.baseUrl}/chat/completions`,
-                `${this.baseUrl}/v1/completions`,
-                `${this.baseUrl}/api/completions`
+                { url: `${this.baseUrl}/v1/chat/completions`, format: 'openai' },
+                { url: `${this.baseUrl}/api/v1/chat/completions`, format: 'openai' },
+                { url: `${this.baseUrl}/chat/completions`, format: 'openai' },
+                { url: `${this.baseUrl}/v1/completions`, format: 'openai' },
+                { url: `${this.baseUrl}/api/completions`, format: 'openai' },
+                { url: `${this.baseUrl}/v1/models/${this.model}/chat`, format: 'custom' },
+                { url: `${this.baseUrl}/api/chat`, format: 'custom' }
             ];
 
             let lastError = null;
             
-            for (const endpoint of endpoints) {
+            for (const { url, format } of endpoints) {
                 try {
-                    const response = await fetch(endpoint, {
+                    // Try different header formats
+                    const headers = {
+                        'Content-Type': 'application/json'
+                    };
+                    
+                    // Try both Bearer token and API key formats
+                    if (format === 'openai') {
+                        headers['Authorization'] = `Bearer ${this.apiKey}`;
+                    } else {
+                        headers['X-API-Key'] = this.apiKey;
+                        headers['Authorization'] = `Bearer ${this.apiKey}`;
+                    }
+
+                    const response = await fetch(url, {
                         method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${this.apiKey}`,
-                            'X-API-Key': this.apiKey
-                        },
+                        headers: headers,
                         body: JSON.stringify(payload)
                     });
 
                     if (response.ok) {
                         const data = await response.json();
                         
-                        // Try different response formats
+                        // Try different response formats (OpenAI-style, custom, etc.)
                         const output = data.choices?.[0]?.message?.content || 
                                       data.choices?.[0]?.text ||
                                       data.output || 
                                       data.text ||
                                       data.message?.content ||
                                       data.response ||
-                                      data.result;
+                                      data.result ||
+                                      data.data?.output ||
+                                      data.data?.text;
                         
-                        if (output) {
-                            return { output, error: null };
+                        if (output && output.trim().length > 0) {
+                            console.log('✅ Bytez API response received from:', url);
+                            return { output: output.trim(), error: null };
                         }
                     } else {
-                        lastError = new Error(`HTTP ${response.status}: ${response.statusText}`);
+                        const errorText = await response.text();
+                        lastError = new Error(`HTTP ${response.status}: ${errorText.substring(0, 100)}`);
                     }
                 } catch (err) {
                     lastError = err;
@@ -76,6 +98,7 @@ const BytezClient = {
             throw lastError || new Error('All API endpoints failed');
         } catch (error) {
             console.error('Bytez API error:', error);
+            console.log('💡 Falling back to rule-based responses');
             return { output: null, error };
         }
     },
