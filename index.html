@@ -2454,6 +2454,8 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
     <!-- Supabase Client Helper Functions -->
     <script src="script.supabase.js"></script>
+    <!-- Bytez AI API Client -->
+    <script src="script.bytez.js"></script>
     <!-- Firebase to Supabase Compatibility Layer -->
     <script src="script.firebase-compat.js"></script>
     <script>
@@ -4043,7 +4045,43 @@
 
                 // Generate response with delay for natural conversation flow
                 setTimeout(async () => {
-                    const response = Deborah.generateResponse(input, messages, currentMode);
+                    let response = null;
+                    
+                    // Try Bytez API first if available
+                    if (window.BytezClient) {
+                        try {
+                            // Build system prompt based on mode and analysis
+                            let systemPrompt = `You are Deborah, a compassionate and empathetic AI mental health therapist. You provide supportive, understanding, and therapeutic responses.`;
+                            
+                            if (currentMode === 'trauma-safe') {
+                                systemPrompt += ' The user may be experiencing distress. Be gentle, grounding, and focus on safety.';
+                            } else if (currentMode === 'journaling') {
+                                systemPrompt += ' Help the user explore their thoughts and feelings through journaling prompts.';
+                            } else if (currentMode === 'checkin') {
+                                systemPrompt += ' This is a daily check-in. Be warm and supportive, helping them reflect on their day.';
+                            }
+                            
+                            // Add emotional context
+                            if (analysis.primary !== 'neutral') {
+                                systemPrompt += ` The user appears to be feeling ${analysis.primary} (intensity: ${(analysis.intensity * 100).toFixed(0)}%).`;
+                            }
+                            
+                            response = await window.BytezClient.generateDeborahResponse(
+                                input,
+                                messages,
+                                systemPrompt
+                            );
+                        } catch (error) {
+                            console.error('Bytez API error:', error);
+                            // Fall through to use fallback
+                        }
+                    }
+                    
+                    // Fallback to rule-based response if Bytez fails or is unavailable
+                    if (!response) {
+                        response = Deborah.generateResponse(input, messages, currentMode);
+                    }
+                    
                     const deborahMessage = {
                         text: response,
                         sender: 'deborah',
@@ -7861,9 +7899,9 @@
                 onClose();
             };
 
-            // Reset responses when modal opens/closes
-            useEffect(() => {
-                if (isOpen) {
+            // Reset responses when modal opens/closes or type changes
+            React.useEffect(() => {
+                if (isOpen && type) {
                     setResponses({});
                     setSaving(false);
                 }
