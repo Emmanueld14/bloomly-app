@@ -29,6 +29,27 @@ A comprehensive mental wellness platform built with React and Supabase, featurin
 
 ## Quick Start
 
+### Automated Setup (Recommended)
+
+The easiest way to get started:
+
+```bash
+# 1. Install dependencies
+npm install
+
+# 2. Create .env file with your Supabase credentials
+npm run create-env
+
+# 3. Run automated setup
+npm run setup
+
+# 4. Run migrations manually (see below)
+```
+
+Then follow the prompts to complete setup.
+
+### Manual Setup
+
 ### 1. Clone the Repository
 
 ```bash
