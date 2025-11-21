@@ -254,11 +254,38 @@
                         submitButton.disabled = false;
                         submitButton.innerHTML = originalButtonText;
                     } else if (data) {
-                        // Login successful - redirect to home page
+                        // Login successful - show loading screen and redirect
                         submitButton.innerHTML = '<i class="fas fa-check mr-2"></i>Success! Redirecting...';
+                        
+                        // Create and show loading screen
+                        const loadingScreen = document.createElement('div');
+                        loadingScreen.id = 'loading-screen';
+                        loadingScreen.style.cssText = `
+                            position: fixed;
+                            top: 0;
+                            left: 0;
+                            width: 100%;
+                            height: 100%;
+                            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                            z-index: 99999;
+                            display: flex;
+                            flex-direction: column;
+                            align-items: center;
+                            justify-content: center;
+                            color: white;
+                        `;
+                        loadingScreen.innerHTML = `
+                            <div style="text-align: center;">
+                                <i class="fas fa-spinner fa-spin" style="font-size: 48px; margin-bottom: 20px;"></i>
+                                <h2 style="font-size: 24px; margin-bottom: 10px;">Welcome back!</h2>
+                                <p style="font-size: 16px; opacity: 0.9;">Loading your dashboard...</p>
+                            </div>
+                        `;
+                        document.body.appendChild(loadingScreen);
+                        
                         setTimeout(() => {
                             window.location.href = 'index.html';
-                        }, 500);
+                        }, 800);
                     } else {
                         throw new Error('No data returned from sign in');
                     }

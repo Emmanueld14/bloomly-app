@@ -3403,16 +3403,23 @@
                 storage.setUserData('last_checkin_date', today);
             },
 
-            // New morning/night check-in system
+            // New morning/afternoon/night check-in system
             getTimeOfDay: () => {
                 const hour = new Date().getHours();
-                if (hour >= 5 && hour < 14) return 'morning'; // 5 AM - 2 PM
-                if (hour >= 18 && hour < 23) return 'night'; // 6 PM - 11 PM
-                return null; // Outside check-in hours
+                if (hour >= 5 && hour < 12) return 'morning'; // 5 AM - 12 PM (noon)
+                if (hour >= 12 && hour < 17) return 'afternoon'; // 12 PM - 5 PM
+                if (hour >= 17 && hour < 23) return 'night'; // 5 PM - 11 PM
+                return null; // Outside check-in hours (11 PM - 5 AM)
             },
 
             hasCheckedInMorning: () => {
                 const lastCheckIn = storage.getUserData('morning_checkin_date', '');
+                const today = new Date().toISOString().split('T')[0];
+                return lastCheckIn === today;
+            },
+
+            hasCheckedInAfternoon: () => {
+                const lastCheckIn = storage.getUserData('afternoon_checkin_date', '');
                 const today = new Date().toISOString().split('T')[0];
                 return lastCheckIn === today;
             },
@@ -3429,6 +3436,8 @@
                 
                 if (timeOfDay === 'morning') {
                     return !DailyCheckIn.hasCheckedInMorning();
+                } else if (timeOfDay === 'afternoon') {
+                    return !DailyCheckIn.hasCheckedInAfternoon();
                 } else if (timeOfDay === 'night') {
                     return !DailyCheckIn.hasCheckedInNight();
                 }
@@ -3438,6 +3447,11 @@
             markMorningCheckedIn: () => {
                 const today = new Date().toISOString().split('T')[0];
                 storage.setUserData('morning_checkin_date', today);
+            },
+
+            markAfternoonCheckedIn: () => {
+                const today = new Date().toISOString().split('T')[0];
+                storage.setUserData('afternoon_checkin_date', today);
             },
 
             markNightCheckedIn: () => {
@@ -3452,6 +3466,13 @@
                 { id: 'sleep', label: 'How did you sleep last night?', placeholder: 'Rate your sleep quality or share details...' }
             ],
 
+            getAfternoonQuestions: () => [
+                { id: 'daySoFar', label: 'How has your day been so far?', placeholder: 'Share how your day is going...' },
+                { id: 'progress', label: 'How are you progressing with your plans?', placeholder: 'What have you accomplished or what\'s left?' },
+                { id: 'energy', label: 'How is your energy level?', placeholder: 'Feeling energized, tired, or somewhere in between?' },
+                { id: 'needs', label: 'What do you need right now?', placeholder: 'Rest, motivation, support, or something else?' }
+            ],
+
             getNightQuestions: () => [
                 { id: 'dayOverall', label: 'How was your day overall?', placeholder: 'Rate your day or share how it went...' },
                 { id: 'accomplished', label: 'What did you accomplish today?', placeholder: 'What went well or what did you complete?' },
@@ -3461,7 +3482,10 @@
 
             saveCheckIn: async (type, responses) => {
                 const user = window.firebaseAuth?.currentUser;
-                if (!user) return false;
+                if (!user) {
+                    console.error('No user logged in');
+                    return false;
+                }
 
                 const today = new Date().toISOString().split('T')[0];
                 
@@ -3469,24 +3493,21 @@
                 if (type === 'morning') {
                     storage.setUserData('morning_checkin_date', today);
                     storage.setUserData('morning_checkin_responses', responses);
+                } else if (type === 'afternoon') {
+                    storage.setUserData('afternoon_checkin_date', today);
+                    storage.setUserData('afternoon_checkin_responses', responses);
                 } else if (type === 'night') {
                     storage.setUserData('night_checkin_date', today);
                     storage.setUserData('night_checkin_responses', responses);
                 }
 
-                // Save to Firestore if available
-                if (window.firestore) {
+                // Save to Supabase
+                if (window.SupabaseClient) {
                     try {
-                        const { collection, addDoc, Timestamp } = window.firestore;
-                        await addDoc(collection(window.firebaseDb, 'dailyCheckIns'), {
-                            userId: user.uid,
-                            type: type,
-                            date: Timestamp.now(),
-                            responses: responses,
-                            createdAt: Timestamp.now()
-                        });
+                        await window.SupabaseClient.saveDailyCheckIn(type, responses);
                     } catch (error) {
-                        console.error('Error saving check-in to Firestore:', error);
+                        console.error('Error saving check-in to Supabase:', error);
+                        // Still return true if localStorage save worked
                     }
                 }
 
@@ -7770,33 +7791,85 @@
         function DailyCheckInModal({ isOpen, onClose, type }) {
             const [responses, setResponses] = useState({});
             const [saving, setSaving] = useState(false);
-            const questions = type === 'morning' ? DailyCheckIn.getMorningQuestions() : DailyCheckIn.getNightQuestions();
+            
+            // Get questions based on type
+            const getQuestions = () => {
+                if (type === 'morning') return DailyCheckIn.getMorningQuestions();
+                if (type === 'afternoon') return DailyCheckIn.getAfternoonQuestions();
+                if (type === 'night') return DailyCheckIn.getNightQuestions();
+                return [];
+            };
+            
+            const questions = getQuestions();
 
             const handleSave = async () => {
-                setSaving(true);
-                const saved = await DailyCheckIn.saveCheckIn(type, responses);
-                if (saved) {
-                    Celebration.show(type === 'morning' ? 'Morning check-in saved! ☀️' : 'Night check-in saved! 🌙');
-                    if (type === 'morning') {
-                        DailyCheckIn.markMorningCheckedIn();
-                    } else {
-                        DailyCheckIn.markNightCheckedIn();
-                    }
-                    onClose();
+                // Validate that at least one field is filled
+                const hasResponse = Object.values(responses).some(val => val && val.trim().length > 0);
+                if (!hasResponse) {
+                    alert('Please fill in at least one field before saving.');
+                    return;
                 }
-                setSaving(false);
+
+                setSaving(true);
+                try {
+                    const saved = await DailyCheckIn.saveCheckIn(type, responses);
+                    if (saved) {
+                        // Mark as checked in
+                        if (type === 'morning') {
+                            DailyCheckIn.markMorningCheckedIn();
+                        } else if (type === 'afternoon') {
+                            DailyCheckIn.markAfternoonCheckedIn();
+                        } else if (type === 'night') {
+                            DailyCheckIn.markNightCheckedIn();
+                        }
+                        
+                        // Show success message
+                        const messages = {
+                            morning: 'Morning check-in saved! ☀️',
+                            afternoon: 'Afternoon check-in saved! 🌤️',
+                            night: 'Night check-in saved! 🌙'
+                        };
+                        Celebration.show(messages[type] || 'Check-in saved!');
+                        
+                        // Clear responses and close
+                        setResponses({});
+                        setTimeout(() => {
+                            onClose();
+                        }, 500);
+                    } else {
+                        alert('Failed to save check-in. Please try again.');
+                    }
+                } catch (error) {
+                    console.error('Error saving check-in:', error);
+                    alert('An error occurred while saving. Please try again.');
+                } finally {
+                    setSaving(false);
+                }
             };
 
             const handleSkip = () => {
+                // Mark as checked in (skipped)
                 if (type === 'morning') {
                     DailyCheckIn.markMorningCheckedIn();
-                } else {
+                } else if (type === 'afternoon') {
+                    DailyCheckIn.markAfternoonCheckedIn();
+                } else if (type === 'night') {
                     DailyCheckIn.markNightCheckedIn();
                 }
+                // Clear responses
+                setResponses({});
                 onClose();
             };
 
-            if (!isOpen) return null;
+            // Reset responses when modal opens/closes
+            useEffect(() => {
+                if (isOpen) {
+                    setResponses({});
+                    setSaving(false);
+                }
+            }, [isOpen, type]);
+
+            if (!isOpen || !type) return null;
 
             return React.createElement('div', {
                 className: 'fixed inset-0 bg-black bg-opacity-50 z-[10000] flex items-center justify-center p-4',
@@ -7811,11 +7884,15 @@
                     React.createElement('div', { className: 'flex justify-between items-center mb-6' },
                         React.createElement('div', null,
                             React.createElement('h2', { className: 'text-3xl font-bold mb-2' },
-                                type === 'morning' ? '☀️ Good Morning!' : '🌙 Good Evening!'
+                                type === 'morning' ? '☀️ Good Morning!' : 
+                                type === 'afternoon' ? '🌤️ Good Afternoon!' : 
+                                '🌙 Good Evening!'
                             ),
                             React.createElement('p', { className: 'text-gray-600' },
                                 type === 'morning' 
                                     ? 'Let\'s start your day with a quick check-in'
+                                    : type === 'afternoon'
+                                    ? 'How is your day going so far?'
                                     : 'Let\'s reflect on your day'
                             )
                         ),
