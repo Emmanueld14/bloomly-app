@@ -442,16 +442,17 @@ a:hover {
 
 /* ========== Glassmorphic Cards ========== */
 .glass-card {
-    background: var(--color-glass);
+    background: #FFFFFF !important;
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border-radius: var(--radius-xl);
     padding: var(--space-xl);
-    border: 1px solid var(--color-glass-border);
-    box-shadow: var(--shadow-card);
+    border: 1px solid rgba(255, 120, 185, 0.3);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
     transition: all var(--transition-base);
     position: relative;
-    overflow: hidden;
+    overflow: visible;
+    z-index: 5;
 }
 
 .glass-card::before {
@@ -1018,7 +1019,8 @@ a:hover {
 
 .my-story-panel {
     position: relative;
-    z-index: 2;
+    z-index: 100 !important;
+    background: #FFFFFF !important;
 }
 
 .my-story-panel:hover {
@@ -1056,17 +1058,9 @@ a:hover {
     }
 }
 
-/* Vignette effect for My Story section */
+/* Vignette effect for My Story section - REMOVED to prevent visibility issues */
 .my-story-section::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: radial-gradient(ellipse at center, transparent 0%, rgba(0, 0, 0, 0.1) 100%);
-    pointer-events: none;
-    z-index: 1;
+    display: none;
 }
 
 @media (max-width: 768px) {
