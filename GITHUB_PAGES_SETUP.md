@@ -27,15 +27,61 @@ Your site will be available at:
 
 If you want to use `bloomly.co.ke`:
 
-1. In GitHub Pages settings, enter your custom domain: `bloomly.co.ke`
-2. Update your DNS records:
-   - Add an A record pointing to GitHub Pages IPs:
-     - `185.199.108.153`
-     - `185.199.109.153`
-     - `185.199.110.153`
-     - `185.199.111.153`
-   - OR add a CNAME record: `bloomly.co.ke` → `Emmanueld14.github.io`
-3. Wait for DNS propagation (can take up to 24 hours)
+#### Option A: Use Apex Domain (bloomly.co.ke)
+
+1. **Create CNAME file in repository:**
+   - Create a file named `CNAME` (no extension) in the root directory
+   - Add this line: `bloomly.co.ke`
+   - Commit and push to GitHub
+
+2. **In GitHub Pages settings:**
+   - Go to Settings → Pages
+   - Under "Custom domain", enter: `bloomly.co.ke`
+   - Click Save
+   - Enable "Enforce HTTPS" (after DNS propagates)
+
+3. **Update DNS records at your domain registrar:**
+   
+   Add **4 A records** (all are required):
+   
+   | Type | Host/Name | Value | TTL |
+   |------|-----------|-------|-----|
+   | A | `@` or blank | `185.199.108.153` | 3600 |
+   | A | `@` or blank | `185.199.109.153` | 3600 |
+   | A | `@` or blank | `185.199.110.153` | 3600 |
+   | A | `@` or blank | `185.199.111.153` | 3600 |
+
+#### Option B: Use WWW Subdomain (www.bloomly.co.ke)
+
+1. **Create CNAME file in repository:**
+   - Create a file named `CNAME` (no extension) in the root directory
+   - Add this line: `www.bloomly.co.ke`
+   - Commit and push to GitHub
+
+2. **In GitHub Pages settings:**
+   - Go to Settings → Pages
+   - Under "Custom domain", enter: `www.bloomly.co.ke`
+   - Click Save
+
+3. **Update DNS records at your domain registrar:**
+   
+   Add **1 CNAME record**:
+   
+   | Type | Host/Name | Value | TTL |
+   |------|-----------|-------|-----|
+   | CNAME | `www` | `Emmanueld14.github.io` | 3600 |
+
+#### Option C: Use Both (Recommended)
+
+Use both apex domain and www subdomain:
+
+1. **Create CNAME file:** `bloomly.co.ke` (apex domain)
+2. **Add DNS records:**
+   - 4 A records for `@` (apex domain)
+   - 1 CNAME record for `www` → `Emmanueld14.github.io`
+3. **In GitHub Pages:** Enter `bloomly.co.ke` (it will handle both)
+
+**Note:** DNS changes can take up to 24 hours to propagate. Be patient!
 
 ## How It Works
 
