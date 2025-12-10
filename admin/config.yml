@@ -1,0 +1,25 @@
+backend:
+  name: github
+  repo: Emmanueld14/bloomly-app
+  branch: main
+
+media_folder: public/uploads
+public_folder: /uploads
+
+collections:
+  - name: "blog"
+    label: "Blog"
+    folder: "content/blog"
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: "Title", name: "title", widget: "string" }
+      - { label: "Publish Date", name: "date", widget: "datetime" }
+      - { label: "Category", name: "category", widget: "string", default: "Mental Health" }
+      - { label: "Summary", name: "summary", widget: "text" }
+      - { label: "Featured Image", name: "featuredImage", widget: "image", required: false }
+      - { label: "Body", name: "body", widget: "markdown" }
+      - { label: "Emoji Icon", name: "emoji", widget: "string", default: "💙", hint: "Emoji to display on blog card" }
+    preview_path: "blog/{{slug}}"
+    preview_template: "admin/preview-templates/blog-post.html"
+
