@@ -128,7 +128,7 @@
                             <div class="blog-card-date">${date} • ${category}</div>
                             <h3>${post.metadata.title}</h3>
                             <p>${post.metadata.summary}</p>
-                            <a href="blog/${slug}" class="blog-card-link">Read More →</a>
+                            <a href="blog-post.html?slug=${slug}" class="blog-card-link">Read More →</a>
                         </div>
                     </article>
                 `;

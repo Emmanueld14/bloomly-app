@@ -1,0 +1,29 @@
+# GitHub Pages Configuration for Bloomly
+# This disables Jekyll processing for our static site
+
+plugins: []
+theme: null
+
+# Exclude files from Jekyll processing
+exclude:
+  - node_modules
+  - .git
+  - .github
+  - scripts
+  - package.json
+  - package-lock.json
+  - README.md
+  - netlify.toml
+  - FIXED_SETUP_INSTRUCTIONS.md
+  - NETLIFY_CMS_SETUP.md
+  - OWNER_ACTION_REQUIRED.md
+  - SETUP_GITHUB_CMS.md
+
+# Include all necessary files
+include:
+  - admin
+  - blog
+  - content
+  - public
+  - static
+

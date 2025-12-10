@@ -7,8 +7,13 @@
 
     // Get slug from URL
     function getSlugFromURL() {
+        // Try query parameter first (for GitHub Pages)
+        const urlParams = new URLSearchParams(window.location.search);
+        const slugParam = urlParams.get('slug');
+        if (slugParam) return slugParam;
+        
+        // Fallback to pathname (for direct access)
         const path = window.location.pathname;
-        // Handle /blog/[slug] or /blog/[slug].html
         const match = path.match(/\/blog\/([^\/]+)(?:\.html)?$/);
         return match ? match[1] : null;
     }

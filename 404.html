@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bloomly - Page Not Found</title>
+    <script>
+        // GitHub Pages 404.html handler
+        // This handles routing for blog posts and admin
+        
+        (function() {
+            const path = window.location.pathname;
+            
+            // Handle /admin redirect
+            if (path === '/admin' || path === '/admin/') {
+                window.location.replace('/admin/index.html');
+                return;
+            }
+            
+            // Handle /blog/[slug] redirects
+            const blogMatch = path.match(/^\/blog\/(.+)$/);
+            if (blogMatch) {
+                const slug = blogMatch[1].replace(/\.html$/, '');
+                window.location.replace(`/blog-post.html?slug=${slug}`);
+                return;
+            }
+            
+            // Default: redirect to home
+            window.location.replace('/');
+        })();
+    </script>
+</head>
+<body>
+    <p>Redirecting...</p>
+</body>
+</html>
+
