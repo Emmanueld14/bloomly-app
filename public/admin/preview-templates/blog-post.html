@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Blog Post Preview</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #FF78B9 0%, #5FA8FF 50%, #C8A7FF 100%);
+        }
+        .preview-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+        }
+        h1 {
+            font-family: 'Nunito', sans-serif;
+            font-size: 2.5rem;
+            color: #1A1A1A;
+            margin-bottom: 20px;
+        }
+        .meta {
+            color: #4A4A4A;
+            margin-bottom: 30px;
+            font-size: 0.9rem;
+        }
+        .content {
+            line-height: 1.8;
+            color: #4A4A4A;
+        }
+        .content h2 {
+            font-family: 'Nunito', sans-serif;
+            color: #1A1A1A;
+            margin-top: 30px;
+            margin-bottom: 15px;
+        }
+        .content h3 {
+            font-family: 'Nunito', sans-serif;
+            color: #1A1A1A;
+            margin-top: 25px;
+            margin-bottom: 12px;
+        }
+        .content ul {
+            margin-left: 20px;
+            margin-bottom: 20px;
+        }
+        .content li {
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="preview-container">
+        <h1>{{title}}</h1>
+        <div class="meta">
+            {{date}} • {{category}}
+        </div>
+        <div class="content">
+            {{body}}
+        </div>
+    </div>
+</body>
+</html>
+

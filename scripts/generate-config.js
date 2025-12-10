@@ -1,6 +1,6 @@
 // scripts/generate-config.js
 // Minimal config generator for Netlify build
-// Note: Bloomly website is static and doesn't require Supabase config
+// Bloomly is a static site using Netlify CMS with Git Gateway
 
 const fs = require('fs');
 const path = require('path');
@@ -11,15 +11,12 @@ if (!fs.existsSync(publicDir)) {
     fs.mkdirSync(publicDir, { recursive: true });
 }
 
-// Generate minimal config (empty since we don't use Supabase)
-const config = {
-    SUPABASE_URL: process.env.SUPABASE_URL || '',
-    SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY || ''
-};
+// Generate minimal config file (for any future needs)
+const config = {};
 
 const configPath = path.join(publicDir, 'config.json');
 fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
 
 console.log('✅ public/config.json generated successfully');
-console.log('ℹ️  Note: Bloomly is a static site - config file is optional');
+console.log('ℹ️  Bloomly uses Netlify CMS with Git Gateway for content management');
 
