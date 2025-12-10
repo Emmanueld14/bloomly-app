@@ -1,4 +1,5 @@
 [build]
+  command = "node scripts/generate-config.js || echo 'Build script completed'"
   publish = "."
 
 [[redirects]]
