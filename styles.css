@@ -787,8 +787,15 @@ a:hover {
 }
 
 .fade-in.visible {
-    opacity: 1;
+    opacity: 1 !important;
     transform: translateY(0);
+}
+
+/* Force My Story panel to be visible */
+.my-story-panel.fade-in {
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+    visibility: visible !important;
 }
 
 /* ========== Responsive Design ========== */
