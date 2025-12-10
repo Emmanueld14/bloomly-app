@@ -1,229 +1,127 @@
-# Bloomly - Mental Wellbeing Companion
+# Bloomly - Teen Mental Health Platform
 
-A comprehensive mental wellness platform built with React and Supabase, featuring AI-powered support, journaling, mood tracking, and more.
+A modern, teen-friendly website for mental health awareness, support, and resources. Built with clean HTML, CSS, and JavaScript, featuring Netlify CMS for easy content management.
 
 ## Features
 
-- 🤖 **AI Therapist (Deborah)** - Personalized mental health support
-- 📔 **Journaling** - Private journal entries with mood tagging
-- 😊 **Mood Tracking** - Track your daily moods and see trends
-- 📊 **Progress Tracking** - Visualize your wellness journey
-- 📚 **Articles** - Mental health resources and articles
-- 🎵 **Soundscapes** - Ambient sounds for relaxation
-- 🧘 **Guided Exercises** - Breathing and mindfulness exercises
-- 🎯 **Goal Setting** - Set and track personal wellness goals
-- 💤 **Sleep Tracking** - Monitor sleep patterns
-- ✅ **Habit Tracking** - Build positive habits with streaks
+- 🏠 **Home Page** - Welcoming hero section with mission and wellness tips
+- 📖 **About Page** - Manuel's personal story and Bloomly's values
+- 📝 **Blog** - Mental health articles with dynamic loading
+- 🎨 **Modern Design** - Glassmorphism, gradients, and smooth animations
+- 📱 **Fully Responsive** - Mobile-first design that works on all devices
+- 🔐 **Netlify CMS** - Easy content management for blog posts
 
 ## Tech Stack
 
-- **Frontend**: React, HTML, CSS, Tailwind CSS
-- **Backend**: Supabase (PostgreSQL, Auth, Storage)
-- **Deployment**: Vercel/Netlify
-
-## Prerequisites
-
-- Node.js 18+ (for local development)
-- A Supabase account and project
-- Git
-
-## Quick Start
-
-### Automated Setup (Recommended)
-
-The easiest way to get started:
-
-```bash
-# 1. Install dependencies
-npm install
-
-# 2. Create .env file with your Supabase credentials
-npm run create-env
-
-# 3. Run automated setup
-npm run setup
-
-# 4. Run migrations manually (see below)
-```
-
-Then follow the prompts to complete setup.
-
-### Manual Setup
-
-### 1. Clone the Repository
-
-```bash
-git clone <your-repo-url>
-cd muhunami
-```
-
-### 2. Set Up Supabase
-
-1. Create a new project at [supabase.com](https://supabase.com)
-2. Go to Project Settings → API
-3. Copy your `Project URL` and `anon public` key
-
-### 3. Configure Environment Variables
-
-Create a `.env` file in the root directory:
-
-```env
-SUPABASE_URL=https://your-project-ref.supabase.co
-SUPABASE_ANON_KEY=your-anon-key-here
-SUPABASE_SERVICE_KEY=your-service-role-key-here
-```
-
-**Important**: Never commit the `.env` file or expose the service role key in client code.
-
-### 4. Set Up Database
-
-Run the SQL migration in your Supabase project:
-
-1. Go to your Supabase project dashboard
-2. Navigate to **SQL Editor**
-3. Copy the contents of `supabase/supabase.sql`
-4. Paste and click **Run**
-
-Alternatively, if you have Supabase CLI installed:
-
-```bash
-supabase init
-supabase link --project-ref your-project-ref
-supabase db push
-```
-
-### 5. Install Dependencies
-
-```bash
-npm install
-```
-
-### 6. Run Locally
-
-```bash
-npm start
-```
-
-The app will be available at `http://localhost:3000`
+- **Frontend**: HTML5, CSS3, JavaScript (Vanilla)
+- **CMS**: Netlify CMS with Git Gateway
+- **Deployment**: Netlify
+- **Styling**: Custom CSS with glassmorphism effects
 
 ## Project Structure
 
 ```
 .
-├── index.html              # Main application file
-├── login.html              # Login page
-├── signup.html             # Signup page
-├── script.supabase.js      # Supabase client helper functions
-├── supabase/
-│   ├── supabase.sql        # Complete database schema
-│   └── migrations/         # Migration files
-├── scripts/
-│   ├── migrate.js          # Migration runner
-│   └── smoke-test.js       # Smoke tests
-├── .github/workflows/      # CI/CD workflows
-├── package.json            # Dependencies and scripts
-└── README.md               # This file
+├── index.html              # Homepage
+├── about.html              # About page with Manuel's story
+├── blog.html               # Blog listing page
+├── blog/                   # Individual blog post pages
+├── content/blog/           # Blog post markdown files (CMS managed)
+├── static/admin/           # Netlify CMS admin interface
+├── public/uploads/         # Uploaded images
+├── styles.css              # Main stylesheet
+├── script.js               # Main JavaScript
+├── blog-loader.js          # Dynamic blog post loader
+├── logo.svg                # Bloomly butterfly logo
+└── netlify.toml            # Netlify configuration
 ```
 
-## Database Schema
+## Quick Start
 
-The application uses the following main tables:
+### Local Development
 
-- `profiles` - User profiles (extends auth.users)
-- `notes` - Journal entries
-- `moods` - Mood tracking data
-- `daily_check_ins` - Daily check-in responses
-- `articles` - Published articles (public)
-- `chat_messages` - AI chat history
-- `habits` - Habit tracking
-- `sleep_tracking` - Sleep data
-- `goals` - User goals
-
-All tables have Row Level Security (RLS) enabled to ensure users can only access their own data.
-
-## Deployment
-
-### Vercel (Recommended)
-
-1. Push your code to GitHub
-2. Import your repository in [Vercel](https://vercel.com)
-3. Add environment variables:
-   - `SUPABASE_URL`
-   - `SUPABASE_ANON_KEY`
-4. Deploy
-
-### Netlify
-
-1. Push your code to GitHub
-2. Import your repository in [Netlify](https://netlify.com)
-3. Add environment variables in Site Settings → Environment Variables
-4. Deploy
-
-### Manual Deployment
-
-1. Build the project: `npm run build`
-2. Upload all files to your hosting provider
-3. Ensure environment variables are set
-
-## Environment Variables
-
-### Required (Client-side)
-
-- `SUPABASE_URL` - Your Supabase project URL
-- `SUPABASE_ANON_KEY` - Your Supabase anon/public key
-
-### Required (Server-side/Migrations)
-
-- `SUPABASE_SERVICE_KEY` - Your Supabase service role key (NEVER expose in client code)
-
-## Testing
-
-Run smoke tests to verify Supabase integration:
-
+1. Clone the repository:
 ```bash
-npm test
+git clone https://github.com/Emmanueld14/bloomly-app.git
+cd bloomly-app
 ```
 
-This will test:
-- User sign up
-- User sign in
-- Note creation
-- Note retrieval
-- Row Level Security
+2. Serve locally:
+```bash
+npx serve . -p 3000
+```
 
-## Security Notes
+3. Open `http://localhost:3000` in your browser
 
-- ✅ Row Level Security (RLS) is enabled on all tables
-- ✅ Users can only access their own data
-- ✅ Service role key is never exposed to clients
-- ✅ All authentication is handled by Supabase Auth
+### Deploy to Netlify
 
-## Troubleshooting
+1. Push your code to GitHub
+2. Connect your repository to Netlify
+3. Enable Netlify Identity in your Netlify dashboard
+4. Enable Git Gateway
+5. Your site will auto-deploy
 
-### "Supabase client not initialized"
+## Content Management
 
-- Check that `SUPABASE_URL` and `SUPABASE_ANON_KEY` are set
-- Verify `script.supabase.js` is loaded before your app code
-- Check browser console for errors
+### Accessing the CMS
 
-### "Permission denied" errors
+1. Deploy your site to Netlify
+2. Navigate to `yoursite.com/admin`
+3. Log in with Netlify Identity
+4. Start creating and editing blog posts!
 
-- Verify RLS policies are set up correctly
-- Check that user is authenticated
-- Ensure user_id matches the authenticated user
+### Creating Blog Posts
 
-### Migration errors
+Blog posts are stored as Markdown files in `/content/blog/`. You can:
 
-- Run SQL manually in Supabase SQL Editor
-- Check that all extensions are enabled (uuid-ossp, pgcrypto)
-- Verify you're using the service role key for migrations
+- Create posts via the CMS admin interface at `/admin`
+- Or manually create `.md` files with frontmatter:
 
-## Contributing
+```markdown
+---
+title: "Your Post Title"
+date: 2025-01-20T10:00:00.000Z
+category: "Category Name"
+summary: "Short description"
+emoji: "💙"
+featuredImage: ""
+---
 
-1. Create a feature branch
-2. Make your changes
-3. Test thoroughly
-4. Submit a pull request
+Your post content in Markdown...
+```
+
+## Design System
+
+### Colors
+- **Soft Blue**: `#5FA8FF`
+- **Blossom Pink**: `#FF78B9`
+- **Lilac**: `#C8A7FF`
+- **Glass White**: `rgba(255, 255, 255, 0.3)`
+
+### Typography
+- **Headings**: Nunito (Google Fonts)
+- **Body**: Poppins (Google Fonts)
+
+### Features
+- Glassmorphic cards with backdrop blur
+- Smooth scroll animations
+- Floating shape animations
+- Responsive grid layouts
+- Mobile-first design
+
+## Pages
+
+- **Home** (`index.html`) - Hero, mission, features, wellness tips
+- **About** (`about.html`) - Manuel's story, values, how we help
+- **Blog** (`blog.html`) - Dynamic blog listing with glassmorphic cards
+- **Blog Posts** (`blog/[slug].html`) - Individual blog post pages
+
+## Browser Support
+
+- Chrome (latest)
+- Firefox (latest)
+- Safari (latest)
+- Edge (latest)
 
 ## License
 
@@ -231,18 +129,8 @@ MIT
 
 ## Support
 
-For issues or questions:
-1. Check the [Supabase documentation](https://supabase.com/docs)
-2. Review error messages in browser console
-3. Check Supabase project logs
+For questions or issues, please contact: support@bloomly.co.ke
 
-## Next Steps After Deployment
+---
 
-1. ✅ Create Supabase project
-2. ✅ Run database migrations
-3. ✅ Set environment variables in deployment platform
-4. ✅ Test authentication flow
-5. ✅ Test all features
-6. ✅ Set up custom domain (optional)
-7. ✅ Configure email templates in Supabase (optional)
-
+Built with ❤️ for teens navigating mental health challenges.

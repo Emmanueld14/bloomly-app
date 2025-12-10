@@ -9,9 +9,6 @@ yarn-error.log*
 .env.local
 .env.*.local
 
-# Auto-generated config (contains secrets)
-supabase-config.js
-
 # Build outputs
 dist/
 build/
@@ -33,14 +30,6 @@ Thumbs.db
 # Logs
 logs/
 *.log
-
-# Firebase (old)
-.firebase/
-firebase-debug.log
-firestore-debug.log
-
-# Supabase
-.supabase/
 
 # Temporary files
 *.tmp

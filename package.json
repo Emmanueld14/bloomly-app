@@ -1,29 +1,23 @@
 {
   "name": "bloomly",
-  "version": "1.0.0",
-  "description": "Mental wellbeing companion app with Supabase backend",
+  "version": "2.0.0",
+  "description": "Bloomly - Teen mental health awareness and support platform",
   "main": "index.html",
   "scripts": {
     "start": "npx serve . -p 3000",
     "dev": "npx serve . -p 3000",
     "build": "echo 'Static site - no build step required'",
-    "test": "node scripts/smoke-test.js",
-    "migrate": "node scripts/migrate.js",
-    "setup": "node scripts/auto-setup.js",
-    "setup:full": "node scripts/full-auto-setup.js",
-    "create-env": "node scripts/create-env.js",
     "lint": "echo 'Linting skipped for static HTML project'"
   },
   "keywords": [
     "wellness",
     "mental-health",
-    "supabase"
+    "teen-mental-health",
+    "bloomly"
   ],
-  "author": "",
+  "author": "Bloomly",
   "license": "MIT",
   "devDependencies": {
-    "@supabase/supabase-js": "^2.84.0",
-    "dotenv": "^16.6.1",
     "serve": "^14.2.1"
   }
 }
