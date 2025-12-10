@@ -493,17 +493,17 @@ a:hover {
 .glass-card h3 {
     margin-bottom: var(--space-sm);
     font-size: var(--text-2xl);
-    color: #0F0F0F;
-    opacity: 1;
+    color: #000000 !important;
+    opacity: 1 !important;
     font-weight: 700;
 }
 
 .glass-card p {
-    color: #2D2D2D;
+    color: #000000 !important;
     margin-bottom: 0;
     line-height: 1.7;
-    opacity: 1;
-    font-weight: 500;
+    opacity: 1 !important;
+    font-weight: 600;
 }
 
 /* ========== Grid System ========== */
@@ -546,18 +546,18 @@ a:hover {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    color: #0F0F0F; /* Fallback for browsers that don't support background-clip */
+    color: #000000 !important; /* Fallback for browsers that don't support background-clip */
     font-weight: 800;
     font-size: var(--text-4xl);
-    opacity: 1;
+    opacity: 1 !important;
 }
 
 .section-header p {
     font-size: var(--text-lg);
-    color: #2D2D2D;
+    color: #000000 !important;
     line-height: 1.8;
-    opacity: 1;
-    font-weight: 500;
+    opacity: 1 !important;
+    font-weight: 600;
 }
 
 /* ========== Footer ========== */
