@@ -542,6 +542,9 @@ a:hover {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    color: #1A1A1A; /* Fallback for browsers that don't support background-clip */
+    font-weight: 800;
+    font-size: var(--text-4xl);
 }
 
 .section-header p {
