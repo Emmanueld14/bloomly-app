@@ -1021,6 +1021,15 @@ a:hover {
     position: relative;
     z-index: 100 !important;
     background: #FFFFFF !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: block !important;
+}
+
+.my-story-panel p {
+    color: #000000 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
 }
 
 .my-story-panel:hover {
