@@ -19,24 +19,23 @@ Since Netlify Identity is deprecated, we've switched your CMS to use **GitHub OA
 3. Fill in the form:
    - **Application name**: `Bloomly CMS`
    - **Homepage URL**: `https://bloomly.co.ke` (or your Netlify URL)
-   - **Authorization callback URL**: `https://bloomly.co.ke/admin` (or `https://your-site.netlify.app/admin`)
+   - **Authorization callback URL**: `https://api.netlify.com/auth/done` ⚠️ **IMPORTANT: Use this exact URL**
 4. Click **"Register application"**
 5. **Copy the Client ID** (you'll need this)
 6. Click **"Generate a new client secret"**
 7. **Copy the Client Secret** (you'll only see it once!)
 
-### Step 2: Add Environment Variables to Netlify
+### Step 2: Configure OAuth Provider in Netlify (NOT Environment Variables!)
 
 1. Go to your Netlify dashboard: https://app.netlify.com
 2. Select your site (bloomlyhub)
-3. Go to **Site settings** → **Environment variables**
-4. Click **"Add a variable"**
-5. Add these two variables:
-   - **Key**: `GITHUB_CLIENT_ID`
-     **Value**: (paste your Client ID from Step 1)
-   - **Key**: `GITHUB_CLIENT_SECRET`
-     **Value**: (paste your Client Secret from Step 1)
-6. Click **"Save"**
+3. Go to **Site settings** → **Access control** → **OAuth**
+4. Under **"Authentication Providers"**, click **"Install Provider"**
+5. Select **"GitHub"**
+6. Enter:
+   - **Client ID**: (paste your Client ID from Step 1)
+   - **Client Secret**: (paste your Client Secret from Step 1)
+7. Click **"Install"** or **"Save"**
 
 ### Step 3: Update CMS Config (Already Done!)
 
