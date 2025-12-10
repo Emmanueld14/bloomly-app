@@ -1,5 +1,6 @@
 backend:
-  name: git-gateway
+  name: github
+  repo: Emmanueld14/bloomly-app
   branch: main
 
 media_folder: public/uploads

@@ -1,45 +1,44 @@
-# Owner Action Required: Enable Netlify Identity & Git Gateway
+# Owner Action Required: Setup GitHub OAuth for Netlify CMS
+
+## ⚠️ Important Update
+
+**Netlify Identity has been deprecated** (as of December 2025) and is no longer available for new setups.
+
+We've updated your CMS to use **GitHub OAuth** instead, which is simpler and more secure!
 
 ## Quick Setup Steps
 
-To enable blog publishing via Netlify CMS, you need to complete these steps in your Netlify dashboard:
+### Step 1: Create GitHub OAuth App
 
-### Step 1: Enable Netlify Identity
+1. Go to: https://github.com/settings/developers
+2. Click **"OAuth Apps"** → **"New OAuth App"**
+3. Fill in:
+   - **Application name**: `Bloomly CMS`
+   - **Homepage URL**: `https://bloomly.co.ke`
+   - **Authorization callback URL**: `https://bloomly.co.ke/admin`
+4. Click **"Register application"**
+5. **Copy the Client ID**
+6. Click **"Generate a new client secret"**
+7. **Copy the Client Secret** (save it - you'll only see it once!)
 
-1. Go to your Netlify site dashboard: https://app.netlify.com
-2. Select your Bloomly site
-3. Navigate to **Identity** in the left sidebar
-4. Click **Enable Identity**
-5. Wait for Identity to be enabled (this may take a few moments)
+### Step 2: Add to Netlify Environment Variables
 
-### Step 2: Enable Git Gateway
+1. Go to: https://app.netlify.com
+2. Select your site (bloomlyhub)
+3. Go to **Site settings** → **Environment variables**
+4. Add these two variables:
+   - `GITHUB_CLIENT_ID` = (your Client ID)
+   - `GITHUB_CLIENT_SECRET` = (your Client Secret)
+5. Click **"Save"**
 
-1. Still in the **Identity** section
-2. Scroll down to **Services** → **Git Gateway**
-3. Click **Enable Git Gateway**
-4. This allows the CMS to commit changes directly to your GitHub repository
+### Step 3: Access the CMS
 
-### Step 3: Configure Registration (Recommended: Invite Only)
+1. Go to: `https://bloomly.co.ke/admin`
+2. Click **"Login with GitHub"**
+3. Authorize the app
+4. Start creating blog posts!
 
-1. In the **Identity** section, go to **Settings**
-2. Under **Registration preferences**, select **Invite only**
-3. This ensures only invited users can access the CMS
-
-### Step 4: Invite Yourself
-
-1. In the **Identity** section, click **Invite users**
-2. Enter your email address
-3. Click **Send invite**
-4. Check your email and click the invitation link
-5. Set a password for your account
-
-### Step 5: Access the CMS
-
-After accepting the invitation, you can log in at:
-
-**https://YOUR-SITE-NAME.netlify.app/admin**
-
-Replace `YOUR-SITE-NAME` with your actual Netlify site name.
+**See `SETUP_GITHUB_CMS.md` for detailed instructions.**
 
 ## What This Enables
 
