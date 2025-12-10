@@ -76,6 +76,8 @@
 
         try {
             // List of blog post files
+            // When you create a new post via Netlify CMS, add the filename here
+            // The filename should match the slug (e.g., "my-new-post.md")
             const blogPosts = [
                 'self-care-practices.md',
                 'supporting-friends.md',
@@ -126,7 +128,7 @@
                             <div class="blog-card-date">${date} • ${category}</div>
                             <h3>${post.metadata.title}</h3>
                             <p>${post.metadata.summary}</p>
-                            <a href="blog/${slug}.html" class="blog-card-link">Read More →</a>
+                            <a href="blog/${slug}" class="blog-card-link">Read More →</a>
                         </div>
                     </article>
                 `;

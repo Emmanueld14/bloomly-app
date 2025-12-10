@@ -35,3 +35,6 @@ logs/
 *.tmp
 *.temp
 
+# Generated config
+public/config.json
+

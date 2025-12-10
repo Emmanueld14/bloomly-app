@@ -7,5 +7,9 @@
   to = "/admin/index.html"
   status = 200
 
-# Blog posts are served directly from blog/ directory
-# No redirect needed - files are at blog/[slug].html
+# Dynamic blog post routing
+[[redirects]]
+  from = "/blog/*"
+  to = "/blog-post.html"
+  status = 200
+  force = false
