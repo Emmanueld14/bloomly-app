@@ -7,7 +7,5 @@
   to = "/admin/index.html"
   status = 200
 
-[[redirects]]
-  from = "/blog/*"
-  to = "/blog-post-template.html"
-  status = 200
+# Blog posts are served directly from blog/ directory
+# No redirect needed - files are at blog/[slug].html
