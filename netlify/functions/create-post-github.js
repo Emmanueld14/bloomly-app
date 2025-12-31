@@ -52,11 +52,11 @@ exports.handler = async (event, context) => {
       };
     }
 
+    // Use shared config for consistency
+    const config = require('./shared/config');
+    
     // Generate slug
-    const slug = data.slug || data.title
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)/g, '');
+    const slug = data.slug || config.generateSlug(data.title);
 
     // Create post object
     const post = {
@@ -85,8 +85,8 @@ featuredImage: "${post.featuredImage}"
 
 ${post.body}`;
 
-    // Get current file content (if exists)
-    const filePath = `content/blog/${slug}.md`;
+    // Get current file content (if exists) - use shared config
+    const filePath = config.getPostPath(slug);
     let currentSha = null;
 
     try {
@@ -142,8 +142,8 @@ ${post.body}`;
       throw new Error(error.message || 'Failed to create file in GitHub');
     }
 
-    // Also update blog-posts.json
-    const dbPath = 'data/blog-posts.json';
+    // Also update blog-posts.json (optional - for backward compatibility)
+    const dbPath = config.DB_PATH;
     let posts = [];
 
     try {
