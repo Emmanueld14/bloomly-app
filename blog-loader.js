@@ -75,35 +75,61 @@
         if (!blogGrid) return;
 
         try {
-            // List of blog post files
-            // When you create a new post via Netlify CMS, add the filename here
-            // The filename should match the slug (e.g., "my-new-post.md")
-            const blogPosts = [
-                'self-care-practices.md',
-                'supporting-friends.md',
-                'mindfulness-beginners.md',
-                'building-confidence.md',
-                'exam-stress.md',
-                'understanding-anxiety.md'
-            ];
+            let posts = [];
 
-            const posts = [];
+            // Try to load from API first (new backend)
+            try {
+                const apiResponse = await fetch('/.netlify/functions/get-posts');
+                if (apiResponse.ok) {
+                    const apiPosts = await apiResponse.json();
+                    // Convert API format to expected format
+                    posts = apiPosts.map(post => ({
+                        metadata: {
+                            title: post.title,
+                            date: post.date,
+                            category: post.category,
+                            summary: post.summary,
+                            emoji: post.emoji,
+                            featuredImage: post.featuredImage,
+                        },
+                        body: post.body,
+                        slug: post.slug,
+                    }));
+                }
+            } catch (apiError) {
+                console.warn('API not available, falling back to markdown files:', apiError);
+            }
 
-            // Load each post
-            for (const filename of blogPosts) {
-                try {
-                    const response = await fetch(`content/blog/${filename}`);
-                    if (!response.ok) continue;
-                    
-                    const markdown = await response.text();
-                    const parsed = parseMarkdown(markdown);
-                    
-                    if (parsed) {
-                        parsed.slug = getSlug(filename);
-                        posts.push(parsed);
+            // Fallback to markdown files if API fails or returns no posts
+            if (posts.length === 0) {
+                // List of blog post files
+                // When you create a new post via Netlify CMS, add the filename here
+                // The filename should match the slug (e.g., "my-new-post.md")
+                const blogPosts = [
+                    'self-care-practices.md',
+                    'supporting-friends.md',
+                    'mindfulness-beginners.md',
+                    'building-confidence.md',
+                    'exam-stress.md',
+                    'understanding-anxiety.md'
+                ];
+
+                // Load each post
+                for (const filename of blogPosts) {
+                    try {
+                        const response = await fetch(`content/blog/${filename}`);
+                        if (!response.ok) continue;
+                        
+                        const markdown = await response.text();
+                        const parsed = parseMarkdown(markdown);
+                        
+                        if (parsed) {
+                            parsed.slug = getSlug(filename);
+                            posts.push(parsed);
+                        }
+                    } catch (error) {
+                        console.warn(`Failed to load ${filename}:`, error);
                     }
-                } catch (error) {
-                    console.warn(`Failed to load ${filename}:`, error);
                 }
             }
 
