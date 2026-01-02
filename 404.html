@@ -11,6 +11,12 @@
         (function() {
             const path = window.location.pathname;
             
+            // Handle /admin redirects
+            if (path === '/admin' || path === '/admin/') {
+                window.location.replace('/admin/index.html');
+                return;
+            }
+            
             // Handle /blog/[slug] redirects
             const blogMatch = path.match(/^\/blog\/(.+)$/);
             if (blogMatch) {

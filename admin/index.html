@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Bloomly Blog</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="../styles.css">
+    
+    <style>
+        .admin-container {
+            min-height: 100vh;
+            background: var(--gradient-hero);
+            padding: var(--space-4xl) var(--space-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .admin-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: var(--radius-2xl);
+            padding: var(--space-3xl);
+            max-width: 800px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        
+        .admin-header {
+            text-align: center;
+            margin-bottom: var(--space-2xl);
+        }
+        
+        .admin-header h1 {
+            color: #2D2D2D;
+            margin-bottom: var(--space-sm);
+        }
+        
+        .admin-header p {
+            color: #666;
+        }
+        
+        .login-section {
+            text-align: center;
+            padding: var(--space-2xl) 0;
+        }
+        
+        .github-login-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-sm);
+            background: #24292e;
+            color: white;
+            padding: var(--space-md) var(--space-2xl);
+            border-radius: var(--radius-lg);
+            text-decoration: none;
+            font-weight: 600;
+            transition: all var(--transition-base);
+            border: none;
+            cursor: pointer;
+            font-size: var(--text-lg);
+        }
+        
+        .github-login-btn:hover {
+            background: #2f363d;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(36, 41, 46, 0.4);
+        }
+        
+        .admin-content {
+            display: none;
+        }
+        
+        .admin-content.active {
+            display: block;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: var(--space-md);
+            background: var(--gradient-soft);
+            border-radius: var(--radius-lg);
+            margin-bottom: var(--space-xl);
+        }
+        
+        .user-info-left {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+        }
+        
+        .user-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+        }
+        
+        .user-details h3 {
+            margin: 0;
+            font-size: var(--text-lg);
+        }
+        
+        .user-details p {
+            margin: 0;
+            color: #666;
+            font-size: var(--text-sm);
+        }
+        
+        .logout-btn {
+            background: var(--color-pink);
+            color: white;
+            border: none;
+            padding: var(--space-sm) var(--space-lg);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-weight: 600;
+            transition: all var(--transition-base);
+        }
+        
+        .logout-btn:hover {
+            background: #ff5fa3;
+            transform: translateY(-2px);
+        }
+        
+        .posts-list {
+            margin-top: var(--space-xl);
+        }
+        
+        .post-item {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: var(--space-lg);
+            margin-bottom: var(--space-md);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow-card);
+            transition: all var(--transition-base);
+        }
+        
+        .post-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+        }
+        
+        .post-info h3 {
+            margin: 0 0 var(--space-xs) 0;
+            color: #2D2D2D;
+        }
+        
+        .post-info p {
+            margin: 0;
+            color: #666;
+            font-size: var(--text-sm);
+        }
+        
+        .post-actions {
+            display: flex;
+            gap: var(--space-sm);
+        }
+        
+        .btn-edit, .btn-delete {
+            padding: var(--space-xs) var(--space-md);
+            border-radius: var(--radius-md);
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all var(--transition-base);
+            font-size: var(--text-sm);
+        }
+        
+        .btn-edit {
+            background: var(--color-blue);
+            color: white;
+        }
+        
+        .btn-edit:hover {
+            background: #4a96e6;
+        }
+        
+        .btn-delete {
+            background: #ff4444;
+            color: white;
+        }
+        
+        .btn-delete:hover {
+            background: #cc0000;
+        }
+        
+        .add-post-btn {
+            background: var(--gradient-primary);
+            color: white;
+            border: none;
+            padding: var(--space-md) var(--space-2xl);
+            border-radius: var(--radius-lg);
+            cursor: pointer;
+            font-weight: 600;
+            font-size: var(--text-lg);
+            margin-bottom: var(--space-xl);
+            transition: all var(--transition-base);
+        }
+        
+        .add-post-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-button);
+        }
+        
+        .loading {
+            text-align: center;
+            padding: var(--space-2xl);
+            color: #666;
+        }
+        
+        .error {
+            background: #ffebee;
+            color: #c62828;
+            padding: var(--space-md);
+            border-radius: var(--radius-md);
+            margin-bottom: var(--space-lg);
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <div class="admin-card">
+            <div class="admin-header">
+                <h1>Bloomly Blog Admin</h1>
+                <p>Manage your blog posts</p>
+            </div>
+            
+            <!-- Login Section -->
+            <div id="loginSection" class="login-section">
+                <p style="margin-bottom: var(--space-lg); color: #666;">Sign in with GitHub to manage your blog posts</p>
+                <button class="github-login-btn" id="githubLoginBtn">
+                    <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                    </svg>
+                    Login with GitHub
+                </button>
+            </div>
+            
+            <!-- Admin Content -->
+            <div id="adminContent" class="admin-content">
+                <div class="user-info">
+                    <div class="user-info-left">
+                        <img id="userAvatar" src="" alt="User Avatar" class="user-avatar">
+                        <div class="user-details">
+                            <h3 id="userName"></h3>
+                            <p id="userEmail"></p>
+                        </div>
+                    </div>
+                    <button class="logout-btn" id="logoutBtn">Logout</button>
+                </div>
+                
+                <div id="errorMessage" class="error" style="display: none;"></div>
+                
+                <button class="add-post-btn" id="addPostBtn">+ Add New Post</button>
+                
+                <div id="postsList" class="posts-list">
+                    <div class="loading">Loading posts...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="config.js"></script>
+    <script src="admin.js"></script>
+</body>
+</html>
+
