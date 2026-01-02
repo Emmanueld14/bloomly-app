@@ -5,7 +5,8 @@
   "main": "index.html",
   "scripts": {
     "start": "npx serve . -p 3000",
-    "dev": "npx serve . -p 3000"
+    "dev": "npx serve . -p 3000",
+    "build": "echo 'Static site - no build required' && exit 0"
   },
   "keywords": [
     "wellness",
