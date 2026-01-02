@@ -1,6 +1,6 @@
 ---
-title: "Do you still feel too attached?"
-date: 2026-01-02T17:52:00.000Z
+title: "Do You Still Feel Too Attached?"
+date: 2026-01-02T14:52:00.000Z
 category: "Mental Health"
 summary: "Have you ever felt attached to someone so bad, and it seems you cant leave, let's talk more on that, shall we? ☺️"
 emoji: "🪴"
