@@ -87,8 +87,8 @@
                 'building-confidence.md',
                 'exam-stress.md',
                 'understanding-anxiety.md',
-                'the-impact-of-social-media-on-mental-health.md',
-                'the-impact-of-social-media-on-mental-health-2025.md'
+                'do-you-still-feel-too-attached.md',
+                'new-year-new-me.md'
             ];
 
             // Load each post

@@ -5,9 +5,7 @@
   "main": "index.html",
   "scripts": {
     "start": "npx serve . -p 3000",
-    "dev": "npx serve . -p 3000",
-    "build": "echo 'Static site - no build step required'",
-    "lint": "echo 'Linting skipped for static HTML project'"
+    "dev": "npx serve . -p 3000"
   },
   "keywords": [
     "wellness",
