@@ -12,18 +12,9 @@ exclude:
   - scripts
   - package.json
   - package-lock.json
-  - README.md
-  - netlify.toml
-  - FIXED_SETUP_INSTRUCTIONS.md
-  - NETLIFY_CMS_SETUP.md
-  - OWNER_ACTION_REQUIRED.md
-  - SETUP_GITHUB_CMS.md
 
-# Include all necessary files
+# Include necessary files
 include:
-  - admin
   - blog
   - content
-  - public
-  - static
 

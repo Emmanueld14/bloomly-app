@@ -5,17 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bloomly - Page Not Found</title>
     <script>
-        // GitHub Pages 404.html handler
-        // This handles routing for blog posts and admin
+        // 404.html handler for Cloudflare Pages
+        // This handles routing for blog posts
         
         (function() {
             const path = window.location.pathname;
-            
-            // Handle /admin redirect
-            if (path === '/admin' || path === '/admin/') {
-                window.location.replace('/admin/index.html');
-                return;
-            }
             
             // Handle /blog/[slug] redirects
             const blogMatch = path.match(/^\/blog\/(.+)$/);

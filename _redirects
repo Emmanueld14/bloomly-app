@@ -1,0 +1,6 @@
+# Cloudflare Pages redirects
+# Format: /from /to [status]
+
+# Blog post routing - redirect /blog/slug to blog-post.html with slug parameter
+/blog/* /blog-post.html?slug=:splat 200
+

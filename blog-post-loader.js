@@ -75,59 +75,17 @@
         }
 
         try {
-            let parsed = null;
-
-            // Try to load from API first (new backend)
-            try {
-                const apiResponse = await fetch(`/.netlify/functions/get-post?slug=${slug}`);
-                if (apiResponse.ok) {
-                    const post = await apiResponse.json();
-                    // Convert markdown body to HTML
-                    let html = post.body
-                        .replace(/^#### (.*$)/gim, '<h4>$1</h4>')
-                        .replace(/^### (.*$)/gim, '<h3>$1</h3>')
-                        .replace(/^## (.*$)/gim, '<h2>$1</h2>')
-                        .replace(/^# (.*$)/gim, '<h2>$1</h2>')
-                        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                        .replace(/\*(.*?)\*/g, '<em>$1</em>')
-                        .replace(/^- (.*$)/gim, '<li>$1</li>')
-                        .replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>')
-                        .replace(/\n\n/g, '</p><p>')
-                        .replace(/^(.*)$/gm, '<p>$1</p>');
-                    
-                    html = html.replace(/<p><\/p>/g, '');
-                    html = html.replace(/<p>(<h[2-4]>.*<\/h[2-4]>)<\/p>/g, '$1');
-                    html = html.replace(/<p>(<ul>.*<\/ul>)<\/p>/g, '$1');
-                    
-                    parsed = {
-                        metadata: {
-                            title: post.title,
-                            date: post.date,
-                            category: post.category,
-                            summary: post.summary,
-                            emoji: post.emoji,
-                            featuredImage: post.featuredImage,
-                        },
-                        body: html,
-                    };
-                }
-            } catch (apiError) {
-                console.warn('API not available, falling back to markdown file:', apiError);
+            // Load from markdown file
+            const response = await fetch(`content/blog/${slug}.md`);
+            if (!response.ok) {
+                throw new Error('Post not found');
             }
-
-            // Fallback to markdown file if API fails
+            
+            const markdown = await response.text();
+            const parsed = parseMarkdown(markdown);
+            
             if (!parsed) {
-                const response = await fetch(`content/blog/${slug}.md`);
-                if (!response.ok) {
-                    throw new Error('Post not found');
-                }
-                
-                const markdown = await response.text();
-                parsed = parseMarkdown(markdown);
-                
-                if (!parsed) {
-                    throw new Error('Invalid post format');
-                }
+                throw new Error('Invalid post format');
             }
             
             // Update page title
