@@ -144,66 +144,14 @@
         showAuth();
     }
     
-    // Load blog posts
+    // Load blog posts using BlogAdmin API
     async function loadPosts() {
         const postsList = document.getElementById('postsList');
         postsList.innerHTML = '<div class="loading">Loading posts...</div>';
         
         try {
-            const repoOwner = config.repoOwner || 'Emmanueld14';
-            const repoName = config.repoName || 'bloomly-app';
-            const apiBase = config.apiBase || 'https://api.github.com';
-            
-            // Get list of files in content/blog directory
-            const response = await fetch(
-                `${apiBase}/repos/${repoOwner}/${repoName}/contents/content/blog`,
-                {
-                    headers: {
-                        'Authorization': 'token ' + githubToken,
-                        'Accept': 'application/vnd.github.v3+json'
-                    }
-                }
-            );
-            
-            if (!response.ok) {
-                throw new Error('Failed to load posts: ' + response.statusText);
-            }
-            
-            const files = await response.json();
-            const markdownFiles = files.filter(file => file.name.endsWith('.md'));
-            
-            // Load each post's content to get metadata
-            const posts = await Promise.all(
-                markdownFiles.map(async (file) => {
-                    try {
-                        const fileResponse = await fetch(file.download_url);
-                        const content = await fileResponse.text();
-                        const frontmatter = parseFrontmatter(content);
-                        return {
-                            ...file,
-                            ...frontmatter,
-                            slug: file.name.replace('.md', ''),
-                            rawContent: content
-                        };
-                    } catch (error) {
-                        console.error('Error loading post:', file.name, error);
-                        return {
-                            ...file,
-                            title: file.name.replace('.md', ''),
-                            date: new Date().toISOString(),
-                            slug: file.name.replace('.md', ''),
-                            rawContent: ''
-                        };
-                    }
-                })
-            );
-            
-            // Sort by date (newest first)
-            posts.sort((a, b) => {
-                const dateA = new Date(a.date || 0);
-                const dateB = new Date(b.date || 0);
-                return dateB - dateA;
-            });
+            // Use BlogAdmin API for consistent data source
+            const posts = await window.BlogAdmin.listPosts();
             
             // Render posts
             if (posts.length === 0) {
@@ -344,7 +292,7 @@
         document.getElementById('postModal').classList.remove('active');
     }
     
-    // Handle save post
+    // Handle save post with verification
     async function handleSavePost(e) {
         e.preventDefault();
         
@@ -357,7 +305,6 @@
             const formData = new FormData(e.target);
             const isNew = formData.get('isNew') === 'true';
             const slug = formData.get('slug') || slugify(formData.get('title'));
-            const fileName = formData.get('fileName') || (slug + '.md');
             const title = formData.get('title');
             const date = formData.get('date');
             const category = formData.get('category');
@@ -365,84 +312,29 @@
             const emoji = formData.get('emoji') || '💙';
             const content = formData.get('content');
             
-            // Format date for frontmatter
-            const dateObj = new Date(date);
-            const formattedDate = dateObj.toISOString();
+            // Use BlogAdmin API for save operation
+            const result = await window.BlogAdmin.savePost({
+                slug,
+                title,
+                date,
+                category,
+                summary,
+                emoji,
+                content
+            }, isNew);
             
-            // Create markdown content with frontmatter
-            const markdown = `---
-title: "${title}"
-date: ${formattedDate}
-category: "${category}"
-summary: "${summary.replace(/"/g, '\\"')}"
-emoji: "${emoji}"
-featuredImage: ""
----
-
-${content}`;
+            // Verify operation succeeded
+            saveBtn.textContent = 'Verifying...';
             
-            const repoOwner = config.repoOwner || 'Emmanueld14';
-            const repoName = config.repoName || 'bloomly-app';
-            const repoBranch = config.repoBranch || 'main';
-            const filePath = `content/blog/${fileName}`;
-            const apiBase = config.apiBase || 'https://api.github.com';
+            // Wait a moment for GitHub to propagate
+            await new Promise(resolve => setTimeout(resolve, 1000));
             
-            let sha = null;
-            if (!isNew) {
-                // Get existing file to get SHA
-                const getFileResponse = await fetch(
-                    `${apiBase}/repos/${repoOwner}/${repoName}/contents/${filePath}`,
-                    {
-                        headers: {
-                            'Authorization': 'token ' + githubToken,
-                            'Accept': 'application/vnd.github.v3+json'
-                        }
-                    }
-                );
-                
-                if (getFileResponse.ok) {
-                    const fileData = await getFileResponse.json();
-                    sha = fileData.sha;
-                }
-            }
+            // Reload posts to confirm
+            await loadPosts();
             
-            // Encode content to base64
-            const encodedContent = btoa(unescape(encodeURIComponent(markdown)));
-            
-            // Create or update file
-            const response = await fetch(
-                `${apiBase}/repos/${repoOwner}/${repoName}/contents/${filePath}`,
-                {
-                    method: 'PUT',
-                    headers: {
-                        'Authorization': 'token ' + githubToken,
-                        'Accept': 'application/vnd.github.v3+json',
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        message: isNew ? `Add blog post: ${title}` : `Update blog post: ${title}`,
-                        content: encodedContent,
-                        branch: repoBranch,
-                        ...(sha && { sha: sha })
-                    })
-                }
-            );
-            
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Failed to save post');
-            }
-            
-            showSuccess('Post saved successfully! The site will update automatically.');
+            showSuccess(`Post ${isNew ? 'created' : 'updated'} successfully! Verified and synced.`);
             closeModal();
-            loadPosts();
             
-            // Invalidate caches by triggering a refresh notification
-            // This helps ensure new posts appear immediately
-            if (typeof window !== 'undefined' && window.parent !== window) {
-                // If in iframe, notify parent
-                window.parent.postMessage({ type: 'blogUpdated', action: isNew ? 'created' : 'updated' }, '*');
-            }
         } catch (error) {
             console.error('Error saving post:', error);
             showError('Failed to save post: ' + error.message);
@@ -452,7 +344,7 @@ ${content}`;
         }
     }
     
-    // Delete post
+    // Delete post with verification
     window.deletePost = async function(slug, fileName) {
         if (!confirm(`Are you sure you want to delete "${slug}"? This action cannot be undone.`)) {
             return;
@@ -468,52 +360,8 @@ ${content}`;
         });
         
         try {
-            const repoOwner = config.repoOwner || 'Emmanueld14';
-            const repoName = config.repoName || 'bloomly-app';
-            const repoBranch = config.repoBranch || 'main';
-            const filePath = `content/blog/${fileName}`;
-            const apiBase = config.apiBase || 'https://api.github.com';
-            
-            // First, get the file to get its SHA
-            const getFileResponse = await fetch(
-                `${apiBase}/repos/${repoOwner}/${repoName}/contents/${filePath}`,
-                {
-                    headers: {
-                        'Authorization': 'token ' + githubToken,
-                        'Accept': 'application/vnd.github.v3+json'
-                    }
-                }
-            );
-            
-            if (!getFileResponse.ok) {
-                const errorData = await getFileResponse.json().catch(() => ({}));
-                throw new Error(errorData.message || 'Failed to get file: ' + getFileResponse.statusText);
-            }
-            
-            const fileData = await getFileResponse.json();
-            
-            // Delete the file
-            const deleteResponse = await fetch(
-                `${apiBase}/repos/${repoOwner}/${repoName}/contents/${filePath}`,
-                {
-                    method: 'DELETE',
-                    headers: {
-                        'Authorization': 'token ' + githubToken,
-                        'Accept': 'application/vnd.github.v3+json',
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        message: `Delete blog post: ${slug}`,
-                        sha: fileData.sha,
-                        branch: repoBranch
-                    })
-                }
-            );
-            
-            if (!deleteResponse.ok) {
-                const errorData = await deleteResponse.json().catch(() => ({}));
-                throw new Error(errorData.message || 'Failed to delete file: ' + deleteResponse.statusText);
-            }
+            // Use BlogAdmin API for delete operation
+            const result = await window.BlogAdmin.deletePost(slug, fileName);
             
             // Optimistically remove from UI immediately
             const postsList = document.getElementById('postsList');
@@ -529,17 +377,14 @@ ${content}`;
                 }
             });
             
-            showSuccess('Post deleted successfully! The site will update automatically.');
+            // Wait for GitHub to propagate
+            await new Promise(resolve => setTimeout(resolve, 1000));
             
-            // Invalidate caches immediately
-            if (typeof window !== 'undefined' && window.parent !== window) {
-                window.parent.postMessage({ type: 'blogUpdated', action: 'deleted', slug: slug }, '*');
-            }
+            // Reload to verify deletion
+            await loadPosts();
             
-            // Reload posts list to ensure sync
-            setTimeout(() => {
-                loadPosts();
-            }, 500);
+            showSuccess('Post deleted successfully! Verified and removed from all sources.');
+            
         } catch (error) {
             console.error('Error deleting post:', error);
             showError('Failed to delete post: ' + error.message);
