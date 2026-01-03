@@ -100,6 +100,8 @@
                         .filter(file => file.name.endsWith('.md') && file.type === 'file')
                         .map(file => file.name);
                     
+                    console.log(`Found ${markdownFiles.length} markdown files:`, markdownFiles);
+                    
                     // Load each post from raw GitHub content
                     for (const filename of markdownFiles) {
                         try {
@@ -108,21 +110,28 @@
                                 cache: 'no-store' // Prevent caching
                             });
                             
-                            if (!response.ok) continue;
+                            if (!response.ok) {
+                                console.warn(`Failed to fetch ${filename}: ${response.status} ${response.statusText}`);
+                                continue;
+                            }
                             
                             const markdown = await response.text();
                             const parsed = parseMarkdown(markdown);
                             
-                            if (parsed) {
+                            if (parsed && parsed.metadata && parsed.metadata.title) {
                                 parsed.slug = getSlug(filename);
                                 posts.push(parsed);
+                                console.log(`✓ Loaded: ${parsed.metadata.title}`);
+                            } else {
+                                console.warn(`Failed to parse ${filename}:`, parsed);
                             }
                         } catch (error) {
-                            console.warn(`Failed to load ${filename}:`, error);
+                            console.error(`Error loading ${filename}:`, error);
                         }
                     }
                 } else {
-                    // Fallback: try loading from local content/blog/ directory
+                    const errorText = await listResponse.text();
+                    console.error('GitHub API failed:', listResponse.status, errorText);
                     throw new Error('GitHub API failed, trying local files');
                 }
             } catch (apiError) {
