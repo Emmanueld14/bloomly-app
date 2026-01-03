@@ -65,9 +65,12 @@
             
             // Exchange code for access token via backend API
             console.log('Exchanging code for token...');
+            console.log('Code:', code);
+            console.log('Redirect URI:', GITHUB_CONFIG.redirectUri);
             
             // Use Vercel API endpoint (update in config.js after deployment)
             const apiUrl = GITHUB_CONFIG.vercelApiUrl || 'https://bloomly-api.vercel.app/api/github-auth';
+            console.log('API URL:', apiUrl);
             
             fetch(apiUrl, {
                 method: 'POST',
@@ -82,11 +85,15 @@
                 })
             })
             .then(async response => {
+                console.log('Response status:', response.status);
+                console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+                
                 // Check if response has content
                 const text = await response.text();
+                console.log('Response text:', text.substring(0, 200));
                 
                 if (!text) {
-                    throw new Error('Empty response from server');
+                    throw new Error(`Empty response from server (Status: ${response.status})`);
                 }
                 
                 // Try to parse JSON
@@ -140,10 +147,14 @@
             })
             .catch(error => {
                 console.error('Auth error:', error);
-                document.querySelector('.loading p').textContent = 'Authentication error: ' + error.message;
+                const errorMsg = error.message || 'Unknown error occurred';
+                document.querySelector('.loading p').innerHTML = 
+                    '<strong style="color: #ff4444;">Authentication Error:</strong><br>' + 
+                    errorMsg + 
+                    '<br><br><small>Check the browser console (F12) for more details.</small>';
                 setTimeout(() => {
                     window.location.href = '/admin/';
-                }, 3000);
+                }, 5000);
             });
         })();
     </script>
