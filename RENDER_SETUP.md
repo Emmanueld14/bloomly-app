@@ -16,11 +16,13 @@ Render.com is easier to set up than Vercel for this use case. Follow these steps
    - **Name**: `bloomly-oauth-api` (or any name)
    - **Region**: Choose closest to you
    - **Branch**: `main`
-   - **Root Directory**: `render-api`
+   - **Root Directory**: `render-api` (IMPORTANT: Must be exactly `render-api`)
    - **Runtime**: `Node`
    - **Build Command**: `npm install`
-   - **Start Command**: `node server.js`
+   - **Start Command**: Leave EMPTY (Render will use `npm start` from package.json automatically)
    - **Plan**: **Free** (select this!)
+   
+   **CRITICAL**: Make sure Root Directory is set to `render-api` (not empty, not `/render-api`, just `render-api`)
 
 ## Step 3: Add Environment Variables
 

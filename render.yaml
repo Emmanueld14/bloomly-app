@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: bloomly-oauth-api
+    env: node
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: GITHUB_CLIENT_ID
+        value: Ov23ligFSm5nzRevPd41
+      - key: GITHUB_CLIENT_SECRET
+        value: c0a23cbd55971a7270d4def0c3384c7d96e74404
+
