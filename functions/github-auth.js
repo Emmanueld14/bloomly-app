@@ -12,7 +12,13 @@ export async function onRequestPost({ request, env }) {
         if (!code) {
             return new Response(
                 JSON.stringify({ error: 'Missing authorization code' }),
-                { status: 400, headers: { 'Content-Type': 'application/json' } }
+                { 
+                    status: 400, 
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Access-Control-Allow-Origin': '*'
+                    } 
+                }
             );
         }
         
@@ -24,7 +30,13 @@ export async function onRequestPost({ request, env }) {
         if (!clientId || !clientSecret) {
             return new Response(
                 JSON.stringify({ error: 'Missing OAuth credentials' }),
-                { status: 400, headers: { 'Content-Type': 'application/json' } }
+                { 
+                    status: 400, 
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Access-Control-Allow-Origin': '*'
+                    } 
+                }
             );
         }
         
@@ -96,8 +108,14 @@ export async function onRequestPost({ request, env }) {
         );
     } catch (error) {
         return new Response(
-            JSON.stringify({ error: error.message }),
-            { status: 500, headers: { 'Content-Type': 'application/json' } }
+            JSON.stringify({ error: error.message, stack: error.stack }),
+            { 
+                status: 500, 
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': '*'
+                } 
+            }
         );
     }
 }
