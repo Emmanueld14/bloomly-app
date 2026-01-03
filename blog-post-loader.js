@@ -75,13 +75,36 @@
         }
 
         try {
-            // Load from markdown file
-            const response = await fetch(`content/blog/${slug}.md`);
+            // Load from GitHub API (same source as blog listing for consistency)
+            const repoOwner = 'Emmanueld14';
+            const repoName = 'bloomly-app';
+            const repoBranch = 'main';
+            
+            // Add cache-busting to prevent stale content
+            const cacheBuster = Date.now();
+            const rawUrl = `https://raw.githubusercontent.com/${repoOwner}/${repoName}/${repoBranch}/content/blog/${slug}.md?t=${cacheBuster}&r=${Math.random()}`;
+            
+            const response = await fetch(rawUrl, {
+                cache: 'no-store',
+                headers: {
+                    'Cache-Control': 'no-cache, no-store, must-revalidate',
+                    'Pragma': 'no-cache'
+                }
+            });
+            
             if (!response.ok) {
-                throw new Error('Post not found');
+                if (response.status === 404) {
+                    throw new Error('Post not found - it may have been deleted');
+                }
+                throw new Error(`Failed to load post: ${response.status} ${response.statusText}`);
             }
             
             const markdown = await response.text();
+            
+            if (!markdown || markdown.trim().length === 0) {
+                throw new Error('Post content is empty');
+            }
+            
             const parsed = parseMarkdown(markdown);
             
             if (!parsed) {
@@ -151,7 +174,25 @@
             console.error('Error loading post:', error);
             document.getElementById('articleTitle').textContent = 'Post Not Found';
             document.getElementById('articleBody').innerHTML = `
-                <p>Unable to load this blog post. <a href="blog.html">Return to blog</a></p>
+                <div style="text-align: center; padding: var(--space-2xl);">
+                    <p style="margin-bottom: var(--space-md); color: var(--color-gray-600);">
+                        ${error.message || 'Unable to load this blog post.'}
+                    </p>
+                    <button onclick="window.location.reload(true)" 
+                            style="padding: var(--space-md) var(--space-xl); 
+                                   background: linear-gradient(135deg, #FF78B9 0%, #C8A7FF 50%, #5FA8FF 100%); 
+                                   color: white; 
+                                   border: none; 
+                                   border-radius: var(--radius-lg); 
+                                   font-weight: 600; 
+                                   cursor: pointer;
+                                   font-size: var(--text-base;">
+                        🔄 Retry
+                    </button>
+                    <p style="margin-top: var(--space-md);">
+                        <a href="blog.html" style="color: var(--color-blue); text-decoration: underline;">Return to blog</a>
+                    </p>
+                </div>
             `;
         }
     }

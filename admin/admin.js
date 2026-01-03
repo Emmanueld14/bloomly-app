@@ -436,6 +436,13 @@ ${content}`;
             showSuccess('Post saved successfully! The site will update automatically.');
             closeModal();
             loadPosts();
+            
+            // Invalidate caches by triggering a refresh notification
+            // This helps ensure new posts appear immediately
+            if (typeof window !== 'undefined' && window.parent !== window) {
+                // If in iframe, notify parent
+                window.parent.postMessage({ type: 'blogUpdated', action: isNew ? 'created' : 'updated' }, '*');
+            }
         } catch (error) {
             console.error('Error saving post:', error);
             showError('Failed to save post: ' + error.message);
@@ -522,7 +529,12 @@ ${content}`;
                 }
             });
             
-            showSuccess('Post deleted successfully! Cloudflare Pages will rebuild automatically (may take 1-2 minutes).');
+            showSuccess('Post deleted successfully! The site will update automatically.');
+            
+            // Invalidate caches immediately
+            if (typeof window !== 'undefined' && window.parent !== window) {
+                window.parent.postMessage({ type: 'blogUpdated', action: 'deleted', slug: slug }, '*');
+            }
             
             // Reload posts list to ensure sync
             setTimeout(() => {

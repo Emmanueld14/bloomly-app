@@ -20,3 +20,13 @@ blog-loader.js
   Pragma: no-cache
   Expires: 0
 
+blog-post.html
+  Cache-Control: no-cache, no-store, must-revalidate, max-age=0
+  Pragma: no-cache
+  Expires: 0
+
+blog-post-loader.js
+  Cache-Control: no-cache, no-store, must-revalidate, max-age=0
+  Pragma: no-cache
+  Expires: 0
+
