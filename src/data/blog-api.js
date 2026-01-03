@@ -1,7 +1,7 @@
 /**
  * Unified Blog Data API
- * Single source of truth for all blog operations
- * All reads/writes go through GitHub API - no static files, no caching
+ * Single source of truth: GitHub API only
+ * NO caching, NO static files, NO localStorage
  */
 
 class BlogAPI {
@@ -15,100 +15,121 @@ class BlogAPI {
     }
 
     /**
-     * Generate cache-busting URL
-     * Ensures every request is unique and bypasses all caches
+     * Generate cache-busting URL - ensures every request is unique
      */
     _cacheBust(url) {
         const separator = url.includes('?') ? '&' : '?';
-        return `${url}${separator}_t=${Date.now()}&_r=${Math.random()}`;
+        const timestamp = Date.now();
+        const random = Math.random().toString(36).substring(7);
+        return `${url}${separator}_t=${timestamp}&_r=${random}`;
     }
 
     /**
-     * Fetch with explicit no-cache headers
+     * Fetch with explicit no-cache - prevents ALL caching layers
      */
     async _fetch(url, options = {}) {
         const bustedUrl = this._cacheBust(url);
+        
         return fetch(bustedUrl, {
             ...options,
             cache: 'no-store',
             headers: {
-                'Cache-Control': 'no-cache, no-store, must-revalidate',
+                'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0',
                 'Pragma': 'no-cache',
                 'Expires': '0',
+                'If-None-Match': '',
+                'If-Modified-Since': '',
                 ...(options.headers || {})
             }
         });
     }
 
     /**
-     * Get list of all blog posts
+     * Get list of all blog posts from GitHub
      * Returns array of file metadata
      */
     async listPosts() {
         const url = `${this.apiBase}/repos/${this.repoOwner}/${this.repoName}/contents/${this.basePath}?ref=${this.repoBranch}`;
         
-        const response = await this._fetch(url, {
-            headers: {
-                'Accept': 'application/vnd.github.v3+json'
+        try {
+            const response = await this._fetch(url, {
+                headers: {
+                    'Accept': 'application/vnd.github.v3+json'
+                }
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                let errorMessage = `Failed to list posts: ${response.status} ${response.statusText}`;
+                
+                if (response.status === 403) {
+                    errorMessage += '. GitHub API rate limit exceeded. Please wait a few minutes.';
+                } else if (response.status === 404) {
+                    errorMessage += '. Blog directory not found.';
+                }
+                
+                console.error('GitHub API error:', response.status, errorText);
+                throw new Error(errorMessage);
             }
-        });
 
-        if (!response.ok) {
-            const error = await response.json().catch(() => ({ message: response.statusText }));
-            throw new Error(`Failed to list posts: ${error.message || response.statusText}`);
+            const files = await response.json();
+            
+            // Handle both array and single object responses
+            const fileArray = Array.isArray(files) ? files : (files ? [files] : []);
+            
+            // Filter only markdown files
+            const markdownFiles = fileArray
+                .filter(file => {
+                    if (!file || !file.name) return false;
+                    return file.name.endsWith('.md') && file.type === 'file';
+                })
+                .map(file => ({
+                    name: file.name,
+                    slug: file.name.replace('.md', ''),
+                    sha: file.sha,
+                    size: file.size,
+                    url: file.download_url || file.url
+                }));
+
+            console.log(`Found ${markdownFiles.length} blog post(s) from GitHub`);
+            return markdownFiles;
+            
+        } catch (error) {
+            console.error('Error in listPosts:', error);
+            throw error;
         }
-
-        const files = await response.json();
-        const fileArray = Array.isArray(files) ? files : [files];
-        
-        return fileArray
-            .filter(file => file && file.name && file.name.endsWith('.md') && file.type === 'file')
-            .map(file => ({
-                name: file.name,
-                slug: file.name.replace('.md', ''),
-                sha: file.sha,
-                size: file.size,
-                url: file.download_url
-            }));
     }
 
     /**
-     * Get single blog post content
+     * Get single blog post content from GitHub
      * Returns parsed markdown with metadata
      */
     async getPost(slug) {
         const filename = `${slug}.md`;
         const url = `${this.rawBase}/${this.repoOwner}/${this.repoName}/${this.repoBranch}/${this.basePath}/${filename}`;
         
-        const response = await this._fetch(url);
+        try {
+            const response = await this._fetch(url);
 
-        if (!response.ok) {
-            if (response.status === 404) {
-                throw new Error(`Post "${slug}" not found - it may have been deleted`);
+            if (!response.ok) {
+                if (response.status === 404) {
+                    throw new Error(`Post "${slug}" not found - it may have been deleted`);
+                }
+                throw new Error(`Failed to load post: ${response.status} ${response.statusText}`);
             }
-            throw new Error(`Failed to load post: ${response.status} ${response.statusText}`);
+
+            const markdown = await response.text();
+            
+            if (!markdown || markdown.trim().length === 0) {
+                throw new Error(`Post "${slug}" is empty`);
+            }
+
+            return this._parseMarkdown(markdown, slug);
+            
+        } catch (error) {
+            console.error(`Error loading post ${slug}:`, error);
+            throw error;
         }
-
-        const markdown = await response.text();
-        
-        if (!markdown || markdown.trim().length === 0) {
-            throw new Error(`Post "${slug}" is empty`);
-        }
-
-        return this._parseMarkdown(markdown, slug);
-    }
-
-    /**
-     * Get multiple posts in parallel
-     */
-    async getPosts(slugs) {
-        const posts = await Promise.allSettled(
-            slugs.map(slug => this.getPost(slug))
-        );
-
-        return posts
-            .filter(result => result.status === 'fulfilled')
-            .map(result => result.value);
     }
 
     /**
@@ -119,7 +140,7 @@ class BlogAPI {
         const match = markdown.match(frontmatterRegex);
 
         if (!match) {
-            throw new Error(`Invalid post format: missing frontmatter`);
+            throw new Error(`Invalid post format: missing frontmatter for "${slug}"`);
         }
 
         const frontmatter = match[1];
@@ -181,16 +202,16 @@ class BlogAPI {
     }
 }
 
-// Export singleton instance
+// Create singleton instance
 const blogAPI = new BlogAPI();
 
-// Export for use in other files
+// Export for browser
 if (typeof window !== 'undefined') {
     window.BlogAPI = BlogAPI;
     window.blogAPI = blogAPI;
 }
 
+// Export for Node.js (if needed)
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = { BlogAPI, blogAPI };
 }
-

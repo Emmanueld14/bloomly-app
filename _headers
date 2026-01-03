@@ -1,6 +1,6 @@
 # Cloudflare Pages Headers
-# Aggressive no-cache policy for all blog-related content
-# Ensures no stale data is served from any cache layer
+# AGGRESSIVE NO-CACHE POLICY - Prevents ALL caching layers
+# This ensures blog data is always fresh from GitHub API
 
 /*
   Cache-Control: no-cache, no-store, must-revalidate, max-age=0
@@ -8,32 +8,37 @@
   Expires: 0
   X-Content-Type-Options: nosniff
 
-# Blog pages - no cache
+# Blog pages - NO CACHE
 /blog.html
   Cache-Control: no-cache, no-store, must-revalidate, max-age=0
   Pragma: no-cache
   Expires: 0
+  X-Cache-Control: no-cache
 
 /blog-post.html
   Cache-Control: no-cache, no-store, must-revalidate, max-age=0
   Pragma: no-cache
   Expires: 0
+  X-Cache-Control: no-cache
 
-# Blog data layer - no cache
+# Blog data layer - NO CACHE
 /src/data/*
   Cache-Control: no-cache, no-store, must-revalidate, max-age=0
   Pragma: no-cache
   Expires: 0
+  X-Cache-Control: no-cache
 
-# Admin pages - no cache
+# Admin pages - NO CACHE
 /admin/*
   Cache-Control: no-cache, no-store, must-revalidate, max-age=0
   Pragma: no-cache
   Expires: 0
+  X-Cache-Control: no-cache
 
-# Static blog content (if any exists) - no cache
+# Static blog content - NO CACHE (if any exists)
 /content/blog/*
   Cache-Control: no-cache, no-store, must-revalidate, max-age=0
   Pragma: no-cache
   Expires: 0
+  X-Cache-Control: no-cache
 

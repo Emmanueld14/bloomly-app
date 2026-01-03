@@ -1,11 +1,21 @@
 /**
  * Individual Blog Post Loader
  * Runtime-only fetching from GitHub API
- * No caching, no static files
+ * NO caching, NO static files
  */
 
 (function() {
     'use strict';
+
+    // Ensure blogAPI is available
+    if (typeof blogAPI === 'undefined') {
+        console.error('blogAPI not loaded! Make sure blog-api.js is loaded before blog-post-loader.js');
+        const bodyEl = document.getElementById('articleBody');
+        if (bodyEl) {
+            bodyEl.innerHTML = '<p style="color: red;">Error: Blog API not loaded. Please refresh the page.</p>';
+        }
+        return;
+    }
 
     // Get slug from URL
     function getSlugFromURL() {
@@ -21,12 +31,17 @@
     // Format date for display
     function formatDate(dateString) {
         if (!dateString) return 'No date';
-        const date = new Date(dateString);
-        return date.toLocaleDateString('en-US', { 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric' 
-        });
+        try {
+            const date = new Date(dateString);
+            if (isNaN(date.getTime())) return 'Invalid date';
+            return date.toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+        } catch (e) {
+            return 'Invalid date';
+        }
     }
 
     // Load and render the post
@@ -38,6 +53,8 @@
         }
 
         try {
+            console.log(`Loading post: ${slug}`);
+            
             // Load from GitHub API (single source of truth)
             const post = await blogAPI.getPost(slug);
             const html = blogAPI.markdownToHTML(post.body);
@@ -101,6 +118,8 @@
                 bodyEl.appendChild(cta);
             }
 
+            console.log(`Post loaded successfully: ${slug}`);
+
         } catch (error) {
             console.error('Error loading post:', error);
             showError(error.message || 'Unable to load this blog post.');
@@ -142,11 +161,15 @@
     }
 
     // Initialize
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', loadPost);
-    } else {
+    function init() {
+        console.log('Initializing blog post loader...');
         loadPost();
     }
 
-})();
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
 
+})();
