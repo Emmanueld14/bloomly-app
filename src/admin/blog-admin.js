@@ -141,14 +141,11 @@ ${postData.content}`;
 
         const result = await response.json();
 
-        // Verify operation succeeded (with token)
-        const token = getToken();
-        if (token) {
-            try {
-                await verifyOperation(isNew ? 'create' : 'update', filePath, true);
-            } catch (error) {
-                console.warn('Verification failed, but operation may have succeeded:', error);
-            }
+        // Verify operation succeeded
+        try {
+            await verifyOperation(isNew ? 'create' : 'update', filePath, true);
+        } catch (error) {
+            console.warn('Verification failed, but operation may have succeeded:', error);
         }
 
         return {
