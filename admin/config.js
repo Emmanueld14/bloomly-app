@@ -23,8 +23,7 @@ const GITHUB_CONFIG = {
     apiBase: 'https://api.github.com',
     
     // Vercel API URL for OAuth token exchange
-    // Update this after deploying to Vercel (see VERCEL_SETUP.md)
-    vercelApiUrl: 'https://bloomly-api.vercel.app/api/github-auth'
+    vercelApiUrl: 'https://bloomly-3mx07p0xs-emmanueld14s-projects.vercel.app/api/github-auth'
 };
 
 // Export for use in other files
