@@ -345,9 +345,13 @@
 
     // Initialize when DOM is ready
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', loadBlogPosts);
+        document.addEventListener('DOMContentLoaded', () => {
+            loadBlogPosts();
+            startAutoRefresh();
+        });
     } else {
         loadBlogPosts();
+        startAutoRefresh();
     }
 
 })();
