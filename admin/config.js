@@ -23,9 +23,7 @@ const GITHUB_CONFIG = {
     apiBase: 'https://api.github.com',
     
     // Backend API URL for OAuth token exchange
-    // Update this after deploying to Render.com (see RENDER_SETUP.md)
-    // Format: https://YOUR-SERVICE-NAME.onrender.com/api/github-auth
-    vercelApiUrl: 'https://YOUR-RENDER-URL.onrender.com/api/github-auth'
+    vercelApiUrl: 'https://bloomly-app.onrender.com/api/github-auth'
 };
 
 // Export for use in other files
