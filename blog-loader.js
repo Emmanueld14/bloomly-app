@@ -69,7 +69,7 @@
         return filename.replace('.md', '');
     }
 
-    // Load blog posts
+    // Load blog posts dynamically from GitHub
     async function loadBlogPosts() {
         const blogGrid = document.getElementById('blogGrid');
         if (!blogGrid) return;
@@ -77,35 +77,86 @@
         try {
             const posts = [];
 
-            // List of blog post files
-            // To add a new post: Create a markdown file in content/blog/ and add the filename here
-            // The filename should match the slug (e.g., "my-new-post.md")
-            const blogPosts = [
-                'self-care-practices.md',
-                'supporting-friends.md',
-                'mindfulness-beginners.md',
-                'building-confidence.md',
-                'exam-stress.md',
-                'understanding-anxiety.md',
-                'do-you-still-feel-too-attached.md',
-                'new-year-new-me.md'
-            ];
-
-            // Load each post
-            for (const filename of blogPosts) {
-                try {
-                    const response = await fetch(`content/blog/${filename}`);
-                    if (!response.ok) continue;
-                    
-                    const markdown = await response.text();
-                    const parsed = parseMarkdown(markdown);
-                    
-                    if (parsed) {
-                        parsed.slug = getSlug(filename);
-                        posts.push(parsed);
+            // Fetch list of markdown files from GitHub API (public repo, no auth needed)
+            // This dynamically gets all .md files from content/blog/ directory
+            const repoOwner = 'Emmanueld14';
+            const repoName = 'bloomly-app';
+            const repoBranch = 'main';
+            
+            try {
+                // Get list of files in content/blog directory from GitHub
+                const listResponse = await fetch(
+                    `https://api.github.com/repos/${repoOwner}/${repoName}/contents/content/blog?ref=${repoBranch}`,
+                    {
+                        headers: {
+                            'Accept': 'application/vnd.github.v3+json'
+                        }
                     }
-                } catch (error) {
-                    console.warn(`Failed to load ${filename}:`, error);
+                );
+                
+                if (listResponse.ok) {
+                    const files = await listResponse.json();
+                    const markdownFiles = files
+                        .filter(file => file.name.endsWith('.md') && file.type === 'file')
+                        .map(file => file.name);
+                    
+                    // Load each post from raw GitHub content
+                    for (const filename of markdownFiles) {
+                        try {
+                            const rawUrl = `https://raw.githubusercontent.com/${repoOwner}/${repoName}/${repoBranch}/content/blog/${filename}`;
+                            const response = await fetch(rawUrl, {
+                                cache: 'no-store' // Prevent caching
+                            });
+                            
+                            if (!response.ok) continue;
+                            
+                            const markdown = await response.text();
+                            const parsed = parseMarkdown(markdown);
+                            
+                            if (parsed) {
+                                parsed.slug = getSlug(filename);
+                                posts.push(parsed);
+                            }
+                        } catch (error) {
+                            console.warn(`Failed to load ${filename}:`, error);
+                        }
+                    }
+                } else {
+                    // Fallback: try loading from local content/blog/ directory
+                    throw new Error('GitHub API failed, trying local files');
+                }
+            } catch (apiError) {
+                console.warn('GitHub API failed, trying local files:', apiError);
+                
+                // Fallback: Try to load from local directory (for development)
+                const fallbackPosts = [
+                    'self-care-practices.md',
+                    'supporting-friends.md',
+                    'mindfulness-beginners.md',
+                    'building-confidence.md',
+                    'exam-stress.md',
+                    'understanding-anxiety.md',
+                    'do-you-still-feel-too-attached.md',
+                    'new-year-new-me.md'
+                ];
+                
+                for (const filename of fallbackPosts) {
+                    try {
+                        const response = await fetch(`content/blog/${filename}`, {
+                            cache: 'no-store'
+                        });
+                        if (!response.ok) continue;
+                        
+                        const markdown = await response.text();
+                        const parsed = parseMarkdown(markdown);
+                        
+                        if (parsed) {
+                            parsed.slug = getSlug(filename);
+                            posts.push(parsed);
+                        }
+                    } catch (error) {
+                        console.warn(`Failed to load ${filename}:`, error);
+                    }
                 }
             }
 
