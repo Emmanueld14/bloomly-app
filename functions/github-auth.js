@@ -3,8 +3,7 @@
  * Handles the server-side token exchange to avoid CORS issues
  */
 
-export async function onRequestPost(context) {
-    const { request, env } = context;
+export async function onRequestPost({ request, env }) {
     
     try {
         const body = await request.json();
@@ -44,12 +43,41 @@ export async function onRequestPost(context) {
             })
         });
         
-        const tokenData = await tokenResponse.json();
+        const tokenText = await tokenResponse.text();
+        let tokenData;
+        
+        try {
+            tokenData = JSON.parse(tokenText);
+        } catch (e) {
+            return new Response(
+                JSON.stringify({ error: 'Invalid response from GitHub: ' + tokenText.substring(0, 100) }),
+                { status: 500, headers: { 'Content-Type': 'application/json' } }
+            );
+        }
         
         if (tokenData.error) {
             return new Response(
                 JSON.stringify({ error: tokenData.error_description || tokenData.error }),
-                { status: 400, headers: { 'Content-Type': 'application/json' } }
+                { 
+                    status: 400, 
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Access-Control-Allow-Origin': '*'
+                    } 
+                }
+            );
+        }
+        
+        if (!tokenData.access_token) {
+            return new Response(
+                JSON.stringify({ error: 'No access token in response' }),
+                { 
+                    status: 500, 
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Access-Control-Allow-Origin': '*'
+                    } 
+                }
             );
         }
         
