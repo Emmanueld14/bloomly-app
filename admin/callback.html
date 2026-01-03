@@ -64,7 +64,10 @@
             }
             
             // Exchange code for access token via Cloudflare Pages Function
-            fetch('/functions/github-auth', {
+            // Try the function first, fallback to direct call if needed
+            const functionUrl = '/functions/github-auth';
+            
+            fetch(functionUrl, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
