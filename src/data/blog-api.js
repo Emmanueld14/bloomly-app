@@ -26,19 +26,18 @@ class BlogAPI {
 
     /**
      * Fetch with explicit no-cache - prevents ALL caching layers
+     * Note: GitHub API doesn't allow custom Cache-Control headers, so we rely on cache-busting URLs
      */
     async _fetch(url, options = {}) {
         const bustedUrl = this._cacheBust(url);
         
+        // GitHub API doesn't allow custom Cache-Control headers in requests
+        // Cache-busting query parameters are sufficient to prevent caching
         return fetch(bustedUrl, {
             ...options,
             cache: 'no-store',
             headers: {
-                'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0',
-                'Pragma': 'no-cache',
-                'Expires': '0',
-                'If-None-Match': '',
-                'If-Modified-Since': '',
+                // Only include headers that GitHub API allows
                 ...(options.headers || {})
             }
         });
