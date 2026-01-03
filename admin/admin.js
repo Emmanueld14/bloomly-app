@@ -54,16 +54,20 @@
             });
             
             if (!response.ok) {
-                throw new Error('Invalid token');
+                const errorText = await response.text();
+                throw new Error('Invalid token: ' + response.status + ' ' + errorText);
             }
             
             githubUser = await response.json();
             showAdminContent();
             loadPosts();
         } catch (error) {
-            showError('Invalid token. Please enter a valid GitHub Personal Access Token.');
+            console.error('Token verification error:', error);
+            alert('Invalid token. Please check your GitHub Personal Access Token and try again.\n\nError: ' + error.message);
             localStorage.removeItem('github_token');
+            githubToken = null;
             showAuth();
+            throw error;
         }
     }
     
@@ -85,18 +89,28 @@
         const token = document.getElementById('githubToken').value.trim();
         
         if (!token) {
-            showError('Please enter a GitHub Personal Access Token');
+            alert('Please enter a GitHub Personal Access Token');
             return;
         }
         
         if (!token.startsWith('ghp_')) {
-            showError('Invalid token format. GitHub tokens start with "ghp_"');
+            alert('Invalid token format. GitHub tokens start with "ghp_"');
             return;
         }
         
+        // Show loading state
+        const saveBtn = document.getElementById('saveTokenBtn');
+        const originalText = saveBtn.textContent;
+        saveBtn.textContent = 'Verifying...';
+        saveBtn.disabled = true;
+        
         githubToken = token;
         localStorage.setItem('github_token', token);
-        verifyToken();
+        
+        verifyToken().finally(() => {
+            saveBtn.textContent = originalText;
+            saveBtn.disabled = false;
+        });
     }
     
     // Handle logout
@@ -238,11 +252,16 @@
     // Show error message
     function showError(message) {
         const errorDiv = document.getElementById('errorMessage');
-        errorDiv.textContent = message;
-        errorDiv.style.display = 'block';
-        setTimeout(() => {
-            errorDiv.style.display = 'none';
-        }, 5000);
+        if (errorDiv) {
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 5000);
+        } else {
+            // Fallback if error div doesn't exist yet
+            alert(message);
+        }
     }
     
     // Show success message
