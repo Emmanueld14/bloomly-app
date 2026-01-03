@@ -12,66 +12,17 @@
     
     // Initialize
     function init() {
-        // Check if user is logged in
-        githubToken = sessionStorage.getItem('github_token');
-        const userStr = sessionStorage.getItem('github_user');
-        
-        if (githubToken && userStr) {
-            githubUser = JSON.parse(userStr);
-            showAdminContent();
-            loadPosts();
-        } else {
-            showLogin();
-        }
-        
-        // Event listeners
-        document.getElementById('githubLoginBtn').addEventListener('click', handleLogin);
-        document.getElementById('logoutBtn').addEventListener('click', handleLogout);
-        document.getElementById('addPostBtn').addEventListener('click', handleAddPost);
-    }
-    
-    // Show login screen
-    function showLogin() {
-        document.getElementById('loginSection').style.display = 'block';
-        document.getElementById('adminContent').classList.remove('active');
+        // Show admin content directly (no login needed)
+        showAdminContent();
+        loadPosts();
     }
     
     // Show admin content
     function showAdminContent() {
-        document.getElementById('loginSection').style.display = 'none';
         document.getElementById('adminContent').classList.add('active');
-        
-        // Update user info
-        if (githubUser) {
-            document.getElementById('userAvatar').src = githubUser.avatar_url;
-            document.getElementById('userName').textContent = githubUser.name || githubUser.login;
-            document.getElementById('userEmail').textContent = githubUser.email || 'No email';
-        }
     }
     
-    // Handle GitHub login
-    function handleLogin() {
-        const clientId = config.clientId;
-        const redirectUri = config.redirectUri || window.location.origin + '/admin/callback.html';
-        
-        if (!clientId || clientId === 'YOUR_GITHUB_CLIENT_ID_HERE') {
-            showError('Please configure GitHub OAuth credentials in admin/config.js');
-            return;
-        }
-        
-        // Redirect to GitHub OAuth
-        const authUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=repo`;
-        window.location.href = authUrl;
-    }
-    
-    // Handle logout
-    function handleLogout() {
-        sessionStorage.removeItem('github_token');
-        sessionStorage.removeItem('github_user');
-        showLogin();
-    }
-    
-    // Load blog posts
+    // Load blog posts (public API, no auth needed)
     async function loadPosts() {
         const postsList = document.getElementById('postsList');
         postsList.innerHTML = '<div class="loading">Loading posts...</div>';
@@ -82,15 +33,9 @@
             const repoBranch = config.repoBranch || 'main';
             const apiBase = config.apiBase || 'https://api.github.com';
             
-            // Get list of files in content/blog directory
+            // Get list of files in content/blog directory (public repo, no auth needed)
             const response = await fetch(
-                `${apiBase}/repos/${repoOwner}/${repoName}/contents/content/blog`,
-                {
-                    headers: {
-                        'Authorization': 'token ' + githubToken,
-                        'Accept': 'application/vnd.github.v3+json'
-                    }
-                }
+                `${apiBase}/repos/${repoOwner}/${repoName}/contents/content/blog`
             );
             
             if (!response.ok) {
@@ -204,88 +149,34 @@
         }, 5000);
     }
     
-    // Handle add post
-    function handleAddPost() {
-        const slug = prompt('Enter post slug (e.g., "my-new-post"):');
-        if (!slug) return;
-        
-        editPost(slug, true);
-    }
-    
-    // Edit post (opens in new window/tab for now - can be enhanced with modal)
+    // Edit post (opens GitHub editor in new tab)
     window.editPost = function(slug, isNew = false) {
         const repoOwner = config.repoOwner || 'Emmanueld14';
         const repoName = config.repoName || 'bloomly-app';
         const fileName = slug + '.md';
         const filePath = `content/blog/${fileName}`;
         
-        // Open GitHub editor in new tab
-        const githubUrl = `https://github.com/${repoOwner}/${repoName}/edit/${config.repoBranch || 'main'}/${filePath}`;
-        
         if (isNew) {
             // For new posts, use GitHub's new file interface
             const newFileUrl = `https://github.com/${repoOwner}/${repoName}/new/${config.repoBranch || 'main'}/content/blog?filename=${fileName}`;
             window.open(newFileUrl, '_blank');
         } else {
+            // For existing posts, open GitHub's editor
+            const githubUrl = `https://github.com/${repoOwner}/${repoName}/edit/${config.repoBranch || 'main'}/${filePath}`;
             window.open(githubUrl, '_blank');
         }
     };
     
-    // Delete post
-    window.deletePost = async function(slug, fileName) {
-        if (!confirm(`Are you sure you want to delete "${slug}"? This action cannot be undone.`)) {
-            return;
-        }
+    // Delete post (opens GitHub delete interface)
+    window.deletePost = function(slug, fileName) {
+        const repoOwner = config.repoOwner || 'Emmanueld14';
+        const repoName = config.repoName || 'bloomly-app';
+        const filePath = `content/blog/${fileName}`;
         
-        try {
-            const repoOwner = config.repoOwner || 'Emmanueld14';
-            const repoName = config.repoName || 'bloomly-app';
-            const filePath = `content/blog/${fileName}`;
-            
-            // First, get the file to get its SHA
-            const getFileResponse = await fetch(
-                `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`,
-                {
-                    headers: {
-                        'Authorization': 'token ' + githubToken,
-                        'Accept': 'application/vnd.github.v3+json'
-                    }
-                }
-            );
-            
-            if (!getFileResponse.ok) {
-                throw new Error('Failed to get file: ' + getFileResponse.statusText);
-            }
-            
-            const fileData = await getFileResponse.json();
-            
-            // Delete the file
-            const deleteResponse = await fetch(
-                `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`,
-                {
-                    method: 'DELETE',
-                    headers: {
-                        'Authorization': 'token ' + githubToken,
-                        'Accept': 'application/vnd.github.v3+json',
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        message: `Delete blog post: ${slug}`,
-                        sha: fileData.sha,
-                        branch: config.repoBranch || 'main'
-                    })
-                }
-            );
-            
-            if (!deleteResponse.ok) {
-                throw new Error('Failed to delete file: ' + deleteResponse.statusText);
-            }
-            
-            alert('Post deleted successfully! The site will update automatically.');
-            loadPosts(); // Reload posts list
-        } catch (error) {
-            console.error('Error deleting post:', error);
-            showError('Failed to delete post: ' + error.message);
+        // Open GitHub's delete interface
+        const deleteUrl = `https://github.com/${repoOwner}/${repoName}/delete/${config.repoBranch || 'main'}/${filePath}`;
+        if (confirm(`Delete "${slug}"? This will open GitHub where you can confirm the deletion.`)) {
+            window.open(deleteUrl, '_blank');
         }
     };
     
