@@ -1,4 +1,6 @@
 {
+  "buildCommand": "echo 'Static site - no build required'",
+  "outputDirectory": ".",
   "functions": {
     "api/github-auth.js": {
       "maxDuration": 10
