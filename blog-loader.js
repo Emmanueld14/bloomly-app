@@ -160,38 +160,11 @@
                     throw new Error('GitHub API failed, trying local files');
                 }
             } catch (apiError) {
-                console.warn('GitHub API failed, trying local files:', apiError);
+                console.error('GitHub API failed:', apiError);
                 
-                // Fallback: Try to load from local directory (for development)
-                const fallbackPosts = [
-                    'self-care-practices.md',
-                    'supporting-friends.md',
-                    'mindfulness-beginners.md',
-                    'building-confidence.md',
-                    'exam-stress.md',
-                    'understanding-anxiety.md',
-                    'do-you-still-feel-too-attached.md',
-                    'new-year-new-me.md'
-                ];
-                
-                for (const filename of fallbackPosts) {
-                    try {
-                        const response = await fetch(`content/blog/${filename}`, {
-                            cache: 'no-store'
-                        });
-                        if (!response.ok) continue;
-                        
-                        const markdown = await response.text();
-                        const parsed = parseMarkdown(markdown);
-                        
-                        if (parsed) {
-                            parsed.slug = getSlug(filename);
-                            posts.push(parsed);
-                        }
-                    } catch (error) {
-                        console.warn(`Failed to load ${filename}:`, error);
-                    }
-                }
+                // Don't use fallback - show error instead
+                // This prevents showing stale cached posts
+                throw new Error('Unable to load posts from GitHub. Please check your connection and try again. Error: ' + apiError.message);
             }
 
             // Sort by date (newest first)
