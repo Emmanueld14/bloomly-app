@@ -451,6 +451,15 @@ ${content}`;
             return;
         }
         
+        // Find and disable the delete button
+        const deleteButtons = document.querySelectorAll('.btn-delete');
+        deleteButtons.forEach(btn => {
+            if (btn.textContent === 'Delete' && btn.onclick && btn.onclick.toString().includes(slug)) {
+                btn.textContent = 'Deleting...';
+                btn.disabled = true;
+            }
+        });
+        
         try {
             const repoOwner = config.repoOwner || 'Emmanueld14';
             const repoName = config.repoName || 'bloomly-app';
@@ -470,7 +479,8 @@ ${content}`;
             );
             
             if (!getFileResponse.ok) {
-                throw new Error('Failed to get file: ' + getFileResponse.statusText);
+                const errorData = await getFileResponse.json().catch(() => ({}));
+                throw new Error(errorData.message || 'Failed to get file: ' + getFileResponse.statusText);
             }
             
             const fileData = await getFileResponse.json();
@@ -494,14 +504,44 @@ ${content}`;
             );
             
             if (!deleteResponse.ok) {
-                throw new Error('Failed to delete file: ' + deleteResponse.statusText);
+                const errorData = await deleteResponse.json().catch(() => ({}));
+                throw new Error(errorData.message || 'Failed to delete file: ' + deleteResponse.statusText);
             }
             
-            showSuccess('Post deleted successfully! The site will update automatically.');
-            loadPosts();
+            // Optimistically remove from UI immediately
+            const postsList = document.getElementById('postsList');
+            const postItems = postsList.querySelectorAll('.post-item');
+            postItems.forEach(item => {
+                const deleteBtn = item.querySelector('.btn-delete');
+                if (deleteBtn && deleteBtn.onclick && deleteBtn.onclick.toString().includes(slug)) {
+                    item.style.opacity = '0.5';
+                    item.style.transition = 'opacity 0.3s';
+                    setTimeout(() => {
+                        item.remove();
+                    }, 300);
+                }
+            });
+            
+            showSuccess('Post deleted successfully! Cloudflare Pages will rebuild automatically (may take 1-2 minutes).');
+            
+            // Reload posts list to ensure sync
+            setTimeout(() => {
+                loadPosts();
+            }, 500);
         } catch (error) {
             console.error('Error deleting post:', error);
             showError('Failed to delete post: ' + error.message);
+            
+            // Re-enable buttons
+            deleteButtons.forEach(btn => {
+                if (btn.disabled) {
+                    btn.textContent = 'Delete';
+                    btn.disabled = false;
+                }
+            });
+            
+            // Reload to show current state
+            loadPosts();
         }
     };
     
