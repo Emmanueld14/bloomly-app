@@ -172,20 +172,6 @@
         }
     }
 
-    // Auto-refresh every 30 seconds (when page visible)
-    let refreshInterval = null;
-    
-    function startAutoRefresh() {
-        if (refreshInterval) clearInterval(refreshInterval);
-        
-        refreshInterval = setInterval(() => {
-            if (!document.hidden) {
-                console.log('Auto-refreshing blog posts...');
-                loadBlogPosts();
-            }
-        }, 30000); // 30 seconds
-    }
-
     // Manual refresh function
     window.refreshBlogPosts = function() {
         console.log('Manual refresh triggered');
@@ -196,7 +182,6 @@
     function init() {
         console.log('Initializing blog loader...');
         loadBlogPosts();
-        startAutoRefresh();
     }
 
     if (document.readyState === 'loading') {
@@ -204,14 +189,5 @@
     } else {
         init();
     }
-
-    // Refresh when page becomes visible
-    document.addEventListener('visibilitychange', () => {
-        if (!document.hidden) {
-            console.log('Page visible, refreshing posts...');
-            loadBlogPosts();
-            startAutoRefresh();
-        }
-    });
 
 })();
