@@ -194,9 +194,11 @@ a:hover {
 }
 
 .logo-icon {
-    width: 40px;
-    height: 40px;
+    width: 180px;
+    height: auto;
+    max-height: 60px;
     flex-shrink: 0;
+    object-fit: contain;
 }
 
 .logo-text {
@@ -1113,13 +1115,9 @@ a:hover {
         font-size: var(--text-sm);
     }
     
-    .logo-text {
-        font-size: var(--text-xl);
-    }
-    
     .logo-icon {
-        width: 32px;
-        height: 32px;
+        width: 140px;
+        max-height: 50px;
     }
     
     .my-story-panel {
