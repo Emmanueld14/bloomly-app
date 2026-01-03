@@ -69,10 +69,19 @@
         return filename.replace('.md', '');
     }
 
+    // Store last known post count and hashes for change detection
+    let lastPostCount = 0;
+    let lastPostHashes = new Set();
+    let isLoading = false;
+
     // Load blog posts dynamically from GitHub
-    async function loadBlogPosts() {
+    async function loadBlogPosts(showNotification = false) {
         const blogGrid = document.getElementById('blogGrid');
         if (!blogGrid) return;
+
+        // Prevent concurrent loads
+        if (isLoading) return;
+        isLoading = true;
 
         try {
             const posts = [];
@@ -83,14 +92,20 @@
             const repoName = 'bloomly-app';
             const repoBranch = 'main';
             
+            // Add cache-busting timestamp
+            const cacheBuster = Date.now();
+            
             try {
                 // Get list of files in content/blog directory from GitHub
                 const listResponse = await fetch(
-                    `https://api.github.com/repos/${repoOwner}/${repoName}/contents/content/blog?ref=${repoBranch}`,
+                    `https://api.github.com/repos/${repoOwner}/${repoName}/contents/content/blog?ref=${repoBranch}&t=${cacheBuster}`,
                     {
                         headers: {
-                            'Accept': 'application/vnd.github.v3+json'
-                        }
+                            'Accept': 'application/vnd.github.v3+json',
+                            'Cache-Control': 'no-cache, no-store, must-revalidate',
+                            'Pragma': 'no-cache'
+                        },
+                        cache: 'no-store'
                     }
                 );
                 
@@ -102,12 +117,21 @@
                     
                     console.log(`Found ${markdownFiles.length} markdown files:`, markdownFiles);
                     
+                    // Check if posts have changed
+                    const currentHashes = new Set(markdownFiles);
+                    const hasChanged = lastPostCount !== markdownFiles.length || 
+                                      ![...currentHashes].every(hash => lastPostHashes.has(hash));
+                    
                     // Load each post from raw GitHub content
                     for (const filename of markdownFiles) {
                         try {
-                            const rawUrl = `https://raw.githubusercontent.com/${repoOwner}/${repoName}/${repoBranch}/content/blog/${filename}`;
+                            const rawUrl = `https://raw.githubusercontent.com/${repoOwner}/${repoName}/${repoBranch}/content/blog/${filename}?t=${cacheBuster}`;
                             const response = await fetch(rawUrl, {
-                                cache: 'no-store' // Prevent caching
+                                cache: 'no-store', // Prevent caching
+                                headers: {
+                                    'Cache-Control': 'no-cache, no-store, must-revalidate',
+                                    'Pragma': 'no-cache'
+                                }
                             });
                             
                             if (!response.ok) {
@@ -176,6 +200,18 @@
                 return dateB - dateA;
             });
 
+            // Show notification if new posts detected
+            if (hasChanged && lastPostCount > 0 && showNotification) {
+                const newPostCount = posts.length - lastPostCount;
+                if (newPostCount > 0) {
+                    showNewPostNotification(`✨ ${newPostCount} new post${newPostCount > 1 ? 's' : ''} available!`);
+                }
+            }
+
+            // Update tracking
+            lastPostCount = posts.length;
+            lastPostHashes = new Set(markdownFiles || []);
+
             // Render posts
             blogGrid.innerHTML = posts.map(post => {
                 const emoji = post.metadata.emoji || '💙';
@@ -210,8 +246,102 @@
             console.error('Error loading blog posts:', error);
             // Fallback: show error message
             blogGrid.innerHTML = '<p style="text-align: center; color: var(--color-gray-600);">Unable to load blog posts. Please try again later.</p>';
+        } finally {
+            isLoading = false;
         }
     }
+
+    // Show notification for new posts
+    function showNewPostNotification(message) {
+        // Remove existing notification if any
+        const existing = document.getElementById('newPostNotification');
+        if (existing) existing.remove();
+
+        const notification = document.createElement('div');
+        notification.id = 'newPostNotification';
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #FF78B9 0%, #C8A7FF 50%, #5FA8FF 100%);
+            color: white;
+            padding: 16px 24px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            z-index: 10000;
+            font-weight: 600;
+            animation: slideIn 0.3s ease-out;
+            cursor: pointer;
+        `;
+        notification.textContent = message;
+        notification.onclick = () => {
+            window.location.reload();
+        };
+        
+        document.body.appendChild(notification);
+        
+        // Auto-remove after 5 seconds
+        setTimeout(() => {
+            notification.style.animation = 'slideOut 0.3s ease-out';
+            setTimeout(() => notification.remove(), 300);
+        }, 5000);
+    }
+
+    // Add CSS animations
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+        }
+    `;
+    document.head.appendChild(style);
+
+    // Auto-refresh mechanism: Check for new posts every 30 seconds when page is visible
+    let refreshInterval = null;
+    
+    function startAutoRefresh() {
+        // Clear existing interval
+        if (refreshInterval) clearInterval(refreshInterval);
+        
+        // Check every 30 seconds
+        refreshInterval = setInterval(() => {
+            // Only check if page is visible (not in background tab)
+            if (!document.hidden) {
+                loadBlogPosts(true); // true = show notification if new posts
+            }
+        }, 30000); // 30 seconds
+    }
+
+    // Start auto-refresh when page becomes visible
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) {
+            startAutoRefresh();
+            // Also check immediately when page becomes visible
+            loadBlogPosts(true);
+        } else {
+            if (refreshInterval) {
+                clearInterval(refreshInterval);
+                refreshInterval = null;
+            }
+        }
+    });
 
     // Initialize when DOM is ready
     if (document.readyState === 'loading') {
