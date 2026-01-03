@@ -28,7 +28,7 @@
             backdrop-filter: blur(20px);
             border-radius: var(--radius-2xl);
             padding: var(--space-3xl);
-            max-width: 800px;
+            max-width: 1000px;
             width: 100%;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
         }
@@ -47,31 +47,53 @@
             color: #666;
         }
         
-        .login-section {
-            text-align: center;
-            padding: var(--space-2xl) 0;
+        .auth-section {
+            background: var(--gradient-soft);
+            padding: var(--space-xl);
+            border-radius: var(--radius-lg);
+            margin-bottom: var(--space-xl);
         }
         
-        .github-login-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: var(--space-sm);
-            background: #24292e;
+        .auth-section h3 {
+            margin-bottom: var(--space-md);
+            color: #2D2D2D;
+        }
+        
+        .auth-section p {
+            color: #666;
+            font-size: var(--text-sm);
+            margin-bottom: var(--space-md);
+        }
+        
+        .token-input {
+            width: 100%;
+            padding: var(--space-md);
+            border: 2px solid #e0e0e0;
+            border-radius: var(--radius-md);
+            font-size: var(--text-base);
+            margin-bottom: var(--space-md);
+            font-family: monospace;
+        }
+        
+        .token-input:focus {
+            outline: none;
+            border-color: var(--color-blue);
+        }
+        
+        .btn-auth {
+            background: var(--color-blue);
             color: white;
-            padding: var(--space-md) var(--space-2xl);
-            border-radius: var(--radius-lg);
-            text-decoration: none;
+            border: none;
+            padding: var(--space-md) var(--space-xl);
+            border-radius: var(--radius-md);
+            cursor: pointer;
             font-weight: 600;
             transition: all var(--transition-base);
-            border: none;
-            cursor: pointer;
-            font-size: var(--text-lg);
         }
         
-        .github-login-btn:hover {
-            background: #2f363d;
+        .btn-auth:hover {
+            background: #4a96e6;
             transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(36, 41, 46, 0.4);
         }
         
         .admin-content {
@@ -207,6 +229,7 @@
             font-size: var(--text-lg);
             margin-bottom: var(--space-xl);
             transition: all var(--transition-base);
+            width: 100%;
         }
         
         .add-post-btn:hover {
@@ -227,6 +250,157 @@
             border-radius: var(--radius-md);
             margin-bottom: var(--space-lg);
         }
+        
+        .success {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: var(--space-md);
+            border-radius: var(--radius-md);
+            margin-bottom: var(--space-lg);
+        }
+        
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+        }
+        
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: var(--radius-2xl);
+            padding: var(--space-3xl);
+            max-width: 800px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-xl);
+        }
+        
+        .modal-header h2 {
+            margin: 0;
+            color: #2D2D2D;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: var(--text-2xl);
+            cursor: pointer;
+            color: #666;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--radius-md);
+        }
+        
+        .close-btn:hover {
+            background: #f0f0f0;
+        }
+        
+        .form-group {
+            margin-bottom: var(--space-lg);
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: var(--space-xs);
+            color: #2D2D2D;
+            font-weight: 600;
+        }
+        
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: var(--space-md);
+            border: 2px solid #e0e0e0;
+            border-radius: var(--radius-md);
+            font-size: var(--text-base);
+            font-family: var(--font-primary);
+        }
+        
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--color-blue);
+        }
+        
+        .form-group textarea {
+            min-height: 300px;
+            resize: vertical;
+        }
+        
+        .form-actions {
+            display: flex;
+            gap: var(--space-md);
+            justify-content: flex-end;
+            margin-top: var(--space-xl);
+        }
+        
+        .btn-save {
+            background: var(--color-blue);
+            color: white;
+            border: none;
+            padding: var(--space-md) var(--space-2xl);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-weight: 600;
+            transition: all var(--transition-base);
+        }
+        
+        .btn-save:hover {
+            background: #4a96e6;
+            transform: translateY(-2px);
+        }
+        
+        .btn-cancel {
+            background: #e0e0e0;
+            color: #666;
+            border: none;
+            padding: var(--space-md) var(--space-2xl);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-weight: 600;
+            transition: all var(--transition-base);
+        }
+        
+        .btn-cancel:hover {
+            background: #d0d0d0;
+        }
+        
+        .help-link {
+            color: var(--color-blue);
+            text-decoration: none;
+            font-size: var(--text-sm);
+        }
+        
+        .help-link:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
@@ -237,20 +411,40 @@
                 <p>Manage your blog posts</p>
             </div>
             
-            <!-- Simple Admin Interface (No OAuth needed) -->
-            <div id="adminContent" class="admin-content active">
-                <div style="text-align: center; margin-bottom: var(--space-xl);">
-                    <h2 style="color: #2D2D2D; margin-bottom: var(--space-md);">Blog Management</h2>
-                    <p style="color: #666; margin-bottom: var(--space-lg);">Manage your blog posts directly on GitHub</p>
+            <!-- Authentication Section -->
+            <div id="authSection" class="auth-section">
+                <h3>🔐 Authentication Required</h3>
+                <p>Enter your GitHub Personal Access Token to manage blog posts. The token is stored locally in your browser and never sent to any server except GitHub.</p>
+                <p><strong>How to get a token:</strong></p>
+                <ol style="color: #666; font-size: var(--text-sm); margin-bottom: var(--space-md); padding-left: var(--space-lg);">
+                    <li>Go to <a href="https://github.com/settings/tokens" target="_blank" class="help-link">GitHub Settings → Developer settings → Personal access tokens</a></li>
+                    <li>Click "Generate new token" → "Generate new token (classic)"</li>
+                    <li>Give it a name: "Bloomly Admin"</li>
+                    <li>Select scopes: <strong>repo</strong> (full control of private repositories)</li>
+                    <li>Click "Generate token" and copy it</li>
+                    <li>Paste it below</li>
+                </ol>
+                <input type="password" id="githubToken" class="token-input" placeholder="ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx">
+                <button class="btn-auth" id="saveTokenBtn">Save Token & Continue</button>
+            </div>
+            
+            <!-- Admin Content -->
+            <div id="adminContent" class="admin-content">
+                <div class="user-info">
+                    <div class="user-info-left">
+                        <img id="userAvatar" src="" alt="User Avatar" class="user-avatar">
+                        <div class="user-details">
+                            <h3 id="userName"></h3>
+                            <p id="userEmail"></p>
+                        </div>
+                    </div>
+                    <button class="logout-btn" id="logoutBtn">Logout</button>
                 </div>
                 
                 <div id="errorMessage" class="error" style="display: none;"></div>
+                <div id="successMessage" class="success" style="display: none;"></div>
                 
-                <div style="text-align: center; margin-bottom: var(--space-xl);">
-                    <a href="https://github.com/Emmanueld14/bloomly-app/tree/main/content/blog" target="_blank" class="add-post-btn" style="text-decoration: none; display: inline-block;">
-                        📝 Manage Posts on GitHub
-                    </a>
-                </div>
+                <button class="add-post-btn" id="addPostBtn">+ Add New Post</button>
                 
                 <div id="postsList" class="posts-list">
                     <div class="loading">Loading posts...</div>
@@ -259,8 +453,66 @@
         </div>
     </div>
     
+    <!-- Edit/Add Post Modal -->
+    <div id="postModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Edit Post</h2>
+                <button class="close-btn" id="closeModalBtn">&times;</button>
+            </div>
+            <form id="postForm">
+                <input type="hidden" id="postSlug" name="slug">
+                <input type="hidden" id="postFileName" name="fileName">
+                <input type="hidden" id="isNewPost" name="isNew" value="false">
+                
+                <div class="form-group">
+                    <label for="postTitle">Title *</label>
+                    <input type="text" id="postTitle" name="title" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="postDate">Date *</label>
+                    <input type="datetime-local" id="postDate" name="date" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="postCategory">Category</label>
+                    <select id="postCategory" name="category">
+                        <option value="Mental Health">Mental Health</option>
+                        <option value="Self-Care">Self-Care</option>
+                        <option value="Wellness">Wellness</option>
+                        <option value="Support">Support</option>
+                        <option value="Tips">Tips</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="postSummary">Summary *</label>
+                    <textarea id="postSummary" name="summary" rows="3" required></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="postEmoji">Emoji</label>
+                    <input type="text" id="postEmoji" name="emoji" placeholder="💙" maxlength="2">
+                </div>
+                
+                <div class="form-group">
+                    <label for="postContent">Content (Markdown) *</label>
+                    <textarea id="postContent" name="content" rows="15" required></textarea>
+                    <p style="font-size: var(--text-sm); color: #666; margin-top: var(--space-xs);">
+                        Write your post content in Markdown format. Use <code>##</code> for headings, <code>**bold**</code> for bold text, etc.
+                    </p>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn-cancel" id="cancelBtn">Cancel</button>
+                    <button type="submit" class="btn-save" id="savePostBtn">Save Post</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
     <script src="config.js"></script>
     <script src="admin.js"></script>
 </body>
 </html>
-

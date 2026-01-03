@@ -1,6 +1,6 @@
 /**
- * Bloomly Blog Admin - GitHub OAuth Admin Interface
- * Manages blog posts via GitHub API
+ * Bloomly Blog Admin - Form-based Admin Interface
+ * Manages blog posts via GitHub API using Personal Access Token
  */
 
 (function() {
@@ -12,17 +12,102 @@
     
     // Initialize
     function init() {
-        // Show admin content directly (no login needed)
-        showAdminContent();
-        loadPosts();
+        // Check if user has saved token
+        githubToken = localStorage.getItem('github_token');
+        
+        if (githubToken) {
+            verifyToken();
+        } else {
+            showAuth();
+        }
+        
+        // Event listeners
+        document.getElementById('saveTokenBtn').addEventListener('click', handleSaveToken);
+        document.getElementById('logoutBtn').addEventListener('click', handleLogout);
+        document.getElementById('addPostBtn').addEventListener('click', handleAddPost);
+        document.getElementById('closeModalBtn').addEventListener('click', closeModal);
+        document.getElementById('cancelBtn').addEventListener('click', closeModal);
+        document.getElementById('postForm').addEventListener('submit', handleSavePost);
+        
+        // Close modal on outside click
+        document.getElementById('postModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+    }
+    
+    // Show auth section
+    function showAuth() {
+        document.getElementById('authSection').style.display = 'block';
+        document.getElementById('adminContent').classList.remove('active');
+    }
+    
+    // Verify token and load user info
+    async function verifyToken() {
+        try {
+            const response = await fetch('https://api.github.com/user', {
+                headers: {
+                    'Authorization': 'token ' + githubToken,
+                    'Accept': 'application/vnd.github.v3+json'
+                }
+            });
+            
+            if (!response.ok) {
+                throw new Error('Invalid token');
+            }
+            
+            githubUser = await response.json();
+            showAdminContent();
+            loadPosts();
+        } catch (error) {
+            showError('Invalid token. Please enter a valid GitHub Personal Access Token.');
+            localStorage.removeItem('github_token');
+            showAuth();
+        }
     }
     
     // Show admin content
     function showAdminContent() {
+        document.getElementById('authSection').style.display = 'none';
         document.getElementById('adminContent').classList.add('active');
+        
+        // Update user info
+        if (githubUser) {
+            document.getElementById('userAvatar').src = githubUser.avatar_url;
+            document.getElementById('userName').textContent = githubUser.name || githubUser.login;
+            document.getElementById('userEmail').textContent = githubUser.email || 'No email';
+        }
     }
     
-    // Load blog posts (public API, no auth needed)
+    // Handle save token
+    function handleSaveToken() {
+        const token = document.getElementById('githubToken').value.trim();
+        
+        if (!token) {
+            showError('Please enter a GitHub Personal Access Token');
+            return;
+        }
+        
+        if (!token.startsWith('ghp_')) {
+            showError('Invalid token format. GitHub tokens start with "ghp_"');
+            return;
+        }
+        
+        githubToken = token;
+        localStorage.setItem('github_token', token);
+        verifyToken();
+    }
+    
+    // Handle logout
+    function handleLogout() {
+        localStorage.removeItem('github_token');
+        githubToken = null;
+        githubUser = null;
+        showAuth();
+    }
+    
+    // Load blog posts
     async function loadPosts() {
         const postsList = document.getElementById('postsList');
         postsList.innerHTML = '<div class="loading">Loading posts...</div>';
@@ -30,12 +115,17 @@
         try {
             const repoOwner = config.repoOwner || 'Emmanueld14';
             const repoName = config.repoName || 'bloomly-app';
-            const repoBranch = config.repoBranch || 'main';
             const apiBase = config.apiBase || 'https://api.github.com';
             
-            // Get list of files in content/blog directory (public repo, no auth needed)
+            // Get list of files in content/blog directory
             const response = await fetch(
-                `${apiBase}/repos/${repoOwner}/${repoName}/contents/content/blog`
+                `${apiBase}/repos/${repoOwner}/${repoName}/contents/content/blog`,
+                {
+                    headers: {
+                        'Authorization': 'token ' + githubToken,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                }
             );
             
             if (!response.ok) {
@@ -55,7 +145,8 @@
                         return {
                             ...file,
                             ...frontmatter,
-                            slug: file.name.replace('.md', '')
+                            slug: file.name.replace('.md', ''),
+                            rawContent: content
                         };
                     } catch (error) {
                         console.error('Error loading post:', file.name, error);
@@ -63,7 +154,8 @@
                             ...file,
                             title: file.name.replace('.md', ''),
                             date: new Date().toISOString(),
-                            slug: file.name.replace('.md', '')
+                            slug: file.name.replace('.md', ''),
+                            rawContent: ''
                         };
                     }
                 })
@@ -87,8 +179,8 @@
                             <p>${formatDate(post.date)} • ${post.category || 'Uncategorized'}</p>
                         </div>
                         <div class="post-actions">
-                            <button class="btn-edit" onclick="editPost('${post.slug}')">Edit on GitHub</button>
-                            <button class="btn-delete" onclick="deletePost('${post.slug}', '${post.name}')">Delete on GitHub</button>
+                            <button class="btn-edit" onclick="editPost('${post.slug}', '${post.name}', ${JSON.stringify(post).replace(/"/g, '&quot;')})">Edit</button>
+                            <button class="btn-delete" onclick="deletePost('${post.slug}', '${post.name}')">Delete</button>
                         </div>
                     </div>
                 `).join('');
@@ -106,10 +198,11 @@
         const match = content.match(frontmatterRegex);
         
         if (!match) {
-            return { title: '', date: new Date().toISOString(), category: '', summary: '' };
+            return { title: '', date: new Date().toISOString(), category: '', summary: '', emoji: '', content: content };
         }
         
         const frontmatter = match[1];
+        const body = match[2];
         const metadata = {};
         
         frontmatter.split('\n').forEach(line => {
@@ -125,7 +218,10 @@
             }
         });
         
-        return metadata;
+        return {
+            ...metadata,
+            content: body
+        };
     }
     
     // Format date
@@ -149,36 +245,233 @@
         }, 5000);
     }
     
-    // Edit post (opens GitHub editor in new tab)
-    window.editPost = function(slug, isNew = false) {
-        const repoOwner = config.repoOwner || 'Emmanueld14';
-        const repoName = config.repoName || 'bloomly-app';
-        const fileName = slug + '.md';
-        const filePath = `content/blog/${fileName}`;
-        
-        if (isNew) {
-            // For new posts, use GitHub's new file interface
-            const newFileUrl = `https://github.com/${repoOwner}/${repoName}/new/${config.repoBranch || 'main'}/content/blog?filename=${fileName}`;
-            window.open(newFileUrl, '_blank');
-        } else {
-            // For existing posts, open GitHub's editor
-            const githubUrl = `https://github.com/${repoOwner}/${repoName}/edit/${config.repoBranch || 'main'}/${filePath}`;
-            window.open(githubUrl, '_blank');
+    // Show success message
+    function showSuccess(message) {
+        const successDiv = document.getElementById('successMessage');
+        successDiv.textContent = message;
+        successDiv.style.display = 'block';
+        setTimeout(() => {
+            successDiv.style.display = 'none';
+        }, 5000);
+    }
+    
+    // Handle add post
+    function handleAddPost() {
+        document.getElementById('modalTitle').textContent = 'Add New Post';
+        document.getElementById('isNewPost').value = 'true';
+        document.getElementById('postSlug').value = '';
+        document.getElementById('postFileName').value = '';
+        document.getElementById('postTitle').value = '';
+        document.getElementById('postDate').value = new Date().toISOString().slice(0, 16);
+        document.getElementById('postCategory').value = 'Mental Health';
+        document.getElementById('postSummary').value = '';
+        document.getElementById('postEmoji').value = '💙';
+        document.getElementById('postContent').value = '';
+        document.getElementById('postModal').classList.add('active');
+    }
+    
+    // Edit post
+    window.editPost = function(slug, fileName, postData) {
+        try {
+            const post = typeof postData === 'string' ? JSON.parse(postData.replace(/&quot;/g, '"')) : postData;
+            
+            document.getElementById('modalTitle').textContent = 'Edit Post';
+            document.getElementById('isNewPost').value = 'false';
+            document.getElementById('postSlug').value = slug;
+            document.getElementById('postFileName').value = fileName;
+            document.getElementById('postTitle').value = post.title || '';
+            
+            // Format date for datetime-local input
+            const postDate = post.date ? new Date(post.date).toISOString().slice(0, 16) : new Date().toISOString().slice(0, 16);
+            document.getElementById('postDate').value = postDate;
+            
+            document.getElementById('postCategory').value = post.category || 'Mental Health';
+            document.getElementById('postSummary').value = post.summary || '';
+            document.getElementById('postEmoji').value = post.emoji || '💙';
+            document.getElementById('postContent').value = post.content || '';
+            
+            document.getElementById('postModal').classList.add('active');
+        } catch (error) {
+            console.error('Error editing post:', error);
+            showError('Failed to load post data');
         }
     };
     
-    // Delete post (opens GitHub delete interface)
-    window.deletePost = function(slug, fileName) {
-        const repoOwner = config.repoOwner || 'Emmanueld14';
-        const repoName = config.repoName || 'bloomly-app';
-        const filePath = `content/blog/${fileName}`;
+    // Close modal
+    function closeModal() {
+        document.getElementById('postModal').classList.remove('active');
+    }
+    
+    // Handle save post
+    async function handleSavePost(e) {
+        e.preventDefault();
         
-        // Open GitHub's delete interface
-        const deleteUrl = `https://github.com/${repoOwner}/${repoName}/delete/${config.repoBranch || 'main'}/${filePath}`;
-        if (confirm(`Delete "${slug}"? This will open GitHub where you can confirm the deletion.`)) {
-            window.open(deleteUrl, '_blank');
+        const saveBtn = document.getElementById('savePostBtn');
+        const originalText = saveBtn.textContent;
+        saveBtn.textContent = 'Saving...';
+        saveBtn.disabled = true;
+        
+        try {
+            const formData = new FormData(e.target);
+            const isNew = formData.get('isNew') === 'true';
+            const slug = formData.get('slug') || slugify(formData.get('title'));
+            const fileName = formData.get('fileName') || (slug + '.md');
+            const title = formData.get('title');
+            const date = formData.get('date');
+            const category = formData.get('category');
+            const summary = formData.get('summary');
+            const emoji = formData.get('emoji') || '💙';
+            const content = formData.get('content');
+            
+            // Format date for frontmatter
+            const dateObj = new Date(date);
+            const formattedDate = dateObj.toISOString();
+            
+            // Create markdown content with frontmatter
+            const markdown = `---
+title: "${title}"
+date: ${formattedDate}
+category: "${category}"
+summary: "${summary.replace(/"/g, '\\"')}"
+emoji: "${emoji}"
+featuredImage: ""
+---
+
+${content}`;
+            
+            const repoOwner = config.repoOwner || 'Emmanueld14';
+            const repoName = config.repoName || 'bloomly-app';
+            const repoBranch = config.repoBranch || 'main';
+            const filePath = `content/blog/${fileName}`;
+            const apiBase = config.apiBase || 'https://api.github.com';
+            
+            let sha = null;
+            if (!isNew) {
+                // Get existing file to get SHA
+                const getFileResponse = await fetch(
+                    `${apiBase}/repos/${repoOwner}/${repoName}/contents/${filePath}`,
+                    {
+                        headers: {
+                            'Authorization': 'token ' + githubToken,
+                            'Accept': 'application/vnd.github.v3+json'
+                        }
+                    }
+                );
+                
+                if (getFileResponse.ok) {
+                    const fileData = await getFileResponse.json();
+                    sha = fileData.sha;
+                }
+            }
+            
+            // Encode content to base64
+            const encodedContent = btoa(unescape(encodeURIComponent(markdown)));
+            
+            // Create or update file
+            const response = await fetch(
+                `${apiBase}/repos/${repoOwner}/${repoName}/contents/${filePath}`,
+                {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': 'token ' + githubToken,
+                        'Accept': 'application/vnd.github.v3+json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: isNew ? `Add blog post: ${title}` : `Update blog post: ${title}`,
+                        content: encodedContent,
+                        branch: repoBranch,
+                        ...(sha && { sha: sha })
+                    })
+                }
+            );
+            
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Failed to save post');
+            }
+            
+            showSuccess('Post saved successfully! The site will update automatically.');
+            closeModal();
+            loadPosts();
+        } catch (error) {
+            console.error('Error saving post:', error);
+            showError('Failed to save post: ' + error.message);
+        } finally {
+            saveBtn.textContent = originalText;
+            saveBtn.disabled = false;
+        }
+    }
+    
+    // Delete post
+    window.deletePost = async function(slug, fileName) {
+        if (!confirm(`Are you sure you want to delete "${slug}"? This action cannot be undone.`)) {
+            return;
+        }
+        
+        try {
+            const repoOwner = config.repoOwner || 'Emmanueld14';
+            const repoName = config.repoName || 'bloomly-app';
+            const repoBranch = config.repoBranch || 'main';
+            const filePath = `content/blog/${fileName}`;
+            const apiBase = config.apiBase || 'https://api.github.com';
+            
+            // First, get the file to get its SHA
+            const getFileResponse = await fetch(
+                `${apiBase}/repos/${repoOwner}/${repoName}/contents/${filePath}`,
+                {
+                    headers: {
+                        'Authorization': 'token ' + githubToken,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                }
+            );
+            
+            if (!getFileResponse.ok) {
+                throw new Error('Failed to get file: ' + getFileResponse.statusText);
+            }
+            
+            const fileData = await getFileResponse.json();
+            
+            // Delete the file
+            const deleteResponse = await fetch(
+                `${apiBase}/repos/${repoOwner}/${repoName}/contents/${filePath}`,
+                {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': 'token ' + githubToken,
+                        'Accept': 'application/vnd.github.v3+json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: `Delete blog post: ${slug}`,
+                        sha: fileData.sha,
+                        branch: repoBranch
+                    })
+                }
+            );
+            
+            if (!deleteResponse.ok) {
+                throw new Error('Failed to delete file: ' + deleteResponse.statusText);
+            }
+            
+            showSuccess('Post deleted successfully! The site will update automatically.');
+            loadPosts();
+        } catch (error) {
+            console.error('Error deleting post:', error);
+            showError('Failed to delete post: ' + error.message);
         }
     };
+    
+    // Slugify function
+    function slugify(text) {
+        return text
+            .toLowerCase()
+            .replace(/[^\w\s-]/g, '')
+            .replace(/\s+/g, '-')
+            .replace(/-+/g, '-')
+            .trim();
+    }
     
     // Initialize when DOM is ready
     if (document.readyState === 'loading') {
@@ -187,4 +480,3 @@
         init();
     }
 })();
-
