@@ -63,20 +63,29 @@
                 return;
             }
             
-            // Exchange code for access token using CORS proxy
-            // Since Cloudflare Pages Functions aren't working, we use a CORS proxy
-            // Note: This is a workaround - ideally use serverless functions
-            const proxyUrl = 'https://api.allorigins.win/raw?url=';
+            // Exchange code for access token
+            // Using a public CORS proxy service since Cloudflare Pages Functions aren't working
+            // Note: For production, use a proper backend or enable Cloudflare Pages Functions
+            console.log('Exchanging code for token...');
+            
+            // Use a different CORS proxy that handles POST requests better
+            const proxyUrl = 'https://corsproxy.io/?';
             const githubTokenUrl = 'https://github.com/login/oauth/access_token';
             
-            console.log('Exchanging code for token via proxy...');
+            // Prepare the request
+            const requestBody = {
+                client_id: GITHUB_CONFIG.clientId,
+                client_secret: GITHUB_CONFIG.clientSecret,
+                code: code,
+                redirect_uri: GITHUB_CONFIG.redirectUri
+            };
             
-            // Use form data format (GitHub prefers this)
+            // Use form-encoded format as GitHub expects
             const formData = new URLSearchParams();
-            formData.append('client_id', GITHUB_CONFIG.clientId);
-            formData.append('client_secret', GITHUB_CONFIG.clientSecret);
-            formData.append('code', code);
-            formData.append('redirect_uri', GITHUB_CONFIG.redirectUri);
+            formData.append('client_id', requestBody.client_id);
+            formData.append('client_secret', requestBody.client_secret);
+            formData.append('code', requestBody.code);
+            formData.append('redirect_uri', requestBody.redirect_uri);
             
             fetch(proxyUrl + encodeURIComponent(githubTokenUrl), {
                 method: 'POST',
