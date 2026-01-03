@@ -251,8 +251,33 @@
 
         } catch (error) {
             console.error('Error loading blog posts:', error);
-            // Fallback: show error message
-            blogGrid.innerHTML = '<p style="text-align: center; color: var(--color-gray-600);">Unable to load blog posts. Please try again later.</p>';
+            
+            // Show detailed error with retry button
+            const errorHtml = `
+                <div style="text-align: center; padding: var(--space-2xl);">
+                    <p style="color: var(--color-gray-600); margin-bottom: var(--space-md); font-size: var(--text-lg);">
+                        Unable to load blog posts
+                    </p>
+                    <p style="color: var(--color-gray-500); margin-bottom: var(--space-lg); font-size: var(--text-sm);">
+                        ${error.message || 'Please try again.'}
+                    </p>
+                    <button onclick="window.refreshBlogPosts(); window.location.reload(true);" 
+                            style="padding: var(--space-md) var(--space-xl); 
+                                   background: linear-gradient(135deg, #FF78B9 0%, #C8A7FF 50%, #5FA8FF 100%); 
+                                   color: white; 
+                                   border: none; 
+                                   border-radius: var(--radius-lg); 
+                                   font-weight: 600; 
+                                   cursor: pointer;
+                                   font-size: var(--text-base;">
+                        🔄 Retry Loading Posts
+                    </button>
+                    <p style="margin-top: var(--space-md); font-size: var(--text-sm); color: var(--color-gray-500);">
+                        If this persists, try <a href="/blog-cache-clear.html" style="color: var(--color-blue); text-decoration: underline;">clearing your cache</a>
+                    </p>
+                </div>
+            `;
+            blogGrid.innerHTML = errorHtml;
         } finally {
             isLoading = false;
         }
