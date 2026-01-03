@@ -68,8 +68,8 @@
             console.log('Code:', code);
             console.log('Redirect URI:', GITHUB_CONFIG.redirectUri);
             
-            // Use Vercel API endpoint (update in config.js after deployment)
-            const apiUrl = GITHUB_CONFIG.vercelApiUrl || 'https://bloomly-api.vercel.app/api/github-auth';
+            // Use Render API endpoint
+            const apiUrl = GITHUB_CONFIG.vercelApiUrl || 'https://bloomly-app.onrender.com/api/github-auth';
             console.log('API URL:', apiUrl);
             
             fetch(apiUrl, {
