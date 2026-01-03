@@ -14,25 +14,21 @@
     function init() {
         console.log('Admin panel initializing...');
         
-        // Check if user has saved token
-        githubToken = localStorage.getItem('github_token');
+        // Check if user is logged in
+        githubToken = sessionStorage.getItem('github_token');
+        const userStr = sessionStorage.getItem('github_user');
         
-        if (githubToken) {
+        if (githubToken && userStr) {
+            githubUser = JSON.parse(userStr);
             verifyToken();
         } else {
             showAuth();
         }
         
         // Event listeners
-        const saveTokenBtn = document.getElementById('saveTokenBtn');
-        if (saveTokenBtn) {
-            saveTokenBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-                console.log('Save token button clicked');
-                handleSaveToken();
-            });
-        } else {
-            console.error('Save token button not found!');
+        const githubLoginBtn = document.getElementById('githubLoginBtn');
+        if (githubLoginBtn) {
+            githubLoginBtn.addEventListener('click', handleGitHubLogin);
         }
         
         const logoutBtn = document.getElementById('logoutBtn');
@@ -95,13 +91,17 @@
             }
             
             githubUser = await response.json();
+            // Store user info
+            sessionStorage.setItem('github_user', JSON.stringify(githubUser));
             showAdminContent();
             loadPosts();
         } catch (error) {
             console.error('Token verification error:', error);
-            alert('Invalid token. Please check your GitHub Personal Access Token and try again.\n\nError: ' + error.message);
-            localStorage.removeItem('github_token');
+            alert('Authentication failed. Please try logging in again.\n\nError: ' + error.message);
+            sessionStorage.removeItem('github_token');
+            sessionStorage.removeItem('github_user');
             githubToken = null;
+            githubUser = null;
             showAuth();
             throw error;
         }
@@ -120,59 +120,25 @@
         }
     }
     
-    // Handle save token
-    function handleSaveToken() {
-        console.log('handleSaveToken called');
-        const tokenInput = document.getElementById('githubToken');
+    // Handle GitHub login
+    function handleGitHubLogin() {
+        const clientId = config.clientId;
+        const redirectUri = config.redirectUri || window.location.origin + '/admin/callback.html';
         
-        if (!tokenInput) {
-            alert('Token input field not found!');
+        if (!clientId || clientId === 'YOUR_GITHUB_CLIENT_ID_HERE') {
+            alert('GitHub OAuth is not configured. Please check admin/config.js');
             return;
         }
         
-        const token = tokenInput.value.trim();
-        console.log('Token length:', token.length);
-        
-        if (!token) {
-            alert('Please enter a GitHub Personal Access Token');
-            return;
-        }
-        
-        if (!token.startsWith('ghp_')) {
-            alert('Invalid token format. GitHub tokens start with "ghp_"');
-            return;
-        }
-        
-        // Show loading state
-        const saveBtn = document.getElementById('saveTokenBtn');
-        if (saveBtn) {
-            const originalText = saveBtn.textContent;
-            saveBtn.textContent = 'Verifying...';
-            saveBtn.disabled = true;
-        }
-        
-        githubToken = token;
-        localStorage.setItem('github_token', token);
-        
-        console.log('Verifying token...');
-        verifyToken().then(() => {
-            console.log('Token verified successfully');
-            if (saveBtn) {
-                saveBtn.textContent = 'Save Token & Continue';
-                saveBtn.disabled = false;
-            }
-        }).catch((error) => {
-            console.error('Token verification failed:', error);
-            if (saveBtn) {
-                saveBtn.textContent = 'Save Token & Continue';
-                saveBtn.disabled = false;
-            }
-        });
+        // Redirect to GitHub OAuth
+        const authUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=repo`;
+        window.location.href = authUrl;
     }
     
     // Handle logout
     function handleLogout() {
-        localStorage.removeItem('github_token');
+        sessionStorage.removeItem('github_token');
+        sessionStorage.removeItem('github_user');
         githubToken = null;
         githubUser = null;
         showAuth();

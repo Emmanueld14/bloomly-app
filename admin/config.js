@@ -20,7 +20,11 @@ const GITHUB_CONFIG = {
     redirectUri: window.location.origin + '/admin/callback.html',
     
     // GitHub API base URL
-    apiBase: 'https://api.github.com'
+    apiBase: 'https://api.github.com',
+    
+    // Vercel API URL for OAuth token exchange
+    // Update this after deploying to Vercel (see VERCEL_SETUP.md)
+    vercelApiUrl: 'https://bloomly-api.vercel.app/api/github-auth'
 };
 
 // Export for use in other files

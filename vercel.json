@@ -1,0 +1,14 @@
+{
+  "functions": {
+    "api/github-auth.js": {
+      "maxDuration": 10
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/api/github-auth",
+      "destination": "/api/github-auth.js"
+    }
+  ]
+}
+

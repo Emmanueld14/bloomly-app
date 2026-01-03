@@ -63,37 +63,23 @@
                 return;
             }
             
-            // Exchange code for access token
-            // Using a public CORS proxy service since Cloudflare Pages Functions aren't working
-            // Note: For production, use a proper backend or enable Cloudflare Pages Functions
+            // Exchange code for access token via backend API
             console.log('Exchanging code for token...');
             
-            // Use a different CORS proxy that handles POST requests better
-            const proxyUrl = 'https://corsproxy.io/?';
-            const githubTokenUrl = 'https://github.com/login/oauth/access_token';
+            // Use Vercel API endpoint (update in config.js after deployment)
+            const apiUrl = GITHUB_CONFIG.vercelApiUrl || 'https://bloomly-api.vercel.app/api/github-auth';
             
-            // Prepare the request
-            const requestBody = {
-                client_id: GITHUB_CONFIG.clientId,
-                client_secret: GITHUB_CONFIG.clientSecret,
-                code: code,
-                redirect_uri: GITHUB_CONFIG.redirectUri
-            };
-            
-            // Use form-encoded format as GitHub expects
-            const formData = new URLSearchParams();
-            formData.append('client_id', requestBody.client_id);
-            formData.append('client_secret', requestBody.client_secret);
-            formData.append('code', requestBody.code);
-            formData.append('redirect_uri', requestBody.redirect_uri);
-            
-            fetch(proxyUrl + encodeURIComponent(githubTokenUrl), {
+            fetch(apiUrl, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    'Accept': 'application/json'
+                    'Content-Type': 'application/json'
                 },
-                body: formData.toString()
+                body: JSON.stringify({
+                    client_id: GITHUB_CONFIG.clientId,
+                    client_secret: GITHUB_CONFIG.clientSecret,
+                    code: code,
+                    redirect_uri: GITHUB_CONFIG.redirectUri
+                })
             })
             .then(async response => {
                 // Check if response has content
@@ -133,7 +119,7 @@
                     throw new Error('No access token received');
                 }
                 
-                // Store access token in sessionStorage
+                // Store access token in sessionStorage (not localStorage for security)
                 sessionStorage.setItem('github_token', data.access_token);
                 
                 // Get user info
