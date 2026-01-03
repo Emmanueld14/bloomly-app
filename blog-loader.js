@@ -125,12 +125,13 @@
                     // Load each post from raw GitHub content
                     for (const filename of markdownFiles) {
                         try {
-                            const rawUrl = `https://raw.githubusercontent.com/${repoOwner}/${repoName}/${repoBranch}/content/blog/${filename}?t=${cacheBuster}`;
+                            const rawUrl = `https://raw.githubusercontent.com/${repoOwner}/${repoName}/${repoBranch}/content/blog/${filename}?t=${cacheBuster}&r=${Math.random()}`;
                             const response = await fetch(rawUrl, {
                                 cache: 'no-store', // Prevent caching
                                 headers: {
                                     'Cache-Control': 'no-cache, no-store, must-revalidate',
-                                    'Pragma': 'no-cache'
+                                    'Pragma': 'no-cache',
+                                    'If-None-Match': '' // Force fresh fetch
                                 }
                             });
                             
@@ -313,21 +314,28 @@
     `;
     document.head.appendChild(style);
 
-    // Auto-refresh mechanism: Check for new posts every 30 seconds when page is visible
+    // Auto-refresh mechanism: Check for new posts every 15 seconds when page is visible
     let refreshInterval = null;
     
     function startAutoRefresh() {
         // Clear existing interval
         if (refreshInterval) clearInterval(refreshInterval);
         
-        // Check every 30 seconds
+        // Check every 15 seconds (more frequent for better UX)
         refreshInterval = setInterval(() => {
             // Only check if page is visible (not in background tab)
             if (!document.hidden) {
                 loadBlogPosts(true); // true = show notification if new posts
             }
-        }, 30000); // 30 seconds
+        }, 15000); // 15 seconds
     }
+
+    // Manual refresh function (exposed globally)
+    window.refreshBlogPosts = function() {
+        lastPostCount = 0;
+        lastPostHashes = new Set();
+        loadBlogPosts(false);
+    };
 
     // Start auto-refresh when page becomes visible
     document.addEventListener('visibilitychange', () => {

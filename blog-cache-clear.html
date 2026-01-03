@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clear Blog Cache - Bloomly</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            text-align: center;
+        }
+        button {
+            padding: 15px 30px;
+            font-size: 18px;
+            background: linear-gradient(135deg, #FF78B9 0%, #C8A7FF 50%, #5FA8FF 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            margin: 10px;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+    <h1>Clear Blog Cache</h1>
+    <p>If you're seeing old or missing blog posts, click the button below to clear your browser cache and reload.</p>
+    
+    <button onclick="clearCacheAndReload()">Clear Cache & Reload Blog</button>
+    
+    <script>
+        async function clearCacheAndReload() {
+            // Clear all caches
+            if ('caches' in window) {
+                const cacheNames = await caches.keys();
+                await Promise.all(cacheNames.map(name => caches.delete(name)));
+            }
+            
+            // Clear service workers
+            if ('serviceWorker' in navigator) {
+                const registrations = await navigator.serviceWorker.getRegistrations();
+                await Promise.all(registrations.map(reg => reg.unregister()));
+            }
+            
+            // Force reload with cache bypass
+            window.location.href = '/blog.html?_=' + Date.now() + '&nocache=1';
+        }
+    </script>
+</body>
+</html>
+
