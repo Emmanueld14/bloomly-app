@@ -1,227 +1,173 @@
 <svg width="240" height="200" viewBox="0 0 240 200" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <!-- Vibrant left wing gradient: Bright Pink to Purple to Blue -->
+    <!-- Soft gradient for left wing -->
     <linearGradient id="leftWingGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#FF6B9D;stop-opacity:1" />
-      <stop offset="30%" style="stop-color:#FF8EC7;stop-opacity:1" />
-      <stop offset="60%" style="stop-color:#C8A7FF;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#6BB5FF;stop-opacity:1" />
+      <stop offset="0%" style="stop-color:#FF78B9;stop-opacity:0.9" />
+      <stop offset="50%" style="stop-color:#C8A7FF;stop-opacity:0.85" />
+      <stop offset="100%" style="stop-color:#5FA8FF;stop-opacity:0.8" />
     </linearGradient>
     
-    <!-- Vibrant right wing gradient: Blue to Purple to Pink -->
+    <!-- Soft gradient for right wing -->
     <linearGradient id="rightWingGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#6BB5FF;stop-opacity:1" />
-      <stop offset="30%" style="stop-color:#9D7AFF;stop-opacity:1" />
-      <stop offset="60%" style="stop-color:#C8A7FF;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#FF6B9D;stop-opacity:1" />
+      <stop offset="0%" style="stop-color:#5FA8FF;stop-opacity:0.9" />
+      <stop offset="50%" style="stop-color:#C8A7FF;stop-opacity:0.85" />
+      <stop offset="100%" style="stop-color:#FF78B9;stop-opacity:0.8" />
     </linearGradient>
     
-    <!-- Bright highlight gradient -->
-    <radialGradient id="wingHighlight" cx="50%" cy="30%">
-      <stop offset="0%" style="stop-color:#FFFFFF;stop-opacity:0.6" />
-      <stop offset="70%" style="stop-color:#FFFFFF;stop-opacity:0.2" />
-      <stop offset="100%" style="stop-color:#FFFFFF;stop-opacity:0" />
-    </radialGradient>
-    
-    <!-- Shimmer effect -->
-    <linearGradient id="shimmer" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#FFFFFF;stop-opacity:0" />
-      <stop offset="50%" style="stop-color:#FFFFFF;stop-opacity:0.4" />
-      <stop offset="100%" style="stop-color:#FFFFFF;stop-opacity:0" />
+    <!-- Body gradient -->
+    <linearGradient id="bodyGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#5FA8FF;stop-opacity:0.9" />
+      <stop offset="50%" style="stop-color:#9D7AFF;stop-opacity:0.9" />
+      <stop offset="100%" style="stop-color:#FF78B9;stop-opacity:0.9" />
     </linearGradient>
     
-    <!-- Soft glow filter -->
-    <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
-      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
-      <feMerge>
-        <feMergeNode in="coloredBlur"/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
-    </filter>
-    
-    <!-- Enhanced shadow -->
-    <filter id="enhancedShadow" x="-50%" y="-50%" width="200%" height="200%">
-      <feGaussianBlur in="SourceAlpha" stdDeviation="4"/>
-      <feOffset dx="0" dy="3" result="offsetblur"/>
+    <!-- Soft shadow for hand-drawn effect -->
+    <filter id="softShadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="2"/>
+      <feOffset dx="0" dy="2" result="offsetblur"/>
       <feComponentTransfer>
-        <feFuncA type="linear" slope="0.3"/>
+        <feFuncA type="linear" slope="0.2"/>
       </feComponentTransfer>
       <feMerge>
         <feMergeNode/>
         <feMergeNode in="SourceGraphic"/>
       </feMerge>
     </filter>
-    
-    <!-- Sparkle filter -->
-    <filter id="sparkle" x="-50%" y="-50%" width="200%" height="200%">
-      <feGaussianBlur stdDeviation="2" result="blur"/>
-      <feMerge>
-        <feMergeNode in="blur"/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
-    </filter>
   </defs>
   
-  <!-- Left top wing - more detailed -->
-  <path d="M 60 100 Q 30 50, 40 25 Q 50 5, 75 15 Q 90 25, 95 40 Q 85 55, 75 70 Q 70 80, 65 90 Z" 
+  <!-- Left top wing - rounded, organic shape -->
+  <path d="M 60 100 
+           Q 35 60, 40 35 
+           Q 45 20, 65 25 
+           Q 80 30, 85 50 
+           Q 80 65, 70 80 
+           Q 65 90, 60 100 Z" 
         fill="url(#leftWingGradient)" 
-        filter="url(#enhancedShadow)"
-        opacity="1"/>
+        filter="url(#softShadow)"
+        opacity="0.95"
+        stroke="rgba(255, 255, 255, 0.3)"
+        stroke-width="1.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"/>
   
-  <!-- Left top wing highlight -->
-  <path d="M 60 100 Q 30 50, 40 25 Q 50 5, 75 15 Q 90 25, 95 40 Q 85 55, 75 70 Q 70 80, 65 90 Z" 
-        fill="url(#wingHighlight)" 
-        opacity="0.7"/>
-  
-  <!-- Left top wing shimmer -->
-  <path d="M 60 100 Q 30 50, 40 25 Q 50 5, 75 15 Q 90 25, 95 40 Q 85 55, 75 70 Q 70 80, 65 90 Z" 
-        fill="url(#shimmer)" 
-        opacity="0.5"/>
-  
-  <!-- Left bottom wing - more detailed -->
-  <path d="M 60 100 Q 30 150, 40 175 Q 50 195, 75 185 Q 90 175, 95 160 Q 85 145, 75 130 Q 70 120, 65 110 Z" 
+  <!-- Left bottom wing - rounded, organic shape -->
+  <path d="M 60 100 
+           Q 35 140, 40 165 
+           Q 45 180, 65 175 
+           Q 80 170, 85 150 
+           Q 80 135, 70 120 
+           Q 65 110, 60 100 Z" 
         fill="url(#leftWingGradient)" 
-        filter="url(#enhancedShadow)"
-        opacity="1"/>
+        filter="url(#softShadow)"
+        opacity="0.95"
+        stroke="rgba(255, 255, 255, 0.3)"
+        stroke-width="1.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"/>
   
-  <!-- Left bottom wing highlight -->
-  <path d="M 60 100 Q 30 150, 40 175 Q 50 195, 75 185 Q 90 175, 95 160 Q 85 145, 75 130 Q 70 120, 65 110 Z" 
-        fill="url(#wingHighlight)" 
-        opacity="0.7"/>
-  
-  <!-- Right top wing - more detailed -->
-  <path d="M 180 100 Q 210 50, 200 25 Q 190 5, 165 15 Q 150 25, 145 40 Q 155 55, 165 70 Q 170 80, 175 90 Z" 
+  <!-- Right top wing - rounded, organic shape -->
+  <path d="M 180 100 
+           Q 205 60, 200 35 
+           Q 195 20, 175 25 
+           Q 160 30, 155 50 
+           Q 160 65, 170 80 
+           Q 175 90, 180 100 Z" 
         fill="url(#rightWingGradient)" 
-        filter="url(#enhancedShadow)"
-        opacity="1"/>
+        filter="url(#softShadow)"
+        opacity="0.95"
+        stroke="rgba(255, 255, 255, 0.3)"
+        stroke-width="1.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"/>
   
-  <!-- Right top wing highlight -->
-  <path d="M 180 100 Q 210 50, 200 25 Q 190 5, 165 15 Q 150 25, 145 40 Q 155 55, 165 70 Q 170 80, 175 90 Z" 
-        fill="url(#wingHighlight)" 
-        opacity="0.7"/>
-  
-  <!-- Right bottom wing - more detailed -->
-  <path d="M 180 100 Q 210 150, 200 175 Q 190 195, 165 185 Q 150 175, 145 160 Q 155 145, 165 130 Q 170 120, 175 110 Z" 
+  <!-- Right bottom wing - rounded, organic shape -->
+  <path d="M 180 100 
+           Q 205 140, 200 165 
+           Q 195 180, 175 175 
+           Q 160 170, 155 150 
+           Q 160 135, 170 120 
+           Q 175 110, 180 100 Z" 
         fill="url(#rightWingGradient)" 
-        filter="url(#enhancedShadow)"
-        opacity="1"/>
+        filter="url(#softShadow)"
+        opacity="0.95"
+        stroke="rgba(255, 255, 255, 0.3)"
+        stroke-width="1.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"/>
   
-  <!-- Right bottom wing highlight -->
-  <path d="M 180 100 Q 210 150, 200 175 Q 190 195, 165 185 Q 150 175, 145 160 Q 155 145, 165 130 Q 170 120, 175 110 Z" 
-        fill="url(#wingHighlight)" 
-        opacity="0.7"/>
-  
-  <!-- Wing pattern details - left top -->
-  <ellipse cx="75" cy="55" rx="12" ry="18" fill="rgba(255, 255, 255, 0.6)" opacity="0.8"/>
-  <ellipse cx="75" cy="55" rx="6" ry="10" fill="rgba(255, 107, 157, 0.4)" opacity="0.9"/>
-  <circle cx="85" cy="45" r="4" fill="rgba(255, 255, 255, 0.7)" filter="url(#sparkle)"/>
-  <circle cx="70" cy="65" r="3" fill="rgba(255, 255, 255, 0.6)" filter="url(#sparkle)"/>
-  
-  <!-- Wing pattern details - left bottom -->
-  <ellipse cx="75" cy="145" rx="12" ry="18" fill="rgba(255, 255, 255, 0.6)" opacity="0.8"/>
-  <ellipse cx="75" cy="145" rx="6" ry="10" fill="rgba(255, 107, 157, 0.4)" opacity="0.9"/>
-  <circle cx="85" cy="155" r="4" fill="rgba(255, 255, 255, 0.7)" filter="url(#sparkle)"/>
-  <circle cx="70" cy="135" r="3" fill="rgba(255, 255, 255, 0.6)" filter="url(#sparkle)"/>
-  
-  <!-- Wing pattern details - right top -->
-  <ellipse cx="165" cy="55" rx="12" ry="18" fill="rgba(255, 255, 255, 0.6)" opacity="0.8"/>
-  <ellipse cx="165" cy="55" rx="6" ry="10" fill="rgba(107, 181, 255, 0.4)" opacity="0.9"/>
-  <circle cx="155" cy="45" r="4" fill="rgba(255, 255, 255, 0.7)" filter="url(#sparkle)"/>
-  <circle cx="170" cy="65" r="3" fill="rgba(255, 255, 255, 0.6)" filter="url(#sparkle)"/>
-  
-  <!-- Wing pattern details - right bottom -->
-  <ellipse cx="165" cy="145" rx="12" ry="18" fill="rgba(255, 255, 255, 0.6)" opacity="0.8"/>
-  <ellipse cx="165" cy="145" rx="6" ry="10" fill="rgba(107, 181, 255, 0.4)" opacity="0.9"/>
-  <circle cx="155" cy="155" r="4" fill="rgba(255, 255, 255, 0.7)" filter="url(#sparkle)"/>
-  <circle cx="170" cy="135" r="3" fill="rgba(255, 255, 255, 0.6)" filter="url(#sparkle)"/>
-  
-  <!-- Additional decorative spots on wings -->
-  <circle cx="55" cy="75" r="5" fill="rgba(255, 255, 255, 0.5)" filter="url(#sparkle)"/>
-  <circle cx="55" cy="125" r="5" fill="rgba(255, 255, 255, 0.5)" filter="url(#sparkle)"/>
-  <circle cx="185" cy="75" r="5" fill="rgba(255, 255, 255, 0.5)" filter="url(#sparkle)"/>
-  <circle cx="185" cy="125" r="5" fill="rgba(255, 255, 255, 0.5)" filter="url(#sparkle)"/>
-  
-  <!-- Enhanced body (vertical ellipse with gradient) -->
-  <defs>
-    <linearGradient id="bodyGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" style="stop-color:#6BB5FF;stop-opacity:1" />
-      <stop offset="50%" style="stop-color:#9D7AFF;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#FF6B9D;stop-opacity:1" />
-    </linearGradient>
-  </defs>
-  
-  <ellipse cx="120" cy="100" rx="12" ry="75" 
+  <!-- Body - rounded, organic ellipse -->
+  <ellipse cx="120" cy="100" rx="8" ry="60" 
            fill="url(#bodyGradient)" 
-           filter="url(#enhancedShadow)"
-           opacity="1"/>
+           filter="url(#softShadow)"
+           opacity="0.9"
+           stroke="rgba(255, 255, 255, 0.4)"
+           stroke-width="1.5"/>
   
-  <!-- Body segments for more detail -->
-  <ellipse cx="120" cy="50" rx="10" ry="8" fill="rgba(255, 255, 255, 0.3)"/>
-  <ellipse cx="120" cy="70" rx="10" ry="8" fill="rgba(255, 255, 255, 0.2)"/>
-  <ellipse cx="120" cy="90" rx="10" ry="8" fill="rgba(255, 255, 255, 0.2)"/>
-  <ellipse cx="120" cy="110" rx="10" ry="8" fill="rgba(255, 255, 255, 0.2)"/>
-  <ellipse cx="120" cy="130" rx="10" ry="8" fill="rgba(255, 255, 255, 0.2)"/>
-  <ellipse cx="120" cy="150" rx="10" ry="8" fill="rgba(255, 255, 255, 0.3)"/>
+  <!-- Body highlight for depth -->
+  <ellipse cx="120" cy="100" rx="5" ry="45" 
+           fill="rgba(255, 255, 255, 0.3)"/>
   
-  <!-- Body highlight -->
-  <ellipse cx="120" cy="100" rx="7" ry="55" 
-           fill="rgba(255, 255, 255, 0.5)"/>
-  
-  <!-- Enhanced antennae left -->
-  <path d="M 115 30 Q 105 15, 95 8 Q 90 5, 88 3" 
+  <!-- Simple antennae - curved, organic -->
+  <path d="M 115 40 
+           Q 108 25, 102 18 
+           Q 98 14, 96 12" 
         stroke="url(#bodyGradient)" 
-        stroke-width="4" 
+        stroke-width="3" 
         fill="none" 
         stroke-linecap="round"
-        opacity="1"
-        filter="url(#softGlow)"/>
+        stroke-linejoin="round"
+        opacity="0.9"/>
   
-  <!-- Enhanced antennae right -->
-  <path d="M 125 30 Q 135 15, 145 8 Q 150 5, 152 3" 
+  <path d="M 125 40 
+           Q 132 25, 138 18 
+           Q 142 14, 144 12" 
         stroke="url(#bodyGradient)" 
-        stroke-width="4" 
+        stroke-width="3" 
         fill="none" 
         stroke-linecap="round"
-        opacity="1"
-        filter="url(#softGlow)"/>
+        stroke-linejoin="round"
+        opacity="0.9"/>
   
-  <!-- Antennae tips with glow -->
-  <circle cx="88" cy="3" r="6" fill="#FF6B9D" opacity="1" filter="url(#softGlow)"/>
-  <circle cx="152" cy="3" r="6" fill="#FF6B9D" opacity="1" filter="url(#softGlow)"/>
-  <circle cx="88" cy="3" r="3" fill="#FFFFFF" opacity="0.8"/>
-  <circle cx="152" cy="3" r="3" fill="#FFFFFF" opacity="0.8"/>
+  <!-- Antennae tips - simple rounded -->
+  <circle cx="96" cy="12" r="4" fill="#FF78B9" opacity="0.9"/>
+  <circle cx="144" cy="12" r="4" fill="#FF78B9" opacity="0.9"/>
   
-  <!-- Wing edge details - left -->
-  <path d="M 40 25 Q 50 5, 75 15" 
-        stroke="rgba(255, 255, 255, 0.4)" 
-        stroke-width="2" 
-        fill="none" 
-        stroke-linecap="round"/>
-  <path d="M 40 175 Q 50 195, 75 185" 
-        stroke="rgba(255, 255, 255, 0.4)" 
-        stroke-width="2" 
-        fill="none" 
-        stroke-linecap="round"/>
+  <!-- Simple decorative spots - soft and rounded -->
+  <ellipse cx="75" cy="60" rx="8" ry="12" fill="rgba(255, 255, 255, 0.5)" opacity="0.7"/>
+  <ellipse cx="75" cy="140" rx="8" ry="12" fill="rgba(255, 255, 255, 0.5)" opacity="0.7"/>
+  <ellipse cx="165" cy="60" rx="8" ry="12" fill="rgba(255, 255, 255, 0.5)" opacity="0.7"/>
+  <ellipse cx="165" cy="140" rx="8" ry="12" fill="rgba(255, 255, 255, 0.5)" opacity="0.7"/>
   
-  <!-- Wing edge details - right -->
-  <path d="M 200 25 Q 190 5, 165 15" 
+  <!-- Wing edge details - soft, hand-drawn style -->
+  <path d="M 40 35 Q 45 20, 65 25" 
         stroke="rgba(255, 255, 255, 0.4)" 
-        stroke-width="2" 
+        stroke-width="1.5" 
         fill="none" 
-        stroke-linecap="round"/>
-  <path d="M 200 175 Q 190 195, 165 185" 
-        stroke="rgba(255, 255, 255, 0.4)" 
-        stroke-width="2" 
-        fill="none" 
-        stroke-linecap="round"/>
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        opacity="0.6"/>
   
-  <!-- Extra sparkles for liveliness -->
-  <circle cx="50" cy="40" r="2" fill="#FFFFFF" opacity="0.9" filter="url(#sparkle)"/>
-  <circle cx="190" cy="40" r="2" fill="#FFFFFF" opacity="0.9" filter="url(#sparkle)"/>
-  <circle cx="50" cy="160" r="2" fill="#FFFFFF" opacity="0.9" filter="url(#sparkle)"/>
-  <circle cx="190" cy="160" r="2" fill="#FFFFFF" opacity="0.9" filter="url(#sparkle)"/>
-  <circle cx="65" cy="50" r="1.5" fill="#FFFFFF" opacity="0.8" filter="url(#sparkle)"/>
-  <circle cx="175" cy="50" r="1.5" fill="#FFFFFF" opacity="0.8" filter="url(#sparkle)"/>
-  <circle cx="65" cy="150" r="1.5" fill="#FFFFFF" opacity="0.8" filter="url(#sparkle)"/>
-  <circle cx="175" cy="150" r="1.5" fill="#FFFFFF" opacity="0.8" filter="url(#sparkle)"/>
+  <path d="M 40 165 Q 45 180, 65 175" 
+        stroke="rgba(255, 255, 255, 0.4)" 
+        stroke-width="1.5" 
+        fill="none" 
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        opacity="0.6"/>
+  
+  <path d="M 200 35 Q 195 20, 175 25" 
+        stroke="rgba(255, 255, 255, 0.4)" 
+        stroke-width="1.5" 
+        fill="none" 
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        opacity="0.6"/>
+  
+  <path d="M 200 165 Q 195 180, 175 175" 
+        stroke="rgba(255, 255, 255, 0.4)" 
+        stroke-width="1.5" 
+        fill="none" 
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        opacity="0.6"/>
 </svg>
