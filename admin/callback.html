@@ -63,23 +63,28 @@
                 return;
             }
             
-            // Exchange code for access token via Cloudflare Pages Function
-            // Cloudflare Pages Functions are accessible at /functions/[filename]
-            const functionUrl = '/functions/github-auth';
+            // Exchange code for access token using CORS proxy
+            // Since Cloudflare Pages Functions aren't working, we use a CORS proxy
+            // Note: This is a workaround - ideally use serverless functions
+            const proxyUrl = 'https://api.allorigins.win/raw?url=';
+            const githubTokenUrl = 'https://github.com/login/oauth/access_token';
             
-            console.log('Calling function:', functionUrl);
+            console.log('Exchanging code for token via proxy...');
             
-            fetch(functionUrl, {
+            // Use form data format (GitHub prefers this)
+            const formData = new URLSearchParams();
+            formData.append('client_id', GITHUB_CONFIG.clientId);
+            formData.append('client_secret', GITHUB_CONFIG.clientSecret);
+            formData.append('code', code);
+            formData.append('redirect_uri', GITHUB_CONFIG.redirectUri);
+            
+            fetch(proxyUrl + encodeURIComponent(githubTokenUrl), {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'Accept': 'application/json'
                 },
-                body: JSON.stringify({
-                    client_id: GITHUB_CONFIG.clientId,
-                    client_secret: GITHUB_CONFIG.clientSecret,
-                    code: code,
-                    redirect_uri: GITHUB_CONFIG.redirectUri
-                })
+                body: formData.toString()
             })
             .then(async response => {
                 // Check if response has content
@@ -94,7 +99,14 @@
                 try {
                     data = JSON.parse(text);
                 } catch (e) {
-                    throw new Error('Invalid response format: ' + text.substring(0, 100));
+                    // GitHub might return form-encoded data, try parsing that
+                    const params = new URLSearchParams(text);
+                    const accessToken = params.get('access_token');
+                    if (accessToken) {
+                        data = { access_token: accessToken };
+                    } else {
+                        throw new Error('Invalid response format: ' + text.substring(0, 100));
+                    }
                 }
                 
                 if (!response.ok) {
