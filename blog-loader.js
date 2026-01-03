@@ -111,11 +111,19 @@
                 
                 if (listResponse.ok) {
                     const files = await listResponse.json();
-                    const markdownFiles = files
-                        .filter(file => file.name.endsWith('.md') && file.type === 'file')
+                    
+                    // Handle case where API returns a single file object instead of array
+                    const fileArray = Array.isArray(files) ? files : [files];
+                    
+                    const markdownFiles = fileArray
+                        .filter(file => file && file.name && file.name.endsWith('.md') && file.type === 'file')
                         .map(file => file.name);
                     
                     console.log(`Found ${markdownFiles.length} markdown files:`, markdownFiles);
+                    
+                    if (markdownFiles.length === 0) {
+                        throw new Error('No blog posts found in repository');
+                    }
                     
                     // Check if posts have changed
                     const currentHashes = new Set(markdownFiles);
@@ -136,11 +144,21 @@
                             });
                             
                             if (!response.ok) {
-                                console.warn(`Failed to fetch ${filename}: ${response.status} ${response.statusText}`);
+                                if (response.status === 404) {
+                                    console.warn(`Post ${filename} not found (may have been deleted)`);
+                                } else {
+                                    console.warn(`Failed to fetch ${filename}: ${response.status} ${response.statusText}`);
+                                }
                                 continue;
                             }
                             
                             const markdown = await response.text();
+                            
+                            if (!markdown || markdown.trim().length === 0) {
+                                console.warn(`Empty content for ${filename}`);
+                                continue;
+                            }
+                            
                             const parsed = parseMarkdown(markdown);
                             
                             if (parsed && parsed.metadata && parsed.metadata.title) {
@@ -155,9 +173,24 @@
                         }
                     }
                 } else {
-                    const errorText = await listResponse.text();
+                    let errorText = 'Unknown error';
+                    try {
+                        const errorData = await listResponse.json();
+                        errorText = errorData.message || JSON.stringify(errorData);
+                    } catch {
+                        errorText = await listResponse.text().catch(() => listResponse.statusText);
+                    }
+                    
                     console.error('GitHub API failed:', listResponse.status, errorText);
-                    throw new Error('GitHub API failed, trying local files');
+                    
+                    // Provide helpful error messages
+                    if (listResponse.status === 403) {
+                        throw new Error('GitHub API rate limit exceeded. Please wait a few minutes and try again.');
+                    } else if (listResponse.status === 404) {
+                        throw new Error('Repository or blog directory not found. Please check the configuration.');
+                    } else {
+                        throw new Error(`GitHub API error (${listResponse.status}): ${errorText}`);
+                    }
                 }
             } catch (apiError) {
                 console.error('GitHub API failed:', apiError);
