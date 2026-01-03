@@ -12,6 +12,8 @@
     
     // Initialize
     function init() {
+        console.log('Admin panel initializing...');
+        
         // Check if user has saved token
         githubToken = localStorage.getItem('github_token');
         
@@ -22,19 +24,53 @@
         }
         
         // Event listeners
-        document.getElementById('saveTokenBtn').addEventListener('click', handleSaveToken);
-        document.getElementById('logoutBtn').addEventListener('click', handleLogout);
-        document.getElementById('addPostBtn').addEventListener('click', handleAddPost);
-        document.getElementById('closeModalBtn').addEventListener('click', closeModal);
-        document.getElementById('cancelBtn').addEventListener('click', closeModal);
-        document.getElementById('postForm').addEventListener('submit', handleSavePost);
+        const saveTokenBtn = document.getElementById('saveTokenBtn');
+        if (saveTokenBtn) {
+            saveTokenBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                console.log('Save token button clicked');
+                handleSaveToken();
+            });
+        } else {
+            console.error('Save token button not found!');
+        }
+        
+        const logoutBtn = document.getElementById('logoutBtn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', handleLogout);
+        }
+        
+        const addPostBtn = document.getElementById('addPostBtn');
+        if (addPostBtn) {
+            addPostBtn.addEventListener('click', handleAddPost);
+        }
+        
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        if (closeModalBtn) {
+            closeModalBtn.addEventListener('click', closeModal);
+        }
+        
+        const cancelBtn = document.getElementById('cancelBtn');
+        if (cancelBtn) {
+            cancelBtn.addEventListener('click', closeModal);
+        }
+        
+        const postForm = document.getElementById('postForm');
+        if (postForm) {
+            postForm.addEventListener('submit', handleSavePost);
+        }
         
         // Close modal on outside click
-        document.getElementById('postModal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                closeModal();
-            }
-        });
+        const postModal = document.getElementById('postModal');
+        if (postModal) {
+            postModal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeModal();
+                }
+            });
+        }
+        
+        console.log('Admin panel initialized');
     }
     
     // Show auth section
@@ -86,7 +122,16 @@
     
     // Handle save token
     function handleSaveToken() {
-        const token = document.getElementById('githubToken').value.trim();
+        console.log('handleSaveToken called');
+        const tokenInput = document.getElementById('githubToken');
+        
+        if (!tokenInput) {
+            alert('Token input field not found!');
+            return;
+        }
+        
+        const token = tokenInput.value.trim();
+        console.log('Token length:', token.length);
         
         if (!token) {
             alert('Please enter a GitHub Personal Access Token');
@@ -100,16 +145,28 @@
         
         // Show loading state
         const saveBtn = document.getElementById('saveTokenBtn');
-        const originalText = saveBtn.textContent;
-        saveBtn.textContent = 'Verifying...';
-        saveBtn.disabled = true;
+        if (saveBtn) {
+            const originalText = saveBtn.textContent;
+            saveBtn.textContent = 'Verifying...';
+            saveBtn.disabled = true;
+        }
         
         githubToken = token;
         localStorage.setItem('github_token', token);
         
-        verifyToken().finally(() => {
-            saveBtn.textContent = originalText;
-            saveBtn.disabled = false;
+        console.log('Verifying token...');
+        verifyToken().then(() => {
+            console.log('Token verified successfully');
+            if (saveBtn) {
+                saveBtn.textContent = 'Save Token & Continue';
+                saveBtn.disabled = false;
+            }
+        }).catch((error) => {
+            console.error('Token verification failed:', error);
+            if (saveBtn) {
+                saveBtn.textContent = 'Save Token & Continue';
+                saveBtn.disabled = false;
+            }
         });
     }
     
