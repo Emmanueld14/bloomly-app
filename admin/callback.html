@@ -64,8 +64,10 @@
             }
             
             // Exchange code for access token via Cloudflare Pages Function
-            // Try the function first, fallback to direct call if needed
+            // Cloudflare Pages Functions are accessible at /functions/[filename]
             const functionUrl = '/functions/github-auth';
+            
+            console.log('Calling function:', functionUrl);
             
             fetch(functionUrl, {
                 method: 'POST',
