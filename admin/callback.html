@@ -63,14 +63,11 @@
                 return;
             }
             
-            // Exchange code for access token
-            // Note: In a production app, this should be done server-side
-            // For now, we'll use a client-side approach (less secure but works)
-            fetch('https://github.com/login/oauth/access_token', {
+            // Exchange code for access token via Cloudflare Pages Function
+            fetch('/functions/github-auth', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
+                    'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
                     client_id: GITHUB_CONFIG.clientId,
@@ -79,10 +76,21 @@
                     redirect_uri: GITHUB_CONFIG.redirectUri
                 })
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => {
+                        throw new Error(err.error || 'Failed to exchange token');
+                    });
+                }
+                return response.json();
+            })
             .then(data => {
                 if (data.error) {
-                    throw new Error(data.error_description || data.error);
+                    throw new Error(data.error);
+                }
+                
+                if (!data.access_token) {
+                    throw new Error('No access token received');
                 }
                 
                 // Store access token in sessionStorage
