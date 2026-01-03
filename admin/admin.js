@@ -87,8 +87,8 @@
                             <p>${formatDate(post.date)} • ${post.category || 'Uncategorized'}</p>
                         </div>
                         <div class="post-actions">
-                            <button class="btn-edit" onclick="editPost('${post.slug}')">Edit</button>
-                            <button class="btn-delete" onclick="deletePost('${post.slug}', '${post.name}')">Delete</button>
+                            <button class="btn-edit" onclick="editPost('${post.slug}')">Edit on GitHub</button>
+                            <button class="btn-delete" onclick="deletePost('${post.slug}', '${post.name}')">Delete on GitHub</button>
                         </div>
                     </div>
                 `).join('');
