@@ -19,6 +19,13 @@
     const basePath = 'content/blog';
 
     /**
+     * Get GitHub token from sessionStorage
+     */
+    function getToken() {
+        return sessionStorage.getItem('github_token');
+    }
+
+    /**
      * Verify operation by checking if file exists/doesn't exist
      */
     async function verifyOperation(operation, filePath, expectedExists) {
