@@ -1,215 +1,101 @@
-<svg width="400" height="300" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+<svg width="240" height="200" viewBox="0 0 240 200" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <!-- Butterfly wing gradient: Pink to Purple to Turquoise -->
-    <linearGradient id="wingGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#FFB6D9;stop-opacity:1" />
-      <stop offset="40%" style="stop-color:#D4A5FF;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#4FD1C7;stop-opacity:1" />
+    <!-- Left wing gradient: Pink to Lilac to Blue -->
+    <linearGradient id="leftWingGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FF78B9;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#C8A7FF;stop-opacity:0.9" />
+      <stop offset="100%" style="stop-color:#5FA8FF;stop-opacity:0.85" />
     </linearGradient>
     
-    <!-- Golden glow gradient -->
-    <radialGradient id="goldenGlow" cx="50%" cy="40%">
-      <stop offset="0%" style="stop-color:#FFD700;stop-opacity:0.6" />
-      <stop offset="50%" style="stop-color:#FFE55C;stop-opacity:0.4" />
-      <stop offset="100%" style="stop-color:#FFD700;stop-opacity:0" />
-    </radialGradient>
-    
-    <!-- Golden text gradient -->
-    <linearGradient id="goldenText" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" style="stop-color:#FFD700;stop-opacity:1" />
-      <stop offset="50%" style="stop-color:#FFA500;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#FF8C00;stop-opacity:1" />
+    <!-- Right wing gradient: Blue to Lilac to Pink -->
+    <linearGradient id="rightWingGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#5FA8FF;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#C8A7FF;stop-opacity:0.9" />
+      <stop offset="100%" style="stop-color:#FF78B9;stop-opacity:0.85" />
     </linearGradient>
     
-    <!-- Text shadow gradient -->
-    <linearGradient id="textShadow" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" style="stop-color:#3A2A1A;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#1A0F05;stop-opacity:1" />
-    </linearGradient>
-    
-    <!-- Glow filter for starbursts -->
-    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+    <!-- Soft glow filter -->
+    <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
       <feMerge>
         <feMergeNode in="coloredBlur"/>
         <feMergeNode in="SourceGraphic"/>
       </feMerge>
     </filter>
     
-    <!-- Sparkle filter -->
-    <filter id="sparkle" x="-50%" y="-50%" width="200%" height="200%">
-      <feGaussianBlur stdDeviation="1" result="blur"/>
+    <!-- Soft shadow -->
+    <filter id="softShadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
+      <feOffset dx="0" dy="2" result="offsetblur"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.25"/>
+      </feComponentTransfer>
       <feMerge>
-        <feMergeNode in="blur"/>
+        <feMergeNode/>
         <feMergeNode in="SourceGraphic"/>
       </feMerge>
     </filter>
   </defs>
   
-  <!-- Golden glow aura behind butterfly -->
-  <ellipse cx="200" cy="100" rx="120" ry="80" 
-           fill="url(#goldenGlow)" 
-           opacity="0.8"/>
+  <!-- Left top wing -->
+  <path d="M 60 100 Q 35 55, 45 30 Q 55 10, 80 20 Q 70 45, 60 65 Z" 
+        fill="url(#leftWingGradient)" 
+        filter="url(#softShadow)"
+        opacity="0.95"/>
   
-  <!-- Golden glow dots -->
-  <circle cx="150" cy="70" r="2" fill="#FFD700" opacity="0.8" filter="url(#sparkle)"/>
-  <circle cx="180" cy="60" r="1.5" fill="#FFE55C" opacity="0.9" filter="url(#sparkle)"/>
-  <circle cx="220" cy="55" r="2" fill="#FFD700" opacity="0.8" filter="url(#sparkle)"/>
-  <circle cx="250" cy="70" r="1.5" fill="#FFE55C" opacity="0.9" filter="url(#sparkle)"/>
-  <circle cx="160" cy="90" r="1.5" fill="#FFFFFF" opacity="0.7" filter="url(#sparkle)"/>
-  <circle cx="240" cy="90" r="1.5" fill="#FFFFFF" opacity="0.7" filter="url(#sparkle)"/>
-  <circle cx="140" cy="110" r="2" fill="#FFD700" opacity="0.8" filter="url(#sparkle)"/>
-  <circle cx="260" cy="110" r="2" fill="#FFD700" opacity="0.8" filter="url(#sparkle)"/>
-  <circle cx="170" cy="130" r="1.5" fill="#FFE55C" opacity="0.9" filter="url(#sparkle)"/>
-  <circle cx="230" cy="130" r="1.5" fill="#FFE55C" opacity="0.9" filter="url(#sparkle)"/>
+  <!-- Left bottom wing -->
+  <path d="M 60 100 Q 35 145, 45 170 Q 55 190, 80 180 Q 70 155, 60 135 Z" 
+        fill="url(#leftWingGradient)" 
+        filter="url(#softShadow)"
+        opacity="0.95"/>
   
-  <!-- Golden starbursts in glow -->
-  <g filter="url(#glow)">
-    <path d="M 160 80 L 162 85 L 167 85 L 163 88 L 165 93 L 160 90 L 155 93 L 157 88 L 153 85 L 158 85 Z" 
-          fill="#FFD700" opacity="0.9"/>
-    <path d="M 240 75 L 242 80 L 247 80 L 243 83 L 245 88 L 240 85 L 235 88 L 237 83 L 233 80 L 238 80 Z" 
-          fill="#FFD700" opacity="0.9"/>
-    <path d="M 180 120 L 182 125 L 187 125 L 183 128 L 185 133 L 180 130 L 175 133 L 177 128 L 173 125 L 178 125 Z" 
-          fill="#FFD700" opacity="0.8"/>
-    <path d="M 220 125 L 222 130 L 227 130 L 223 133 L 225 138 L 220 135 L 215 138 L 217 133 L 213 130 L 218 130 Z" 
-          fill="#FFD700" opacity="0.8"/>
-  </g>
+  <!-- Right top wing -->
+  <path d="M 180 100 Q 205 55, 195 30 Q 185 10, 160 20 Q 170 45, 180 65 Z" 
+        fill="url(#rightWingGradient)" 
+        filter="url(#softShadow)"
+        opacity="0.95"/>
   
-  <!-- Butterfly - Left top wing -->
-  <path d="M 200 100 
-           Q 160 60, 150 40 
-           Q 145 25, 170 30 
-           Q 185 40, 190 60 
-           Q 195 75, 200 100 Z" 
-        fill="url(#wingGradient)" 
-        stroke="#000000" 
-        stroke-width="2"
-        stroke-linejoin="round"/>
+  <!-- Right bottom wing -->
+  <path d="M 180 100 Q 205 145, 195 170 Q 185 190, 160 180 Q 170 155, 180 135 Z" 
+        fill="url(#rightWingGradient)" 
+        filter="url(#softShadow)"
+        opacity="0.95"/>
   
-  <!-- White dots on left top wing edge -->
-  <circle cx="155" cy="45" r="2" fill="#FFFFFF"/>
-  <circle cx="165" cy="35" r="1.5" fill="#FFFFFF"/>
-  <circle cx="175" cy="45" r="2" fill="#FFFFFF"/>
-  <circle cx="185" cy="55" r="1.5" fill="#FFFFFF"/>
+  <!-- Body (vertical ellipse) -->
+  <ellipse cx="120" cy="100" rx="10" ry="70" 
+           fill="#5FA8FF" 
+           filter="url(#softShadow)"
+           opacity="0.9"/>
   
-  <!-- Butterfly - Left bottom wing -->
-  <path d="M 200 100 
-           Q 160 140, 150 160 
-           Q 145 175, 170 170 
-           Q 185 160, 190 140 
-           Q 195 125, 200 100 Z" 
-        fill="url(#wingGradient)" 
-        stroke="#000000" 
-        stroke-width="2"
-        stroke-linejoin="round"/>
+  <!-- Body highlight -->
+  <ellipse cx="120" cy="100" rx="6" ry="50" 
+           fill="rgba(255, 255, 255, 0.4)"/>
   
-  <!-- White dots on left bottom wing edge -->
-  <circle cx="155" cy="155" r="2" fill="#FFFFFF"/>
-  <circle cx="165" cy="165" r="1.5" fill="#FFFFFF"/>
-  <circle cx="175" cy="155" r="2" fill="#FFFFFF"/>
-  <circle cx="185" cy="145" r="1.5" fill="#FFFFFF"/>
-  
-  <!-- Butterfly - Right top wing -->
-  <path d="M 200 100 
-           Q 240 60, 250 40 
-           Q 255 25, 230 30 
-           Q 215 40, 210 60 
-           Q 205 75, 200 100 Z" 
-        fill="url(#wingGradient)" 
-        stroke="#000000" 
-        stroke-width="2"
-        stroke-linejoin="round"/>
-  
-  <!-- White dots on right top wing edge -->
-  <circle cx="245" cy="45" r="2" fill="#FFFFFF"/>
-  <circle cx="235" cy="35" r="1.5" fill="#FFFFFF"/>
-  <circle cx="225" cy="45" r="2" fill="#FFFFFF"/>
-  <circle cx="215" cy="55" r="1.5" fill="#FFFFFF"/>
-  
-  <!-- Butterfly - Right bottom wing -->
-  <path d="M 200 100 
-           Q 240 140, 250 160 
-           Q 255 175, 230 170 
-           Q 215 160, 210 140 
-           Q 205 125, 200 100 Z" 
-        fill="url(#wingGradient)" 
-        stroke="#000000" 
-        stroke-width="2"
-        stroke-linejoin="round"/>
-  
-  <!-- White dots on right bottom wing edge -->
-  <circle cx="245" cy="155" r="2" fill="#FFFFFF"/>
-  <circle cx="235" cy="165" r="1.5" fill="#FFFFFF"/>
-  <circle cx="225" cy="155" r="2" fill="#FFFFFF"/>
-  <circle cx="215" cy="145" r="1.5" fill="#FFFFFF"/>
-  
-  <!-- Butterfly body (dark/black) -->
-  <ellipse cx="200" cy="100" rx="6" ry="50" 
-           fill="#1A1A1A" 
-           stroke="#000000" 
-           stroke-width="1"/>
-  
-  <!-- Butterfly antennae -->
-  <path d="M 195 50 Q 190 35, 188 30" 
-        stroke="#1A1A1A" 
-        stroke-width="2.5" 
-        fill="none" 
-        stroke-linecap="round"/>
-  <path d="M 205 50 Q 210 35, 212 30" 
-        stroke="#1A1A1A" 
-        stroke-width="2.5" 
-        fill="none" 
-        stroke-linecap="round"/>
-  <circle cx="188" cy="30" r="3" fill="#1A1A1A"/>
-  <circle cx="212" cy="30" r="3" fill="#1A1A1A"/>
-  
-  <!-- "Bloomly" text with golden highlights -->
-  <text x="200" y="220" 
-        font-family="Georgia, serif" 
-        font-size="48" 
-        font-weight="bold" 
-        text-anchor="middle"
-        fill="url(#textShadow)"
-        style="font-style: italic; letter-spacing: 2px;">
-    Bloomly
-  </text>
-  
-  <!-- Golden highlight on text -->
-  <text x="200" y="220" 
-        font-family="Georgia, serif" 
-        font-size="48" 
-        font-weight="bold" 
-        text-anchor="middle"
-        fill="url(#goldenText)"
-        opacity="0.7"
-        style="font-style: italic; letter-spacing: 2px;">
-    Bloomly
-  </text>
-  
-  <!-- Golden curved lines underneath -->
-  <path d="M 120 240 Q 160 245, 200 248 Q 240 245, 280 240" 
-        stroke="url(#goldenText)" 
+  <!-- Antennae left -->
+  <path d="M 115 35 Q 108 20, 100 12" 
+        stroke="#5FA8FF" 
         stroke-width="3" 
         fill="none" 
         stroke-linecap="round"
-        opacity="0.9"/>
+        opacity="0.85"/>
   
-  <path d="M 125 250 Q 165 253, 200 256 Q 235 253, 275 250" 
-        stroke="url(#goldenText)" 
-        stroke-width="2" 
+  <!-- Antennae right -->
+  <path d="M 125 35 Q 132 20, 140 12" 
+        stroke="#5FA8FF" 
+        stroke-width="3" 
         fill="none" 
         stroke-linecap="round"
-        opacity="0.7"/>
+        opacity="0.85"/>
   
-  <!-- Golden starbursts around text lines -->
-  <g filter="url(#glow)">
-    <path d="M 140 245 L 142 250 L 147 250 L 143 253 L 145 258 L 140 255 L 135 258 L 137 253 L 133 250 L 138 250 Z" 
-          fill="#FFD700" opacity="0.8"/>
-    <path d="M 260 245 L 262 250 L 267 250 L 263 253 L 265 258 L 260 255 L 255 258 L 257 253 L 253 250 L 258 250 Z" 
-          fill="#FFD700" opacity="0.8"/>
-    <path d="M 180 250 L 182 255 L 187 255 L 183 258 L 185 263 L 180 260 L 175 263 L 177 258 L 173 255 L 178 255 Z" 
-          fill="#FFD700" opacity="0.7"/>
-    <path d="M 220 250 L 222 255 L 227 255 L 223 258 L 225 263 L 220 260 L 215 263 L 217 258 L 213 255 L 218 255 Z" 
-          fill="#FFD700" opacity="0.7"/>
-  </g>
+  <!-- Antennae tips -->
+  <circle cx="100" cy="12" r="4" fill="#FF78B9" opacity="0.9" filter="url(#softGlow)"/>
+  <circle cx="140" cy="12" r="4" fill="#FF78B9" opacity="0.9" filter="url(#softGlow)"/>
+  
+  <!-- Decorative spots on wings (left) -->
+  <circle cx="70" cy="70" r="10" fill="rgba(255, 255, 255, 0.5)"/>
+  <circle cx="70" cy="130" r="8" fill="rgba(255, 255, 255, 0.4)"/>
+  
+  <!-- Decorative spots on wings (right) -->
+  <circle cx="170" cy="70" r="10" fill="rgba(255, 255, 255, 0.5)"/>
+  <circle cx="170" cy="130" r="8" fill="rgba(255, 255, 255, 0.4)"/>
 </svg>
