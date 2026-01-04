@@ -1,6 +1,6 @@
 ---
-title: "Is It Really the Phone? Or Is It Something Deeper"
-date: 2026-01-04T13:33:00.000Z
+title: "Is It Really that Phone? Or Is It Something Deeper"
+date: 2026-01-04T10:33:00.000Z
 category: "Self-Care"
 summary: "Maybe you feel the same way I do. You’re the type who wants to make a change—you plan to make a change—but somehow you fall back into the same cycle again. Scroll, scroll, scroll… and scroll. Afterwards, guilt eats you up, and you hate yourself for it. But honestly, is it really the phone—or is it something you’ve never fully understood?"
 emoji: "🫶"
