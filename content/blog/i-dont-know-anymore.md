@@ -1,7 +1,7 @@
 ---
 title: "I Don’t Know Anymore"
 date: 2026-01-05T01:51:00.000Z
-category: "Poetry"
+category: "Poetry "
 summary: "Have you ever been in that position where things feel so heavy? Where everything you've been working for seems to be crumbling down and it's all you by yourself, no one else? That feeling like your heart is about to pop off because it's too much to contain? That feeling of isolating yourself for the world? The feeling that you just wanna leave where you are and start a completely new chapter elsewhere? That feeling that as much you have someone around you you still feel so empty? You fee like it's just how it was before? No new changes?"
 emoji: "☹️"
 featuredImage: ""
