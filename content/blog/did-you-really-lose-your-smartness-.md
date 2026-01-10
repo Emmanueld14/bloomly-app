@@ -1,10 +1,8 @@
 ---
 title: "Did you really lose your smartness? "
-date: 2026-01-10T13:46:00.000Z
+date: 2026-01-10T10:46:00.000Z
 category: "Academics"
-summary: "This piece explores the quiet fear of feeling like you’ve lost your intelligence and the frustration that follows when effort doesn’t bring results. Through personal experience, it reflects on burnout, self-doubt, and the moment of giving up that unexpectedly leads to clarity. It offers honest lessons on patience, planning, and learning at your own pace, reminding readers that growth takes time and that progress looks different for everyone.
-
-"
+summary: "This piece explores the quiet fear of feeling like you’ve lost your intelligence and the frustration that follows when effort doesn’t bring results. Through personal experience, it reflects on burnout, self-doubt, and the moment of giving up that unexpectedly leads to clarity. It offers honest lessons on patience, planning, and learning at your own pace, reminding readers that growth takes time and that progress looks different for everyone."
 emoji: "👓"
 featuredImage: ""
 ---
