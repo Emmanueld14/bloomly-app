@@ -26,8 +26,16 @@ const GITHUB_CONFIG = {
     vercelApiUrl: 'https://bloomly-app.onrender.com/api/github-auth'
 };
 
+// Supabase configuration for email notifications
+const SUPABASE_CONFIG = {
+    url: 'https://xmhyjttyarskimsxcfhl.supabase.co',
+    anonKey: 'sb_publishable_IOs-j6rgWuDnwrymIIUHxQ_wCTmcaMp',
+    notifyFunctionUrl: 'https://xmhyjttyarskimsxcfhl.supabase.co/functions/v1/notify-subscribers',
+    adminPublishKey: 'REPLACE_WITH_ADMIN_PUBLISH_KEY'
+};
+
 // Export for use in other files
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = GITHUB_CONFIG;
+    module.exports = { GITHUB_CONFIG, SUPABASE_CONFIG };
 }
 

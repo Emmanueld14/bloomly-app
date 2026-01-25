@@ -429,6 +429,37 @@
         .help-link:hover {
             text-decoration: underline;
         }
+
+        .email-update-section {
+            margin-top: var(--space-2xl);
+            padding: var(--space-xl);
+            border-radius: var(--radius-lg);
+            background: var(--gradient-soft);
+        }
+
+        .email-update-section h3 {
+            margin-bottom: var(--space-sm);
+            color: #2D2D2D;
+        }
+
+        .email-update-section p {
+            color: #666;
+            font-size: var(--text-sm);
+            margin-bottom: var(--space-lg);
+        }
+
+        .email-post-message {
+            margin-top: var(--space-md);
+            font-size: var(--text-sm);
+        }
+
+        .email-post-message.success {
+            color: #2e7d32;
+        }
+
+        .email-post-message.error {
+            color: #c62828;
+        }
     </style>
 </head>
 <body>
@@ -471,6 +502,37 @@
                 
                 <div id="postsList" class="posts-list">
                     <div class="loading">Loading posts...</div>
+                </div>
+
+                <div class="email-update-section">
+                    <h3>Email subscribers about a new post</h3>
+                    <p>Send an email update when a new blog post is published.</p>
+                    <form id="emailPostForm">
+                        <div class="form-group">
+                            <label for="emailPostTitle">Title *</label>
+                            <input type="text" id="emailPostTitle" name="title" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="emailPostSummary">Summary *</label>
+                            <textarea id="emailPostSummary" name="summary" rows="3" required></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="emailPostUrl">Post URL *</label>
+                            <input type="url" id="emailPostUrl" name="url" placeholder="https://yourdomain.com/blog-post.html?slug=your-post" required>
+                        </div>
+
+                        <div class="form-group" id="adminPublishKeyGroup">
+                            <label for="adminPublishKey">Admin publish key *</label>
+                            <input type="password" id="adminPublishKey" name="adminKey" placeholder="Enter your admin publish key">
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn-save" id="emailPostSubmit">Send email update</button>
+                        </div>
+                        <p id="emailPostMessage" class="email-post-message"></p>
+                    </form>
                 </div>
             </div>
         </div>
@@ -530,6 +592,7 @@
     </div>
     
     <script src="config.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../src/data/blog-api.js"></script>
     <script src="../src/admin/blog-admin.js"></script>
     <script src="admin.js"></script>

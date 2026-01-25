@@ -9,10 +9,14 @@
     let githubToken = null;
     let githubUser = null;
     const config = typeof GITHUB_CONFIG !== 'undefined' ? GITHUB_CONFIG : {};
+    const supabaseConfig = typeof SUPABASE_CONFIG !== 'undefined' ? SUPABASE_CONFIG : {};
+    let supabaseClient = null;
     
     // Initialize
     function init() {
         console.log('Admin panel initializing...');
+
+        initSupabaseClient();
         
         // Check if user is logged in
         githubToken = sessionStorage.getItem('github_token');
@@ -54,6 +58,12 @@
         const postForm = document.getElementById('postForm');
         if (postForm) {
             postForm.addEventListener('submit', handleSavePost);
+        }
+
+        const emailPostForm = document.getElementById('emailPostForm');
+        if (emailPostForm) {
+            emailPostForm.addEventListener('submit', handleEmailPostSubmit);
+            configureAdminPublishKey();
         }
         
         // Close modal on outside click
@@ -117,6 +127,149 @@
             document.getElementById('userAvatar').src = githubUser.avatar_url;
             document.getElementById('userName').textContent = githubUser.name || githubUser.login;
             document.getElementById('userEmail').textContent = githubUser.email || 'No email';
+        }
+    }
+
+    // Initialize Supabase client for notifications
+    function initSupabaseClient() {
+        if (!window.supabase || typeof window.supabase.createClient !== 'function') {
+            console.warn('Supabase JS library not loaded.');
+            return;
+        }
+
+        if (!supabaseConfig.url || !supabaseConfig.anonKey) {
+            console.warn('Supabase config is missing. Check admin/config.js.');
+            return;
+        }
+
+        supabaseClient = window.supabase.createClient(
+            supabaseConfig.url,
+            supabaseConfig.anonKey
+        );
+    }
+
+    function isSupabaseReady() {
+        return Boolean(supabaseClient && supabaseConfig.url && supabaseConfig.anonKey);
+    }
+
+    function configureAdminPublishKey() {
+        const adminKeyGroup = document.getElementById('adminPublishKeyGroup');
+        if (!adminKeyGroup) return;
+
+        const configuredKey = (supabaseConfig.adminPublishKey || '').trim();
+        const hasConfiguredKey = configuredKey && configuredKey !== 'REPLACE_WITH_ADMIN_PUBLISH_KEY';
+
+        adminKeyGroup.style.display = hasConfiguredKey ? 'none' : 'block';
+    }
+
+    function setEmailPostMessage(message, type) {
+        const messageEl = document.getElementById('emailPostMessage');
+        if (!messageEl) return;
+
+        messageEl.textContent = message || '';
+        messageEl.classList.remove('success', 'error');
+        if (type === 'success') {
+            messageEl.classList.add('success');
+        }
+        if (type === 'error') {
+            messageEl.classList.add('error');
+        }
+    }
+
+    function getAdminPublishKey() {
+        const configuredKey = (supabaseConfig.adminPublishKey || '').trim();
+        if (configuredKey && configuredKey !== 'REPLACE_WITH_ADMIN_PUBLISH_KEY') {
+            return configuredKey;
+        }
+
+        const adminKeyInput = document.getElementById('adminPublishKey');
+        return adminKeyInput ? adminKeyInput.value.trim() : '';
+    }
+
+    async function handleEmailPostSubmit(event) {
+        event.preventDefault();
+
+        if (!isSupabaseReady()) {
+            setEmailPostMessage('Supabase is not configured. Check admin/config.js.', 'error');
+            return;
+        }
+
+        const titleInput = document.getElementById('emailPostTitle');
+        const summaryInput = document.getElementById('emailPostSummary');
+        const urlInput = document.getElementById('emailPostUrl');
+
+        const title = titleInput ? titleInput.value.trim() : '';
+        const summary = summaryInput ? summaryInput.value.trim() : '';
+        const url = urlInput ? urlInput.value.trim() : '';
+
+        if (!title || !summary || !url) {
+            setEmailPostMessage('Title, summary, and URL are required.', 'error');
+            return;
+        }
+
+        const adminKey = getAdminPublishKey();
+        if (!adminKey) {
+            setEmailPostMessage('Admin publish key is required.', 'error');
+            return;
+        }
+
+        const notifyUrl = supabaseConfig.notifyFunctionUrl ||
+            `${supabaseConfig.url}/functions/v1/notify-subscribers`;
+
+        const submitBtn = document.getElementById('emailPostSubmit');
+        const originalText = submitBtn ? submitBtn.textContent : 'Send email update';
+        if (submitBtn) {
+            submitBtn.textContent = 'Sending...';
+            submitBtn.disabled = true;
+        }
+
+        try {
+            const payload = {
+                post: {
+                    title,
+                    summary,
+                    url,
+                    slug: slugify(title)
+                }
+            };
+
+            const response = await fetch(notifyUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${supabaseConfig.anonKey}`,
+                    'X-Admin-Key': adminKey
+                },
+                body: JSON.stringify(payload)
+            });
+
+            const result = await response.json().catch(() => ({}));
+
+            if (!response.ok) {
+                const errorMessage = result.error || 'Failed to send email updates.';
+                setEmailPostMessage(errorMessage, 'error');
+                return;
+            }
+
+            const sent = Number(result.sent || 0);
+            const skipped = Number(result.skipped || 0);
+            const failed = Number(result.failed || 0);
+            setEmailPostMessage(
+                `Email update complete. Sent: ${sent}, failed: ${failed}, skipped: ${skipped}.`,
+                failed > 0 ? 'error' : 'success'
+            );
+
+            if (event.target && typeof event.target.reset === 'function') {
+                event.target.reset();
+            }
+        } catch (error) {
+            console.error('Email update failed:', error);
+            setEmailPostMessage('Failed to send email updates. Please try again.', 'error');
+        } finally {
+            if (submitBtn) {
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }
         }
     }
     
