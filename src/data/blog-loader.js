@@ -122,7 +122,7 @@
                 const category = post.metadata.category || 'Mental Health';
                 
                 return `
-                    <article class="blog-card fade-in">
+                    <article class="blog-card post fade-in" data-post-id="${post.slug}">
                         <div class="blog-card-image" style="font-size: var(--text-5xl);">${emoji}</div>
                         <div class="blog-card-content">
                             <div class="blog-card-date">${date} • ${category}</div>

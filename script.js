@@ -315,6 +315,31 @@
         return Boolean(supabaseClient);
     }
 
+    function subscribeToLikeUpdates(postId, onUpdate) {
+        if (!isSupabaseReady() || typeof supabaseClient.channel !== 'function') {
+            return null;
+        }
+
+        return supabaseClient
+            .channel(`likes-${postId}`)
+            .on(
+                'postgres_changes',
+                {
+                    event: '*',
+                    schema: 'public',
+                    table: 'likes',
+                    filter: `post_id=eq.${postId}`
+                },
+                (payload) => {
+                    const newCount = payload?.new?.count;
+                    if (typeof newCount === 'number') {
+                        onUpdate(newCount);
+                    }
+                }
+            )
+            .subscribe();
+    }
+
     async function fetchSupabaseLikeCount(postId) {
         if (!isSupabaseReady()) return null;
 
@@ -451,12 +476,18 @@
             likeCountEl.textContent = `${likeCount} like${likeCount === 1 ? '' : 's'}`;
             likeButton.classList.toggle('liked', liked);
             likeButton.setAttribute('aria-pressed', liked ? 'true' : 'false');
+            likeButton.disabled = liked;
             if (likeText) {
                 likeText.textContent = liked ? 'Liked' : 'Like';
             }
         };
 
         updateLikeUI();
+
+        subscribeToLikeUpdates(postId, (newCount) => {
+            likeCount = newCount;
+            updateLikeUI();
+        });
 
         likeButton.addEventListener('click', async () => {
             // Prevent multiple likes per browser by storing a flag

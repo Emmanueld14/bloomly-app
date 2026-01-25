@@ -843,6 +843,15 @@ a:hover {
     box-shadow: 0 8px 25px rgba(255, 120, 185, 0.45);
 }
 
+.like-button:disabled {
+    background: #F1F1F1;
+    color: #9B9B9B;
+    border-color: #DDDDDD;
+    box-shadow: none;
+    cursor: not-allowed;
+    transform: none;
+}
+
 .like-icon {
     font-size: var(--text-lg);
 }
