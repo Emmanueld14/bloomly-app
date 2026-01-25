@@ -82,7 +82,8 @@ supabase functions deploy publish-post
 ```
 
 `publish-post` is used by the admin panel to sync new posts into Supabase when
-you save a blog post.
+you save a blog post. The admin panel can also call `notify-subscribers`
+directly for new posts, so emails can send even without webhooks.
 
 If you have not linked the project yet:
 

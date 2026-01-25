@@ -441,6 +441,50 @@
             return { ok: false, message: 'Failed to sync post.' };
         }
     }
+
+    async function notifySubscribersForPost(post) {
+        if (!isSupabaseReady()) {
+            return { ok: false, message: 'Supabase is not configured.' };
+        }
+
+        const adminKey = getAdminPublishKey();
+        if (!adminKey) {
+            return { ok: false, message: 'Admin publish key is required to notify subscribers.' };
+        }
+
+        const notifyUrl = supabaseConfig.notifyFunctionUrl ||
+            `${supabaseConfig.url}/functions/v1/notify-subscribers`;
+        const postUrl = `${window.location.origin}/blog-post.html?slug=${encodeURIComponent(post.slug)}`;
+
+        try {
+            const response = await fetch(notifyUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${supabaseConfig.anonKey}`,
+                    'X-Admin-Key': adminKey
+                },
+                body: JSON.stringify({
+                    post: {
+                        title: post.title,
+                        summary: post.summary,
+                        url: postUrl,
+                        slug: post.slug
+                    }
+                })
+            });
+
+            const result = await response.json().catch(() => ({}));
+            if (!response.ok) {
+                return { ok: false, message: result.error || 'Failed to notify subscribers.' };
+            }
+
+            return { ok: true, result };
+        } catch (error) {
+            console.error('Notify subscribers failed:', error);
+            return { ok: false, message: 'Failed to notify subscribers.' };
+        }
+    }
     
     // Handle add post
     function handleAddPost() {
@@ -531,7 +575,17 @@
 
             const publishResult = await publishPostToSupabase({ title, summary, slug });
             if (publishResult.ok) {
-                showSuccess(`Post ${isNew ? 'created' : 'updated'} successfully! Synced to subscribers.`);
+                if (isNew) {
+                    const notifyResult = await notifySubscribersForPost({ title, summary, slug });
+                    if (notifyResult.ok) {
+                        showSuccess(`Post created successfully! Email update sent to subscribers.`);
+                    } else {
+                        showSuccess('Post created successfully!');
+                        showError(notifyResult.message || 'Post saved, but email notification failed.');
+                    }
+                } else {
+                    showSuccess('Post updated successfully!');
+                }
             } else {
                 showSuccess(`Post ${isNew ? 'created' : 'updated'} successfully!`);
                 showError(publishResult.message || 'Post saved, but failed to sync.');
