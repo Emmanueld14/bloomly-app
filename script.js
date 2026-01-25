@@ -237,8 +237,8 @@
 
     // ========== Supabase Setup ==========
     // Replace these placeholders with your Supabase project credentials.
-    const SUPABASE_URL = 'SUPABASE_URL';
-    const SUPABASE_ANON_KEY = 'SUPABASE_ANON_KEY';
+    const SUPABASE_URL = 'https://xmhyjttyarskimsxcfhl.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_IOs-j6rgWuDnwrymIIUHxQ_wCTmcaMp';
 
     function createSupabaseClient() {
         // Supabase library is loaded via CDN in blog pages
