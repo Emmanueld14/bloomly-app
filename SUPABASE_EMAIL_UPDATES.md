@@ -77,6 +77,7 @@ From the repo root:
 
 ```
 supabase functions deploy notify-subscribers
+supabase functions deploy subscribe-newsletter
 ```
 
 If you have not linked the project yet:

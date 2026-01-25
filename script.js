@@ -622,23 +622,22 @@
                 }
 
                 if (isSupabaseReady()) {
-                    const { error } = await supabaseClient
-                        .from('subscribers')
-                        .insert({ email });
+                    const { data, error } = await supabaseClient.functions.invoke(
+                        'subscribe-newsletter',
+                        { body: { email } }
+                    );
 
                     if (error) {
-                        const isDuplicate = error.code === '23505' ||
-                            (typeof error.message === 'string' && error.message.toLowerCase().includes('duplicate'));
-
-                        setFormMessage(
-                            messageEl,
-                            isDuplicate ? 'You are already subscribed.' : 'Subscription failed. Please try again.',
-                            isDuplicate ? 'success' : 'error'
-                        );
+                        setFormMessage(messageEl, 'Subscription failed. Please try again.', 'error');
                         return;
                     }
 
-                    setFormMessage(messageEl, 'Thanks for subscribing!', 'success');
+                    if (data && data.status === 'already_subscribed') {
+                        setFormMessage(messageEl, 'You are already subscribed.', 'success');
+                        return;
+                    }
+
+                    setFormMessage(messageEl, 'Thanks for subscribing! Check your inbox.', 'success');
                 } else {
                     const storageKey = 'bloomly:newsletter-emails';
                     const stored = safeJSONParse(safeStorageGet(storageKey), []);
