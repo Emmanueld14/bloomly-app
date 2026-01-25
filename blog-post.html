@@ -43,66 +43,69 @@
         </div>
     </nav>
 
-    <!-- Article Header -->
-    <section class="article-header">
-        <div class="container">
-            <a href="blog.html" class="back-button">← Back to Blog</a>
-            <h1 id="articleTitle">Loading...</h1>
-            <div class="article-meta" id="articleMeta">
-                <span>Loading...</span>
-            </div>
-        </div>
-    </section>
-
-    <!-- Article Content -->
-    <article class="article-content">
-        <div class="container">
-            <div id="articleBody" style="max-width: 800px; margin: 0 auto;">
-                <p>Loading article...</p>
-            </div>
-        </div>
-    </article>
-
-    <!-- Post Engagement -->
-    <section class="post-engagement" aria-label="Post engagement">
-        <div class="container">
-            <div class="engagement-card" data-post-interactions data-post-id="">
-                <div class="engagement-header">
-                    <h2>Join the conversation</h2>
-                    <p>Like this post or leave a supportive comment for others to read.</p>
+    <!-- Post Wrapper (required for modularity) -->
+    <div class="post" data-post-id="">
+        <!-- Article Header -->
+        <section class="article-header">
+            <div class="container">
+                <a href="blog.html" class="back-button">← Back to Blog</a>
+                <h1 id="articleTitle">Loading...</h1>
+                <div class="article-meta" id="articleMeta">
+                    <span>Loading...</span>
                 </div>
+            </div>
+        </section>
 
-                <div class="post-actions">
-                    <button class="like-button" type="button" data-like-button aria-pressed="false">
-                        <span class="like-icon">💗</span>
-                        <span class="like-text">Like</span>
-                    </button>
-                    <span class="like-count" data-like-count>0 likes</span>
+        <!-- Article Content -->
+        <article class="article-content">
+            <div class="container">
+                <div id="articleBody" style="max-width: 800px; margin: 0 auto;">
+                    <p>Loading article...</p>
                 </div>
+            </div>
+        </article>
 
-                <div class="comment-section">
-                    <h3>Comments</h3>
-                    <form class="comment-form" data-comment-form novalidate>
-                        <label class="comment-label">
-                            Nickname (optional)
-                            <input type="text" name="nickname" maxlength="40" placeholder="Your nickname">
-                        </label>
-                        <label class="comment-label">
-                            Comment
-                            <textarea name="comment" rows="4" maxlength="500" placeholder="Share your thoughts..." required></textarea>
-                        </label>
-                        <div class="comment-actions">
-                            <button type="submit" class="btn btn-primary">Post Comment</button>
-                            <span class="form-message" data-comment-message aria-live="polite"></span>
+        <!-- Post Engagement -->
+        <section class="post-engagement" aria-label="Post engagement">
+            <div class="container">
+                <div class="engagement-card" data-post-interactions>
+                    <div class="engagement-header">
+                        <h2>Join the conversation</h2>
+                        <p>Like this post or leave a supportive comment for others to read.</p>
+                    </div>
+
+                    <div class="post-actions">
+                        <button class="like-button" type="button" data-like-button aria-pressed="false">
+                            <span class="like-icon">💗</span>
+                            <span class="like-text">Like</span>
+                        </button>
+                        <span class="like-count" data-like-count>0 likes</span>
+                    </div>
+
+                    <div class="comment-section">
+                        <h3>Comments</h3>
+                        <form class="comment-form" data-comment-form novalidate>
+                            <label class="comment-label">
+                                Nickname (optional)
+                                <input type="text" name="nickname" maxlength="40" placeholder="Your nickname">
+                            </label>
+                            <label class="comment-label">
+                                Comment
+                                <textarea name="comment" rows="4" maxlength="500" placeholder="Share your thoughts..." required></textarea>
+                            </label>
+                            <div class="comment-actions">
+                                <button type="submit" class="btn btn-primary">Post Comment</button>
+                                <span class="form-message" data-comment-message aria-live="polite"></span>
+                            </div>
+                        </form>
+                        <div class="comment-list" data-comment-list>
+                            <p class="comment-empty">No comments yet. Be the first to share.</p>
                         </div>
-                    </form>
-                    <div class="comment-list" data-comment-list>
-                        <p class="comment-empty">No comments yet. Be the first to share.</p>
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
+    </div>
 
     <!-- Newsletter Signup -->
     <section class="newsletter-section" aria-label="Newsletter signup">
@@ -155,6 +158,7 @@
 
     <script src="src/data/blog-api.js"></script>
     <script src="src/data/blog-post-loader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="script.js"></script>
 </body>
 </html>

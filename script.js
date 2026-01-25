@@ -235,12 +235,42 @@
         }
     }
 
+    // ========== Supabase Setup ==========
+    // Replace these placeholders with your Supabase project credentials.
+    const SUPABASE_URL = 'SUPABASE_URL';
+    const SUPABASE_ANON_KEY = 'SUPABASE_ANON_KEY';
+
+    function createSupabaseClient() {
+        // Supabase library is loaded via CDN in blog pages
+        if (!window.supabase || typeof window.supabase.createClient !== 'function') {
+            return null;
+        }
+
+        // Prevent accidental use before credentials are set
+        if (SUPABASE_URL === 'SUPABASE_URL' || SUPABASE_ANON_KEY === 'SUPABASE_ANON_KEY') {
+            console.warn('Supabase not configured. Replace SUPABASE_URL and SUPABASE_ANON_KEY.');
+            return null;
+        }
+
+        return window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    }
+
+    const supabaseClient = createSupabaseClient();
+
     // ========== Post Interactions (Likes + Comments) ==========
     function resolvePostId(container) {
         // Use explicit data-post-id if provided, otherwise derive from the URL
         const explicitId = container.getAttribute('data-post-id');
         if (explicitId && explicitId.trim()) {
             return explicitId.trim();
+        }
+
+        const parentPost = container.closest('.post[data-post-id]');
+        if (parentPost) {
+            const parentId = parentPost.getAttribute('data-post-id');
+            if (parentId && parentId.trim()) {
+                return parentId.trim();
+            }
         }
 
         const params = new URLSearchParams(window.location.search);
@@ -281,7 +311,120 @@
         }
     }
 
-    function initLikeButton(container, postId) {
+    function isSupabaseReady() {
+        return Boolean(supabaseClient);
+    }
+
+    async function fetchSupabaseLikeCount(postId) {
+        if (!isSupabaseReady()) return null;
+
+        const { data, error } = await supabaseClient
+            .from('likes')
+            .select('count')
+            .eq('post_id', postId)
+            .maybeSingle();
+
+        if (error) {
+            console.warn('Unable to load like count from Supabase.', error);
+            return null;
+        }
+
+        if (data && typeof data.count === 'number') {
+            return data.count;
+        }
+
+        return 0;
+    }
+
+    async function upsertSupabaseLikeCount(postId, count) {
+        if (!isSupabaseReady()) return false;
+
+        const { error } = await supabaseClient
+            .from('likes')
+            .upsert({ post_id: postId, count }, { onConflict: 'post_id' });
+
+        if (error) {
+            console.warn('Unable to save like count to Supabase.', error);
+            return false;
+        }
+
+        return true;
+    }
+
+    async function fetchSupabaseComments(postId) {
+        if (!isSupabaseReady()) return null;
+
+        const { data, error } = await supabaseClient
+            .from('comments')
+            .select('id, post_id, nick, text, timestamp')
+            .eq('post_id', postId)
+            .order('timestamp', { ascending: false });
+
+        if (error) {
+            console.warn('Unable to load comments from Supabase.', error);
+            return null;
+        }
+
+        return data || [];
+    }
+
+    async function insertSupabaseComment(postId, nickname, text) {
+        if (!isSupabaseReady()) return null;
+
+        const { data, error } = await supabaseClient
+            .from('comments')
+            .insert({ post_id: postId, nick: nickname || null, text })
+            .select('id, post_id, nick, text, timestamp')
+            .single();
+
+        if (error) {
+            console.warn('Unable to save comment to Supabase.', error);
+            return null;
+        }
+
+        return data;
+    }
+
+    function renderComments(list, comments) {
+        list.innerHTML = '';
+
+        if (!comments.length) {
+            const empty = document.createElement('p');
+            empty.className = 'comment-empty';
+            empty.textContent = 'No comments yet. Be the first to share.';
+            list.appendChild(empty);
+            return;
+        }
+
+        comments.forEach(comment => {
+            const item = document.createElement('div');
+            item.className = 'comment-item';
+
+            const meta = document.createElement('div');
+            meta.className = 'comment-meta';
+
+            const author = document.createElement('span');
+            author.className = 'comment-author';
+            author.textContent = comment.nick || comment.nickname || 'Anonymous';
+
+            const time = document.createElement('span');
+            time.className = 'comment-time';
+            time.textContent = formatTimestamp(comment.timestamp);
+
+            meta.appendChild(author);
+            meta.appendChild(time);
+
+            const text = document.createElement('p');
+            text.className = 'comment-text';
+            text.textContent = comment.text || '';
+
+            item.appendChild(meta);
+            item.appendChild(text);
+            list.appendChild(item);
+        });
+    }
+
+    async function initLikeButton(container, postId) {
         const likeButton = container.querySelector('[data-like-button]');
         const likeCountEl = container.querySelector('[data-like-count]');
         if (!likeButton || !likeCountEl) return;
@@ -289,9 +432,16 @@
         const likedKey = `bloomly:liked:${postId}`;
         const countKey = `bloomly:like-count:${postId}`;
 
-        let likeCount = parseInt(safeStorageGet(countKey) || '0', 10);
-        if (Number.isNaN(likeCount) || likeCount < 0) {
-            likeCount = 0;
+        let likeCount = 0;
+        const supabaseCount = await fetchSupabaseLikeCount(postId);
+
+        if (typeof supabaseCount === 'number') {
+            likeCount = supabaseCount;
+        } else {
+            likeCount = parseInt(safeStorageGet(countKey) || '0', 10);
+            if (Number.isNaN(likeCount) || likeCount < 0) {
+                likeCount = 0;
+            }
         }
 
         let liked = safeStorageGet(likedKey) === 'true';
@@ -308,71 +458,48 @@
 
         updateLikeUI();
 
-        likeButton.addEventListener('click', () => {
+        likeButton.addEventListener('click', async () => {
             // Prevent multiple likes per browser by storing a flag
             if (liked) return;
             liked = true;
             likeCount += 1;
             safeStorageSet(likedKey, 'true');
-            safeStorageSet(countKey, String(likeCount));
             updateLikeUI();
+
+            if (isSupabaseReady()) {
+                const saved = await upsertSupabaseLikeCount(postId, likeCount);
+                if (!saved) {
+                    // Fallback to local storage if Supabase write fails
+                    safeStorageSet(countKey, String(likeCount));
+                }
+            } else {
+                safeStorageSet(countKey, String(likeCount));
+            }
         });
     }
 
-    function initComments(container, postId) {
+    async function initComments(container, postId) {
         const form = container.querySelector('[data-comment-form]');
         const list = container.querySelector('[data-comment-list]');
         const messageEl = container.querySelector('[data-comment-message]');
         if (!form || !list) return;
 
         const commentsKey = `bloomly:comments:${postId}`;
-        let comments = safeJSONParse(safeStorageGet(commentsKey), []);
-        if (!Array.isArray(comments)) {
-            comments = [];
+        let comments = [];
+        const supabaseComments = await fetchSupabaseComments(postId);
+
+        if (Array.isArray(supabaseComments)) {
+            comments = supabaseComments;
+        } else {
+            comments = safeJSONParse(safeStorageGet(commentsKey), []);
+            if (!Array.isArray(comments)) {
+                comments = [];
+            }
         }
 
-        const renderComments = () => {
-            list.innerHTML = '';
+        renderComments(list, comments);
 
-            if (!comments.length) {
-                const empty = document.createElement('p');
-                empty.className = 'comment-empty';
-                empty.textContent = 'No comments yet. Be the first to share.';
-                list.appendChild(empty);
-                return;
-            }
-
-            comments.forEach(comment => {
-                const item = document.createElement('div');
-                item.className = 'comment-item';
-
-                const meta = document.createElement('div');
-                meta.className = 'comment-meta';
-
-                const author = document.createElement('span');
-                author.className = 'comment-author';
-                author.textContent = comment.nickname || 'Anonymous';
-
-                const time = document.createElement('span');
-                time.className = 'comment-time';
-                time.textContent = formatTimestamp(comment.timestamp);
-
-                meta.appendChild(author);
-                meta.appendChild(time);
-
-                const text = document.createElement('p');
-                text.className = 'comment-text';
-                text.textContent = comment.text || '';
-
-                item.appendChild(meta);
-                item.appendChild(text);
-                list.appendChild(item);
-            });
-        };
-
-        renderComments();
-
-        form.addEventListener('submit', (event) => {
+        form.addEventListener('submit', async (event) => {
             event.preventDefault();
 
             const nicknameInput = form.querySelector('input[name="nickname"]');
@@ -388,40 +515,55 @@
                 return;
             }
 
-            const newComment = {
-                nickname: nickname || 'Anonymous',
-                text,
-                timestamp: new Date().toISOString()
-            };
+            if (isSupabaseReady()) {
+                const savedComment = await insertSupabaseComment(postId, nickname, text);
+                if (!savedComment) {
+                    setFormMessage(messageEl, 'Unable to save comment. Please try again.', 'error');
+                    return;
+                }
 
-            comments.push(newComment);
-            safeStorageSet(commentsKey, JSON.stringify(comments));
-            renderComments();
+                comments.unshift(savedComment);
+                renderComments(list, comments);
+                setFormMessage(messageEl, 'Thanks! Your comment is now public.', 'success');
+            } else {
+                const newComment = {
+                    nick: nickname || 'Anonymous',
+                    text,
+                    timestamp: new Date().toISOString()
+                };
+
+                comments.unshift(newComment);
+                safeStorageSet(commentsKey, JSON.stringify(comments));
+                renderComments(list, comments);
+                setFormMessage(messageEl, 'Thanks! Your comment is saved on this device.', 'success');
+            }
 
             if (commentInput) {
                 commentInput.value = '';
             }
-
-            setFormMessage(messageEl, 'Thanks! Your comment is saved on this device.', 'success');
         });
     }
 
-    function initPostInteractions() {
-        const interactionBlocks = document.querySelectorAll('[data-post-interactions]');
+    async function initPostInteractions() {
+        const postBlocks = Array.from(document.querySelectorAll('.post'));
+        const interactionBlocks = postBlocks.length
+            ? postBlocks
+            : Array.from(document.querySelectorAll('[data-post-interactions]'));
+
         if (!interactionBlocks.length) return;
 
-        interactionBlocks.forEach(block => {
+        for (const block of interactionBlocks) {
             const postId = resolvePostId(block);
             if (!postId) {
                 console.warn('Post interactions skipped: missing data-post-id.');
-                return;
+                continue;
             }
 
             // Store the resolved ID to keep multiple components consistent
             block.setAttribute('data-post-id', postId);
-            initLikeButton(block, postId);
-            initComments(block, postId);
-        });
+            await initLikeButton(block, postId);
+            await initComments(block, postId);
+        }
     }
 
     // ========== Newsletter Signup ==========
@@ -438,7 +580,7 @@
             const messageEl = form.querySelector('[data-newsletter-message]');
             if (!emailInput) return;
 
-            form.addEventListener('submit', (event) => {
+            form.addEventListener('submit', async (event) => {
                 event.preventDefault();
 
                 const email = emailInput.value.trim().toLowerCase();
@@ -448,21 +590,43 @@
                     return;
                 }
 
-                const storageKey = 'bloomly:newsletter-emails';
-                const stored = safeJSONParse(safeStorageGet(storageKey), []);
-                const emails = Array.isArray(stored) ? stored : [];
-                const alreadySubscribed = emails.includes(email);
+                if (isSupabaseReady()) {
+                    const { error } = await supabaseClient
+                        .from('subscribers')
+                        .insert({ email });
 
-                if (!alreadySubscribed) {
-                    emails.push(email);
-                    safeStorageSet(storageKey, JSON.stringify(emails));
+                    if (error) {
+                        const isDuplicate = error.code === '23505' ||
+                            (typeof error.message === 'string' && error.message.toLowerCase().includes('duplicate'));
+
+                        setFormMessage(
+                            messageEl,
+                            isDuplicate ? 'You are already subscribed.' : 'Subscription failed. Please try again.',
+                            isDuplicate ? 'success' : 'error'
+                        );
+                        return;
+                    }
+
+                    setFormMessage(messageEl, 'Thanks for subscribing!', 'success');
+                } else {
+                    const storageKey = 'bloomly:newsletter-emails';
+                    const stored = safeJSONParse(safeStorageGet(storageKey), []);
+                    const emails = Array.isArray(stored) ? stored : [];
+                    const alreadySubscribed = emails.includes(email);
+
+                    if (!alreadySubscribed) {
+                        emails.push(email);
+                        safeStorageSet(storageKey, JSON.stringify(emails));
+                    }
+
+                    setFormMessage(
+                        messageEl,
+                        alreadySubscribed
+                            ? 'You are already subscribed on this device.'
+                            : 'Thanks for subscribing! (Saved on this device)',
+                        'success'
+                    );
                 }
-
-                setFormMessage(
-                    messageEl,
-                    alreadySubscribed ? 'You are already subscribed on this device.' : 'Thanks for subscribing!',
-                    'success'
-                );
 
                 emailInput.value = '';
             });
@@ -491,7 +655,7 @@
         initButtonEffects();
         initCardEffects();
         initFloatingShapes();
-        initPostInteractions();
+        void initPostInteractions();
         initNewsletterForms();
         
         // Trigger initial scroll check

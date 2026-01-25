@@ -52,6 +52,12 @@
             return;
         }
 
+        // Keep post wrapper in sync for modular interactions
+        const postWrapper = document.querySelector('.post');
+        if (postWrapper) {
+            postWrapper.setAttribute('data-post-id', slug);
+        }
+
         try {
             console.log(`Loading post: ${slug}`);
             

@@ -776,6 +776,11 @@ a:hover {
     color: var(--color-pink);
 }
 
+/* ========== Post Wrapper ========== */
+.post {
+    display: block;
+}
+
 /* ========== Post Engagement (Likes + Comments) ========== */
 .post-engagement {
     padding: var(--space-3xl) 0;
