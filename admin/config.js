@@ -31,6 +31,7 @@ const SUPABASE_CONFIG = {
     url: 'https://xmhyjttyarskimsxcfhl.supabase.co',
     anonKey: 'sb_publishable_IOs-j6rgWuDnwrymIIUHxQ_wCTmcaMp',
     notifyFunctionUrl: 'https://xmhyjttyarskimsxcfhl.supabase.co/functions/v1/notify-subscribers',
+    publishPostFunctionUrl: 'https://xmhyjttyarskimsxcfhl.supabase.co/functions/v1/publish-post',
     adminPublishKey: 'REPLACE_WITH_ADMIN_PUBLISH_KEY'
 };
 

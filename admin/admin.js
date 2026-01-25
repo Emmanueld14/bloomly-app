@@ -397,6 +397,50 @@
             successDiv.style.display = 'none';
         }, 5000);
     }
+
+    async function publishPostToSupabase(post) {
+        if (!isSupabaseReady()) {
+            return { ok: false, message: 'Supabase is not configured.' };
+        }
+
+        const adminKey = getAdminPublishKey();
+        if (!adminKey) {
+            return { ok: false, message: 'Admin publish key is required to sync posts.' };
+        }
+
+        const publishUrl = supabaseConfig.publishPostFunctionUrl ||
+            `${supabaseConfig.url}/functions/v1/publish-post`;
+        const postUrl = `${window.location.origin}/blog-post.html?slug=${encodeURIComponent(post.slug)}`;
+
+        try {
+            const response = await fetch(publishUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${supabaseConfig.anonKey}`,
+                    'X-Admin-Key': adminKey
+                },
+                body: JSON.stringify({
+                    post: {
+                        title: post.title,
+                        summary: post.summary,
+                        url: postUrl,
+                        slug: post.slug
+                    }
+                })
+            });
+
+            const result = await response.json().catch(() => ({}));
+            if (!response.ok) {
+                return { ok: false, message: result.error || 'Failed to sync post.' };
+            }
+
+            return { ok: true };
+        } catch (error) {
+            console.error('Publish post sync failed:', error);
+            return { ok: false, message: 'Failed to sync post.' };
+        }
+    }
     
     // Handle add post
     function handleAddPost() {
@@ -484,8 +528,14 @@
             
             // Reload posts to confirm
             await loadPosts();
-            
-            showSuccess(`Post ${isNew ? 'created' : 'updated'} successfully! Verified and synced.`);
+
+            const publishResult = await publishPostToSupabase({ title, summary, slug });
+            if (publishResult.ok) {
+                showSuccess(`Post ${isNew ? 'created' : 'updated'} successfully! Synced to subscribers.`);
+            } else {
+                showSuccess(`Post ${isNew ? 'created' : 'updated'} successfully!`);
+                showError(publishResult.message || 'Post saved, but failed to sync.');
+            }
             closeModal();
             
         } catch (error) {

@@ -78,7 +78,11 @@ From the repo root:
 ```
 supabase functions deploy notify-subscribers
 supabase functions deploy subscribe-newsletter
+supabase functions deploy publish-post
 ```
+
+`publish-post` is used by the admin panel to sync new posts into Supabase when
+you save a blog post.
 
 If you have not linked the project yet:
 
