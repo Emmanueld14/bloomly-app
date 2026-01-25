@@ -63,6 +63,69 @@
         </div>
     </article>
 
+    <!-- Post Engagement -->
+    <section class="post-engagement" aria-label="Post engagement">
+        <div class="container">
+            <div class="engagement-card" data-post-interactions data-post-id="">
+                <div class="engagement-header">
+                    <h2>Join the conversation</h2>
+                    <p>Like this post or leave a supportive comment for others to read.</p>
+                </div>
+
+                <div class="post-actions">
+                    <button class="like-button" type="button" data-like-button aria-pressed="false">
+                        <span class="like-icon">💗</span>
+                        <span class="like-text">Like</span>
+                    </button>
+                    <span class="like-count" data-like-count>0 likes</span>
+                </div>
+
+                <div class="comment-section">
+                    <h3>Comments</h3>
+                    <form class="comment-form" data-comment-form novalidate>
+                        <label class="comment-label">
+                            Nickname (optional)
+                            <input type="text" name="nickname" maxlength="40" placeholder="Your nickname">
+                        </label>
+                        <label class="comment-label">
+                            Comment
+                            <textarea name="comment" rows="4" maxlength="500" placeholder="Share your thoughts..." required></textarea>
+                        </label>
+                        <div class="comment-actions">
+                            <button type="submit" class="btn btn-primary">Post Comment</button>
+                            <span class="form-message" data-comment-message aria-live="polite"></span>
+                        </div>
+                    </form>
+                    <div class="comment-list" data-comment-list>
+                        <p class="comment-empty">No comments yet. Be the first to share.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Newsletter Signup -->
+    <section class="newsletter-section" aria-label="Newsletter signup">
+        <div class="container">
+            <div class="newsletter-card">
+                <div class="newsletter-copy">
+                    <h2>Get new blog updates</h2>
+                    <p>Join our newsletter for gentle reminders and fresh posts.</p>
+                </div>
+                <form class="newsletter-form" data-newsletter-form novalidate>
+                    <label class="newsletter-label">
+                        Email address
+                        <div class="newsletter-input">
+                            <input type="email" name="email" placeholder="you@example.com" required>
+                            <button type="submit" class="btn btn-primary">Subscribe</button>
+                        </div>
+                    </label>
+                    <span class="form-message" data-newsletter-message aria-live="polite"></span>
+                </form>
+            </div>
+        </div>
+    </section>
+
     <!-- Footer -->
     <footer class="footer">
         <div class="container">

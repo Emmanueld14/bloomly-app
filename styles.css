@@ -776,6 +776,238 @@ a:hover {
     color: var(--color-pink);
 }
 
+/* ========== Post Engagement (Likes + Comments) ========== */
+.post-engagement {
+    padding: var(--space-3xl) 0;
+    background: var(--gradient-soft);
+}
+
+.engagement-card {
+    background: #FFFFFF;
+    border-radius: var(--radius-xl);
+    padding: var(--space-2xl);
+    box-shadow: var(--shadow-card);
+    border: 1px solid rgba(255, 120, 185, 0.2);
+}
+
+.engagement-header {
+    margin-bottom: var(--space-xl);
+}
+
+.engagement-header h2 {
+    margin-bottom: var(--space-sm);
+}
+
+.post-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    flex-wrap: wrap;
+    margin-bottom: var(--space-xl);
+}
+
+.like-button {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-sm) var(--space-xl);
+    border-radius: var(--radius-full);
+    border: 1px solid rgba(255, 120, 185, 0.35);
+    background: rgba(255, 120, 185, 0.12);
+    color: #B83280;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-base);
+}
+
+.like-button:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-soft);
+    background: rgba(255, 120, 185, 0.2);
+}
+
+.like-button.liked {
+    background: var(--gradient-primary);
+    color: #FFFFFF;
+    border-color: transparent;
+    box-shadow: var(--shadow-button);
+}
+
+.like-button.liked:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(255, 120, 185, 0.45);
+}
+
+.like-icon {
+    font-size: var(--text-lg);
+}
+
+.like-count {
+    padding: var(--space-xs) var(--space-md);
+    border-radius: var(--radius-full);
+    background: rgba(95, 168, 255, 0.15);
+    color: #2B6CB0;
+    font-weight: 600;
+    font-size: var(--text-sm);
+}
+
+.comment-section {
+    display: grid;
+    gap: var(--space-lg);
+}
+
+.comment-form {
+    display: grid;
+    gap: var(--space-md);
+}
+
+.comment-label {
+    display: grid;
+    gap: var(--space-xs);
+    font-weight: 600;
+    color: #1A1A1A;
+}
+
+.comment-label input,
+.comment-label textarea {
+    width: 100%;
+    padding: var(--space-sm);
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(95, 168, 255, 0.25);
+    background: rgba(255, 255, 255, 0.95);
+    font-size: var(--text-base);
+    font-family: var(--font-primary);
+    transition: all var(--transition-fast);
+}
+
+.comment-label input:focus,
+.comment-label textarea:focus {
+    outline: none;
+    border-color: var(--color-blue);
+    box-shadow: 0 0 0 3px rgba(95, 168, 255, 0.15);
+}
+
+.comment-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    flex-wrap: wrap;
+}
+
+.form-message {
+    font-size: var(--text-sm);
+    color: #4A4A4A;
+}
+
+.form-message.is-success {
+    color: #2F855A;
+}
+
+.form-message.is-error {
+    color: #C53030;
+}
+
+.comment-list {
+    display: grid;
+    gap: var(--space-sm);
+    max-height: 320px;
+    overflow-y: auto;
+    padding-right: var(--space-xs);
+}
+
+.comment-item {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-glass-border);
+    padding: var(--space-md);
+}
+
+.comment-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    font-size: var(--text-sm);
+    color: #6B6B6B;
+    margin-bottom: var(--space-xs);
+    flex-wrap: wrap;
+}
+
+.comment-author {
+    font-weight: 600;
+    color: #1A1A1A;
+}
+
+.comment-text {
+    color: #4A4A4A;
+    margin-bottom: 0;
+}
+
+.comment-empty {
+    font-style: italic;
+    color: #6B6B6B;
+}
+
+/* ========== Newsletter Signup ========== */
+.newsletter-section {
+    padding: var(--space-3xl) 0;
+}
+
+.newsletter-card {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: var(--space-xl);
+    align-items: center;
+    background: #FFFFFF;
+    border-radius: var(--radius-xl);
+    padding: var(--space-2xl);
+    box-shadow: var(--shadow-card);
+    border: 1px solid rgba(95, 168, 255, 0.2);
+}
+
+.newsletter-copy h2 {
+    margin-bottom: var(--space-sm);
+}
+
+.newsletter-copy p {
+    margin-bottom: 0;
+}
+
+.newsletter-form {
+    display: grid;
+    gap: var(--space-xs);
+    min-width: 280px;
+}
+
+.newsletter-label {
+    display: grid;
+    gap: var(--space-xs);
+    font-weight: 600;
+    color: #1A1A1A;
+}
+
+.newsletter-input {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.newsletter-input input {
+    flex: 1;
+    padding: var(--space-sm);
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(95, 168, 255, 0.3);
+    background: rgba(255, 255, 255, 0.95);
+    font-size: var(--text-base);
+    font-family: var(--font-primary);
+    transition: all var(--transition-fast);
+}
+
+.newsletter-input input:focus {
+    outline: none;
+    border-color: var(--color-blue);
+    box-shadow: 0 0 0 3px rgba(95, 168, 255, 0.15);
+}
+
 /* ========== Utility Classes ========== */
 .text-center {
     text-align: center;
@@ -1017,6 +1249,34 @@ a:hover {
     .article-meta {
         flex-direction: column;
         gap: var(--space-sm);
+    }
+
+    .engagement-card {
+        padding: var(--space-xl);
+    }
+
+    .comment-actions {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .newsletter-card {
+        grid-template-columns: 1fr;
+        text-align: left;
+    }
+
+    .newsletter-form {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .newsletter-input {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .newsletter-input .btn {
+        width: 100%;
     }
 }
 
