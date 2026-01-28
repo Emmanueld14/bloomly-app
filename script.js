@@ -602,6 +602,77 @@
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
     }
 
+    function isSupabaseFunctionsReady() {
+        return Boolean(
+            supabaseClient &&
+            supabaseClient.functions &&
+            typeof supabaseClient.functions.invoke === 'function'
+        );
+    }
+
+    function parseFunctionError(error) {
+        if (!error) return null;
+
+        const context = error.context || {};
+        let payload = context.body;
+        let payloadObject = null;
+
+        if (payload && typeof payload === 'string') {
+            try {
+                payloadObject = JSON.parse(payload);
+            } catch (parseError) {
+                payloadObject = null;
+            }
+        } else if (payload && typeof payload === 'object') {
+            payloadObject = payload;
+        }
+
+        return {
+            status: context.status,
+            message: payloadObject?.error || payloadObject?.message || error.message,
+            payload: payloadObject,
+            original: error
+        };
+    }
+
+    function resolveNewsletterErrorMessage(errorInfo) {
+        if (!errorInfo) {
+            return 'Subscription failed. Please try again.';
+        }
+
+        const message = String(errorInfo.message || '').toLowerCase();
+
+        if (errorInfo.status === 400 && message.includes('email')) {
+            return 'Please enter a valid email address.';
+        }
+
+        if (message.includes('already') || message.includes('duplicate')) {
+            return 'You are already subscribed.';
+        }
+
+        if (message.includes('network') || message.includes('fetch')) {
+            return 'Network error. Please try again.';
+        }
+
+        return 'Subscription failed. Please try again.';
+    }
+
+    function setNewsletterLoading(form, button, isLoading) {
+        if (button) {
+            if (!button.dataset.defaultLabel) {
+                button.dataset.defaultLabel = button.textContent || 'Subscribe';
+            }
+            button.textContent = isLoading ? 'Subscribing...' : button.dataset.defaultLabel;
+            button.disabled = isLoading;
+            button.classList.toggle('is-loading', isLoading);
+        }
+
+        if (form) {
+            form.dataset.submitting = isLoading ? 'true' : 'false';
+            form.setAttribute('aria-busy', isLoading ? 'true' : 'false');
+        }
+    }
+
     function initNewsletterForms() {
         const forms = document.querySelectorAll('[data-newsletter-form]');
         if (!forms.length) return;
@@ -609,10 +680,15 @@
         forms.forEach(form => {
             const emailInput = form.querySelector('input[name="email"]');
             const messageEl = form.querySelector('[data-newsletter-message]');
+            const submitButton = form.querySelector('button[type="submit"]');
             if (!emailInput) return;
 
             form.addEventListener('submit', async (event) => {
                 event.preventDefault();
+
+                if (form.dataset.submitting === 'true') {
+                    return;
+                }
 
                 const email = emailInput.value.trim().toLowerCase();
                 if (!isValidEmail(email)) {
@@ -621,50 +697,84 @@
                     return;
                 }
 
-                if (isSupabaseReady()) {
-                    const { data, error } = await supabaseClient.functions.invoke(
-                        'subscribe-newsletter',
-                        { body: { email } }
-                    );
+                setFormMessage(messageEl, '', null);
+                setNewsletterLoading(form, submitButton, true);
 
-                    if (error) {
-                        setFormMessage(messageEl, 'Subscription failed. Please try again.', 'error');
-                        return;
+                try {
+                    if (isSupabaseFunctionsReady()) {
+                        const { data, error } = await supabaseClient.functions.invoke(
+                            'subscribe-newsletter',
+                            { body: { email } }
+                        );
+
+                        if (error) {
+                            const errorInfo = parseFunctionError(error);
+                            console.error('Newsletter subscription failed', errorInfo);
+                            setFormMessage(messageEl, resolveNewsletterErrorMessage(errorInfo), 'error');
+                            return;
+                        }
+
+                        if (!data || !data.status) {
+                            console.error('Newsletter subscription returned no status', data);
+                            setFormMessage(messageEl, 'Subscription failed. Please try again.', 'error');
+                            return;
+                        }
+
+                        if (data.status === 'already_subscribed') {
+                            setFormMessage(messageEl, 'You are already subscribed.', 'success');
+                            return;
+                        }
+
+                        if (data.status !== 'subscribed') {
+                            console.error('Unexpected newsletter response', data);
+                            setFormMessage(messageEl, 'Subscription failed. Please try again.', 'error');
+                            return;
+                        }
+
+                        const emailStatus = data.email_status || null;
+                        if (emailStatus === 'failed') {
+                            setFormMessage(
+                                messageEl,
+                                'You are subscribed, but we could not send a welcome email.',
+                                'success'
+                            );
+                            return;
+                        }
+
+                        if (emailStatus === 'skipped') {
+                            setFormMessage(messageEl, 'Thanks for subscribing! You are on the list.', 'success');
+                            return;
+                        }
+
+                        setFormMessage(messageEl, 'Thanks for subscribing! Check your inbox.', 'success');
+                    } else {
+                        console.warn('Supabase functions not available; using local fallback.');
+                        const storageKey = 'bloomly:newsletter-emails';
+                        const stored = safeJSONParse(safeStorageGet(storageKey), []);
+                        const emails = Array.isArray(stored) ? stored : [];
+                        const alreadySubscribed = emails.includes(email);
+
+                        if (!alreadySubscribed) {
+                            emails.push(email);
+                            safeStorageSet(storageKey, JSON.stringify(emails));
+                        }
+
+                        setFormMessage(
+                            messageEl,
+                            alreadySubscribed
+                                ? 'You are already subscribed on this device.'
+                                : 'Thanks for subscribing! (Saved on this device)',
+                            'success'
+                        );
                     }
 
-                    if (data && data.status === 'already_subscribed') {
-                        setFormMessage(messageEl, 'You are already subscribed.', 'success');
-                        return;
-                    }
-
-                    const emailStatus = data ? data.email_status : null;
-                    if (emailStatus === 'failed' || emailStatus === 'skipped') {
-                        setFormMessage(messageEl, 'Thanks for subscribing! You are on the list.', 'success');
-                        return;
-                    }
-
-                    setFormMessage(messageEl, 'Thanks for subscribing! Check your inbox.', 'success');
-                } else {
-                    const storageKey = 'bloomly:newsletter-emails';
-                    const stored = safeJSONParse(safeStorageGet(storageKey), []);
-                    const emails = Array.isArray(stored) ? stored : [];
-                    const alreadySubscribed = emails.includes(email);
-
-                    if (!alreadySubscribed) {
-                        emails.push(email);
-                        safeStorageSet(storageKey, JSON.stringify(emails));
-                    }
-
-                    setFormMessage(
-                        messageEl,
-                        alreadySubscribed
-                            ? 'You are already subscribed on this device.'
-                            : 'Thanks for subscribing! (Saved on this device)',
-                        'success'
-                    );
+                    emailInput.value = '';
+                } catch (error) {
+                    console.error('Newsletter subscription error', error);
+                    setFormMessage(messageEl, 'Subscription failed. Please try again.', 'error');
+                } finally {
+                    setNewsletterLoading(form, submitButton, false);
                 }
-
-                emailInput.value = '';
             });
         });
     }
