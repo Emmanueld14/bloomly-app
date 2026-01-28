@@ -654,7 +654,58 @@
             return 'Network error. Please try again.';
         }
 
+        if (errorInfo.status === 401 || errorInfo.status === 403) {
+            return 'Subscription service is unavailable right now.';
+        }
+
         return 'Subscription failed. Please try again.';
+    }
+
+    function isDuplicateDatabaseError(error) {
+        const message = String(error?.message || '').toLowerCase();
+        return error?.code === '23505' || message.includes('duplicate') || message.includes('unique');
+    }
+
+    function resolveDirectInsertErrorMessage(error) {
+        if (!error) {
+            return 'Subscription failed. Please try again.';
+        }
+
+        if (isDuplicateDatabaseError(error)) {
+            return 'You are already subscribed.';
+        }
+
+        const message = String(error.message || '').toLowerCase();
+        if (message.includes('row-level security') || message.includes('permission')) {
+            return 'Subscription service is unavailable right now.';
+        }
+
+        if (message.includes('does not exist')) {
+            return 'Subscription service is unavailable right now.';
+        }
+
+        return 'Subscription failed. Please try again.';
+    }
+
+    async function insertSubscriberDirect(email) {
+        if (!isSupabaseReady()) {
+            return { status: 'error', error: new Error('Supabase client unavailable') };
+        }
+
+        const { data, error } = await supabaseClient
+            .from('subscribers')
+            .insert({ email })
+            .select('id, email')
+            .single();
+
+        if (error) {
+            if (isDuplicateDatabaseError(error)) {
+                return { status: 'already_subscribed' };
+            }
+            return { status: 'error', error };
+        }
+
+        return { status: 'subscribed', subscriber: data };
     }
 
     function setNewsletterLoading(form, button, isLoading) {
@@ -710,6 +761,33 @@
                         if (error) {
                             const errorInfo = parseFunctionError(error);
                             console.error('Newsletter subscription failed', errorInfo);
+                            if (isSupabaseReady()) {
+                                const fallbackResult = await insertSubscriberDirect(email);
+                                if (fallbackResult.status === 'subscribed') {
+                                    setFormMessage(
+                                        messageEl,
+                                        'Thanks for subscribing! You are on the list.',
+                                        'success'
+                                    );
+                                    return;
+                                }
+
+                                if (fallbackResult.status === 'already_subscribed') {
+                                    setFormMessage(messageEl, 'You are already subscribed.', 'success');
+                                    return;
+                                }
+
+                                if (fallbackResult.status === 'error') {
+                                    console.error('Newsletter direct insert failed', fallbackResult.error);
+                                    setFormMessage(
+                                        messageEl,
+                                        resolveDirectInsertErrorMessage(fallbackResult.error),
+                                        'error'
+                                    );
+                                    return;
+                                }
+                            }
+
                             setFormMessage(messageEl, resolveNewsletterErrorMessage(errorInfo), 'error');
                             return;
                         }
@@ -747,8 +825,24 @@
                         }
 
                         setFormMessage(messageEl, 'Thanks for subscribing! Check your inbox.', 'success');
+                    } else if (isSupabaseReady()) {
+                        const fallbackResult = await insertSubscriberDirect(email);
+                        if (fallbackResult.status === 'subscribed') {
+                            setFormMessage(messageEl, 'Thanks for subscribing! You are on the list.', 'success');
+                        } else if (fallbackResult.status === 'already_subscribed') {
+                            setFormMessage(messageEl, 'You are already subscribed.', 'success');
+                        } else if (fallbackResult.status === 'error') {
+                            console.error('Newsletter direct insert failed', fallbackResult.error);
+                            setFormMessage(
+                                messageEl,
+                                resolveDirectInsertErrorMessage(fallbackResult.error),
+                                'error'
+                            );
+                        } else {
+                            setFormMessage(messageEl, 'Subscription failed. Please try again.', 'error');
+                        }
                     } else {
-                        console.warn('Supabase functions not available; using local fallback.');
+                        console.warn('Supabase not configured; saving locally.');
                         const storageKey = 'bloomly:newsletter-emails';
                         const stored = safeJSONParse(safeStorageGet(storageKey), []);
                         const emails = Array.isArray(stored) ? stored : [];
@@ -762,9 +856,9 @@
                         setFormMessage(
                             messageEl,
                             alreadySubscribed
-                                ? 'You are already subscribed on this device.'
-                                : 'Thanks for subscribing! (Saved on this device)',
-                            'success'
+                                ? 'We could not reach the signup service. Your email is saved on this device.'
+                                : 'We could not reach the signup service. Your email is saved on this device.',
+                            'error'
                         );
                     }
 
