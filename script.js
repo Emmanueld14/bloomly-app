@@ -637,6 +637,12 @@
                         return;
                     }
 
+                    const emailStatus = data ? data.email_status : null;
+                    if (emailStatus === 'failed' || emailStatus === 'skipped') {
+                        setFormMessage(messageEl, 'Thanks for subscribing! You are on the list.', 'success');
+                        return;
+                    }
+
                     setFormMessage(messageEl, 'Thanks for subscribing! Check your inbox.', 'success');
                 } else {
                     const storageKey = 'bloomly:newsletter-emails';

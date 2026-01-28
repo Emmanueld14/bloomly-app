@@ -10,6 +10,7 @@ const SUPABASE_URL = Deno.env.get("SUPABASE_URL") || "";
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY") || "";
 const RESEND_FROM_EMAIL = Deno.env.get("RESEND_FROM_EMAIL") || "";
+const CAN_SEND_WELCOME = Boolean(RESEND_API_KEY && RESEND_FROM_EMAIL);
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
@@ -66,10 +67,6 @@ Deno.serve(async (req) => {
     return jsonResponse({ error: "Supabase service role key is missing." }, 500);
   }
 
-  if (!RESEND_API_KEY || !RESEND_FROM_EMAIL) {
-    return jsonResponse({ error: "Resend API key or from email is missing." }, 500);
-  }
-
   let email = "";
   try {
     const body = await req.json();
@@ -100,30 +97,47 @@ Deno.serve(async (req) => {
       return jsonResponse({ error: "Unable to save subscriber." }, 500);
     }
 
-    const welcome = buildWelcomeEmail(email);
+    let emailStatus = "skipped";
 
-    const resendResponse = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${RESEND_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        from: RESEND_FROM_EMAIL,
-        to: [email],
-        subject: welcome.subject,
-        html: welcome.html,
-        text: welcome.text,
-      }),
-    });
+    if (CAN_SEND_WELCOME) {
+      const welcome = buildWelcomeEmail(email);
 
-    if (!resendResponse.ok) {
-      const detail = await resendResponse.text().catch(() => "");
-      console.error("Resend error", resendResponse.status, detail);
-      return jsonResponse({ error: "Subscriber saved, but email failed." }, 502);
+      try {
+        const resendResponse = await fetch("https://api.resend.com/emails", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${RESEND_API_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            from: RESEND_FROM_EMAIL,
+            to: [email],
+            subject: welcome.subject,
+            html: welcome.html,
+            text: welcome.text,
+          }),
+        });
+
+        if (!resendResponse.ok) {
+          const detail = await resendResponse.text().catch(() => "");
+          console.error("Resend error", resendResponse.status, detail);
+          emailStatus = "failed";
+        } else {
+          emailStatus = "sent";
+        }
+      } catch (error) {
+        console.error("Resend request failed", error);
+        emailStatus = "failed";
+      }
+    } else {
+      console.warn("Resend not configured; skipping welcome email.");
     }
 
-    return jsonResponse({ status: "subscribed", subscriber: data });
+    return jsonResponse({
+      status: "subscribed",
+      subscriber: data,
+      email_status: emailStatus,
+    });
   } catch (error) {
     console.error("subscribe-newsletter error", error);
     return jsonResponse({ error: "Unexpected error." }, 500);
