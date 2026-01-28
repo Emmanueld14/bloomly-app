@@ -873,6 +873,125 @@
         });
     }
 
+    // ========== Bloomly Team Cards ==========
+    function initBloomlyTeamCards() {
+        const cards = document.querySelectorAll('[data-team-card]');
+        if (!cards.length) return;
+
+        const supportsHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+
+        const closeCard = (card) => {
+            if (!card) return;
+            card.classList.remove('is-expanded');
+            const toggle = card.querySelector('[data-team-toggle]');
+            if (toggle) {
+                toggle.setAttribute('aria-expanded', 'false');
+            }
+            const panel = card.querySelector('[data-team-panel]');
+            if (panel) {
+                panel.setAttribute('aria-hidden', 'true');
+            }
+        };
+
+        const openCard = (card) => {
+            if (!card) return;
+            card.classList.add('is-expanded');
+            const toggle = card.querySelector('[data-team-toggle]');
+            if (toggle) {
+                toggle.setAttribute('aria-expanded', 'true');
+            }
+            const panel = card.querySelector('[data-team-panel]');
+            if (panel) {
+                panel.setAttribute('aria-hidden', 'false');
+            }
+        };
+
+        const closeAllCards = () => {
+            cards.forEach(card => closeCard(card));
+        };
+
+        cards.forEach((card, index) => {
+            const { name, role, bio, image } = card.dataset;
+
+            const nameEl = card.querySelector('[data-team-name]');
+            if (name && nameEl) {
+                nameEl.textContent = name;
+            }
+
+            const roleEl = card.querySelector('[data-team-role]');
+            if (role && roleEl) {
+                roleEl.textContent = role;
+            }
+
+            const bioEl = card.querySelector('[data-team-bio]');
+            if (bio && bioEl) {
+                bioEl.textContent = bio;
+            }
+
+            const imageEl = card.querySelector('[data-team-image]');
+            if (image && imageEl) {
+                imageEl.src = image;
+                imageEl.alt = name ? `${name} portrait` : 'Team member portrait';
+            }
+
+            const panel = card.querySelector('[data-team-panel]');
+            if (panel && !panel.id) {
+                panel.id = `bloomly-team-panel-${index + 1}`;
+            }
+            if (panel) {
+                panel.setAttribute('aria-hidden', 'true');
+            }
+
+            const toggle = card.querySelector('[data-team-toggle]');
+            if (toggle) {
+                if (panel) {
+                    toggle.setAttribute('aria-controls', panel.id);
+                }
+                toggle.setAttribute('aria-expanded', 'false');
+
+                toggle.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    if (card.classList.contains('is-expanded')) {
+                        closeCard(card);
+                    } else {
+                        closeAllCards();
+                        openCard(card);
+                    }
+                });
+            }
+
+            if (!supportsHover) {
+                card.addEventListener('click', (event) => {
+                    if (event.target.closest('[data-team-panel]') && !event.target.closest('[data-team-toggle]')) {
+                        return;
+                    }
+
+                    if (card.classList.contains('is-expanded')) {
+                        closeCard(card);
+                    } else {
+                        closeAllCards();
+                        openCard(card);
+                    }
+                });
+            }
+        });
+
+        if (!supportsHover) {
+            document.addEventListener('click', (event) => {
+                if (!event.target.closest('[data-team-card]')) {
+                    closeAllCards();
+                }
+            });
+
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape') {
+                    closeAllCards();
+                }
+            });
+        }
+    }
+
     // ========== Initialize Everything ==========
     function init() {
         // Navigation
@@ -897,6 +1016,7 @@
         initFloatingShapes();
         void initPostInteractions();
         initNewsletterForms();
+        initBloomlyTeamCards();
         
         // Trigger initial scroll check
         handleNavbarScroll();
