@@ -201,7 +201,7 @@
 
     // ========== Card Hover Effects ==========
     function initCardEffects() {
-        const cards = document.querySelectorAll('.card, .blog-card, .glass-card');
+        const cards = document.querySelectorAll('.card, .blog-card, .glass-card, .writing-card, .why-card');
         cards.forEach(card => {
             card.addEventListener('mouseenter', function() {
                 this.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
@@ -214,6 +214,99 @@
         const shapes = document.querySelectorAll('.floating-shape');
         shapes.forEach((shape, index) => {
             shape.style.animationDelay = `${index * -2}s`;
+        });
+    }
+
+    // ========== Home Parallax ==========
+    function initHomeParallax() {
+        const elements = Array.from(document.querySelectorAll('[data-parallax]'));
+        if (!elements.length) return;
+
+        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (prefersReducedMotion) return;
+
+        const supportsHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+        const state = {
+            mouseX: 0,
+            mouseY: 0,
+            scrollY: 0
+        };
+        let rafId = null;
+
+        const update = () => {
+            rafId = null;
+            elements.forEach((element) => {
+                const depth = parseFloat(element.dataset.parallaxDepth || '12');
+                const speed = parseFloat(element.dataset.parallaxSpeed || '0.06');
+                const translateX = state.mouseX * depth;
+                const translateY = state.mouseY * depth - state.scrollY * speed;
+                element.style.transform = `translate3d(${translateX}px, ${translateY}px, 0)`;
+            });
+        };
+
+        const requestUpdate = () => {
+            if (rafId === null) {
+                rafId = window.requestAnimationFrame(update);
+            }
+        };
+
+        if (supportsHover) {
+            window.addEventListener('mousemove', (event) => {
+                state.mouseX = (event.clientX / window.innerWidth) - 0.5;
+                state.mouseY = (event.clientY / window.innerHeight) - 0.5;
+                requestUpdate();
+            }, { passive: true });
+        }
+
+        window.addEventListener('scroll', () => {
+            state.scrollY = window.scrollY || 0;
+            requestUpdate();
+        }, { passive: true });
+
+        requestUpdate();
+    }
+
+    // ========== Why Bloomly Cards ==========
+    function initWhyBloomlyCards() {
+        const cards = Array.from(document.querySelectorAll('[data-why-card]'));
+        if (!cards.length) return;
+
+        const supportsHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+        if (supportsHover) return;
+
+        const closeAll = () => {
+            cards.forEach((card) => {
+                card.classList.remove('is-revealed');
+                card.setAttribute('aria-expanded', 'false');
+            });
+        };
+
+        cards.forEach((card) => {
+            card.setAttribute('aria-expanded', 'false');
+            card.addEventListener('click', (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                if (card.classList.contains('is-revealed')) {
+                    card.classList.remove('is-revealed');
+                    card.setAttribute('aria-expanded', 'false');
+                } else {
+                    closeAll();
+                    card.classList.add('is-revealed');
+                    card.setAttribute('aria-expanded', 'true');
+                }
+            });
+        });
+
+        document.addEventListener('click', (event) => {
+            if (!event.target.closest('[data-why-card]')) {
+                closeAll();
+            }
+        });
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') {
+                closeAll();
+            }
         });
     }
 
@@ -1295,6 +1388,8 @@
         initButtonEffects();
         initCardEffects();
         initFloatingShapes();
+        initHomeParallax();
+        initWhyBloomlyCards();
         void initPostInteractions();
         initNewsletterForms();
         initBloomlyTeamCards();

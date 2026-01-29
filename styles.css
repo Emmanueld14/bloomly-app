@@ -12,6 +12,12 @@
     --color-glass: rgba(255, 255, 255, 0.3);
     --color-glass-strong: rgba(255, 255, 255, 0.5);
     --color-glass-border: rgba(255, 255, 255, 0.2);
+    --color-ink: #1F1F1F;
+    --color-muted: #595959;
+    --color-offwhite: #F9FAF7;
+    --color-mist: #F1F2F0;
+    --color-sage: #8AA89A;
+    --color-sage-dark: #6D8F7F;
     
     /* Gradients */
     --gradient-primary: linear-gradient(135deg, #FF78B9 0%, #C8A7FF 50%, #5FA8FF 100%);
@@ -364,6 +370,267 @@ a:hover {
     }
 }
 
+/* ========== Home Page Redesign ========== */
+.home-page {
+    background: var(--color-offwhite);
+    color: var(--color-ink);
+}
+
+.home-page .navbar {
+    background: rgba(255, 255, 255, 0.85);
+    border-bottom: 1px solid rgba(138, 168, 154, 0.2);
+}
+
+.home-page .logo-text {
+    background: none;
+    -webkit-text-fill-color: var(--color-ink);
+    color: var(--color-ink);
+}
+
+.home-page .nav-links a.active {
+    color: var(--color-sage);
+}
+
+.home-page .nav-links a:hover {
+    color: var(--color-sage-dark);
+}
+
+.home-page .nav-links a.active::after {
+    background: var(--color-sage);
+}
+
+.home-main {
+    display: block;
+}
+
+.home-hero {
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    text-align: center;
+    padding: calc(var(--space-4xl) + 80px) var(--space-lg) var(--space-3xl);
+    background: linear-gradient(180deg, #FFFFFF 0%, var(--color-mist) 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.home-hero-background {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.home-hero-orb {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(138, 168, 154, 0.18);
+    filter: blur(2px);
+    transition: transform 400ms ease;
+}
+
+.home-hero-orb.orb-one {
+    width: 180px;
+    height: 180px;
+    top: 18%;
+    left: 12%;
+}
+
+.home-hero-orb.orb-two {
+    width: 240px;
+    height: 240px;
+    bottom: 20%;
+    right: 8%;
+    background: rgba(138, 168, 154, 0.12);
+}
+
+.home-hero-orb.orb-three {
+    width: 120px;
+    height: 120px;
+    top: 60%;
+    left: 24%;
+    background: rgba(138, 168, 154, 0.2);
+}
+
+.home-hero-content {
+    position: relative;
+    z-index: 2;
+    max-width: 720px;
+}
+
+.home-hero-title {
+    font-size: clamp(2.75rem, 6vw, 4.5rem);
+    margin-bottom: var(--space-md);
+    color: var(--color-ink);
+    animation: homeFadeUp 0.9s ease-out both;
+}
+
+.home-hero-tagline {
+    font-size: var(--text-xl);
+    color: var(--color-muted);
+    margin-bottom: var(--space-2xl);
+    line-height: 1.7;
+    animation: homeFadeUp 0.9s ease-out 0.2s both;
+}
+
+.home-hero-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-md);
+    flex-wrap: wrap;
+    animation: homeFadeUp 0.9s ease-out 0.4s both;
+}
+
+@keyframes homeFadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.home-storyline {
+    background: var(--color-offwhite);
+}
+
+.story-step {
+    font-size: var(--text-2xl);
+    color: var(--color-ink);
+    padding: var(--space-xl) var(--space-xl);
+    border-left: 2px solid rgba(138, 168, 154, 0.4);
+    background: rgba(255, 255, 255, 0.85);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 12px 30px rgba(31, 31, 31, 0.08);
+    margin-bottom: var(--space-lg);
+    line-height: 1.6;
+}
+
+.story-step:last-child {
+    margin-bottom: 0;
+}
+
+.home-why {
+    background: var(--color-mist);
+}
+
+.home-section-header h2 {
+    background: none;
+    -webkit-text-fill-color: var(--color-ink);
+    color: var(--color-ink);
+}
+
+.home-section-header p {
+    color: var(--color-muted);
+}
+
+.why-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: var(--space-lg);
+}
+
+.why-card {
+    text-align: left;
+    border-radius: var(--radius-lg);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    background: rgba(255, 255, 255, 0.55);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    padding: var(--space-lg);
+    cursor: pointer;
+    box-shadow: 0 16px 30px rgba(31, 31, 31, 0.1);
+    transition: transform var(--transition-base), box-shadow var(--transition-base);
+    overflow: hidden;
+    appearance: none;
+}
+
+.why-card:focus-visible {
+    outline: 2px solid rgba(138, 168, 154, 0.6);
+    outline-offset: 3px;
+}
+
+.why-card-title {
+    display: block;
+    font-size: var(--text-xl);
+    font-weight: 700;
+    color: var(--color-ink);
+    margin-bottom: var(--space-sm);
+}
+
+.why-card-detail {
+    display: block;
+    font-size: var(--text-base);
+    color: var(--color-muted);
+    max-height: 0;
+    opacity: 0;
+    transform: translateY(6px);
+    transition: max-height var(--transition-base), opacity var(--transition-base), transform var(--transition-base);
+}
+
+.why-card:hover,
+.why-card.is-revealed {
+    transform: translateY(-4px) scale(1.01);
+    box-shadow: 0 20px 40px rgba(31, 31, 31, 0.14);
+}
+
+.why-card:hover .why-card-detail,
+.why-card.is-revealed .why-card-detail {
+    max-height: 120px;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.home-writing {
+    background: var(--color-offwhite);
+}
+
+.writing-scroll {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: var(--space-lg);
+}
+
+.writing-card {
+    border-radius: var(--radius-lg);
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(31, 31, 31, 0.08);
+    padding: var(--space-lg);
+    box-shadow: 0 16px 28px rgba(31, 31, 31, 0.08);
+    transition: transform var(--transition-base), box-shadow var(--transition-base);
+}
+
+.writing-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 40px rgba(31, 31, 31, 0.12);
+}
+
+.writing-tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--radius-full);
+    background: rgba(138, 168, 154, 0.18);
+    color: var(--color-sage-dark);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    margin-bottom: var(--space-sm);
+}
+
+.writing-card h3 {
+    font-size: var(--text-xl);
+    color: var(--color-ink);
+    margin-bottom: var(--space-sm);
+}
+
+.writing-excerpt {
+    color: var(--color-muted);
+    margin-bottom: 0;
+    line-height: 1.7;
+}
+
 /* Floating shapes */
 .floating-shape {
     position: absolute;
@@ -458,6 +725,32 @@ a:hover {
     transform: translateY(-3px);
     box-shadow: 0 6px 25px rgba(255, 255, 255, 0.3);
     color: var(--color-pink);
+}
+
+.btn-sage {
+    background: var(--color-sage);
+    color: #FFFFFF;
+    box-shadow: 0 10px 24px rgba(138, 168, 154, 0.35);
+}
+
+.btn-sage:hover {
+    background: var(--color-sage-dark);
+    transform: translateY(-2px) scale(1.01);
+    box-shadow: 0 16px 30px rgba(138, 168, 154, 0.35);
+    color: #FFFFFF;
+}
+
+.btn-ghost {
+    background: rgba(255, 255, 255, 0.8);
+    color: var(--color-ink);
+    border: 1px solid rgba(31, 31, 31, 0.15);
+    box-shadow: none;
+}
+
+.btn-ghost:hover {
+    transform: translateY(-2px) scale(1.01);
+    box-shadow: 0 12px 24px rgba(31, 31, 31, 0.12);
+    color: var(--color-ink);
 }
 
 /* ========== Glassmorphic Cards ========== */
@@ -1304,6 +1597,36 @@ a:hover {
     .newsletter-input .btn {
         width: 100%;
     }
+
+    .home-hero {
+        padding: calc(var(--space-3xl) + 80px) var(--space-md) var(--space-2xl);
+    }
+
+    .home-hero-actions {
+        flex-direction: column;
+    }
+
+    .home-hero-actions .btn {
+        width: 100%;
+    }
+
+    .story-step {
+        font-size: var(--text-lg);
+        padding: var(--space-lg);
+    }
+
+    .writing-scroll {
+        display: flex;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        padding-bottom: var(--space-sm);
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .writing-card {
+        min-width: 240px;
+        scroll-snap-align: start;
+    }
 }
 
 /* ========== Team Introduction Section ========== */
@@ -1775,6 +2098,19 @@ a:hover {
     .bloomly-team-photo,
     .bloomly-team-panel,
     .bloomly-team-link {
+        transition: none;
+    }
+
+    .home-hero-title,
+    .home-hero-tagline,
+    .home-hero-actions {
+        animation: none;
+    }
+
+    .home-hero-orb,
+    .why-card,
+    .writing-card,
+    .story-step {
         transition: none;
     }
 }

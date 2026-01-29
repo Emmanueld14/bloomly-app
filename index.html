@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Bloomly - A safe space for teens to find support, healing, and hope. Mental health awareness and resources for teenagers.">
     <meta name="keywords" content="teen mental health, mental health awareness, teenage wellbeing, Bloomly">
-    <meta name="author" content="Manuel Muhunami">
+    <meta name="author" content="Bloomly Team">
     <meta name="date" content="2026-01-01">
-    <meta property="article:author" content="Manuel Muhunami">
+    <meta property="article:author" content="Bloomly Team">
     <meta property="article:published_time" content="2026-01-01T00:00:00+00:00">
     <meta property="og:title" content="Bloomly - Your Safe Space for Mental Health Support">
     <meta property="og:description" content="A warm, supportive community for teens navigating mental health challenges. Find hope, healing, and connection.">
@@ -38,7 +38,7 @@
     <!-- Stylesheet -->
     <link rel="stylesheet" href="styles.css">
 </head>
-<body>
+<body class="home-page">
     <!-- Navigation -->
     <nav class="navbar" id="navbar">
         <div class="navbar-content">
@@ -59,107 +59,94 @@
         </div>
     </nav>
 
-    <!-- Hero Section -->
-    <section class="hero">
-        <div class="floating-shape" style="width: 100px; height: 100px; background: rgba(255, 120, 185, 0.3); top: 20%; left: 10%;"></div>
-        <div class="floating-shape" style="width: 80px; height: 80px; background: rgba(95, 168, 255, 0.3); top: 60%; right: 15%; animation-delay: -5s;"></div>
-        <div class="floating-shape" style="width: 120px; height: 120px; background: rgba(200, 167, 255, 0.25); bottom: 20%; left: 20%; animation-delay: -10s;"></div>
-        
-        <div class="hero-content">
-            <h1>You're Not Alone</h1>
-            <p>Bloomly is your safe space to find support, healing, and hope. We're here to help you navigate life's challenges with confidence, resilience, and a community that cares.</p>
-            <div class="hero-cta">
-                <a href="blog.html" class="btn btn-primary">Read Our Blog</a>
-                <a href="about.html" class="btn btn-secondary">Learn More</a>
+    <main class="home-main">
+        <!-- Hero Section -->
+        <section class="home-hero">
+            <div class="home-hero-background" aria-hidden="true">
+                <span class="home-hero-orb orb-one" data-parallax data-parallax-depth="18" data-parallax-speed="0.05"></span>
+                <span class="home-hero-orb orb-two" data-parallax data-parallax-depth="26" data-parallax-speed="0.08"></span>
+                <span class="home-hero-orb orb-three" data-parallax data-parallax-depth="14" data-parallax-speed="0.04"></span>
             </div>
-        </div>
-    </section>
+            <div class="home-hero-content">
+                <h1 class="home-hero-title">Bloomly</h1>
+                <p class="home-hero-tagline">A calm space to write, reflect, and feel understood.</p>
+                <div class="home-hero-actions">
+                    <a href="admin/index.html" class="btn btn-sage">Start Writing</a>
+                    <a href="blog.html" class="btn btn-ghost">Explore Stories</a>
+                </div>
+            </div>
+        </section>
 
-    <!-- Mission Section -->
-    <section class="section">
-        <div class="container">
-            <div class="section-header">
-                <h2>Our Mission</h2>
-                <p>We're building a world where every teen feels supported, understood, and empowered to thrive. Mental health matters, and you matter.</p>
+        <!-- Storytelling Sections -->
+        <section class="section home-storyline">
+            <div class="container">
+                <div class="story-step fade-in">Some days are heavy, and Bloomly is a quiet place to set the weight down.</div>
+                <div class="story-step fade-in">Write what you feel in a space that listens without judgment.</div>
+                <div class="story-step fade-in">Reflect on the small steps forward, even when progress feels invisible.</div>
+                <div class="story-step fade-in">Find stories that remind you that your voice belongs here.</div>
             </div>
-            <div class="feature-grid">
-                <div class="glass-card fade-in">
-                    <div class="card-icon">💙</div>
-                    <h3>Safe Space</h3>
-                    <p>We create a judgment-free environment where you can be yourself, share your feelings, and find understanding without fear.</p>
-                </div>
-                <div class="glass-card fade-in">
-                    <div class="card-icon">🌱</div>
-                    <h3>Growth & Healing</h3>
-                    <p>Discover tools and strategies to build resilience, manage stress, and develop healthy coping skills that work for you.</p>
-                </div>
-                <div class="glass-card fade-in">
-                    <div class="card-icon">✨</div>
-                    <h3>Hope & Positivity</h3>
-                    <p>Every day is a new opportunity to grow. We believe in your strength and your ability to overcome challenges.</p>
-                </div>
-            </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- Programs Section -->
-    <section class="section features">
-        <div class="container">
-            <div class="section-header">
-                <h2>What We Offer</h2>
-                <p>Comprehensive support designed specifically for teens, by people who understand what you're going through.</p>
-            </div>
-            <div class="feature-grid">
-                <div class="glass-card fade-in">
-                    <div class="card-icon">📚</div>
-                    <h3>Wellness Resources</h3>
-                    <p>Access helpful articles, guided exercises, and tools for mindfulness, self-care, stress management, and building confidence.</p>
+        <!-- Why Bloomly -->
+        <section class="section home-why" aria-labelledby="why-bloomly-title">
+            <div class="container">
+                <div class="section-header home-section-header">
+                    <h2 id="why-bloomly-title">Why Bloomly</h2>
+                    <p>Simple ways to care for your inner world.</p>
                 </div>
-                <div class="glass-card fade-in">
-                    <div class="card-icon">🔒</div>
-                    <h3>Anonymous Check-ins</h3>
-                    <p>Use our safe, anonymous tools to check in with yourself, track your mood, and access resources whenever you need them.</p>
+                <div class="why-grid">
+                    <button class="why-card" type="button" data-why-card aria-expanded="false">
+                        <span class="why-card-title">Write</span>
+                        <span class="why-card-detail">Let your thoughts land gently, one honest sentence at a time.</span>
+                    </button>
+                    <button class="why-card" type="button" data-why-card aria-expanded="false">
+                        <span class="why-card-title">Reflect</span>
+                        <span class="why-card-detail">Notice patterns, progress, and the quiet moments that matter.</span>
+                    </button>
+                    <button class="why-card" type="button" data-why-card aria-expanded="false">
+                        <span class="why-card-title">Breathe</span>
+                        <span class="why-card-detail">Pause and return to yourself when everything feels loud.</span>
+                    </button>
+                    <button class="why-card" type="button" data-why-card aria-expanded="false">
+                        <span class="why-card-title">Connect</span>
+                        <span class="why-card-detail">Feel seen through shared stories and gentle community support.</span>
+                    </button>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- Mental Health Tips Section -->
-    <section class="section">
-        <div class="container">
-            <div class="section-header">
-                <h2>Quick Wellness Tips</h2>
-                <p>Small steps can make a big difference. Here are some simple ways to support your mental wellbeing.</p>
-            </div>
-            <div class="grid grid-3">
-                <div class="glass-card fade-in">
-                    <h3>🌿 Take Breaks</h3>
-                    <p>It's okay to pause. Give yourself permission to rest when you need it. Your mental health is just as important as your physical health.</p>
+        <!-- Featured Writing -->
+        <section class="section home-writing" aria-labelledby="featured-writing-title">
+            <div class="container">
+                <div class="section-header home-section-header">
+                    <h2 id="featured-writing-title">Featured Writing</h2>
+                    <p>Quiet reflections from Bloomly writers.</p>
                 </div>
-                <div class="glass-card fade-in">
-                    <h3>💭 Express Yourself</h3>
-                    <p>Whether it's writing, art, music, or talking to someone you trust—finding healthy ways to express your feelings is powerful.</p>
+                <div class="writing-scroll">
+                    <article class="writing-card fade-in">
+                        <span class="writing-tag">Hope</span>
+                        <h3>When the morning feels softer</h3>
+                        <p class="writing-excerpt">Today I noticed the light looked different, and it made me breathe a little deeper.</p>
+                    </article>
+                    <article class="writing-card fade-in">
+                        <span class="writing-tag">Grounding</span>
+                        <h3>Five small things</h3>
+                        <p class="writing-excerpt">I wrote down five tiny wins so I would not forget they happened.</p>
+                    </article>
+                    <article class="writing-card fade-in">
+                        <span class="writing-tag">Growth</span>
+                        <h3>Still learning to be gentle</h3>
+                        <p class="writing-excerpt">Some days are messy, but I am learning to speak to myself with kindness.</p>
+                    </article>
+                    <article class="writing-card fade-in">
+                        <span class="writing-tag">Calm</span>
+                        <h3>A quiet hour</h3>
+                        <p class="writing-excerpt">I sat with my thoughts without fixing them, and that felt like enough.</p>
+                    </article>
                 </div>
-                <div class="glass-card fade-in">
-                    <h3>🤗 Connect</h3>
-                    <p>Reach out to friends, family, or support groups. Connection is healing, and you don't have to face challenges alone.</p>
-                </div>
             </div>
-        </div>
-    </section>
-
-    <!-- CTA Section -->
-    <section class="section features">
-        <div class="container">
-            <div class="section-header">
-                <h2>Ready to Start Your Journey?</h2>
-                <p>Taking the first step can feel scary, but it's also incredibly brave. We're here to support you every step of the way.</p>
-            </div>
-            <div style="text-align: center; margin-top: var(--space-2xl);">
-                <a href="blog.html" class="btn btn-primary" style="font-size: var(--text-lg); padding: var(--space-md) var(--space-2xl);">Get Started Today</a>
-            </div>
-        </div>
-    </section>
+        </section>
+    </main>
 
     <!-- Footer -->
     <footer class="footer">
