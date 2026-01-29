@@ -982,19 +982,20 @@
             name: 'Manuel Muhunami',
             role: 'Founder & Community Lead',
             image: '/logo.svg',
-            accent: 'pink',
+            accent: 'sage',
             details: [
                 'Community safety & trust',
                 'Platform vision & partnerships',
                 'Teen support strategy'
             ],
-            bio: 'Manuel is a community builder focused on creating safe, stigma-free spaces for teens to feel supported and heard.',
+            panelSummary: 'Keeps Bloomly rooted in empathy, safety, and belonging.',
+            bio: 'Manuel began journaling as a way to survive heavy days. Bloomly grew from that quiet practice into a shared space for teens who want to feel seen.',
             work: {
-                summary: 'Manuel shapes Bloomly\u2019s vision and keeps the team aligned on safety, empathy, and accessibility.',
+                summary: 'Manuel guides Bloomly with an emphasis on trust, care, and real stories.',
                 highlights: [
-                    'Leads the platform roadmap and community guidelines.',
-                    'Builds partnerships that expand teen support resources.',
-                    'Collaborates with the team to keep every feature grounded in empathy.'
+                    'Shapes the platform roadmap and community values.',
+                    'Partners with schools and youth advocates to expand support.',
+                    'Keeps every experience grounded in empathy and safety.'
                 ]
             },
             links: [
@@ -1007,19 +1008,20 @@
             name: 'Amina Wambui',
             role: 'Wellness Program Lead',
             image: '/logo.svg',
-            accent: 'blue',
+            accent: 'mist',
             details: [
                 'Wellness resource design',
                 'Check-ins & self-care plans',
                 'Program research'
             ],
-            bio: 'Amina designs gentle wellness experiences that turn mental health support into practical, everyday habits.',
+            panelSummary: 'Designs calming routines that make support feel doable.',
+            bio: 'Amina listens for the small moments that make people feel calm. She turns those moments into gentle wellness tools for teens.',
             work: {
-                summary: 'Amina curates Bloomly\u2019s wellness programs so every tool feels calming, practical, and teen-friendly.',
+                summary: 'Amina curates Bloomly wellness experiences so they feel soft, practical, and teen-friendly.',
                 highlights: [
                     'Designs self-care toolkits and guided check-ins.',
-                    'Translates research into clear, approachable resources.',
-                    'Partners with the team to keep support tools inclusive.'
+                    'Translates research into clear, approachable routines.',
+                    'Keeps support tools inclusive and easy to return to.'
                 ]
             },
             links: [
@@ -1031,15 +1033,16 @@
             name: 'Brian Otieno',
             role: 'Content & Outreach',
             image: '/logo.svg',
-            accent: 'lilac',
+            accent: 'stone',
             details: [
                 'Content storytelling',
                 'Community outreach',
                 'Youth engagement'
             ],
-            bio: 'Brian crafts Bloomly\u2019s voice, making complex mental health topics feel clear, warm, and approachable.',
+            panelSummary: 'Tells stories that make mental health feel human.',
+            bio: 'Brian believes words can soften the hardest days. He shapes Bloomly stories to feel warm, honest, and easy to understand.',
             work: {
-                summary: 'Brian leads Bloomly\u2019s content strategy and outreach so teens can connect with support in ways that feel familiar.',
+                summary: 'Brian leads Bloomly storytelling so teens can connect with support that feels familiar.',
                 highlights: [
                     'Shapes the Bloomly content voice and storytelling.',
                     'Partners with schools and youth groups for outreach.',
@@ -1055,12 +1058,15 @@
 
     // ========== Bloomly Team Cards ==========
     function buildTeamCard(member, index) {
-        const card = document.createElement('article');
+        const wrapper = document.createElement('article');
+        wrapper.className = 'bloomly-team-item';
+        wrapper.dataset.teamCard = '';
+        wrapper.dataset.accent = member.accent || 'sage';
+        wrapper.dataset.slug = member.slug;
+        wrapper.setAttribute('aria-expanded', 'false');
+
+        const card = document.createElement('div');
         card.className = 'bloomly-team-card';
-        card.dataset.teamCard = '';
-        card.dataset.accent = member.accent || 'pink';
-        card.dataset.slug = member.slug;
-        card.setAttribute('aria-expanded', 'false');
 
         const core = document.createElement('div');
         core.className = 'bloomly-team-core';
@@ -1097,8 +1103,9 @@
 
         info.append(eyebrow, name, role, link);
         core.append(avatar, info);
+        card.appendChild(core);
 
-        const panel = document.createElement('div');
+        const panel = document.createElement('aside');
         panel.className = 'bloomly-team-panel';
         panel.dataset.teamPanel = '';
         panel.id = `bloomly-team-panel-${index + 1}`;
@@ -1108,18 +1115,22 @@
         panelTitle.className = 'bloomly-team-panel-title';
         panelTitle.textContent = 'Focus areas';
 
+        const panelSummary = document.createElement('p');
+        panelSummary.className = 'bloomly-team-panel-summary';
+        panelSummary.textContent = member.panelSummary || '';
+
         const detailList = document.createElement('ul');
         detailList.className = 'bloomly-team-details';
-        (member.details || []).forEach((detail) => {
+        (member.details || []).slice(0, 3).forEach((detail) => {
             const item = document.createElement('li');
             item.textContent = detail;
             detailList.appendChild(item);
         });
 
-        panel.append(panelTitle, detailList);
-        card.append(core, panel);
+        panel.append(panelTitle, panelSummary, detailList);
+        wrapper.append(card, panel);
 
-        return card;
+        return wrapper;
     }
 
     function renderTeamGrid() {
@@ -1186,6 +1197,9 @@
                     if (event.target.closest('a')) {
                         return;
                     }
+                    if (event.target.closest('[data-team-panel]')) {
+                        return;
+                    }
                     toggleCard();
                 });
 
@@ -1234,7 +1248,7 @@
         wrapper.className = 'container';
 
         const card = document.createElement('div');
-        card.className = 'glass-card team-profile-card team-profile-notice';
+        card.className = 'glass-card team-profile-card team-profile-notice fade-in';
 
         const message = document.createElement('p');
         message.textContent = 'We could not find this team profile. Please return to the About page to meet the team.';
@@ -1277,7 +1291,7 @@
         backLink.textContent = 'Back to About';
 
         const profileCard = document.createElement('div');
-        profileCard.className = 'glass-card team-profile-card';
+        profileCard.className = 'glass-card team-profile-card fade-in';
 
         const avatar = document.createElement('div');
         avatar.className = 'team-profile-avatar';
@@ -1338,10 +1352,12 @@
         workContainer.className = 'container';
 
         const workCard = document.createElement('div');
-        workCard.className = 'glass-card team-profile-work-card';
+        workCard.className = 'glass-card team-profile-work-card fade-in';
 
         const workTitle = document.createElement('h2');
         workTitle.textContent = 'Work at Bloomly';
+        workTitle.id = `work-at-bloomly-${member.slug}`;
+        workSection.setAttribute('aria-labelledby', workTitle.id);
 
         const workCopy = document.createElement('p');
         workCopy.className = 'team-profile-work-copy';
@@ -1350,14 +1366,15 @@
         workCard.append(workTitle, workCopy);
 
         if (Array.isArray(member.work?.highlights) && member.work.highlights.length) {
-            const list = document.createElement('ul');
-            list.className = 'team-profile-work-list';
+            const grid = document.createElement('div');
+            grid.className = 'team-profile-work-grid';
             member.work.highlights.forEach((item) => {
-                const listItem = document.createElement('li');
-                listItem.textContent = item;
-                list.appendChild(listItem);
+                const workItem = document.createElement('div');
+                workItem.className = 'team-profile-work-item';
+                workItem.textContent = item;
+                grid.appendChild(workItem);
             });
-            workCard.appendChild(list);
+            workCard.appendChild(grid);
         }
 
         workContainer.appendChild(workCard);
