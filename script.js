@@ -17,23 +17,32 @@
         if (!navLinks) return;
         const links = navLinks.querySelectorAll('a');
         const path = window.location.pathname;
-        const isBlogPost = path.includes('/blog/') && path !== '/blog.html';
+        const isBlogPost = path.includes('/blog/') && !path.endsWith('blog.html');
+        const isTeamProfile = path.includes('/team/');
         
         links.forEach(link => {
-            const linkPath = link.getAttribute('href');
-            const isBlogLink = linkPath === 'blog.html' || linkPath === '../blog.html' || linkPath.includes('blog.html');
+            const linkPath = link.getAttribute('href') || '';
+            const normalizedLinkPath = linkPath.split('?')[0];
+            const linkSegment = normalizedLinkPath.split('/').pop();
+            const isBlogLink = normalizedLinkPath.endsWith('blog.html');
+            const isAboutLink = normalizedLinkPath.endsWith('about.html');
             
             // Remove active class first
             link.classList.remove('active');
             
             // Check if this link should be active
+            if (isTeamProfile && isAboutLink) {
+                link.classList.add('active');
+                return;
+            }
+
             if (isBlogPost && isBlogLink) {
                 link.classList.add('active');
-            } else if (!isBlogPost) {
-                if (linkPath === currentPath || 
-                    (currentPath === '' && linkPath === 'index.html') ||
-                    (currentPath === 'index.html' && linkPath === 'index.html') ||
-                    (path.endsWith('/') && linkPath === 'index.html')) {
+            } else if (!isBlogPost && !isTeamProfile) {
+                if (linkSegment === currentPath || 
+                    (currentPath === '' && linkSegment === 'index.html') ||
+                    (currentPath === 'index.html' && linkSegment === 'index.html') ||
+                    (path.endsWith('/') && linkSegment === 'index.html')) {
                     link.classList.add('active');
                 }
             }
@@ -873,8 +882,166 @@
         });
     }
 
+    // ========== Bloomly Team Data ==========
+    const BLOOMLY_TEAM_MEMBERS = [
+        {
+            slug: 'manuel-muhunami',
+            name: 'Manuel Muhunami',
+            role: 'Founder & Community Lead',
+            image: '/logo.svg',
+            accent: 'pink',
+            details: [
+                'Community safety & trust',
+                'Platform vision & partnerships',
+                'Teen support strategy'
+            ],
+            bio: 'Manuel is a community builder focused on creating safe, stigma-free spaces for teens to feel supported and heard.',
+            work: {
+                summary: 'Manuel shapes Bloomly\u2019s vision and keeps the team aligned on safety, empathy, and accessibility.',
+                highlights: [
+                    'Leads the platform roadmap and community guidelines.',
+                    'Builds partnerships that expand teen support resources.',
+                    'Collaborates with the team to keep every feature grounded in empathy.'
+                ]
+            },
+            links: [
+                { label: 'LinkedIn', url: 'https://www.linkedin.com/in/manuel-muhunami' },
+                { label: 'Portfolio', url: 'https://www.behance.net/manuel-muhunami' }
+            ]
+        },
+        {
+            slug: 'amina-wambui',
+            name: 'Amina Wambui',
+            role: 'Wellness Program Lead',
+            image: '/logo.svg',
+            accent: 'blue',
+            details: [
+                'Wellness resource design',
+                'Check-ins & self-care plans',
+                'Program research'
+            ],
+            bio: 'Amina designs gentle wellness experiences that turn mental health support into practical, everyday habits.',
+            work: {
+                summary: 'Amina curates Bloomly\u2019s wellness programs so every tool feels calming, practical, and teen-friendly.',
+                highlights: [
+                    'Designs self-care toolkits and guided check-ins.',
+                    'Translates research into clear, approachable resources.',
+                    'Partners with the team to keep support tools inclusive.'
+                ]
+            },
+            links: [
+                { label: 'LinkedIn', url: 'https://www.linkedin.com/in/amina-wambui' }
+            ]
+        },
+        {
+            slug: 'brian-otieno',
+            name: 'Brian Otieno',
+            role: 'Content & Outreach',
+            image: '/logo.svg',
+            accent: 'lilac',
+            details: [
+                'Content storytelling',
+                'Community outreach',
+                'Youth engagement'
+            ],
+            bio: 'Brian crafts Bloomly\u2019s voice, making complex mental health topics feel clear, warm, and approachable.',
+            work: {
+                summary: 'Brian leads Bloomly\u2019s content strategy and outreach so teens can connect with support in ways that feel familiar.',
+                highlights: [
+                    'Shapes the Bloomly content voice and storytelling.',
+                    'Partners with schools and youth groups for outreach.',
+                    'Builds campaigns that keep the community connected.'
+                ]
+            },
+            links: [
+                { label: 'LinkedIn', url: 'https://www.linkedin.com/in/brian-otieno' },
+                { label: 'GitHub', url: 'https://github.com/brian-otieno' }
+            ]
+        }
+    ];
+
     // ========== Bloomly Team Cards ==========
+    function buildTeamCard(member, index) {
+        const card = document.createElement('article');
+        card.className = 'bloomly-team-card';
+        card.dataset.teamCard = '';
+        card.dataset.accent = member.accent || 'pink';
+        card.dataset.slug = member.slug;
+        card.setAttribute('aria-expanded', 'false');
+
+        const core = document.createElement('div');
+        core.className = 'bloomly-team-core';
+
+        const avatar = document.createElement('div');
+        avatar.className = 'bloomly-team-avatar';
+
+        const image = document.createElement('img');
+        image.className = 'bloomly-team-photo';
+        image.src = member.image || '/logo.svg';
+        image.alt = `${member.name} portrait`;
+
+        avatar.appendChild(image);
+
+        const info = document.createElement('div');
+        info.className = 'bloomly-team-info';
+
+        const eyebrow = document.createElement('p');
+        eyebrow.className = 'bloomly-team-eyebrow';
+        eyebrow.textContent = 'Bloomly Team';
+
+        const name = document.createElement('h3');
+        name.className = 'bloomly-team-name';
+        name.textContent = member.name;
+
+        const role = document.createElement('p');
+        role.className = 'bloomly-team-role';
+        role.textContent = member.role;
+
+        const link = document.createElement('a');
+        link.className = 'bloomly-team-link';
+        link.href = `/team/${member.slug}`;
+        link.textContent = 'View Profile';
+
+        info.append(eyebrow, name, role, link);
+        core.append(avatar, info);
+
+        const panel = document.createElement('div');
+        panel.className = 'bloomly-team-panel';
+        panel.dataset.teamPanel = '';
+        panel.id = `bloomly-team-panel-${index + 1}`;
+        panel.setAttribute('aria-hidden', 'true');
+
+        const panelTitle = document.createElement('p');
+        panelTitle.className = 'bloomly-team-panel-title';
+        panelTitle.textContent = 'Focus areas';
+
+        const detailList = document.createElement('ul');
+        detailList.className = 'bloomly-team-details';
+        (member.details || []).forEach((detail) => {
+            const item = document.createElement('li');
+            item.textContent = detail;
+            detailList.appendChild(item);
+        });
+
+        panel.append(panelTitle, detailList);
+        card.append(core, panel);
+
+        return card;
+    }
+
+    function renderTeamGrid() {
+        const grid = document.querySelector('[data-team-grid]');
+        if (!grid) return;
+        grid.innerHTML = '';
+        const fragment = document.createDocumentFragment();
+        BLOOMLY_TEAM_MEMBERS.forEach((member, index) => {
+            fragment.appendChild(buildTeamCard(member, index));
+        });
+        grid.appendChild(fragment);
+    }
+
     function initBloomlyTeamCards() {
+        renderTeamGrid();
         const cards = document.querySelectorAll('[data-team-card]');
         if (!cards.length) return;
 
@@ -883,10 +1050,7 @@
         const closeCard = (card) => {
             if (!card) return;
             card.classList.remove('is-expanded');
-            const toggle = card.querySelector('[data-team-toggle]');
-            if (toggle) {
-                toggle.setAttribute('aria-expanded', 'false');
-            }
+            card.setAttribute('aria-expanded', 'false');
             const panel = card.querySelector('[data-team-panel]');
             if (panel) {
                 panel.setAttribute('aria-hidden', 'true');
@@ -896,10 +1060,7 @@
         const openCard = (card) => {
             if (!card) return;
             card.classList.add('is-expanded');
-            const toggle = card.querySelector('[data-team-toggle]');
-            if (toggle) {
-                toggle.setAttribute('aria-expanded', 'true');
-            }
+            card.setAttribute('aria-expanded', 'true');
             const panel = card.querySelector('[data-team-panel]');
             if (panel) {
                 panel.setAttribute('aria-hidden', 'false');
@@ -910,68 +1071,35 @@
             cards.forEach(card => closeCard(card));
         };
 
-        cards.forEach((card, index) => {
-            const { name, role, bio, image } = card.dataset;
-
-            const nameEl = card.querySelector('[data-team-name]');
-            if (name && nameEl) {
-                nameEl.textContent = name;
-            }
-
-            const roleEl = card.querySelector('[data-team-role]');
-            if (role && roleEl) {
-                roleEl.textContent = role;
-            }
-
-            const bioEl = card.querySelector('[data-team-bio]');
-            if (bio && bioEl) {
-                bioEl.textContent = bio;
-            }
-
-            const imageEl = card.querySelector('[data-team-image]');
-            if (image && imageEl) {
-                imageEl.src = image;
-                imageEl.alt = name ? `${name} portrait` : 'Team member portrait';
-            }
-
+        cards.forEach((card) => {
             const panel = card.querySelector('[data-team-panel]');
-            if (panel && !panel.id) {
-                panel.id = `bloomly-team-panel-${index + 1}`;
-            }
             if (panel) {
                 panel.setAttribute('aria-hidden', 'true');
             }
 
-            const toggle = card.querySelector('[data-team-toggle]');
-            if (toggle) {
-                if (panel) {
-                    toggle.setAttribute('aria-controls', panel.id);
-                }
-                toggle.setAttribute('aria-expanded', 'false');
+            if (!supportsHover) {
+                card.setAttribute('tabindex', '0');
 
-                toggle.addEventListener('click', (event) => {
-                    event.preventDefault();
-                    event.stopPropagation();
+                const toggleCard = () => {
                     if (card.classList.contains('is-expanded')) {
                         closeCard(card);
                     } else {
                         closeAllCards();
                         openCard(card);
                     }
-                });
-            }
+                };
 
-            if (!supportsHover) {
                 card.addEventListener('click', (event) => {
-                    if (event.target.closest('[data-team-panel]') && !event.target.closest('[data-team-toggle]')) {
+                    if (event.target.closest('a')) {
                         return;
                     }
+                    toggleCard();
+                });
 
-                    if (card.classList.contains('is-expanded')) {
-                        closeCard(card);
-                    } else {
-                        closeAllCards();
-                        openCard(card);
+                card.addEventListener('keydown', (event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        toggleCard();
                     }
                 });
             }
@@ -990,6 +1118,159 @@
                 }
             });
         }
+    }
+
+    // ========== Team Profile Page ==========
+    function resolveTeamSlug() {
+        const params = new URLSearchParams(window.location.search);
+        const slugParam = params.get('slug');
+        if (slugParam) {
+            return slugParam.replace(/\.html$/, '');
+        }
+
+        const match = window.location.pathname.match(/\/team\/([^\/?#]+)(?:\.html)?$/);
+        return match ? match[1] : null;
+    }
+
+    function renderTeamProfileNotFound(container) {
+        container.innerHTML = '';
+        const section = document.createElement('section');
+        section.className = 'team-profile-hero';
+
+        const wrapper = document.createElement('div');
+        wrapper.className = 'container';
+
+        const card = document.createElement('div');
+        card.className = 'glass-card team-profile-card team-profile-notice';
+
+        const message = document.createElement('p');
+        message.textContent = 'We could not find this team profile. Please return to the About page to meet the team.';
+
+        const link = document.createElement('a');
+        link.className = 'btn btn-primary';
+        link.href = '/about.html';
+        link.textContent = 'Back to About';
+
+        card.append(message, link);
+        wrapper.appendChild(card);
+        section.appendChild(wrapper);
+        container.appendChild(section);
+    }
+
+    function initTeamProfilePage() {
+        const container = document.querySelector('[data-team-profile]');
+        if (!container) return;
+
+        const slug = resolveTeamSlug();
+        const member = BLOOMLY_TEAM_MEMBERS.find((item) => item.slug === slug);
+        if (!member) {
+            renderTeamProfileNotFound(container);
+            return;
+        }
+
+        document.title = `${member.name} - Bloomly`;
+
+        container.innerHTML = '';
+
+        const heroSection = document.createElement('section');
+        heroSection.className = 'team-profile-hero';
+
+        const heroContainer = document.createElement('div');
+        heroContainer.className = 'container';
+
+        const backLink = document.createElement('a');
+        backLink.className = 'back-button';
+        backLink.href = '/about.html';
+        backLink.textContent = 'Back to About';
+
+        const profileCard = document.createElement('div');
+        profileCard.className = 'glass-card team-profile-card';
+
+        const avatar = document.createElement('div');
+        avatar.className = 'team-profile-avatar';
+
+        const image = document.createElement('img');
+        image.className = 'team-profile-image';
+        image.src = member.image || '/logo.svg';
+        image.alt = `${member.name} portrait`;
+
+        avatar.appendChild(image);
+
+        const info = document.createElement('div');
+        info.className = 'team-profile-info';
+
+        const eyebrow = document.createElement('p');
+        eyebrow.className = 'team-profile-eyebrow';
+        eyebrow.textContent = 'Bloomly Team';
+
+        const name = document.createElement('h1');
+        name.className = 'team-profile-name';
+        name.textContent = member.name;
+
+        const role = document.createElement('p');
+        role.className = 'team-profile-role';
+        role.textContent = member.role;
+
+        const bio = document.createElement('p');
+        bio.className = 'team-profile-bio';
+        bio.textContent = member.bio;
+
+        info.append(eyebrow, name, role, bio);
+
+        if (Array.isArray(member.links) && member.links.length) {
+            const links = document.createElement('div');
+            links.className = 'team-profile-links';
+
+            member.links.forEach((linkData) => {
+                const link = document.createElement('a');
+                link.className = 'team-profile-link';
+                link.href = linkData.url;
+                link.target = '_blank';
+                link.rel = 'noopener noreferrer';
+                link.textContent = linkData.label;
+                links.appendChild(link);
+            });
+
+            info.appendChild(links);
+        }
+
+        profileCard.append(avatar, info);
+        heroContainer.append(backLink, profileCard);
+        heroSection.appendChild(heroContainer);
+
+        const workSection = document.createElement('section');
+        workSection.className = 'section team-profile-work';
+
+        const workContainer = document.createElement('div');
+        workContainer.className = 'container';
+
+        const workCard = document.createElement('div');
+        workCard.className = 'glass-card team-profile-work-card';
+
+        const workTitle = document.createElement('h2');
+        workTitle.textContent = 'Work at Bloomly';
+
+        const workCopy = document.createElement('p');
+        workCopy.className = 'team-profile-work-copy';
+        workCopy.textContent = member.work?.summary || '';
+
+        workCard.append(workTitle, workCopy);
+
+        if (Array.isArray(member.work?.highlights) && member.work.highlights.length) {
+            const list = document.createElement('ul');
+            list.className = 'team-profile-work-list';
+            member.work.highlights.forEach((item) => {
+                const listItem = document.createElement('li');
+                listItem.textContent = item;
+                list.appendChild(listItem);
+            });
+            workCard.appendChild(list);
+        }
+
+        workContainer.appendChild(workCard);
+        workSection.appendChild(workContainer);
+
+        container.append(heroSection, workSection);
     }
 
     // ========== Initialize Everything ==========
@@ -1017,6 +1298,7 @@
         void initPostInteractions();
         initNewsletterForms();
         initBloomlyTeamCards();
+        initTeamProfilePage();
         
         // Trigger initial scroll check
         handleNavbarScroll();
