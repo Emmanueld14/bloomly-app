@@ -927,6 +927,71 @@ a:hover {
     margin-top: var(--space-3xl);
 }
 
+/* ========== Blog Category Navigation ========== */
+.blog-category-panel {
+    position: sticky;
+    top: 88px;
+    z-index: 200;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(31, 31, 31, 0.08);
+}
+
+.blog-category-panel--post {
+    top: 80px;
+}
+
+.blog-category-nav {
+    display: flex;
+    gap: var(--space-sm);
+    align-items: center;
+    padding: var(--space-sm) 0;
+    overflow-x: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(31, 31, 31, 0.2) transparent;
+}
+
+.blog-category-nav::-webkit-scrollbar {
+    height: 6px;
+}
+
+.blog-category-nav::-webkit-scrollbar-thumb {
+    background: rgba(31, 31, 31, 0.2);
+    border-radius: var(--radius-full);
+}
+
+.blog-category-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.35rem 1rem;
+    border-radius: var(--radius-full);
+    border: 1px solid rgba(31, 31, 31, 0.12);
+    background: rgba(255, 255, 255, 0.85);
+    color: #2A2A2A;
+    font-size: var(--text-sm);
+    font-weight: 600;
+    white-space: nowrap;
+    transition: transform var(--transition-base), box-shadow var(--transition-base), background var(--transition-base);
+}
+
+.blog-category-pill:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 16px rgba(31, 31, 31, 0.08);
+}
+
+.blog-category-pill.is-active {
+    background: rgba(138, 168, 154, 0.2);
+    border-color: rgba(138, 168, 154, 0.5);
+    color: #1F1F1F;
+}
+
+.blog-category-pill:focus-visible {
+    outline: 2px solid rgba(138, 168, 154, 0.7);
+    outline-offset: 2px;
+}
+
 .blog-card {
     background: var(--color-glass);
     backdrop-filter: blur(20px);
@@ -1334,6 +1399,87 @@ a:hover {
     box-shadow: 0 0 0 3px rgba(95, 168, 255, 0.15);
 }
 
+/* ========== Subscribe Page ========== */
+.subscribe-page {
+    background: var(--color-offwhite);
+    color: var(--color-ink);
+}
+
+.subscribe-main {
+    padding-top: 80px;
+}
+
+.subscribe-hero {
+    padding: var(--space-4xl) 0 var(--space-2xl);
+    text-align: center;
+}
+
+.subscribe-intro {
+    max-width: 720px;
+    margin: 0 auto;
+}
+
+.subscribe-eyebrow {
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: rgba(26, 26, 26, 0.6);
+    font-weight: 600;
+    margin-bottom: var(--space-sm);
+}
+
+.subscribe-hero h1 {
+    font-size: clamp(2.2rem, 4vw, 3.2rem);
+    margin-bottom: var(--space-md);
+}
+
+.subscribe-hero p {
+    font-size: var(--text-lg);
+    color: var(--color-muted);
+    line-height: 1.8;
+    margin-bottom: 0;
+}
+
+.subscribe-form-section {
+    padding-bottom: var(--space-4xl);
+}
+
+.subscribe-card {
+    max-width: 640px;
+    margin: 0 auto;
+    background: rgba(255, 255, 255, 0.95) !important;
+    border: 1px solid rgba(31, 31, 31, 0.08);
+    box-shadow: 0 18px 36px rgba(31, 31, 31, 0.08);
+}
+
+.subscribe-form {
+    display: grid;
+    gap: var(--space-md);
+}
+
+.subscribe-form .newsletter-label input {
+    width: 100%;
+    padding: var(--space-sm);
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(31, 31, 31, 0.12);
+    background: rgba(255, 255, 255, 0.95);
+    font-size: var(--text-base);
+    font-family: var(--font-primary);
+    transition: all var(--transition-fast);
+}
+
+.subscribe-form .newsletter-label input:focus {
+    outline: none;
+    border-color: var(--color-sage);
+    box-shadow: 0 0 0 3px rgba(138, 168, 154, 0.2);
+}
+
+.subscribe-note {
+    font-size: var(--text-sm);
+    color: var(--color-muted);
+    margin: 0;
+}
+
 /* ========== Utility Classes ========== */
 .text-center {
     text-align: center;
@@ -1598,6 +1744,11 @@ a:hover {
         width: 100%;
     }
 
+    .blog-category-panel,
+    .blog-category-panel--post {
+        top: 72px;
+    }
+
     .home-hero {
         padding: calc(var(--space-3xl) + 80px) var(--space-md) var(--space-2xl);
     }
@@ -1626,6 +1777,14 @@ a:hover {
     .writing-card {
         min-width: 240px;
         scroll-snap-align: start;
+    }
+
+    .subscribe-hero {
+        padding: var(--space-3xl) 0 var(--space-xl);
+    }
+
+    .subscribe-card {
+        padding: var(--space-xl);
     }
 }
 

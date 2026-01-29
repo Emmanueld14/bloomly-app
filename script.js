@@ -17,15 +17,18 @@
         if (!navLinks) return;
         const links = navLinks.querySelectorAll('a');
         const path = window.location.pathname;
-        const isBlogPost = path.includes('/blog/') && !path.endsWith('blog.html');
+        const isBlogRoot = path === '/blog' || path === '/blog/';
+        const isBlogPost = path.includes('/blog/') && !path.endsWith('blog.html') && !isBlogRoot;
         const isTeamProfile = path.includes('/team/');
+        const isSubscribePage = path.includes('/subscribe') || path.endsWith('subscribe.html');
         
         links.forEach(link => {
             const linkPath = link.getAttribute('href') || '';
             const normalizedLinkPath = linkPath.split('?')[0];
             const linkSegment = normalizedLinkPath.split('/').pop();
-            const isBlogLink = normalizedLinkPath.endsWith('blog.html');
+            const isBlogLink = normalizedLinkPath.endsWith('blog.html') || normalizedLinkPath.endsWith('/blog');
             const isAboutLink = normalizedLinkPath.endsWith('about.html');
+            const isSubscribeLink = normalizedLinkPath.endsWith('subscribe.html');
             
             // Remove active class first
             link.classList.remove('active');
@@ -36,9 +39,14 @@
                 return;
             }
 
-            if (isBlogPost && isBlogLink) {
+            if (isSubscribePage && isSubscribeLink) {
                 link.classList.add('active');
-            } else if (!isBlogPost && !isTeamProfile) {
+                return;
+            }
+
+            if ((isBlogPost || isBlogRoot) && isBlogLink) {
+                link.classList.add('active');
+            } else if (!isBlogPost && !isTeamProfile && !isSubscribePage) {
                 if (linkSegment === currentPath || 
                     (currentPath === '' && linkSegment === 'index.html') ||
                     (currentPath === 'index.html' && linkSegment === 'index.html') ||
@@ -184,6 +192,95 @@
             });
         });
     }
+
+    // ========== Blog Category Helpers ==========
+    const BLOG_CATEGORY_DEFAULTS = [
+        'All',
+        'Mental Health',
+        'Mental Health & Awareness',
+        'Self-Care',
+        'Tips',
+        'New Year Resolutions',
+        'Poetry'
+    ];
+
+    function normalizeCategory(value) {
+        if (!value) return '';
+        return value
+            .toString()
+            .trim()
+            .toLowerCase()
+            .replace(/&/g, 'and')
+            .replace(/[^a-z0-9\s-]/g, '')
+            .replace(/\s+/g, '-')
+            .replace(/-+/g, '-');
+    }
+
+    function buildCategoryOptions(list) {
+        const categories = Array.isArray(list) ? list : [];
+        const seen = new Set();
+        const results = [];
+
+        categories.forEach((item) => {
+            const label = typeof item === 'string' ? item : item?.label;
+            if (!label) return;
+            const slug = typeof item === 'string'
+                ? normalizeCategory(label)
+                : normalizeCategory(item.slug || item.label);
+            if (!slug || seen.has(slug)) return;
+            seen.add(slug);
+            results.push({ label, slug });
+        });
+
+        return results;
+    }
+
+    function getDefaultBlogCategories() {
+        return buildCategoryOptions(BLOG_CATEGORY_DEFAULTS);
+    }
+
+    function getBlogCategoryFromUrl() {
+        const params = new URLSearchParams(window.location.search);
+        const value = params.get('category');
+        return value ? normalizeCategory(value) : 'all';
+    }
+
+    function renderBlogCategoryPanel({ categories, activeSlug, baseUrl } = {}) {
+        const panels = document.querySelectorAll('[data-blog-category-panel]');
+        if (!panels.length) return null;
+
+        const base = baseUrl || '/blog';
+        const categoryList = buildCategoryOptions(categories);
+        const active = activeSlug || 'all';
+
+        panels.forEach((panel) => {
+            panel.innerHTML = '';
+            const fragment = document.createDocumentFragment();
+            categoryList.forEach((category) => {
+                const link = document.createElement('a');
+                link.className = 'blog-category-pill';
+                link.textContent = category.label;
+                link.dataset.categorySlug = category.slug;
+                link.href = category.slug === 'all'
+                    ? base
+                    : `${base}?category=${encodeURIComponent(category.slug)}`;
+                if (category.slug === active) {
+                    link.classList.add('is-active');
+                }
+                fragment.appendChild(link);
+            });
+            panel.appendChild(fragment);
+        });
+
+        return { categories: categoryList, active };
+    }
+
+    window.BloomlyBlog = {
+        normalizeCategory,
+        getDefaultBlogCategories,
+        getBlogCategoryFromUrl,
+        renderBlogCategoryPanel
+    };
 
     // ========== Button Hover Effects ==========
     function initButtonEffects() {
@@ -832,6 +929,7 @@
 
         forms.forEach(form => {
             const emailInput = form.querySelector('input[name="email"]');
+            const nameInput = form.querySelector('input[name="name"]');
             const messageEl = form.querySelector('[data-newsletter-message]');
             const submitButton = form.querySelector('button[type="submit"]');
             if (!emailInput) return;
@@ -844,6 +942,7 @@
                 }
 
                 const email = emailInput.value.trim().toLowerCase();
+                const name = nameInput ? nameInput.value.trim() : '';
                 if (!isValidEmail(email)) {
                     setFormMessage(messageEl, 'Please enter a valid email address.', 'error');
                     emailInput.focus();
@@ -857,7 +956,7 @@
                     if (isSupabaseFunctionsReady()) {
                         const { data, error } = await supabaseClient.functions.invoke(
                             'subscribe-newsletter',
-                            { body: { email } }
+                            { body: { email, name: name || null } }
                         );
 
                         if (error) {
@@ -965,6 +1064,9 @@
                     }
 
                     emailInput.value = '';
+                    if (nameInput) {
+                        nameInput.value = '';
+                    }
                 } catch (error) {
                     console.error('Newsletter subscription error', error);
                     setFormMessage(messageEl, 'Subscription failed. Please try again.', 'error');

@@ -3,38 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Subscribe to Bloomly updates and receive new blog posts and gentle mental health reflections.">
+    <meta name="keywords" content="Bloomly newsletter, mental health blog updates, subscribe">
     <meta name="author" content="Bloomly Team">
     <meta name="date" content="2026-01-01">
     <meta property="article:author" content="Bloomly Team">
     <meta property="article:published_time" content="2026-01-01T00:00:00+00:00">
+    <meta property="og:title" content="Subscribe - Bloomly">
+    <meta property="og:description" content="Subscribe to Bloomly for new reflections and gentle updates.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://bloomly.co.ke/subscribe">
     <meta property="og:image" content="https://bloomly.co.ke/og-image.png">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
     <meta property="og:image:alt" content="Bloomly Logo - Butterfly with golden glow and elegant text">
     <link rel="icon" type="image/png" href="/favicon.png">
-    <title>Loading... - Bloomly Blog</title>
-    
+    <title>Subscribe - Bloomly</title>
+
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    
+
     <!-- Stylesheet -->
     <link rel="stylesheet" href="styles.css">
 </head>
-<body>
+<body class="subscribe-page">
     <!-- Navigation -->
     <nav class="navbar" id="navbar">
         <div class="navbar-content">
-            <a href="index.html" class="logo-container">
+            <a href="/index.html" class="logo-container">
                 <img src="logo.svg" alt="Bloomly Logo" class="logo-icon">
                 <span class="logo-text">Bloomly</span>
             </a>
             <ul class="nav-links" id="navLinks">
                 <li><a href="/index.html">Home</a></li>
                 <li><a href="/about.html">About</a></li>
-                <li><a href="/blog" class="active">Blog</a></li>
-                <li><a href="/subscribe.html">Subscribe</a></li>
+                <li><a href="/blog">Blog</a></li>
+                <li><a href="/subscribe.html" class="active">Subscribe</a></li>
             </ul>
             <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Toggle menu">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -44,78 +50,39 @@
         </div>
     </nav>
 
-    <!-- Post Wrapper (required for modularity) -->
-    <div class="post" data-post-id="">
-        <!-- Article Header -->
-        <section class="article-header">
+    <main class="subscribe-main">
+        <section class="subscribe-hero">
             <div class="container">
-                <a href="/blog" class="back-button">← Back to Blog</a>
-                <h1 id="articleTitle">Loading...</h1>
-                <div class="article-meta" id="articleMeta">
-                    <span>Loading...</span>
+                <div class="subscribe-intro fade-in">
+                    <p class="subscribe-eyebrow">Bloomly Subscribe</p>
+                    <h1>Stay close to calm reflections</h1>
+                    <p>One gentle email when new stories land. No clutter, just supportive words when you need them.</p>
                 </div>
             </div>
         </section>
 
-        <!-- Blog Category Navigation -->
-        <section class="blog-category-panel blog-category-panel--post" aria-label="Blog categories">
+        <section class="subscribe-form-section">
             <div class="container">
-                <nav class="blog-category-nav" data-blog-category-panel>
-                    <!-- Categories injected by script -->
-                </nav>
-            </div>
-        </section>
-
-        <!-- Article Content -->
-        <article class="article-content">
-            <div class="container">
-                <div id="articleBody" style="max-width: 800px; margin: 0 auto;">
-                    <p>Loading article...</p>
-                </div>
-            </div>
-        </article>
-
-        <!-- Post Engagement -->
-        <section class="post-engagement" aria-label="Post engagement">
-            <div class="container">
-                <div class="engagement-card" data-post-interactions>
-                    <div class="engagement-header">
-                        <h2>Join the conversation</h2>
-                        <p>Like this post or leave a supportive comment for others to read.</p>
-                    </div>
-
-                    <div class="post-actions">
-                        <button class="like-button" type="button" data-like-button aria-pressed="false">
-                            <span class="like-icon">💗</span>
-                            <span class="like-text">Like</span>
-                        </button>
-                        <span class="like-count" data-like-count>0 likes</span>
-                    </div>
-
-                    <div class="comment-section">
-                        <h3>Comments</h3>
-                        <form class="comment-form" data-comment-form novalidate>
-                            <label class="comment-label">
-                                Nickname (optional)
-                                <input type="text" name="nickname" maxlength="40" placeholder="Your nickname">
-                            </label>
-                            <label class="comment-label">
-                                Comment
-                                <textarea name="comment" rows="4" maxlength="500" placeholder="Share your thoughts..." required></textarea>
-                            </label>
-                            <div class="comment-actions">
-                                <button type="submit" class="btn btn-primary">Post Comment</button>
-                                <span class="form-message" data-comment-message aria-live="polite"></span>
+                <div class="subscribe-card glass-card fade-in">
+                    <form class="newsletter-form subscribe-form" data-newsletter-form novalidate>
+                        <label class="newsletter-label">
+                            Name (optional)
+                            <input type="text" name="name" maxlength="60" placeholder="Your name">
+                        </label>
+                        <label class="newsletter-label">
+                            Email address
+                            <div class="newsletter-input">
+                                <input type="email" name="email" placeholder="you@example.com" required>
+                                <button type="submit" class="btn btn-primary">Subscribe</button>
                             </div>
-                        </form>
-                        <div class="comment-list" data-comment-list>
-                            <p class="comment-empty">No comments yet. Be the first to share.</p>
-                        </div>
-                    </div>
+                        </label>
+                        <span class="form-message" data-newsletter-message aria-live="polite"></span>
+                        <p class="subscribe-note">You can unsubscribe anytime. We only send calm updates.</p>
+                    </form>
                 </div>
             </div>
         </section>
-    </div>
+    </main>
 
     <!-- Footer -->
     <footer class="footer">
@@ -145,10 +112,7 @@
         </div>
     </footer>
 
-    <script src="src/data/blog-api.js"></script>
-    <script src="src/data/blog-post-loader.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="script.js"></script>
 </body>
 </html>
-

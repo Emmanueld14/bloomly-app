@@ -86,6 +86,26 @@
             const category = post.metadata.category || 'Mental Health';
             const wordCount = post.body.split(' ').length;
             const readTime = Math.ceil(wordCount / 200);
+            const categorySlug = window.BloomlyBlog?.normalizeCategory
+                ? window.BloomlyBlog.normalizeCategory(category)
+                : category.toLowerCase().replace(/\s+/g, '-');
+
+            if (window.BloomlyBlog?.renderBlogCategoryPanel) {
+                const defaults = window.BloomlyBlog.getDefaultBlogCategories?.() || [];
+                const hasCategory = defaults.some((item) => {
+                    const slug = window.BloomlyBlog.normalizeCategory(item.label || item.slug || '');
+                    return slug === categorySlug;
+                });
+                const categories = hasCategory
+                    ? defaults
+                    : [...defaults, { label: category, slug: categorySlug }];
+
+                window.BloomlyBlog.renderBlogCategoryPanel({
+                    categories,
+                    activeSlug: categorySlug,
+                    baseUrl: '/blog'
+                });
+            }
 
             // Update meta info
             const metaEl = document.getElementById('articleMeta');
@@ -115,11 +135,11 @@
 
                 // Add CTA at the end
                 const cta = document.createElement('div');
-                cta.style.cssText = 'margin-top: var(--space-3xl); padding: var(--space-xl); background: var(--gradient-soft); border-radius: var(--radius-xl); text-align: center;';
+                cta.style.cssText = 'margin-top: var(--space-3xl); padding: var(--space-xl); background: rgba(255, 255, 255, 0.8); border-radius: var(--radius-xl); text-align: center; border: 1px solid rgba(31, 31, 31, 0.08);';
                 cta.innerHTML = `
-                    <h3 style="margin-bottom: var(--space-md);">Want to Read More?</h3>
-                    <p style="margin-bottom: var(--space-lg);">Check out our other articles for more mental health tips and support.</p>
-                    <a href="blog.html" class="btn btn-primary">Read More Articles</a>
+                    <h3 style="margin-bottom: var(--space-md);">Stay close to new reflections</h3>
+                    <p style="margin-bottom: var(--space-lg);">Subscribe for calm updates and new stories as they land.</p>
+                    <a href="/subscribe.html" class="btn btn-primary">Subscribe</a>
                 `;
                 bodyEl.appendChild(cta);
             }
@@ -159,7 +179,7 @@
                         🔄 Retry
                     </button>
                     <p style="margin-top: var(--space-md);">
-                        <a href="blog.html" style="color: var(--color-blue); text-decoration: underline;">Return to blog</a>
+                        <a href="/blog.html" style="color: var(--color-blue); text-decoration: underline;">Return to blog</a>
                     </p>
                 </div>
             `;

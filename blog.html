@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Read helpful articles about teen mental health, self-care, coping strategies, and wellness tips from Bloomly.">
     <meta name="keywords" content="teen mental health blog, self-care tips, mental health articles, wellness advice">
-    <meta name="author" content="Manuel Muhunami">
+    <meta name="author" content="Bloomly Team">
     <meta name="date" content="2026-01-01">
-    <meta property="article:author" content="Manuel Muhunami">
+    <meta property="article:author" content="Bloomly Team">
     <meta property="article:published_time" content="2026-01-01T00:00:00+00:00">
     <meta property="og:title" content="Bloomly Blog - Mental Health Articles for Teens">
     <meta property="og:description" content="Read helpful articles about teen mental health, self-care, and wellness tips.">
@@ -37,9 +37,10 @@
                 <span class="logo-text">Bloomly</span>
             </a>
             <ul class="nav-links" id="navLinks">
-                <li><a href="index.html">Home</a></li>
-                <li><a href="about.html">About</a></li>
-                <li><a href="blog.html" class="active">Blog</a></li>
+                <li><a href="/index.html">Home</a></li>
+                <li><a href="/about.html">About</a></li>
+                <li><a href="/blog" class="active">Blog</a></li>
+                <li><a href="/subscribe.html">Subscribe</a></li>
             </ul>
             <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Toggle menu">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -64,6 +65,15 @@
         </div>
     </section>
 
+    <!-- Blog Category Navigation -->
+    <section class="blog-category-panel" aria-label="Blog categories">
+        <div class="container">
+            <nav class="blog-category-nav" data-blog-category-panel>
+                <!-- Categories injected by script -->
+            </nav>
+        </div>
+    </section>
+
     <!-- Blog Posts -->
     <section class="section">
         <div class="container">
@@ -72,28 +82,6 @@
                 <div style="text-align: center; padding: var(--space-2xl); color: var(--color-gray-600);">
                     <p>Loading blog posts...</p>
                 </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Newsletter Signup -->
-    <section class="newsletter-section" aria-label="Newsletter signup">
-        <div class="container">
-            <div class="newsletter-card">
-                <div class="newsletter-copy">
-                    <h2>Stay in the loop</h2>
-                    <p>Get new Bloomly posts in your inbox with no spam.</p>
-                </div>
-                <form class="newsletter-form" data-newsletter-form novalidate>
-                    <label class="newsletter-label">
-                        Email address
-                        <div class="newsletter-input">
-                            <input type="email" name="email" placeholder="you@example.com" required>
-                            <button type="submit" class="btn btn-primary">Subscribe</button>
-                        </div>
-                    </label>
-                    <span class="form-message" data-newsletter-message aria-live="polite"></span>
-                </form>
             </div>
         </div>
     </section>
@@ -108,9 +96,10 @@
                 </div>
                 <div class="footer-section">
                     <h4>Quick Links</h4>
-                    <a href="index.html">Home</a>
-                    <a href="about.html">About</a>
-                    <a href="blog.html">Blog</a>
+                    <a href="/index.html">Home</a>
+                    <a href="/about.html">About</a>
+                    <a href="/blog">Blog</a>
+                    <a href="/subscribe.html">Subscribe</a>
                 </div>
                 <div class="footer-section">
                     <h4>Get Support</h4>
