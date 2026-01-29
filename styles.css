@@ -481,6 +481,10 @@ a:hover {
     animation: homeFadeUp 0.9s ease-out 0.4s both;
 }
 
+.home-hero-actions .btn {
+    min-width: 200px;
+}
+
 @keyframes homeFadeUp {
     from {
         opacity: 0;
@@ -727,29 +731,18 @@ a:hover {
     color: var(--color-pink);
 }
 
-.btn-sage {
-    background: var(--color-sage);
-    color: #FFFFFF;
-    box-shadow: 0 10px 24px rgba(138, 168, 154, 0.35);
-}
-
-.btn-sage:hover {
-    background: var(--color-sage-dark);
-    transform: translateY(-2px) scale(1.01);
-    box-shadow: 0 16px 30px rgba(138, 168, 154, 0.35);
-    color: #FFFFFF;
-}
-
-.btn-ghost {
-    background: rgba(255, 255, 255, 0.8);
+.btn-neutral {
+    background: rgba(255, 255, 255, 0.95);
     color: var(--color-ink);
     border: 1px solid rgba(31, 31, 31, 0.15);
-    box-shadow: none;
+    box-shadow: 0 12px 24px rgba(31, 31, 31, 0.08);
 }
 
-.btn-ghost:hover {
+.btn-neutral:hover {
     transform: translateY(-2px) scale(1.01);
-    box-shadow: 0 12px 24px rgba(31, 31, 31, 0.12);
+    background: rgba(248, 249, 247, 0.95);
+    border-color: rgba(138, 168, 154, 0.45);
+    box-shadow: 0 16px 28px rgba(31, 31, 31, 0.12);
     color: var(--color-ink);
 }
 
