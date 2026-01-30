@@ -308,7 +308,7 @@
             
             // Render posts
             if (posts.length === 0) {
-                postsList.innerHTML = '<p style="text-align: center; color: #666;">No blog posts found.</p>';
+                postsList.innerHTML = '<p style="text-align: center; color: var(--color-gray-550);">No blog posts found.</p>';
             } else {
                 postsList.innerHTML = posts.map(post => `
                     <div class="post-item">
@@ -326,7 +326,7 @@
         } catch (error) {
             console.error('Error loading posts:', error);
             showError('Failed to load posts: ' + error.message);
-            postsList.innerHTML = '<p style="text-align: center; color: #ff4444;">Error loading posts. Please try again.</p>';
+            postsList.innerHTML = '<p style="text-align: center; color: var(--color-danger);">Error loading posts. Please try again.</p>';
         }
     }
     

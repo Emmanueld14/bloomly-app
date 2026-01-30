@@ -5,13 +5,13 @@
 /admin /admin/index.html 200
 
 # Blog routing
-/blog /blog.html 200
-/blog/ /blog.html 200
+/blog /blog/index.html 200
+/blog/ /blog/index.html 200
 /blog/* /blog-post.html?slug=:splat 200
 
 # Subscribe page routing
-/subscribe /subscribe.html 200
-/subscribe/ /subscribe.html 200
+/subscribe /subscribe/index.html 200
+/subscribe/ /subscribe/index.html 200
 
 # Team profile routing - redirect /team/slug to team profile template
 /team/* /team/index.html?slug=:splat 200

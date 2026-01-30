@@ -11,7 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="../styles.css">
+    <link rel="stylesheet" href="/styles.css">
     
     <style>
         .admin-container {
@@ -24,13 +24,13 @@
         }
         
         .admin-card {
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(var(--color-white-rgb), 0.95);
             backdrop-filter: blur(20px);
             border-radius: var(--radius-2xl);
             padding: var(--space-3xl);
             max-width: 1000px;
             width: 100%;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 20px 60px rgba(var(--color-black-rgb), 0.3);
         }
         
         .admin-header {
@@ -39,12 +39,12 @@
         }
         
         .admin-header h1 {
-            color: #2D2D2D;
+            color: var(--color-text);
             margin-bottom: var(--space-sm);
         }
         
         .admin-header p {
-            color: #666;
+            color: var(--color-gray-550);
         }
         
         .auth-section {
@@ -56,11 +56,11 @@
         
         .auth-section h3 {
             margin-bottom: var(--space-md);
-            color: #2D2D2D;
+            color: var(--color-text);
         }
         
         .auth-section p {
-            color: #666;
+            color: var(--color-gray-550);
             font-size: var(--text-sm);
             margin-bottom: var(--space-md);
         }
@@ -68,7 +68,7 @@
         .token-input {
             width: 100%;
             padding: var(--space-md);
-            border: 2px solid #e0e0e0;
+            border: 2px solid var(--color-gray-250);
             border-radius: var(--radius-md);
             font-size: var(--text-base);
             margin-bottom: var(--space-md);
@@ -82,7 +82,7 @@
         
         .btn-auth {
             background: var(--color-blue);
-            color: white;
+            color: var(--color-white);
             border: none;
             padding: var(--space-md) var(--space-xl);
             border-radius: var(--radius-md);
@@ -92,13 +92,13 @@
         }
         
         .btn-auth:hover {
-            background: #4a96e6;
+            background: var(--color-blue-strong);
             transform: translateY(-2px);
         }
         
         .github-login-btn {
-            background: #24292e;
-            color: white;
+            background: var(--color-github-dark);
+            color: var(--color-white);
             border: none;
             padding: var(--space-md) var(--space-xl);
             border-radius: var(--radius-md);
@@ -114,9 +114,9 @@
         }
         
         .github-login-btn:hover {
-            background: #2f363d;
+            background: var(--color-github-dark-hover);
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 4px 12px rgba(var(--color-black-rgb), 0.15);
         }
         
         .github-login-btn svg {
@@ -161,13 +161,13 @@
         
         .user-details p {
             margin: 0;
-            color: #666;
+            color: var(--color-gray-550);
             font-size: var(--text-sm);
         }
         
         .logout-btn {
             background: var(--color-pink);
-            color: white;
+            color: var(--color-white);
             border: none;
             padding: var(--space-sm) var(--space-lg);
             border-radius: var(--radius-md);
@@ -177,7 +177,7 @@
         }
         
         .logout-btn:hover {
-            background: #ff5fa3;
+            background: var(--color-pink-strong);
             transform: translateY(-2px);
         }
         
@@ -186,7 +186,7 @@
         }
         
         .post-item {
-            background: white;
+            background: var(--color-white);
             border-radius: var(--radius-lg);
             padding: var(--space-lg);
             margin-bottom: var(--space-md);
@@ -199,17 +199,17 @@
         
         .post-item:hover {
             transform: translateY(-2px);
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 12px 40px rgba(var(--color-black-rgb), 0.15);
         }
         
         .post-info h3 {
             margin: 0 0 var(--space-xs) 0;
-            color: #2D2D2D;
+            color: var(--color-text);
         }
         
         .post-info p {
             margin: 0;
-            color: #666;
+            color: var(--color-gray-550);
             font-size: var(--text-sm);
         }
         
@@ -230,25 +230,25 @@
         
         .btn-edit {
             background: var(--color-blue);
-            color: white;
+            color: var(--color-white);
         }
         
         .btn-edit:hover {
-            background: #4a96e6;
+            background: var(--color-blue-strong);
         }
         
         .btn-delete {
-            background: #ff4444;
-            color: white;
+            background: var(--color-danger);
+            color: var(--color-white);
         }
         
         .btn-delete:hover {
-            background: #cc0000;
+            background: var(--color-danger-dark);
         }
         
         .add-post-btn {
             background: var(--gradient-primary);
-            color: white;
+            color: var(--color-white);
             border: none;
             padding: var(--space-md) var(--space-2xl);
             border-radius: var(--radius-lg);
@@ -268,20 +268,20 @@
         .loading {
             text-align: center;
             padding: var(--space-2xl);
-            color: #666;
+            color: var(--color-gray-550);
         }
         
         .error {
-            background: #ffebee;
-            color: #c62828;
+            background: var(--color-error-bg);
+            color: var(--color-error-text);
             padding: var(--space-md);
             border-radius: var(--radius-md);
             margin-bottom: var(--space-lg);
         }
         
         .success {
-            background: #e8f5e9;
-            color: #2e7d32;
+            background: var(--color-success-bg);
+            color: var(--color-success-text);
             padding: var(--space-md);
             border-radius: var(--radius-md);
             margin-bottom: var(--space-lg);
@@ -296,7 +296,7 @@
             top: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(var(--color-black-rgb), 0.5);
             backdrop-filter: blur(5px);
         }
         
@@ -307,14 +307,14 @@
         }
         
         .modal-content {
-            background: white;
+            background: var(--color-white);
             border-radius: var(--radius-2xl);
             padding: var(--space-3xl);
             max-width: 800px;
             width: 90%;
             max-height: 90vh;
             overflow-y: auto;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 20px 60px rgba(var(--color-black-rgb), 0.3);
         }
         
         .modal-header {
@@ -326,7 +326,7 @@
         
         .modal-header h2 {
             margin: 0;
-            color: #2D2D2D;
+            color: var(--color-text);
         }
         
         .close-btn {
@@ -334,7 +334,7 @@
             border: none;
             font-size: var(--text-2xl);
             cursor: pointer;
-            color: #666;
+            color: var(--color-gray-550);
             padding: 0;
             width: 32px;
             height: 32px;
@@ -345,7 +345,7 @@
         }
         
         .close-btn:hover {
-            background: #f0f0f0;
+            background: var(--color-gray-150);
         }
         
         .form-group {
@@ -355,7 +355,7 @@
         .form-group label {
             display: block;
             margin-bottom: var(--space-xs);
-            color: #2D2D2D;
+            color: var(--color-text);
             font-weight: 600;
         }
         
@@ -364,7 +364,7 @@
         .form-group select {
             width: 100%;
             padding: var(--space-md);
-            border: 2px solid #e0e0e0;
+            border: 2px solid var(--color-gray-250);
             border-radius: var(--radius-md);
             font-size: var(--text-base);
             font-family: var(--font-primary);
@@ -391,7 +391,7 @@
         
         .btn-save {
             background: var(--color-blue);
-            color: white;
+            color: var(--color-white);
             border: none;
             padding: var(--space-md) var(--space-2xl);
             border-radius: var(--radius-md);
@@ -401,13 +401,13 @@
         }
         
         .btn-save:hover {
-            background: #4a96e6;
+            background: var(--color-blue-strong);
             transform: translateY(-2px);
         }
         
         .btn-cancel {
-            background: #e0e0e0;
-            color: #666;
+            background: var(--color-gray-250);
+            color: var(--color-gray-550);
             border: none;
             padding: var(--space-md) var(--space-2xl);
             border-radius: var(--radius-md);
@@ -417,7 +417,7 @@
         }
         
         .btn-cancel:hover {
-            background: #d0d0d0;
+            background: var(--color-gray-220);
         }
         
         .help-link {
@@ -439,11 +439,11 @@
 
         .email-update-section h3 {
             margin-bottom: var(--space-sm);
-            color: #2D2D2D;
+            color: var(--color-text);
         }
 
         .email-update-section p {
-            color: #666;
+            color: var(--color-gray-550);
             font-size: var(--text-sm);
             margin-bottom: var(--space-lg);
         }
@@ -454,11 +454,11 @@
         }
 
         .email-post-message.success {
-            color: #2e7d32;
+            color: var(--color-success-text);
         }
 
         .email-post-message.error {
-            color: #c62828;
+            color: var(--color-error-text);
         }
     </style>
 </head>
@@ -473,7 +473,7 @@
             <!-- Authentication Section -->
             <div id="authSection" class="auth-section">
                 <h3>🔐 Login Required</h3>
-                <p style="margin-bottom: var(--space-lg); color: #666;">Sign in with your GitHub account to manage blog posts</p>
+                <p style="margin-bottom: var(--space-lg); color: var(--color-gray-550);">Sign in with your GitHub account to manage blog posts</p>
                 <button class="github-login-btn" id="githubLoginBtn" style="width: 100%; justify-content: center;">
                     <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
@@ -578,7 +578,7 @@
                 <div class="form-group">
                     <label for="postContent">Content (Markdown) *</label>
                     <textarea id="postContent" name="content" rows="15" required></textarea>
-                    <p style="font-size: var(--text-sm); color: #666; margin-top: var(--space-xs);">
+                    <p style="font-size: var(--text-sm); color: var(--color-gray-550); margin-top: var(--space-xs);">
                         Write your post content in Markdown format. Use <code>##</code> for headings, <code>**bold**</code> for bold text, etc.
                     </p>
                 </div>
@@ -591,10 +591,10 @@
         </div>
     </div>
     
-    <script src="config.js"></script>
+    <script src="/admin/config.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="../src/data/blog-api.js"></script>
-    <script src="../src/admin/blog-admin.js"></script>
-    <script src="admin.js"></script>
+    <script src="/src/data/blog-api.js"></script>
+    <script src="/src/admin/blog-admin.js"></script>
+    <script src="/admin/admin.js"></script>
 </body>
 </html>

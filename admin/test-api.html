@@ -4,9 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Test Vercel API</title>
+    <link rel="stylesheet" href="/styles.css">
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: var(--font-primary);
             max-width: 800px;
             margin: 50px auto;
             padding: 20px;
@@ -17,17 +18,21 @@
             border-radius: 5px;
         }
         .success {
-            background: #d4edda;
-            border: 1px solid #c3e6cb;
+            background: var(--color-success-soft);
+            border: 1px solid var(--color-success-border);
         }
         .error {
-            background: #f8d7da;
-            border: 1px solid #f5c6cb;
+            background: var(--color-error-soft);
+            border: 1px solid var(--color-error-border);
         }
         button {
             padding: 10px 20px;
             font-size: 16px;
             cursor: pointer;
+            background: var(--gradient-primary);
+            color: var(--color-white);
+            border: none;
+            border-radius: var(--radius-md);
         }
     </style>
 </head>
@@ -39,7 +44,7 @@
     
     <div id="results"></div>
     
-    <script src="config.js"></script>
+    <script src="/admin/config.js"></script>
     <script>
         async function testEndpoints() {
             const resultsDiv = document.getElementById('results');

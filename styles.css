@@ -24,11 +24,33 @@
     --color-gray-400: #9B9B9B;
     --color-gray-300: #DDDDDD;
     --color-gray-200: #F1F1F1;
+    --color-gray-150: #F0F0F0;
+    --color-gray-250: #E0E0E0;
+    --color-gray-220: #D0D0D0;
+    --color-gray-550: #666666;
     --color-page-bg: #F8F9FF;
     --color-white-rgb: 255, 255, 255;
     --color-black-rgb: 0, 0, 0;
     --color-footer-dark: #1A1A1A;
     --color-footer-darker: #0F0F0F;
+    --color-blue-strong: #4A96E6;
+    --color-github-dark: #24292E;
+    --color-github-dark-hover: #2F363D;
+    --color-pink-strong: #FF5FA3;
+    --color-danger: #FF4444;
+    --color-danger-dark: #CC0000;
+    --color-error-bg: #FFEBEE;
+    --color-error-text: #C62828;
+    --color-success-bg: #E8F5E9;
+    --color-success-text: #2E7D32;
+    --color-success-soft: #D4EDDA;
+    --color-success-border: #C3E6CB;
+    --color-error-soft: #F8D7DA;
+    --color-error-border: #F5C6CB;
+    --color-like-text: #B83280;
+    --color-like-count: #2B6CB0;
+    --color-success-message: #2F855A;
+    --color-error-message: #C53030;
     --color-ink: #1F1F1F;
     --color-muted: #595959;
     --color-offwhite: #F9FAF7;
@@ -818,13 +840,13 @@ a:hover {
 .glass-card h3 {
     margin-bottom: var(--space-sm);
     font-size: var(--text-2xl);
-    color: #000000 !important;
+    color: var(--color-black) !important;
     opacity: 1 !important;
     font-weight: 700;
 }
 
 .glass-card p {
-    color: #000000 !important;
+    color: var(--color-black) !important;
     margin-bottom: 0;
     line-height: 1.7;
     opacity: 1 !important;
@@ -871,7 +893,7 @@ a:hover {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    color: #000000 !important; /* Fallback for browsers that don't support background-clip */
+    color: var(--color-black) !important; /* Fallback for browsers that don't support background-clip */
     font-weight: 800;
     font-size: var(--text-4xl);
     opacity: 1 !important;
@@ -879,7 +901,7 @@ a:hover {
 
 .section-header p {
     font-size: var(--text-lg);
-    color: #000000 !important;
+    color: var(--color-black) !important;
     line-height: 1.8;
     opacity: 1 !important;
     font-weight: 600;
@@ -1206,8 +1228,8 @@ a:hover {
     padding: var(--space-sm) var(--space-xl);
     border-radius: var(--radius-full);
     border: 1px solid rgba(255, 120, 185, 0.35);
-    background: rgba(255, 120, 185, 0.12);
-    color: #B83280;
+    background: rgba(var(--color-pink-rgb), 0.12);
+    color: var(--color-like-text);
     font-weight: 600;
     cursor: pointer;
     transition: all var(--transition-base);
@@ -1232,9 +1254,9 @@ a:hover {
 }
 
 .like-button:disabled {
-    background: #F1F1F1;
-    color: #9B9B9B;
-    border-color: #DDDDDD;
+    background: var(--color-gray-200);
+    color: var(--color-gray-400);
+    border-color: var(--color-gray-300);
     box-shadow: none;
     cursor: not-allowed;
     transform: none;
@@ -1247,8 +1269,8 @@ a:hover {
 .like-count {
     padding: var(--space-xs) var(--space-md);
     border-radius: var(--radius-full);
-    background: rgba(95, 168, 255, 0.15);
-    color: #2B6CB0;
+    background: rgba(var(--color-blue-rgb), 0.15);
+    color: var(--color-like-count);
     font-weight: 600;
     font-size: var(--text-sm);
 }
@@ -1302,11 +1324,11 @@ a:hover {
 }
 
 .form-message.is-success {
-    color: #2F855A;
+    color: var(--color-success-message);
 }
 
 .form-message.is-error {
-    color: #C53030;
+    color: var(--color-error-message);
 }
 
 .comment-list {
