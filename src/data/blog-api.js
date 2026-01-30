@@ -12,6 +12,8 @@ class BlogAPI {
         this.basePath = 'content/blog';
         this.apiBase = 'https://api.github.com';
         this.rawBase = 'https://raw.githubusercontent.com';
+        this.localBase = '/content/blog';
+        this.localIndex = '/content/blog/index.json';
     }
 
     /**
@@ -90,12 +92,17 @@ class BlogAPI {
                     url: file.download_url || file.url
                 }));
 
-            console.log(`Found ${markdownFiles.length} blog post(s) from GitHub`);
-            return markdownFiles;
+            if (markdownFiles.length) {
+                console.log(`Found ${markdownFiles.length} blog post(s) from GitHub`);
+                return markdownFiles;
+            }
+
+            console.warn('GitHub returned no posts, falling back to local index.');
+            return await this._listLocalPosts();
             
         } catch (error) {
             console.error('Error in listPosts:', error);
-            throw error;
+            return await this._listLocalPosts();
         }
     }
 
@@ -127,7 +134,51 @@ class BlogAPI {
             
         } catch (error) {
             console.error(`Error loading post ${slug}:`, error);
+            return await this._getLocalPost(slug, error);
+        }
+    }
+
+    async _listLocalPosts() {
+        try {
+            const response = await this._fetch(this.localIndex);
+            if (!response.ok) {
+                throw new Error(`Local index unavailable: ${response.status}`);
+            }
+            const data = await response.json();
+            const entries = Array.isArray(data) ? data : [];
+            const files = entries
+                .filter(name => typeof name === 'string' && name.endsWith('.md'))
+                .map(name => ({
+                    name,
+                    slug: name.replace('.md', ''),
+                    url: `${this.localBase}/${name}`
+                }));
+
+            console.log(`Loaded ${files.length} blog post(s) from local index`);
+            return files;
+        } catch (error) {
+            console.error('Unable to load local blog index:', error);
             throw error;
+        }
+    }
+
+    async _getLocalPost(slug, originalError) {
+        const filename = `${slug}.md`;
+        const url = `${this.localBase}/${filename}`;
+
+        try {
+            const response = await this._fetch(url);
+            if (!response.ok) {
+                throw new Error(`Local post not found: ${response.status}`);
+            }
+            const markdown = await response.text();
+            if (!markdown || markdown.trim().length === 0) {
+                throw new Error(`Local post "${slug}" is empty`);
+            }
+            return this._parseMarkdown(markdown, slug);
+        } catch (error) {
+            console.error(`Local fallback failed for ${slug}:`, error);
+            throw originalError || error;
         }
     }
 
