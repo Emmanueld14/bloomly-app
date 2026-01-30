@@ -22,21 +22,21 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
     <!-- Navigation -->
     <nav class="navbar" id="navbar">
         <div class="navbar-content">
             <a href="index.html" class="logo-container">
-                <img src="logo.svg" alt="Bloomly Logo" class="logo-icon">
+                <img src="/logo.svg" alt="Bloomly Logo" class="logo-icon">
                 <span class="logo-text">Bloomly</span>
             </a>
             <ul class="nav-links" id="navLinks">
                 <li><a href="/index.html">Home</a></li>
                 <li><a href="/about.html" class="active">About</a></li>
                 <li><a href="/blog">Blog</a></li>
-                <li><a href="/subscribe.html">Subscribe</a></li>
+                <li><a href="/subscribe">Subscribe</a></li>
             </ul>
             <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Toggle menu">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -48,12 +48,12 @@
 
     <!-- Page Header -->
     <section class="section" style="padding-top: calc(var(--space-4xl) + 80px); background: var(--gradient-hero); position: relative; overflow: hidden;">
-        <div class="floating-shape" style="width: 150px; height: 150px; background: rgba(255, 255, 255, 0.2); top: 10%; right: 10%;"></div>
-        <div class="floating-shape" style="width: 100px; height: 100px; background: rgba(200, 167, 255, 0.2); bottom: 20%; left: 15%; animation-delay: -7s;"></div>
+        <div class="floating-shape" style="width: 150px; height: 150px; background: rgba(var(--color-white-rgb), 0.2); top: 10%; right: 10%;"></div>
+        <div class="floating-shape" style="width: 100px; height: 100px; background: rgba(var(--color-lilac-rgb), 0.2); bottom: 20%; left: 15%; animation-delay: -7s;"></div>
         <div class="container" style="position: relative; z-index: 1;">
-            <div class="section-header" style="color: #FFFFFF;">
-                <h1 style="color: #FFFFFF; text-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);">About Bloomly</h1>
-                <p style="color: rgba(255, 255, 255, 0.95); font-size: var(--text-xl);">We're here to support you, empower you, and remind you that your mental health matters.</p>
+            <div class="section-header" style="color: var(--color-white);">
+                <h1 style="color: var(--color-white); text-shadow: 0 2px 20px rgba(var(--color-black-rgb), 0.1);">About Bloomly</h1>
+                <p style="color: rgba(var(--color-white-rgb), 0.95); font-size: var(--text-xl);">We're here to support you, empower you, and remind you that your mental health matters.</p>
             </div>
         </div>
     </section>
@@ -69,42 +69,42 @@
     </section>
 
     <!-- Our Values -->
-    <section class="section features" style="background: #F8F9FF; position: relative; z-index: 10;">
+    <section class="section features" style="background: var(--color-page-bg); position: relative; z-index: 10;">
         <div class="container" style="position: relative; z-index: 10;">
             <div class="section-header" style="position: relative; z-index: 10;">
-                <h2 style="color: #000000 !important; opacity: 1 !important; background: none !important; -webkit-text-fill-color: #000000 !important;">What We Stand For</h2>
-                <p style="color: #000000 !important; opacity: 1 !important;">The values that guide everything we do at Bloomly</p>
+                <h2 style="color: var(--color-black) !important; opacity: 1 !important; background: none !important; -webkit-text-fill-color: var(--color-black) !important;">What We Stand For</h2>
+                <p style="color: var(--color-black) !important; opacity: 1 !important;">The values that guide everything we do at Bloomly</p>
             </div>
             <div class="grid grid-3" style="position: relative; z-index: 10;">
                 <div class="glass-card fade-in" style="opacity: 1 !important; visibility: visible !important;">
                     <div class="card-icon">💙</div>
-                    <h3 style="color: #000000 !important; opacity: 1 !important;">Safety First</h3>
-                    <p style="color: #000000 !important; opacity: 1 !important;">Your safety and privacy are non-negotiable. We create secure, confidential spaces where you can be vulnerable without fear.</p>
+                    <h3 style="color: var(--color-black) !important; opacity: 1 !important;">Safety First</h3>
+                    <p style="color: var(--color-black) !important; opacity: 1 !important;">Your safety and privacy are non-negotiable. We create secure, confidential spaces where you can be vulnerable without fear.</p>
                 </div>
                 <div class="glass-card fade-in" style="opacity: 1 !important; visibility: visible !important;">
                     <div class="card-icon">🤝</div>
-                    <h3 style="color: #000000 !important; opacity: 1 !important;">No Judgment Zone</h3>
-                    <p style="color: #000000 !important; opacity: 1 !important;">Everyone's journey is different, and that's okay. We meet you where you are, without judgment or expectations.</p>
+                    <h3 style="color: var(--color-black) !important; opacity: 1 !important;">No Judgment Zone</h3>
+                    <p style="color: var(--color-black) !important; opacity: 1 !important;">Everyone's journey is different, and that's okay. We meet you where you are, without judgment or expectations.</p>
                 </div>
                 <div class="glass-card fade-in" style="opacity: 1 !important; visibility: visible !important;">
                     <div class="card-icon">🌱</div>
-                    <h3 style="color: #000000 !important; opacity: 1 !important;">Growth Mindset</h3>
-                    <p style="color: #000000 !important; opacity: 1 !important;">We believe in your potential to grow, heal, and thrive. Every challenge is an opportunity to discover your strength.</p>
+                    <h3 style="color: var(--color-black) !important; opacity: 1 !important;">Growth Mindset</h3>
+                    <p style="color: var(--color-black) !important; opacity: 1 !important;">We believe in your potential to grow, heal, and thrive. Every challenge is an opportunity to discover your strength.</p>
                 </div>
                 <div class="glass-card fade-in" style="opacity: 1 !important; visibility: visible !important;">
                     <div class="card-icon">✨</div>
-                    <h3 style="color: #000000 !important; opacity: 1 !important;">Hope & Positivity</h3>
-                    <p style="color: #000000 !important; opacity: 1 !important;">Even on tough days, there's hope. We focus on possibilities, progress, and the power of small steps forward.</p>
+                    <h3 style="color: var(--color-black) !important; opacity: 1 !important;">Hope & Positivity</h3>
+                    <p style="color: var(--color-black) !important; opacity: 1 !important;">Even on tough days, there's hope. We focus on possibilities, progress, and the power of small steps forward.</p>
                 </div>
                 <div class="glass-card fade-in" style="opacity: 1 !important; visibility: visible !important;">
                     <div class="card-icon">👥</div>
-                    <h3 style="color: #000000 !important; opacity: 1 !important;">Community Support</h3>
-                    <p style="color: #000000 !important; opacity: 1 !important;">You don't have to do this alone. We build supportive communities where everyone belongs and everyone matters.</p>
+                    <h3 style="color: var(--color-black) !important; opacity: 1 !important;">Community Support</h3>
+                    <p style="color: var(--color-black) !important; opacity: 1 !important;">You don't have to do this alone. We build supportive communities where everyone belongs and everyone matters.</p>
                 </div>
                 <div class="glass-card fade-in" style="opacity: 1 !important; visibility: visible !important;">
                     <div class="card-icon">🎯</div>
-                    <h3 style="color: #000000 !important; opacity: 1 !important;">Teen-Centered</h3>
-                    <p style="color: #000000 !important; opacity: 1 !important;">Everything we do is designed with teens in mind. We speak your language, understand your world, and respect your voice.</p>
+                    <h3 style="color: var(--color-black) !important; opacity: 1 !important;">Teen-Centered</h3>
+                    <p style="color: var(--color-black) !important; opacity: 1 !important;">Everything we do is designed with teens in mind. We speak your language, understand your world, and respect your voice.</p>
                 </div>
             </div>
         </div>
@@ -128,25 +128,25 @@
                 <h2 style="margin-bottom: var(--space-lg); text-align: center;">How We Help</h2>
                 <div class="glass-card" style="margin-bottom: var(--space-xl);">
                     <h3 style="margin-bottom: var(--space-md);">Mental Health Awareness</h3>
-                    <p style="font-size: var(--text-lg); line-height: 1.9; color: #4A4A4A; margin-bottom: var(--space-md);">
+                    <p style="font-size: var(--text-lg); line-height: 1.9; color: var(--color-gray-600); margin-bottom: var(--space-md);">
                         We break down the stigma around mental health by creating open, honest conversations. Mental health is just as important as physical health, and it's okay to talk about it.
                     </p>
                 </div>
                 <div class="glass-card" style="margin-bottom: var(--space-xl);">
                     <h3 style="margin-bottom: var(--space-md);">Safe Digital Space</h3>
-                    <p style="font-size: var(--text-lg); line-height: 1.9; color: #4A4A4A; margin-bottom: var(--space-md);">
+                    <p style="font-size: var(--text-lg); line-height: 1.9; color: var(--color-gray-600); margin-bottom: var(--space-md);">
                         Our platform is designed to be a safe, welcoming online space where you can access resources, connect with support, and find community—all while maintaining your privacy and safety.
                     </p>
                 </div>
                 <div class="glass-card" style="margin-bottom: var(--space-xl);">
                     <h3 style="margin-bottom: var(--space-md);">Emotional Support</h3>
-                    <p style="font-size: var(--text-lg); line-height: 1.9; color: #4A4A4A; margin-bottom: var(--space-md);">
+                    <p style="font-size: var(--text-lg); line-height: 1.9; color: var(--color-gray-600); margin-bottom: var(--space-md);">
                         Through anonymous check-ins, wellness resources, and our supportive community, we provide multiple ways for you to get the emotional support you need, when you need it.
                     </p>
                 </div>
                 <div class="glass-card">
                     <h3 style="margin-bottom: var(--space-md);">Tools for Wellness</h3>
-                    <p style="font-size: var(--text-lg); line-height: 1.9; color: #4A4A4A; margin-bottom: 0;">
+                    <p style="font-size: var(--text-lg); line-height: 1.9; color: var(--color-gray-600); margin-bottom: 0;">
                         We offer practical tools for mindfulness, self-care, confidence-building, and stress management. These aren't one-size-fits-all solutions—they're resources you can adapt to work for you.
                     </p>
                 </div>
@@ -162,7 +162,7 @@
                 <p>You're welcome here, exactly as you are. Let's grow together.</p>
             </div>
             <div style="text-align: center; margin-top: var(--space-2xl);">
-                <a href="/subscribe.html" class="btn btn-primary" style="font-size: var(--text-lg); padding: var(--space-md) var(--space-2xl);">Subscribe for Updates</a>
+                <a href="/subscribe" class="btn btn-primary" style="font-size: var(--text-lg); padding: var(--space-md) var(--space-2xl);">Subscribe for Updates</a>
             </div>
         </div>
     </section>
@@ -180,11 +180,11 @@
                     <a href="/index.html">Home</a>
                     <a href="/about.html">About</a>
                     <a href="/blog">Blog</a>
-                    <a href="/subscribe.html">Subscribe</a>
+                    <a href="/subscribe">Subscribe</a>
                 </div>
                 <div class="footer-section">
                     <h4>Get Support</h4>
-                    <p style="color: rgba(255, 255, 255, 0.7); margin-bottom: var(--space-sm);">If you're in crisis, please reach out:</p>
+                    <p style="color: rgba(var(--color-white-rgb), 0.7); margin-bottom: var(--space-sm);">If you're in crisis, please reach out:</p>
                     <a href="tel:+254700000000">Emergency: +254 700 000 000</a>
                     <a href="mailto:support@bloomly.co.ke">support@bloomly.co.ke</a>
                 </div>
@@ -195,6 +195,6 @@
         </div>
     </footer>
 
-    <script src="script.js"></script>
+    <script src="/script.js"></script>
 </body>
 </html>

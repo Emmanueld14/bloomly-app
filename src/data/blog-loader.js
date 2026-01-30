@@ -205,13 +205,13 @@
                         </p>
                         <button onclick="window.location.reload(true)" 
                                 style="padding: var(--space-md) var(--space-xl); 
-                                       background: linear-gradient(135deg, #FF78B9 0%, #C8A7FF 50%, #5FA8FF 100%); 
-                                       color: white; 
+                                       background: var(--gradient-primary); 
+                                       color: var(--color-white); 
                                        border: none; 
                                        border-radius: var(--radius-lg); 
                                        font-weight: 600; 
                                        cursor: pointer;
-                                       font-size: var(--text-base;">
+                                       font-size: var(--text-base);">
                             🔄 Retry
                         </button>
                     </div>
@@ -268,13 +268,13 @@
                     </p>
                     <button onclick="window.location.reload(true)" 
                             style="padding: var(--space-md) var(--space-xl); 
-                                   background: linear-gradient(135deg, #FF78B9 0%, #C8A7FF 50%, #5FA8FF 100%); 
-                                   color: white; 
+                                   background: var(--gradient-primary); 
+                                   color: var(--color-white); 
                                    border: none; 
                                    border-radius: var(--radius-lg); 
                                    font-weight: 600; 
                                    cursor: pointer;
-                                   font-size: var(--text-base;">
+                                   font-size: var(--text-base);">
                         🔄 Retry
                     </button>
                 </div>

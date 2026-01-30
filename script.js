@@ -28,7 +28,7 @@
             const linkSegment = normalizedLinkPath.split('/').pop();
             const isBlogLink = normalizedLinkPath.endsWith('blog.html') || normalizedLinkPath.endsWith('/blog');
             const isAboutLink = normalizedLinkPath.endsWith('about.html');
-            const isSubscribeLink = normalizedLinkPath.endsWith('subscribe.html');
+            const isSubscribeLink = normalizedLinkPath.endsWith('subscribe.html') || normalizedLinkPath.endsWith('/subscribe');
             
             // Remove active class first
             link.classList.remove('active');

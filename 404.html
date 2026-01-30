@@ -17,6 +17,18 @@
                 return;
             }
             
+            // Handle /blog root
+            if (path === '/blog' || path === '/blog/') {
+                window.location.replace('/blog.html');
+                return;
+            }
+
+            // Handle /subscribe root
+            if (path === '/subscribe' || path === '/subscribe/') {
+                window.location.replace('/subscribe.html');
+                return;
+            }
+
             // Handle /blog/[slug] redirects
             const blogMatch = path.match(/^\/blog\/(.+)$/);
             if (blogMatch) {
