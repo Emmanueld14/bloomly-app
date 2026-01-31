@@ -44,78 +44,93 @@
         </div>
     </nav>
 
-    <!-- Post Wrapper (required for modularity) -->
-    <div class="post" data-post-id="">
-        <!-- Article Header -->
-        <section class="article-header">
-            <div class="container">
-                <a href="/blog" class="back-button">← Back to Blog</a>
-                <h1 id="articleTitle">Loading...</h1>
-                <div class="article-meta" id="articleMeta">
-                    <span>Loading...</span>
-                </div>
-            </div>
-        </section>
-
-        <!-- Blog Category Navigation -->
-        <section class="blog-category-panel blog-category-panel--post" aria-label="Blog categories">
-            <div class="container">
-                <nav class="blog-category-nav" data-blog-category-panel>
-                    <!-- Categories injected by script -->
-                </nav>
-            </div>
-        </section>
-
-        <!-- Article Content -->
-        <article class="article-content">
-            <div class="container">
-                <div id="articleBody" style="max-width: 800px; margin: 0 auto;">
-                    <p>Loading article...</p>
-                </div>
-            </div>
-        </article>
-
-        <!-- Post Engagement -->
-        <section class="post-engagement" aria-label="Post engagement">
-            <div class="container">
-                <div class="engagement-card" data-post-interactions>
-                    <div class="engagement-header">
-                        <h2>Join the conversation</h2>
-                        <p>Like this post or leave a supportive comment for others to read.</p>
+    <main class="post-page">
+        <!-- Post Wrapper (required for modularity) -->
+        <div class="post" data-post-id="">
+            <!-- Article Header -->
+            <section class="article-header">
+                <div class="container">
+                    <a href="/blog" class="back-button">← Back to Blog</a>
+                    <h1 id="articleTitle">Loading...</h1>
+                    <div class="article-meta" id="articleMeta">
+                        <span>Loading...</span>
                     </div>
+                </div>
+            </section>
 
-                    <div class="post-actions">
-                        <button class="like-button" type="button" data-like-button aria-pressed="false">
-                            <span class="like-icon">💗</span>
-                            <span class="like-text">Like</span>
-                        </button>
-                        <span class="like-count" data-like-count>0 likes</span>
+            <!-- Blog Category Navigation -->
+            <section class="blog-category-panel blog-category-panel--post" aria-label="Blog categories">
+                <div class="container">
+                    <nav class="blog-category-nav" data-blog-category-panel>
+                        <!-- Categories injected by script -->
+                    </nav>
+                </div>
+            </section>
+
+            <!-- Article Content -->
+            <article class="article-content">
+                <div class="container">
+                    <div id="articleBody" style="max-width: 800px; margin: 0 auto;">
+                        <p>Loading article...</p>
                     </div>
+                </div>
+            </article>
 
-                    <div class="comment-section">
-                        <h3>Comments</h3>
-                        <form class="comment-form" data-comment-form novalidate>
-                            <label class="comment-label">
-                                Nickname (optional)
-                                <input type="text" name="nickname" maxlength="40" placeholder="Your nickname">
-                            </label>
-                            <label class="comment-label">
-                                Comment
-                                <textarea name="comment" rows="4" maxlength="500" placeholder="Share your thoughts..." required></textarea>
-                            </label>
-                            <div class="comment-actions">
-                                <button type="submit" class="btn btn-primary">Post Comment</button>
-                                <span class="form-message" data-comment-message aria-live="polite"></span>
+            <!-- Post Engagement -->
+            <section class="post-engagement" aria-label="Post engagement">
+                <div class="container">
+                    <div class="engagement-card" data-post-interactions>
+                        <div class="engagement-header">
+                            <h2>Join the conversation</h2>
+                            <p>Like this post or leave a supportive comment for others to read.</p>
+                        </div>
+
+                        <div class="post-actions">
+                            <button class="like-button" type="button" data-like-button aria-pressed="false">
+                                <span class="like-icon">💗</span>
+                                <span class="like-text">Like</span>
+                            </button>
+                            <span class="like-count" data-like-count>0 likes</span>
+                        </div>
+
+                        <div class="comment-section">
+                            <h3>Comments</h3>
+                            <form class="comment-form" data-comment-form novalidate>
+                                <label class="comment-label">
+                                    Nickname (optional)
+                                    <input type="text" name="nickname" maxlength="40" placeholder="Your nickname">
+                                </label>
+                                <label class="comment-label">
+                                    Comment
+                                    <textarea name="comment" rows="4" maxlength="500" placeholder="Share your thoughts..." required></textarea>
+                                </label>
+                                <div class="comment-actions">
+                                    <button type="submit" class="btn btn-primary">Post Comment</button>
+                                    <span class="form-message" data-comment-message aria-live="polite"></span>
+                                </div>
+                            </form>
+                            <div class="comment-list" data-comment-list>
+                                <p class="comment-empty">No comments yet. Be the first to share.</p>
                             </div>
-                        </form>
-                        <div class="comment-list" data-comment-list>
-                            <p class="comment-empty">No comments yet. Be the first to share.</p>
                         </div>
                     </div>
                 </div>
+            </section>
+        </div>
+
+        <section class="section features" aria-labelledby="post-cta-title">
+            <div class="container">
+                <div class="section-header">
+                    <h2 id="post-cta-title">Keep reading with Bloomly</h2>
+                    <p>Explore more stories or subscribe for gentle updates.</p>
+                </div>
+                <div style="display: flex; flex-wrap: wrap; gap: var(--space-md); justify-content: center;">
+                    <a href="/blog" class="btn btn-primary">Back to Blog</a>
+                    <a href="/subscribe" class="btn btn-secondary">Subscribe</a>
+                </div>
             </div>
         </section>
-    </div>
+    </main>
 
     <!-- Footer -->
     <footer class="footer">
