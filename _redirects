@@ -7,7 +7,6 @@
 # Blog routing
 /blog /blog/index.html 200
 /blog/ /blog/index.html 200
-/blog/* /blog-post.html?slug=:splat 200
 
 # Legacy blog-post path (no slug)
 /blog-post /blog/index.html 200
