@@ -1185,9 +1185,23 @@ a:hover {
     transition: all var(--transition-fast);
 }
 
+.article-header .back-button {
+    padding: var(--space-xs) var(--space-md);
+    background: rgba(var(--color-white-rgb), 0.9);
+    border: 1px solid rgba(var(--color-blue-rgb), 0.25);
+    border-radius: var(--radius-full);
+    box-shadow: 0 10px 24px rgba(var(--color-black-rgb), 0.12);
+}
+
 .back-button:hover {
     gap: var(--space-sm);
     color: var(--color-pink);
+}
+
+.article-header .back-button:hover {
+    background: rgba(var(--color-white-rgb), 0.98);
+    border-color: rgba(var(--color-pink-rgb), 0.35);
+    box-shadow: 0 14px 30px rgba(var(--color-pink-rgb), 0.2);
 }
 
 /* ========== Post Wrapper ========== */
