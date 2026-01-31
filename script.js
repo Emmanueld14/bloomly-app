@@ -1124,54 +1124,53 @@
             ]
         },
         {
-            slug: 'amina-wambui',
-            name: 'Amina Wambui',
-            role: 'Wellness Program Lead',
+            slug: 'vinny-kangara',
+            name: 'Vinny Kangara',
+            role: 'Outreach and Business Manager',
             image: '/logo.svg',
             accent: 'mist',
             details: [
-                'Wellness resource design',
-                'Check-ins & self-care plans',
-                'Program research'
+                'Community partnerships',
+                'Impact storytelling',
+                'Sustainable growth'
             ],
-            panelSummary: 'Designs calming routines that make support feel doable.',
-            bio: 'Amina listens for the small moments that make people feel calm. She turns those moments into gentle wellness tools for teens.',
+            panelSummary: 'Builds partnerships that extend Bloomly support with care.',
+            bio: 'Vinny connects people, ideas, and resources so Bloomly can show up for more teens. Their work blends relationship-building with thoughtful strategy to keep every collaboration grounded in care.',
             work: {
-                summary: 'Amina curates Bloomly wellness experiences so they feel soft, practical, and teen-friendly.',
+                summary: 'Vinny leads outreach and business efforts, making sure every partnership feels authentic and mission-aligned.',
                 highlights: [
-                    'Designs self-care toolkits and guided check-ins.',
-                    'Translates research into clear, approachable routines.',
-                    'Keeps support tools inclusive and easy to return to.'
+                    'Nurtures relationships with schools and youth groups.',
+                    'Shapes partnership strategies that prioritize teen wellbeing.',
+                    'Coordinates outreach campaigns with a gentle, supportive voice.'
                 ]
             },
             links: [
-                { label: 'LinkedIn', url: 'https://www.linkedin.com/in/amina-wambui' }
+                { label: 'LinkedIn', url: 'https://www.linkedin.com/' }
             ]
         },
         {
-            slug: 'brian-otieno',
-            name: 'Brian Otieno',
-            role: 'Content & Outreach',
+            slug: 'ryan-kuria',
+            name: 'Ryan Kuria',
+            role: 'Head of Software',
             image: '/logo.svg',
             accent: 'stone',
             details: [
-                'Content storytelling',
-                'Community outreach',
-                'Youth engagement'
+                'Platform engineering',
+                'Reliability & security',
+                'Product experience'
             ],
-            panelSummary: 'Tells stories that make mental health feel human.',
-            bio: 'Brian believes words can soften the hardest days. He shapes Bloomly stories to feel warm, honest, and easy to understand.',
+            panelSummary: 'Builds the systems that keep Bloomly calm and reliable.',
+            bio: 'Ryan loves turning big ideas into reliable, friendly experiences. He focuses on software that feels calm and secure, so teens can access Bloomly without friction.',
             work: {
-                summary: 'Brian leads Bloomly storytelling so teens can connect with support that feels familiar.',
+                summary: 'Ryan leads Bloomly software development to keep the platform fast, safe, and easy to navigate.',
                 highlights: [
-                    'Shapes the Bloomly content voice and storytelling.',
-                    'Partners with schools and youth groups for outreach.',
-                    'Builds campaigns that keep the community connected.'
+                    'Architects core platform features and data flows.',
+                    'Builds reliability checks that protect user trust.',
+                    'Collaborates with the team to keep the experience gentle and intuitive.'
                 ]
             },
             links: [
-                { label: 'LinkedIn', url: 'https://www.linkedin.com/in/brian-otieno' },
-                { label: 'GitHub', url: 'https://github.com/brian-otieno' }
+                { label: 'GitHub', url: 'https://github.com/' }
             ]
         }
     ];
