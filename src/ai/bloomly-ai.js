@@ -103,6 +103,52 @@
         };
     }
 
+    function buildErrorReply(error) {
+        const message = String(error?.message || '').toLowerCase();
+        if (message.includes('api key') || message.includes('not configured')) {
+            return {
+                opener: "Bloomly AI isn't configured yet.",
+                bullets: [
+                    "If you're an admin, add the HF_API_KEY in your hosting environment.",
+                    "Save the environment settings and refresh the page."
+                ],
+                closing: "I'm here once it's set up."
+            };
+        }
+
+        if (error?.status === 404) {
+            return {
+                opener: "Bloomly AI isn't available on this site yet.",
+                bullets: [
+                    'The AI service endpoint was not found.',
+                    'If this is a static-only deployment, serverless functions are required.'
+                ],
+                closing: "I'm here when it's ready."
+            };
+        }
+
+        if (error?.status === 429 || error?.status === 503 || message.includes('overloaded') || message.includes('rate')) {
+            return {
+                opener: "Bloomly AI is a little busy right now.",
+                bullets: [
+                    'Please try again in a moment.',
+                    'Refreshing the page can also help.'
+                ],
+                closing: "Thanks for your patience."
+            };
+        }
+
+        return {
+            opener: "I'm having trouble responding right now.",
+            bullets: [
+                'Please try again in a moment.',
+                'If the issue continues, refresh the page.',
+                'You can also explore the blog for gentle support.'
+            ],
+            closing: "I'm here when you're ready."
+        };
+    }
+
     function appendToConversation(role, content) {
         conversation.push({ role, content });
         if (conversation.length > MAX_HISTORY * 2) {
@@ -123,7 +169,10 @@
         const payload = await response.json().catch(() => ({}));
         if (!response.ok) {
             const errorMessage = payload.error || 'Bloomly AI could not respond right now.';
-            throw new Error(errorMessage);
+            const error = new Error(errorMessage);
+            error.status = response.status;
+            error.payload = payload;
+            throw error;
         }
 
         return payload.reply || '';
@@ -147,16 +196,8 @@
             addMessage({ sender: 'bot', ...parseAssistantReply(replyText) });
         } catch (error) {
             typingBubble.remove();
-            addMessage({
-                sender: 'bot',
-                opener: 'I’m having trouble responding right now.',
-                bullets: [
-                    'Please try again in a moment.',
-                    'If the issue continues, refresh the page.',
-                    'You can also explore the blog for gentle support.'
-                ],
-                closing: 'I’m here when you’re ready.'
-            });
+            console.error('Bloomly AI request failed', error);
+            addMessage({ sender: 'bot', ...buildErrorReply(error) });
         } finally {
             sendBtn.disabled = false;
             inputEl.focus();

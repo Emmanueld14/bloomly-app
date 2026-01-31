@@ -34,21 +34,31 @@ export default async function handler(req, res) {
         return;
     }
 
-    const apiKey = process.env.HF_API_KEY || process.env.HUGGINGFACE_API_KEY;
+    const apiKey = process.env.HF_API_KEY
+        || process.env.HUGGINGFACE_API_KEY
+        || process.env.AI_API_KEY
+        || process.env.BLOOMLY_AI_KEY;
     if (!apiKey) {
-        res.status(500).json({ error: 'Hugging Face API key not configured.' });
+        res.status(500).json({ error: 'AI API key not configured.' });
         return;
     }
 
-    const model = process.env.HF_MODEL || 'deepseek-ai/DeepSeek-R1-Distill-Qwen-32B';
-    const apiUrl = process.env.HF_API_URL || `https://api-inference.huggingface.co/models/${model}`;
+    const apiUrlOverride = process.env.HF_API_URL || process.env.AI_API_URL;
+    const requestedModel = process.env.HF_MODEL || process.env.AI_MODEL;
+    const fallbackModels = [
+        requestedModel,
+        'mistralai/Mistral-7B-Instruct-v0.2',
+        'HuggingFaceH4/zephyr-7b-beta'
+    ].filter(Boolean);
+    const modelsToTry = apiUrlOverride ? [null] : Array.from(new Set(fallbackModels));
     const prompt = buildPrompt(req.body?.messages);
     const payload = {
         inputs: prompt,
         parameters: {
-            max_new_tokens: 400,
+            max_new_tokens: 220,
             temperature: 0.7,
-            top_p: 0.9
+            top_p: 0.9,
+            return_full_text: false
         },
         options: {
             wait_for_model: true
@@ -56,25 +66,42 @@ export default async function handler(req, res) {
     };
 
     try {
-        const response = await fetch(apiUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${apiKey}`
-            },
-            body: JSON.stringify(payload)
-        });
+        let lastError = null;
+        for (const model of modelsToTry) {
+            const apiUrl = apiUrlOverride || `https://api-inference.huggingface.co/models/${model}`;
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`
+                },
+                body: JSON.stringify(payload)
+            });
 
-        const data = await response.json().catch(() => ({}));
-        if (!response.ok) {
-            const message = data?.error?.message || 'AI request failed.';
-            res.status(500).json({ error: message });
+            const data = await response.json().catch(() => ({}));
+            if (!response.ok) {
+                const message = data?.error?.message || data?.error || 'AI request failed.';
+                const shouldRetry = response.status === 429
+                    || response.status === 503
+                    || /loading|overloaded|rate/i.test(message);
+                lastError = { message, status: response.status };
+                if (shouldRetry && modelsToTry.length > 1) {
+                    continue;
+                }
+                res.status(500).json({ error: message, status: response.status });
+                return;
+            }
+
+            const generated = Array.isArray(data) ? data[0]?.generated_text : data?.generated_text;
+            const reply = String(generated || '').replace(prompt, '').trim();
+            res.status(200).json({ reply });
             return;
         }
 
-        const generated = Array.isArray(data) ? data[0]?.generated_text : data?.generated_text;
-        const reply = String(generated || '').replace(prompt, '').trim();
-        res.status(200).json({ reply });
+        if (lastError) {
+            res.status(500).json({ error: lastError.message, status: lastError.status });
+            return;
+        }
     } catch (error) {
         res.status(502).json({ error: 'Unable to reach AI service.' });
     }
