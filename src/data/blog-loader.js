@@ -114,14 +114,7 @@
             summary: 'What or how are new year, new me resolutions really supposed to look like? Immediate and direct? or slow but progressive? Let\'s find out more 😁',
             emoji: '❤️'
         },
-        {
-            slug: 'self-care-practices',
-            title: '5 Simple Self-Care Practices for Busy Teens',
-            date: '2025-01-12T09:00:00.000Z',
-            category: 'Self-Care',
-            summary: 'Five gentle self-care practices for busy teens who want to feel calmer and more grounded.',
-            emoji: '🌿'
-        }
+        
     ];
 
     function buildFallbackPosts() {
