@@ -216,6 +216,7 @@
         .post-actions {
             display: flex;
             gap: var(--space-sm);
+            align-items: center;
         }
         
         .btn-edit, .btn-delete {
@@ -226,6 +227,9 @@
             font-weight: 600;
             transition: all var(--transition-base);
             font-size: var(--text-sm);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
         
         .btn-edit {
@@ -459,6 +463,20 @@
 
         .email-post-message.error {
             color: var(--color-error-text);
+        }
+
+        @media (max-width: 720px) {
+            .post-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: var(--space-sm);
+            }
+
+            .post-actions {
+                width: 100%;
+                justify-content: flex-start;
+                flex-wrap: wrap;
+            }
         }
     </style>
 </head>

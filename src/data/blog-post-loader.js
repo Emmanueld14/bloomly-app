@@ -21,11 +21,11 @@
     function getSlugFromURL() {
         const urlParams = new URLSearchParams(window.location.search);
         const slugParam = urlParams.get('slug');
-        if (slugParam) return slugParam;
+        if (slugParam) return decodeURIComponent(slugParam);
         
         const path = window.location.pathname;
-        const match = path.match(/\/blog\/([^\/]+)(?:\.html)?$/);
-        return match ? match[1] : null;
+        const match = path.match(/\/blog\/([^\/?#]+)(?:\/|\.html)?$/);
+        return match ? decodeURIComponent(match[1]) : null;
     }
 
     // Format date for display
@@ -48,7 +48,7 @@
     async function loadPost() {
         const slug = getSlugFromURL();
         if (!slug) {
-            showError('Post slug not found in URL');
+            showError('This post link is missing a slug. Please return to the blog.');
             return;
         }
 
