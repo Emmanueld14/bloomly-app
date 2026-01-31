@@ -50,41 +50,58 @@
         </div>
     </nav>
 
-    <!-- Page Header -->
-    <section class="section" style="padding-top: calc(var(--space-4xl) + 80px); background: var(--gradient-hero); position: relative; overflow: hidden;">
-        <div class="floating-shape" style="width: 130px; height: 130px; background: rgba(var(--color-white-rgb), 0.2); top: 12%; right: 8%;"></div>
-        <div class="floating-shape" style="width: 100px; height: 100px; background: rgba(var(--color-lilac-rgb), 0.2); bottom: 22%; left: 10%; animation-delay: -8s;"></div>
-        <div class="container" style="position: relative; z-index: 1;">
-            <div class="section-header" style="color: var(--color-white);">
-                <h1 style="color: var(--color-white); text-shadow: 0 2px 20px rgba(var(--color-black-rgb), 0.1);">Our Blog</h1>
-                <p style="color: rgba(var(--color-white-rgb), 0.95); font-size: var(--text-xl);">Helpful articles, tips, and stories to support your mental health journey.</p>
-                <button onclick="window.refreshBlogPosts();" style="margin-top: var(--space-md); padding: var(--space-sm) var(--space-lg); background: rgba(var(--color-white-rgb), 0.2); border: 2px solid rgba(var(--color-white-rgb), 0.3); border-radius: var(--radius-lg); color: var(--color-white); font-weight: 600; cursor: pointer; transition: all 0.3s;">
-                    🔄 Refresh Posts
-                </button>
-            </div>
-        </div>
-    </section>
-
-    <!-- Blog Category Navigation -->
-    <section class="blog-category-panel" aria-label="Blog categories">
-        <div class="container">
-            <nav class="blog-category-nav" data-blog-category-panel>
-                <!-- Categories injected by script -->
-            </nav>
-        </div>
-    </section>
-
-    <!-- Blog Posts -->
-    <section class="section">
-        <div class="container">
-            <div class="blog-grid" id="blogGrid">
-                <!-- Blog posts will be loaded dynamically -->
-                <div style="text-align: center; padding: var(--space-2xl); color: var(--color-gray-600);">
-                    <p>Loading blog posts...</p>
+    <main>
+        <!-- Page Header -->
+        <section class="section" style="padding-top: calc(var(--space-4xl) + 80px); background: var(--gradient-hero); position: relative; overflow: hidden;">
+            <div class="floating-shape" style="width: 130px; height: 130px; background: rgba(var(--color-white-rgb), 0.2); top: 12%; right: 8%;"></div>
+            <div class="floating-shape" style="width: 100px; height: 100px; background: rgba(var(--color-lilac-rgb), 0.2); bottom: 22%; left: 10%; animation-delay: -8s;"></div>
+            <div class="container" style="position: relative; z-index: 1;">
+                <div class="section-header" style="color: var(--color-white);">
+                    <h1 style="color: var(--color-white); text-shadow: 0 2px 20px rgba(var(--color-black-rgb), 0.1);">Bloomly Blog</h1>
+                    <p style="color: rgba(var(--color-white-rgb), 0.95); font-size: var(--text-xl);">Short reflections and helpful guides to support your mental health journey.</p>
+                    <div style="display: flex; flex-wrap: wrap; gap: var(--space-md); justify-content: center; margin-top: var(--space-lg);">
+                        <button type="button" class="btn btn-secondary" onclick="window.refreshBlogPosts && window.refreshBlogPosts();">
+                            🔄 Refresh Posts
+                        </button>
+                        <a href="/subscribe" class="btn btn-primary">Get Updates</a>
+                    </div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
+
+        <!-- Blog Category Navigation -->
+        <section class="blog-category-panel" aria-label="Blog categories">
+            <div class="container">
+                <nav class="blog-category-nav" data-blog-category-panel>
+                    <!-- Categories injected by script -->
+                </nav>
+            </div>
+        </section>
+
+        <!-- Blog Posts -->
+        <section class="section">
+            <div class="container">
+                <div class="blog-grid" id="blogGrid">
+                    <!-- Blog posts will be loaded dynamically -->
+                    <div style="text-align: center; padding: var(--space-2xl); color: var(--color-gray-600);">
+                        <p>Loading blog posts...</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section features" aria-labelledby="blog-cta-title">
+            <div class="container">
+                <div class="section-header">
+                    <h2 id="blog-cta-title">Need a gentle reminder?</h2>
+                    <p>Subscribe for calm updates whenever a new story lands.</p>
+                </div>
+                <div style="text-align: center;">
+                    <a href="/subscribe" class="btn btn-primary">Subscribe to Bloomly</a>
+                </div>
+            </div>
+        </section>
+    </main>
 
     <!-- Footer -->
     <footer class="footer">
