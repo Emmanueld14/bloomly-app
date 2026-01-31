@@ -78,16 +78,32 @@ class BlogAPI {
      */
     async listPosts() {
         const localPosts = await this._tryListLocalPosts();
-        if (localPosts.length) {
-            return localPosts;
-        }
-
         const remotePosts = await this._tryListRemotePosts();
-        if (remotePosts.length) {
-            return remotePosts;
+
+        if (!localPosts.length && !remotePosts.length) {
+            return [];
         }
 
-        return localPosts;
+        return this._mergePostLists(localPosts, remotePosts);
+    }
+
+    _mergePostLists(localPosts, remotePosts) {
+        const bySlug = new Map();
+
+        const addPosts = (posts) => {
+            posts.forEach((post) => {
+                if (!post) return;
+                const slug = post.slug || (post.name ? post.name.replace('.md', '') : '');
+                if (!slug) return;
+                const current = bySlug.get(slug) || {};
+                bySlug.set(slug, { ...current, ...post, slug });
+            });
+        };
+
+        addPosts(localPosts);
+        addPosts(remotePosts);
+
+        return Array.from(bySlug.values());
     }
 
     async _tryListRemotePosts() {
