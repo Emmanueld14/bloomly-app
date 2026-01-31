@@ -1,6 +1,6 @@
 ---
 title: "It’s Okay to Reflect"
-date: 2026-01-06T07:33:00.000Z
+date: 2026-01-05T07:33:00.000Z
 category: "Mental Health & Awareness"
 summary: "At times, do you ever feel like isolating yourself from the world? Just taking a break and being you. When circumstances finally slap sense back into you, and all you want is to be alone."
 emoji: "💫"
