@@ -48,7 +48,8 @@
     async function loadPost() {
         const slug = getSlugFromURL();
         if (!slug) {
-            showError('This post link is missing a slug. Please return to the blog.');
+            document.body.dataset.postSlugMissing = 'true';
+            showError('We could not find that post. Please return to the blog.');
             return;
         }
 
@@ -148,7 +149,7 @@
 
         } catch (error) {
             console.error('Error loading post:', error);
-            showError(error.message || 'Unable to load this blog post.');
+            showError('We could not load this post right now. Please return to the blog.');
         }
     }
 

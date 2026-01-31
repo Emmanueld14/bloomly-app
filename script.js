@@ -782,6 +782,10 @@
 
         if (!interactionBlocks.length) return;
 
+        if (document.body.dataset.postSlugMissing === 'true') {
+            return;
+        }
+
         for (const block of interactionBlocks) {
             const postId = resolvePostId(block);
             if (!postId) {
