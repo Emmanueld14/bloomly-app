@@ -1,6 +1,6 @@
 ---
 title: "New Year, New me"
-date: 2026-01-01T02:18:00.000Z
+date: 2025-12-31T02:18:00.000Z
 category: "New Year Resolutions"
 summary: "What or how are new year, new me resolutions really supposed to look like? Immediate and direct? or slow but progressive? Let's find out more 😁"
 emoji: "❤️"
