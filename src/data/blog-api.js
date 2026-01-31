@@ -14,6 +14,21 @@ class BlogAPI {
         this.rawBase = 'https://raw.githubusercontent.com';
         this.localBase = '/content/blog';
         this.localIndex = '/content/blog/index.json';
+        this.debug = typeof window !== 'undefined' &&
+            window.localStorage &&
+            window.localStorage.getItem('bloomly:blog-debug') === 'true';
+    }
+
+    _log(...args) {
+        if (this.debug) {
+            console.log(...args);
+        }
+    }
+
+    _warn(...args) {
+        if (this.debug) {
+            console.warn(...args);
+        }
     }
 
     /**
@@ -69,7 +84,7 @@ class BlogAPI {
                     errorMessage += '. Blog directory not found.';
                 }
                 
-                console.error('GitHub API error:', response.status, errorText);
+                this._warn('GitHub API error:', response.status, errorText);
                 throw new Error(errorMessage);
             }
 
@@ -93,15 +108,15 @@ class BlogAPI {
                 }));
 
             if (markdownFiles.length) {
-                console.log(`Found ${markdownFiles.length} blog post(s) from GitHub`);
+                this._log(`Found ${markdownFiles.length} blog post(s) from GitHub`);
                 return markdownFiles;
             }
 
-            console.warn('GitHub returned no posts, falling back to local index.');
+            this._warn('GitHub returned no posts, falling back to local index.');
             return await this._listLocalPosts();
             
         } catch (error) {
-            console.error('Error in listPosts:', error);
+            this._warn('Error in listPosts:', error);
             return await this._listLocalPosts();
         }
     }
@@ -133,7 +148,7 @@ class BlogAPI {
             return this._parseMarkdown(markdown, slug);
             
         } catch (error) {
-            console.error(`Error loading post ${slug}:`, error);
+            this._warn(`Error loading post ${slug}:`, error);
             return await this._getLocalPost(slug, error);
         }
     }
@@ -154,10 +169,10 @@ class BlogAPI {
                     url: `${this.localBase}/${name}`
                 }));
 
-            console.log(`Loaded ${files.length} blog post(s) from local index`);
+            this._log(`Loaded ${files.length} blog post(s) from local index`);
             return files;
         } catch (error) {
-            console.error('Unable to load local blog index:', error);
+            this._warn('Unable to load local blog index:', error);
             throw error;
         }
     }
@@ -177,7 +192,7 @@ class BlogAPI {
             }
             return this._parseMarkdown(markdown, slug);
         } catch (error) {
-            console.error(`Local fallback failed for ${slug}:`, error);
+            this._warn(`Local fallback failed for ${slug}:`, error);
             throw originalError || error;
         }
     }

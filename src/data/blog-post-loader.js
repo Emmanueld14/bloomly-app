@@ -7,9 +7,21 @@
 (function() {
     'use strict';
 
+    const BLOG_DEBUG = window.localStorage && window.localStorage.getItem('bloomly:blog-debug') === 'true';
+    const logDebug = (...args) => {
+        if (BLOG_DEBUG) {
+            console.log(...args);
+        }
+    };
+    const warnDebug = (...args) => {
+        if (BLOG_DEBUG) {
+            console.warn(...args);
+        }
+    };
+
     // Ensure blogAPI is available
     if (typeof blogAPI === 'undefined') {
-        console.error('blogAPI not loaded! Make sure blog-api.js is loaded before blog-post-loader.js');
+        warnDebug('blogAPI not loaded! Make sure blog-api.js is loaded before blog-post-loader.js');
         const bodyEl = document.getElementById('articleBody');
         if (bodyEl) {
             bodyEl.innerHTML = '<p style="color: red;">Error: Blog API not loaded. Please refresh the page.</p>';
@@ -56,8 +68,10 @@
         const slug = getSlugFromURL();
         if (!slug) {
             document.body.dataset.postSlugMissing = 'true';
-            console.warn('Blog post slug missing in URL.');
             showError('We could not find that post. Please return to the blog.');
+            setTimeout(() => {
+                window.location.replace('/blog');
+            }, 1200);
             return;
         }
 
@@ -68,7 +82,7 @@
         }
 
         try {
-            console.log(`Loading post: ${slug}`);
+            logDebug(`Loading post: ${slug}`);
             
             // Load from GitHub API (single source of truth)
             const post = await blogAPI.getPost(slug);
@@ -153,11 +167,14 @@
                 bodyEl.appendChild(cta);
             }
 
-            console.log(`Post loaded successfully: ${slug}`);
+            logDebug(`Post loaded successfully: ${slug}`);
 
         } catch (error) {
-            console.error('Error loading post:', error);
+            warnDebug('Error loading post:', error);
             showError('We could not load this post right now. Please return to the blog.');
+            setTimeout(() => {
+                window.location.replace('/blog');
+            }, 1500);
         }
     }
 
@@ -197,7 +214,7 @@
 
     // Initialize
     function init() {
-        console.log('Initializing blog post loader...');
+        logDebug('Initializing blog post loader...');
         loadPost();
     }
 

@@ -7,9 +7,21 @@
 (function() {
     'use strict';
 
+    const BLOG_DEBUG = window.localStorage && window.localStorage.getItem('bloomly:blog-debug') === 'true';
+    const logDebug = (...args) => {
+        if (BLOG_DEBUG) {
+            console.log(...args);
+        }
+    };
+    const warnDebug = (...args) => {
+        if (BLOG_DEBUG) {
+            console.warn(...args);
+        }
+    };
+
     // Ensure blogAPI is available
     if (typeof blogAPI === 'undefined') {
-        console.error('blogAPI not loaded! Make sure blog-api.js is loaded before blog-loader.js');
+        warnDebug('blogAPI not loaded! Make sure blog-api.js is loaded before blog-loader.js');
         return;
     }
 
@@ -108,7 +120,7 @@
             const slug = post.slug || post.metadata?.slug || (post.name ? post.name.replace('.md', '') : '');
 
             if (!slug) {
-                console.warn('Skipped blog post without slug.', post);
+            warnDebug('Skipped blog post without slug.', post);
                 return '';
             }
             
@@ -150,7 +162,7 @@
     async function loadBlogPosts() {
         const blogGrid = document.getElementById('blogGrid');
         if (!blogGrid) {
-            console.error('Blog grid element #blogGrid not found');
+            warnDebug('Blog grid element #blogGrid not found');
             return;
         }
 
@@ -158,12 +170,12 @@
         blogGrid.innerHTML = '<div style="text-align: center; padding: var(--space-2xl); color: var(--color-gray-600);">Loading blog posts...</div>';
 
         try {
-            console.log('Fetching blog posts from GitHub...');
+            logDebug('Fetching blog posts from GitHub...');
             
             // Get list of posts from GitHub
             const posts = await blogAPI.listPosts();
             
-            console.log(`Received ${posts.length} post(s) from GitHub`);
+            logDebug(`Received ${posts.length} post(s) from GitHub`);
             
             if (posts.length === 0) {
                 blogGrid.innerHTML = `
@@ -176,7 +188,7 @@
             }
 
             // Load content for each post
-            console.log('Loading content for posts...');
+            logDebug('Loading content for posts...');
             const postsWithContent = await Promise.allSettled(
                 posts.map(async (post) => {
                     try {
@@ -187,8 +199,18 @@
                             html: blogAPI.markdownToHTML(content.body)
                         };
                     } catch (error) {
-                        console.warn(`Failed to load post ${post.slug}:`, error);
-                        return null;
+                        warnDebug(`Failed to load post ${post.slug}:`, error);
+                        return {
+                            ...post,
+                            metadata: {
+                                title: post.slug ? post.slug.replace(/-/g, ' ') : 'Untitled Post',
+                                date: new Date().toISOString(),
+                                category: 'Mental Health',
+                                summary: ''
+                            },
+                            body: '',
+                            html: ''
+                        };
                     }
                 })
             );
@@ -198,7 +220,7 @@
                 .filter(result => result.status === 'fulfilled' && result.value !== null)
                 .map(result => result.value);
 
-            console.log(`Successfully loaded ${validPosts.length} post(s)`);
+            logDebug(`Successfully loaded ${validPosts.length} post(s)`);
 
             if (validPosts.length === 0) {
                 blogGrid.innerHTML = `
@@ -261,7 +283,7 @@
             });
 
         } catch (error) {
-            console.error('Error loading blog posts:', error);
+            warnDebug('Error loading blog posts:', error);
             
             // Show error with retry
             blogGrid.innerHTML = `
@@ -290,13 +312,13 @@
 
     // Manual refresh function
     window.refreshBlogPosts = function() {
-        console.log('Manual refresh triggered');
+        logDebug('Manual refresh triggered');
         loadBlogPosts();
     };
 
     // Initialize
     function init() {
-        console.log('Initializing blog loader...');
+        logDebug('Initializing blog loader...');
         loadBlogPosts();
     }
 
