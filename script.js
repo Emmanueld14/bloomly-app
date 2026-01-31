@@ -478,7 +478,12 @@
             return slugParam;
         }
 
-        const match = window.location.pathname.match(/\/blog\/([^\/]+)(?:\.html)?$/);
+        const compatParam = params.get('id') || params.get('post') || params.get('postId');
+        if (compatParam) {
+            return compatParam;
+        }
+
+        const match = window.location.pathname.match(/\/blog\/([^\/?#]+)(?:\/|\.html)?$/);
         return match ? match[1] : null;
     }
 
@@ -789,7 +794,6 @@
         for (const block of interactionBlocks) {
             const postId = resolvePostId(block);
             if (!postId) {
-                console.warn('Post interactions skipped: missing data-post-id.');
                 continue;
             }
 

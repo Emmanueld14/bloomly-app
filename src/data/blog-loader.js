@@ -101,19 +101,25 @@
         }
 
         blogGrid.innerHTML = filteredPosts.map(post => {
-            const emoji = post.metadata.emoji || '💙';
-            const date = formatDate(post.metadata.date);
-            const category = post.metadata.category || 'Mental Health';
+            const emoji = post.metadata?.emoji || '💙';
+            const date = formatDate(post.metadata?.date);
+            const category = post.metadata?.category || 'Mental Health';
             const categorySlug = getCategorySlug(category);
+            const slug = post.slug || post.metadata?.slug || (post.name ? post.name.replace('.md', '') : '');
+
+            if (!slug) {
+                console.warn('Skipped blog post without slug.', post);
+                return '';
+            }
             
             return `
-                <article class="blog-card post fade-in" data-post-id="${post.slug}" data-category="${categorySlug}">
+                <article class="blog-card post fade-in" data-post-id="${slug}" data-category="${categorySlug}">
                     <div class="blog-card-image" style="font-size: var(--text-5xl);">${emoji}</div>
                     <div class="blog-card-content">
                         <div class="blog-card-date">${date} • ${category}</div>
-                        <h3>${post.metadata.title}</h3>
-                        <p>${post.metadata.summary || ''}</p>
-                        <a href="/blog/${post.slug}" class="blog-card-link">Read More →</a>
+                        <h3>${post.metadata?.title || 'Untitled Post'}</h3>
+                        <p>${post.metadata?.summary || ''}</p>
+                        <a href="/blog/${slug}" class="blog-card-link">Read More →</a>
                     </div>
                 </article>
             `;

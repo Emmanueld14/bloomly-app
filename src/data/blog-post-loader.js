@@ -22,10 +22,17 @@
         const urlParams = new URLSearchParams(window.location.search);
         const slugParam = urlParams.get('slug');
         if (slugParam) return decodeURIComponent(slugParam);
+
+        const compatParam = urlParams.get('id') || urlParams.get('post') || urlParams.get('postId');
+        if (compatParam) return decodeURIComponent(compatParam);
         
         const path = window.location.pathname;
         const match = path.match(/\/blog\/([^\/?#]+)(?:\/|\.html)?$/);
-        return match ? decodeURIComponent(match[1]) : null;
+        if (match) return decodeURIComponent(match[1]);
+
+        const hash = window.location.hash || '';
+        const hashMatch = hash.match(/\/blog\/([^\/?#]+)(?:\/|\.html)?$/);
+        return hashMatch ? decodeURIComponent(hashMatch[1]) : null;
     }
 
     // Format date for display
@@ -49,6 +56,7 @@
         const slug = getSlugFromURL();
         if (!slug) {
             document.body.dataset.postSlugMissing = 'true';
+            console.warn('Blog post slug missing in URL.');
             showError('We could not find that post. Please return to the blog.');
             return;
         }
