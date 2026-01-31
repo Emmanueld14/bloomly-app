@@ -108,10 +108,19 @@
         }
     }
 
+    function isBlogPostRoot() {
+        const path = window.location.pathname.replace(/\/+$/, '');
+        return path === '/blog-post' || path.endsWith('/blog-post/index.html') || path.endsWith('/blog-post.html');
+    }
+
     // Load and render the post
     async function loadPost() {
         const slug = getSlugFromURL();
         if (!slug) {
+            if (isBlogPostRoot()) {
+                window.location.replace('/blog');
+                return;
+            }
             document.body.dataset.postSlugMissing = 'true';
             showError('We could not find that post. Please return to the blog.');
             renderNotFound();

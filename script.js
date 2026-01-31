@@ -19,6 +19,7 @@
         const path = window.location.pathname;
         const isBlogRoot = path === '/blog' || path === '/blog/';
         const isBlogPost = path.includes('/blog/') && !path.endsWith('blog.html') && !isBlogRoot;
+        const isBlogPostTemplate = path.includes('/blog-post');
         const isTeamProfile = path.includes('/team/');
         const isSubscribePage = path.includes('/subscribe') || path.endsWith('subscribe.html');
         
@@ -44,7 +45,7 @@
                 return;
             }
 
-            if ((isBlogPost || isBlogRoot) && isBlogLink) {
+            if ((isBlogPost || isBlogPostTemplate || isBlogRoot) && isBlogLink) {
                 link.classList.add('active');
             } else if (!isBlogPost && !isTeamProfile && !isSubscribePage) {
                 if (linkSegment === currentPath || 
