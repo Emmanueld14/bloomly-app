@@ -7,6 +7,20 @@
     "api/test.js": {
       "maxDuration": 10
     }
-  }
+  },
+  "rewrites": [
+    { "source": "/blog", "destination": "/blog/index.html" },
+    { "source": "/blog/", "destination": "/blog/index.html" },
+    { "source": "/blog/:slug", "destination": "/blog-post.html?slug=:slug" },
+    { "source": "/blog/:slug/", "destination": "/blog-post.html?slug=:slug" },
+    { "source": "/blog-post", "destination": "/blog-post/index.html" },
+    { "source": "/blog-post/", "destination": "/blog-post/index.html" },
+    { "source": "/subscribe", "destination": "/subscribe/index.html" },
+    { "source": "/subscribe/", "destination": "/subscribe/index.html" },
+    { "source": "/bloomly-ai", "destination": "/bloomly-ai/index.html" },
+    { "source": "/bloomly-ai/", "destination": "/bloomly-ai/index.html" },
+    { "source": "/team/:slug", "destination": "/team/index.html?slug=:slug" },
+    { "source": "/team/:slug/", "destination": "/team/index.html?slug=:slug" }
+  ]
 }
 

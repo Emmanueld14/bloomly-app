@@ -36,6 +36,12 @@
                 return;
             }
 
+            // Handle /bloomly-ai root
+            if (path === '/bloomly-ai' || path === '/bloomly-ai/') {
+                window.location.replace('/bloomly-ai/index.html');
+                return;
+            }
+
             // Handle /blog/[slug] redirects
             const blogMatch = path.match(/^\/blog\/(.+)$/);
             if (blogMatch) {
