@@ -10,6 +10,13 @@
         
         (function() {
             const path = window.location.pathname;
+            const legacyBlogSlugs = new Set([
+                'building-confidence',
+                'exam-stress',
+                'mindfulness-beginners',
+                'supporting-friends',
+                'understanding-anxiety'
+            ]);
             
             // Handle /admin redirects
             if (path === '/admin' || path === '/admin/') {
@@ -39,6 +46,10 @@
             const blogMatch = path.match(/^\/blog\/(.+)$/);
             if (blogMatch) {
                 const slug = blogMatch[1].replace(/\.html$/, '');
+                if (legacyBlogSlugs.has(slug)) {
+                    window.location.replace(`/blog/${slug}.html`);
+                    return;
+                }
                 window.location.replace(`/blog-post.html?slug=${slug}`);
                 return;
             }

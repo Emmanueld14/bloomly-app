@@ -49,6 +49,66 @@
         }
     }
 
+    function cacheBustUrl(url) {
+        const separator = url.includes('?') ? '&' : '?';
+        return `${url}${separator}_t=${Date.now()}`;
+    }
+
+    function normalizeLegacyPost(entry) {
+        const slug = String(entry?.slug || '').trim();
+        if (!slug) return null;
+
+        return {
+            slug,
+            name: `${slug}.html`,
+            permalink: entry.permalink || `/blog/${slug}.html`,
+            metadata: {
+                title: entry.title || 'Untitled Post',
+                date: entry.date || '',
+                category: entry.category || 'Mental Health',
+                summary: entry.summary || '',
+                emoji: entry.emoji || '💙'
+            },
+            body: '',
+            html: ''
+        };
+    }
+
+    async function loadLegacyPosts() {
+        try {
+            const response = await fetch(cacheBustUrl('/content/blog/legacy.json'), {
+                cache: 'no-store'
+            });
+            if (!response.ok) {
+                throw new Error(`Legacy posts unavailable: ${response.status}`);
+            }
+            const data = await response.json();
+            if (!Array.isArray(data)) return [];
+            return data.map(normalizeLegacyPost).filter(Boolean);
+        } catch (error) {
+            warnDebug('Unable to load legacy blog posts:', error);
+            return [];
+        }
+    }
+
+    function mergePosts(primaryPosts, legacyPosts) {
+        const merged = new Map();
+
+        primaryPosts.forEach((post) => {
+            const slug = post.slug || post.metadata?.slug || (post.name ? post.name.replace('.md', '') : '');
+            if (!slug) return;
+            merged.set(slug, { ...post, slug });
+        });
+
+        legacyPosts.forEach((post) => {
+            const slug = post.slug || post.metadata?.slug || (post.name ? post.name.replace('.md', '') : '');
+            if (!slug || merged.has(slug)) return;
+            merged.set(slug, { ...post, slug });
+        });
+
+        return Array.from(merged.values());
+    }
+
     let cachedPosts = [];
     let activeCategorySlug = 'all';
     let categoryOptions = [];
@@ -126,9 +186,10 @@
             const category = post.metadata?.category || 'Mental Health';
             const categorySlug = getCategorySlug(category);
             const slug = post.slug || post.metadata?.slug || (post.name ? post.name.replace('.md', '') : '');
+            const permalink = post.permalink || post.metadata?.permalink || `/blog/${encodeURIComponent(slug)}`;
 
             if (!slug) {
-            warnDebug('Skipped blog post without slug.', post);
+                warnDebug('Skipped blog post without slug.', post);
                 return '';
             }
             
@@ -139,7 +200,7 @@
                         <div class="blog-card-date">${date} • ${category}</div>
                         <h3>${post.metadata?.title || 'Untitled Post'}</h3>
                         <p>${post.metadata?.summary || ''}</p>
-                        <a href="/blog/${encodeURIComponent(slug)}" class="blog-card-link">Read More →</a>
+                        <a href="${permalink}" class="blog-card-link">Read More →</a>
                     </div>
                 </article>
             `;
@@ -178,14 +239,16 @@
         blogGrid.innerHTML = '<div style="text-align: center; padding: var(--space-2xl); color: var(--color-gray-600);">Loading blog posts...</div>';
 
         try {
-            logDebug('Fetching blog posts from GitHub...');
+            logDebug('Fetching blog posts...');
             
-            // Get list of posts from GitHub
+            // Get list of markdown posts and legacy HTML posts
             const posts = await blogAPI.listPosts();
+            const legacyPosts = await loadLegacyPosts();
             
-            logDebug(`Received ${posts.length} post(s) from GitHub`);
+            logDebug(`Received ${posts.length} markdown post(s)`);
+            logDebug(`Received ${legacyPosts.length} legacy post(s)`);
             
-            if (posts.length === 0) {
+            if (posts.length === 0 && legacyPosts.length === 0) {
                 blogGrid.innerHTML = `
                     <div style="text-align: center; padding: var(--space-2xl); color: var(--color-gray-600);">
                         <p style="font-size: var(--text-lg); margin-bottom: var(--space-md);">No blog posts found.</p>
@@ -230,7 +293,9 @@
 
             logDebug(`Successfully loaded ${validPosts.length} post(s)`);
 
-            if (validPosts.length === 0) {
+            const mergedPosts = mergePosts(validPosts, legacyPosts);
+
+            if (mergedPosts.length === 0) {
                 blogGrid.innerHTML = `
                     <div style="text-align: center; padding: var(--space-2xl);">
                         <p style="color: var(--color-gray-600); margin-bottom: var(--space-md); font-size: var(--text-lg);">
@@ -256,14 +321,14 @@
             }
 
             // Sort by date (newest first)
-            validPosts.sort((a, b) => {
+            mergedPosts.sort((a, b) => {
                 const dateA = new Date(a.metadata.date || 0);
                 const dateB = new Date(b.metadata.date || 0);
                 return dateB - dateA;
             });
-            cachedPosts = validPosts;
+            cachedPosts = mergedPosts;
 
-            const derivedCategories = buildCategoryOptionsFromPosts(validPosts);
+            const derivedCategories = buildCategoryOptionsFromPosts(mergedPosts);
             const defaultCategories = window.BloomlyBlog?.getDefaultBlogCategories?.() || [];
             categoryOptions = (window.BloomlyBlog?.renderBlogCategoryPanel({
                 categories: [...defaultCategories, ...derivedCategories],
