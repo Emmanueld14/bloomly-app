@@ -216,6 +216,48 @@
             .replace(/-+/g, '-');
     }
 
+    const existingBloomlyBlog = window.BloomlyBlog || {};
+
+    const normalizeBlogSlug = existingBloomlyBlog.normalizeBlogSlug || function normalizeBlogSlug(value) {
+        if (!value) return null;
+        let decoded = '';
+        try {
+            decoded = decodeURIComponent(String(value));
+        } catch (error) {
+            decoded = String(value);
+        }
+        const cleaned = decoded.trim().replace(/^\/+/, '').replace(/\/+$/, '').replace(/\.html$/, '');
+        return cleaned || null;
+    };
+
+    const resolveBlogSlug = existingBloomlyBlog.resolveBlogSlug || function resolveBlogSlug() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const slugParam = normalizeBlogSlug(urlParams.get('slug'));
+        if (slugParam) return slugParam;
+
+        const compatParam = normalizeBlogSlug(
+            urlParams.get('id') || urlParams.get('post') || urlParams.get('postId') || urlParams.get('splat')
+        );
+        if (compatParam) return compatParam;
+
+        const firstParam = normalizeBlogSlug(urlParams.values().next().value);
+        if (firstParam) return firstParam;
+
+        const firstKey = normalizeBlogSlug(urlParams.keys().next().value);
+        if (firstKey) return firstKey;
+
+        const pathMatch = window.location.pathname.match(/\/blog\/([^\/?#]+)(?:\/|\.html)?$/);
+        const pathSlug = normalizeBlogSlug(pathMatch ? pathMatch[1] : null);
+        if (pathSlug) return pathSlug;
+
+        const hashMatch = (window.location.hash || '').match(/\/blog\/([^\/?#]+)(?:\/|\.html)?$/);
+        const hashSlug = normalizeBlogSlug(hashMatch ? hashMatch[1] : null);
+        if (hashSlug) return hashSlug;
+
+        const refMatch = (document.referrer || '').match(/\/blog\/([^\/?#]+)(?:\/|\.html)?$/);
+        return normalizeBlogSlug(refMatch ? refMatch[1] : null);
+    };
+
     function buildCategoryOptions(list) {
         const categories = Array.isArray(list) ? list : [];
         const seen = new Set();
@@ -276,10 +318,13 @@
     }
 
     window.BloomlyBlog = {
+        ...existingBloomlyBlog,
         normalizeCategory,
         getDefaultBlogCategories,
         getBlogCategoryFromUrl,
-        renderBlogCategoryPanel
+        renderBlogCategoryPanel,
+        normalizeBlogSlug,
+        resolveBlogSlug
     };
 
     // ========== Button Hover Effects ==========
@@ -472,29 +517,8 @@
             }
         }
 
-        const params = new URLSearchParams(window.location.search);
-        const slugParam = params.get('slug');
-        if (slugParam) {
-            return slugParam;
-        }
-
-        const compatParam = params.get('id') || params.get('post') || params.get('postId') || params.get('splat');
-        if (compatParam) {
-            return compatParam;
-        }
-
-        const firstValue = params.values().next().value;
-        if (firstValue) {
-            return firstValue;
-        }
-
-        const firstKey = params.keys().next().value;
-        if (firstKey) {
-            return firstKey;
-        }
-
-        const match = window.location.pathname.match(/\/blog\/([^\/?#]+)(?:\/|\.html)?$/);
-        return match ? match[1] : null;
+        const sharedResolve = window.BloomlyBlog?.resolveBlogSlug || resolveBlogSlug;
+        return sharedResolve ? sharedResolve() : null;
     }
 
     function formatTimestamp(isoString) {
@@ -797,7 +821,7 @@
 
         if (!interactionBlocks.length) return;
 
-        if (document.body.dataset.postSlugMissing === 'true') {
+        if (document.body.dataset.postSlugMissing === 'true' || document.body.dataset.postUnavailable === 'true') {
             return;
         }
 

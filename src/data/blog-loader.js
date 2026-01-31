@@ -133,7 +133,7 @@
             }
             
             return `
-                <article class="blog-card post fade-in" data-post-id="${slug}" data-category="${categorySlug}">
+                <article class="blog-card fade-in" data-post-id="${slug}" data-category="${categorySlug}">
                     <div class="blog-card-image" style="font-size: var(--text-5xl);">${emoji}</div>
                     <div class="blog-card-content">
                         <div class="blog-card-date">${date} • ${category}</div>
