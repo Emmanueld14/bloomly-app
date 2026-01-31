@@ -1,7 +1,7 @@
 /**
  * Unified Blog Data API
- * Single source of truth: GitHub API only
- * NO caching, NO static files, NO localStorage
+ * Local content first with GitHub fallback
+ * NO caching, NO localStorage
  */
 
 class BlogAPI {
@@ -14,9 +14,21 @@ class BlogAPI {
         this.rawBase = 'https://raw.githubusercontent.com';
         this.localBase = '/content/blog';
         this.localIndex = '/content/blog/index.json';
-        this.debug = typeof window !== 'undefined' &&
-            window.localStorage &&
-            window.localStorage.getItem('bloomly:blog-debug') === 'true';
+        this.debug = this._getDebugFlag();
+    }
+
+    _getDebugFlag() {
+        if (typeof window === 'undefined') {
+            return false;
+        }
+        try {
+            return Boolean(
+                window.localStorage &&
+                window.localStorage.getItem('bloomly:blog-debug') === 'true'
+            );
+        } catch (error) {
+            return false;
+        }
     }
 
     _log(...args) {
@@ -65,60 +77,76 @@ class BlogAPI {
      * Returns array of file metadata
      */
     async listPosts() {
+        const localPosts = await this._tryListLocalPosts();
+        if (localPosts.length) {
+            return localPosts;
+        }
+
+        const remotePosts = await this._tryListRemotePosts();
+        if (remotePosts.length) {
+            return remotePosts;
+        }
+
+        return localPosts;
+    }
+
+    async _tryListRemotePosts() {
+        try {
+            return await this._listRemotePosts();
+        } catch (error) {
+            this._warn('GitHub blog listing failed:', error);
+            return [];
+        }
+    }
+
+    async _listRemotePosts() {
         const url = `${this.apiBase}/repos/${this.repoOwner}/${this.repoName}/contents/${this.basePath}?ref=${this.repoBranch}`;
         
-        try {
-            const response = await this._fetch(url, {
-                headers: {
-                    'Accept': 'application/vnd.github.v3+json'
-                }
-            });
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                let errorMessage = `Failed to list posts: ${response.status} ${response.statusText}`;
-                
-                if (response.status === 403) {
-                    errorMessage += '. GitHub API rate limit exceeded. Please wait a few minutes.';
-                } else if (response.status === 404) {
-                    errorMessage += '. Blog directory not found.';
-                }
-                
-                this._warn('GitHub API error:', response.status, errorText);
-                throw new Error(errorMessage);
+        const response = await this._fetch(url, {
+            headers: {
+                'Accept': 'application/vnd.github.v3+json'
             }
+        });
 
-            const files = await response.json();
+        if (!response.ok) {
+            const errorText = await response.text();
+            let errorMessage = `Failed to list posts: ${response.status} ${response.statusText}`;
             
-            // Handle both array and single object responses
-            const fileArray = Array.isArray(files) ? files : (files ? [files] : []);
-            
-            // Filter only markdown files
-            const markdownFiles = fileArray
-                .filter(file => {
-                    if (!file || !file.name) return false;
-                    return file.name.endsWith('.md') && file.type === 'file';
-                })
-                .map(file => ({
-                    name: file.name,
-                    slug: file.name.replace('.md', ''),
-                    sha: file.sha,
-                    size: file.size,
-                    url: file.download_url || file.url
-                }));
-
-            if (markdownFiles.length) {
-                this._log(`Found ${markdownFiles.length} blog post(s) from GitHub`);
-                return markdownFiles;
+            if (response.status === 403) {
+                errorMessage += '. GitHub API rate limit exceeded. Please wait a few minutes.';
+            } else if (response.status === 404) {
+                errorMessage += '. Blog directory not found.';
             }
-
-            this._warn('GitHub returned no posts, falling back to local index.');
-            return await this._listLocalPosts();
             
-        } catch (error) {
-            this._warn('Error in listPosts:', error);
-            return await this._listLocalPosts();
+            this._warn('GitHub API error:', response.status, errorText);
+            throw new Error(errorMessage);
         }
+
+        const files = await response.json();
+        
+        // Handle both array and single object responses
+        const fileArray = Array.isArray(files) ? files : (files ? [files] : []);
+        
+        // Filter only markdown files
+        const markdownFiles = fileArray
+            .filter(file => {
+                if (!file || !file.name) return false;
+                return file.name.endsWith('.md') && file.type === 'file';
+            })
+            .map(file => ({
+                name: file.name,
+                slug: file.name.replace('.md', ''),
+                sha: file.sha,
+                size: file.size,
+                url: file.download_url || file.url
+            }));
+
+        if (markdownFiles.length) {
+            this._log(`Found ${markdownFiles.length} blog post(s) from GitHub`);
+            return markdownFiles;
+        }
+
+        return [];
     }
 
     /**
@@ -126,30 +154,65 @@ class BlogAPI {
      * Returns parsed markdown with metadata
      */
     async getPost(slug) {
+        const localPost = await this._tryGetLocalPost(slug);
+        if (localPost) {
+            return localPost;
+        }
+
+        const remotePost = await this._tryGetRemotePost(slug);
+        if (remotePost) {
+            return remotePost;
+        }
+
+        throw new Error(`Post "${slug}" not found`);
+    }
+
+    async _tryGetRemotePost(slug) {
+        try {
+            return await this._getRemotePost(slug);
+        } catch (error) {
+            this._warn(`Remote fallback failed for ${slug}:`, error);
+            return null;
+        }
+    }
+
+    async _getRemotePost(slug) {
         const filename = `${slug}.md`;
         const url = `${this.rawBase}/${this.repoOwner}/${this.repoName}/${this.repoBranch}/${this.basePath}/${filename}`;
         
+        const response = await this._fetch(url);
+
+        if (!response.ok) {
+            if (response.status === 404) {
+                throw new Error(`Post "${slug}" not found - it may have been deleted`);
+            }
+            throw new Error(`Failed to load post: ${response.status} ${response.statusText}`);
+        }
+
+        const markdown = await response.text();
+        
+        if (!markdown || markdown.trim().length === 0) {
+            throw new Error(`Post "${slug}" is empty`);
+        }
+
+        return this._parseMarkdown(markdown, slug);
+    }
+
+    async _tryListLocalPosts() {
         try {
-            const response = await this._fetch(url);
-
-            if (!response.ok) {
-                if (response.status === 404) {
-                    throw new Error(`Post "${slug}" not found - it may have been deleted`);
-                }
-                throw new Error(`Failed to load post: ${response.status} ${response.statusText}`);
-            }
-
-            const markdown = await response.text();
-            
-            if (!markdown || markdown.trim().length === 0) {
-                throw new Error(`Post "${slug}" is empty`);
-            }
-
-            return this._parseMarkdown(markdown, slug);
-            
+            return await this._listLocalPosts();
         } catch (error) {
-            this._warn(`Error loading post ${slug}:`, error);
-            return await this._getLocalPost(slug, error);
+            this._warn('Unable to load local blog index:', error);
+            return [];
+        }
+    }
+
+    async _tryGetLocalPost(slug) {
+        try {
+            return await this._getLocalPost(slug);
+        } catch (error) {
+            this._warn(`Local fallback failed for ${slug}:`, error);
+            return null;
         }
     }
 
@@ -172,12 +235,11 @@ class BlogAPI {
             this._log(`Loaded ${files.length} blog post(s) from local index`);
             return files;
         } catch (error) {
-            this._warn('Unable to load local blog index:', error);
             throw error;
         }
     }
 
-    async _getLocalPost(slug, originalError) {
+    async _getLocalPost(slug) {
         const filename = `${slug}.md`;
         const url = `${this.localBase}/${filename}`;
 
@@ -192,8 +254,7 @@ class BlogAPI {
             }
             return this._parseMarkdown(markdown, slug);
         } catch (error) {
-            this._warn(`Local fallback failed for ${slug}:`, error);
-            throw originalError || error;
+            throw error;
         }
     }
 

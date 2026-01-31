@@ -1,13 +1,21 @@
 /**
  * Individual Blog Post Loader
- * Runtime-only fetching from GitHub API
- * NO caching, NO static files
+ * Local content first with GitHub fallback
+ * NO caching, NO localStorage (debug flag only)
  */
 
 (function() {
     'use strict';
 
-    const BLOG_DEBUG = window.localStorage && window.localStorage.getItem('bloomly:blog-debug') === 'true';
+    let BLOG_DEBUG = false;
+    try {
+        BLOG_DEBUG = Boolean(
+            window.localStorage &&
+            window.localStorage.getItem('bloomly:blog-debug') === 'true'
+        );
+    } catch (error) {
+        BLOG_DEBUG = false;
+    }
     const logDebug = (...args) => {
         if (BLOG_DEBUG) {
             console.log(...args);
