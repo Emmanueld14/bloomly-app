@@ -131,7 +131,7 @@
                         <div class="blog-card-date">${date} • ${category}</div>
                         <h3>${post.metadata?.title || 'Untitled Post'}</h3>
                         <p>${post.metadata?.summary || ''}</p>
-                        <a href="/blog/${slug}" class="blog-card-link">Read More →</a>
+                        <a href="/blog/${encodeURIComponent(slug)}" class="blog-card-link">Read More →</a>
                     </div>
                 </article>
             `;

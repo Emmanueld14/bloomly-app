@@ -30,21 +30,54 @@
     }
 
     // Get slug from URL
+    function normalizeSlug(value) {
+        if (!value) return null;
+        const decoded = decodeURIComponent(String(value)).trim();
+        const cleaned = decoded.replace(/^\/+/, '').replace(/\/+$/, '').replace(/\.html$/, '');
+        return cleaned || null;
+    }
+
     function getSlugFromURL() {
         const urlParams = new URLSearchParams(window.location.search);
         const slugParam = urlParams.get('slug');
-        if (slugParam) return decodeURIComponent(slugParam);
+        const normalizedSlug = normalizeSlug(slugParam);
+        if (normalizedSlug) return normalizedSlug;
 
-        const compatParam = urlParams.get('id') || urlParams.get('post') || urlParams.get('postId');
-        if (compatParam) return decodeURIComponent(compatParam);
+        const compatParam = urlParams.get('id') || urlParams.get('post') || urlParams.get('postId') || urlParams.get('splat');
+        const normalizedCompat = normalizeSlug(compatParam);
+        if (normalizedCompat) return normalizedCompat;
+
+        const firstParam = urlParams.values().next().value;
+        const normalizedFirst = normalizeSlug(firstParam);
+        if (normalizedFirst) return normalizedFirst;
         
         const path = window.location.pathname;
         const match = path.match(/\/blog\/([^\/?#]+)(?:\/|\.html)?$/);
-        if (match) return decodeURIComponent(match[1]);
+        const normalizedPath = normalizeSlug(match ? match[1] : null);
+        if (normalizedPath) return normalizedPath;
 
         const hash = window.location.hash || '';
         const hashMatch = hash.match(/\/blog\/([^\/?#]+)(?:\/|\.html)?$/);
-        return hashMatch ? decodeURIComponent(hashMatch[1]) : null;
+        const normalizedHash = normalizeSlug(hashMatch ? hashMatch[1] : null);
+        if (normalizedHash) return normalizedHash;
+
+        const referrer = document.referrer || '';
+        const refMatch = referrer.match(/\/blog\/([^\/?#]+)(?:\/|\.html)?$/);
+        return normalizeSlug(refMatch ? refMatch[1] : null);
+    }
+
+    function renderNotFound() {
+        const bodyEl = document.getElementById('articleBody');
+        if (bodyEl) {
+            bodyEl.innerHTML = `
+                <div style="text-align: center; padding: var(--space-2xl);">
+                    <p style="margin-bottom: var(--space-md); color: var(--color-gray-600);">
+                        We could not find that post.
+                    </p>
+                    <a href="/blog" class="btn btn-primary">Back to Blog</a>
+                </div>
+            `;
+        }
     }
 
     // Format date for display
@@ -69,9 +102,7 @@
         if (!slug) {
             document.body.dataset.postSlugMissing = 'true';
             showError('We could not find that post. Please return to the blog.');
-            setTimeout(() => {
-                window.location.replace('/blog');
-            }, 1200);
+            renderNotFound();
             return;
         }
 
@@ -172,9 +203,6 @@
         } catch (error) {
             warnDebug('Error loading post:', error);
             showError('We could not load this post right now. Please return to the blog.');
-            setTimeout(() => {
-                window.location.replace('/blog');
-            }, 1500);
         }
     }
 
