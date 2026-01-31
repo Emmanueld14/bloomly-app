@@ -37,10 +37,17 @@
     </nav>
 
     <section class="section" style="padding-top: calc(var(--space-4xl) + 80px);">
-        <div class="container" style="text-align: center;">
-            <h1>Find a Bloomly post</h1>
-            <p>Choose a story from our blog to read the full post.</p>
-            <a href="/blog" class="btn btn-primary">Go to Blog</a>
+        <div class="container">
+            <div class="glass-card" style="padding: var(--space-2xl); text-align: center; max-width: 720px; margin: 0 auto;">
+                <h1 style="margin-bottom: var(--space-md);">Post Not Found</h1>
+                <p style="margin-bottom: var(--space-lg); color: var(--color-gray-600);">
+                    We could not find the post you were looking for. Browse the latest stories instead.
+                </p>
+                <div style="display: flex; flex-wrap: wrap; gap: var(--space-md); justify-content: center;">
+                    <a href="/blog" class="btn btn-primary">Back to Blog</a>
+                    <a href="/index.html" class="btn btn-secondary">Go Home</a>
+                </div>
+            </div>
         </div>
     </section>
 
