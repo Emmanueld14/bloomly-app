@@ -19,6 +19,8 @@
     { "source": "/subscribe/", "destination": "/subscribe/index.html" },
     { "source": "/bloomly-ai", "destination": "/bloomly-ai/index.html" },
     { "source": "/bloomly-ai/", "destination": "/bloomly-ai/index.html" },
+    { "source": "/team", "destination": "/team/index.html" },
+    { "source": "/team/", "destination": "/team/index.html" },
     { "source": "/team/:slug", "destination": "/team/index.html?slug=:slug" },
     { "source": "/team/:slug/", "destination": "/team/index.html?slug=:slug" }
   ]
