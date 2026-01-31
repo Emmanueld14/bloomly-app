@@ -1,6 +1,6 @@
 /**
- * Bloomly AI - lightweight chat experience
- * Teen-centered guidance with safety guardrails
+ * Bloomly AI - live AI chat experience
+ * Sends messages to a model endpoint and streams responses back.
  */
 
 (function() {
@@ -15,80 +15,39 @@
     const sendBtn = chatRoot.querySelector('[data-chat-send]');
     const chipContainer = chatRoot.querySelector('[data-ai-chips]');
 
-    const topicSets = {
-        stress: [
-            'Try a 3-minute reset: inhale 4, hold 4, exhale 6.',
-            'Pick one tiny task that you can finish today.',
-            'Write down what’s loud in your head, then choose one priority.',
-            'Move your body for 5–10 minutes to release tension.'
-        ],
-        focus: [
-            'Use a 25-minute focus sprint with a 5-minute break.',
-            'Turn on “Do Not Disturb” and place your phone out of reach.',
-            'Start with the easiest task to build momentum.',
-            'Study with a low, steady playlist or white noise.'
-        ],
-        habits: [
-            'Stack one habit onto something you already do daily.',
-            'Track progress with a simple checkmark, not perfection.',
-            'Set a tiny goal: 5 minutes of practice is enough.',
-            'Reward yourself after consistent effort, not just results.'
-        ],
-        confidence: [
-            'Write down one win from today, even if it’s small.',
-            'Practice “I’m learning” language instead of “I’m bad at it.”',
-            'Choose one outfit or task that makes you feel capable.',
-            'Talk to yourself like you would a close friend.'
-        ],
-        relationships: [
-            'Start with: “Hey, I care about you—want to talk?”',
-            'Listen first, then ask how you can support them.',
-            'Set boundaries if the situation feels heavy.',
-            'Encourage a trusted adult if things feel serious.'
-        ],
-        sleep: [
-            'Dim your lights 30–60 minutes before bed.',
-            'Put your phone on the other side of the room.',
-            'Do a 2-minute breathing routine to slow your thoughts.',
-            'Keep a short “brain dump” list by your bed.'
-        ],
-        school: [
-            'Break work into three small steps, not one big task.',
-            'Start with the assignment that stresses you most.',
-            'Study with a friend for accountability, then solo focus.',
-            'Plan for one “catch-up” slot this week.'
-        ],
-        general: [
-            'Pause and name what you’re feeling in one sentence.',
-            'Pick one doable next step instead of the whole problem.',
-            'Check in with your body: water, food, movement, rest.',
-            'Reach out to someone you trust if it feels heavy.'
-        ]
-    };
+    const SESSION_KEY = 'bloomly-ai:session';
+    const API_ENDPOINT = '/api/ai';
+    const MAX_HISTORY = 10;
 
-    const closers = [
-        'You’re not alone in this—small steps count.',
-        'You’re doing better than you think. I’m proud of you.',
-        'If today feels heavy, take it one tiny step at a time.',
-        'You’ve got this—steady progress is still progress.'
-    ];
+    function loadSession() {
+        try {
+            const stored = sessionStorage.getItem(SESSION_KEY);
+            return stored ? JSON.parse(stored) : [];
+        } catch (error) {
+            return [];
+        }
+    }
 
-    const unsafePhrases = [
-        'suicide', 'kill myself', 'self-harm', 'self harm', 'end my life',
-        'hurt myself', 'cut myself'
-    ];
+    function saveSession(messages) {
+        try {
+            sessionStorage.setItem(SESSION_KEY, JSON.stringify(messages));
+        } catch (error) {
+            // ignore storage failures
+        }
+    }
 
-    const illegalPhrases = ['cheat', 'steal', 'hack', 'drugs', 'weapon'];
-    const medicalPhrases = ['diagnose', 'medication', 'prescription', 'therapy dose'];
+    let conversation = loadSession();
 
-    function addMessage({ sender, opener, bullets, closing, text }) {
+    function addMessage({ sender, opener, bullets, closing, text, isTyping }) {
         const wrapper = document.createElement('div');
         wrapper.className = `ai-message ai-message--${sender}`;
 
         const bubble = document.createElement('div');
         bubble.className = 'ai-bubble';
 
-        if (text) {
+        if (isTyping) {
+            bubble.textContent = 'Bloomly AI is thinking…';
+        } else if (text) {
             const paragraph = document.createElement('p');
             paragraph.textContent = text;
             bubble.appendChild(paragraph);
@@ -122,91 +81,86 @@
         wrapper.appendChild(bubble);
         logEl.appendChild(wrapper);
         logEl.scrollTop = logEl.scrollHeight;
+        return wrapper;
     }
 
-    function pickBullets(topic, count = 3) {
-        const options = topicSets[topic] || topicSets.general;
-        const shuffled = [...options].sort(() => Math.random() - 0.5);
-        return shuffled.slice(0, count);
-    }
-
-    function detectTopic(message) {
-        const text = message.toLowerCase();
-        if (text.match(/stress|overwhelm|anxious|anxiety|panic|burnout|pressure/)) return 'stress';
-        if (text.match(/focus|distract|procrast|study|homework|exam|test/)) return 'focus';
-        if (text.match(/habit|routine|discipline|consisten|healthy/)) return 'habits';
-        if (text.match(/confidence|insecure|self esteem|shy/)) return 'confidence';
-        if (text.match(/friend|relationship|breakup|lonely/)) return 'relationships';
-        if (text.match(/sleep|insomnia|tired|night/)) return 'sleep';
-        if (text.match(/school|class|grades|assignment/)) return 'school';
-        return 'general';
-    }
-
-    function containsPhrase(message, phrases) {
-        const text = message.toLowerCase();
-        return phrases.some((phrase) => text.includes(phrase));
-    }
-
-    function buildResponse(message) {
-        if (containsPhrase(message, unsafePhrases)) {
-            return {
-                opener: 'I’m really sorry you’re feeling this way. You deserve support and care.',
-                bullets: [
-                    'If you feel in danger, please reach out to a trusted adult or local crisis line.',
-                    'You can also tell a friend, family member, or school counselor.',
-                    'If it helps, we can focus on a small grounding step right now.'
-                ],
-                closing: 'You matter, and you don’t have to carry this alone.'
-            };
+    function parseAssistantReply(text) {
+        const lines = String(text || '').split('\n').map((line) => line.trim()).filter(Boolean);
+        const bullets = lines.filter((line) => line.startsWith('-') || line.startsWith('•'))
+            .map((line) => line.replace(/^[-•]\s*/, '').trim())
+            .filter(Boolean);
+        const nonBullets = lines.filter((line) => !(line.startsWith('-') || line.startsWith('•')));
+        if (!nonBullets.length) {
+            return { text };
         }
 
-        if (containsPhrase(message, illegalPhrases)) {
-            return {
-                opener: 'I can’t help with that, but I can help with a safer approach.',
-                bullets: [
-                    'Tell me what you’re trying to achieve.',
-                    'We can break it into steps that keep you safe and on track.',
-                    'If it involves school, I can help you plan a catch-up path.'
-                ],
-                closing: 'Let’s find a way forward that protects you.'
-            };
-        }
-
-        if (containsPhrase(message, medicalPhrases)) {
-            return {
-                opener: 'I’m not the best source for medical advice, but I can share general support tips.',
-                bullets: [
-                    'Try a small routine that calms your body and mind.',
-                    'Track how you’re feeling to notice patterns.',
-                    'If you can, talk to a trusted adult or health professional.'
-                ],
-                closing: 'You deserve real support—asking for help is a strong step.'
-            };
-        }
-
-        const topic = detectTopic(message);
-        const bullets = pickBullets(topic, 3);
-        const closers = pickBullets('general', 1);
-
+        const opener = nonBullets[0];
+        const closing = nonBullets.length > 1 ? nonBullets[nonBullets.length - 1] : '';
         return {
-            opener: 'Thanks for sharing. Let’s make this feel more manageable.',
-            bullets,
-            closing: closers[0] || closers[0]
+            opener,
+            bullets: bullets.slice(0, 4),
+            closing
         };
     }
 
-    function handleSend(message) {
-        if (!message.trim()) return;
-        addMessage({ sender: 'user', text: message });
+    function appendToConversation(role, content) {
+        conversation.push({ role, content });
+        if (conversation.length > MAX_HISTORY * 2) {
+            conversation = conversation.slice(-MAX_HISTORY * 2);
+        }
+        saveSession(conversation);
+    }
+
+    async function requestAIResponse(message) {
+        const response = await fetch(API_ENDPOINT, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                messages: [...conversation, { role: 'user', content: message }]
+            })
+        });
+
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok) {
+            const errorMessage = payload.error || 'Bloomly AI could not respond right now.';
+            throw new Error(errorMessage);
+        }
+
+        return payload.reply || '';
+    }
+
+    async function handleSend(message) {
+        const trimmed = message.trim();
+        if (!trimmed) return;
+
+        addMessage({ sender: 'user', text: trimmed });
+        appendToConversation('user', trimmed);
         inputEl.value = '';
         sendBtn.disabled = true;
 
-        setTimeout(() => {
-            const response = buildResponse(message);
-            addMessage({ sender: 'bot', ...response });
+        const typingBubble = addMessage({ sender: 'bot', isTyping: true });
+
+        try {
+            const replyText = await requestAIResponse(trimmed);
+            appendToConversation('assistant', replyText);
+            typingBubble.remove();
+            addMessage({ sender: 'bot', ...parseAssistantReply(replyText) });
+        } catch (error) {
+            typingBubble.remove();
+            addMessage({
+                sender: 'bot',
+                opener: 'I’m having trouble responding right now.',
+                bullets: [
+                    'Please try again in a moment.',
+                    'If the issue continues, refresh the page.',
+                    'You can also explore the blog for gentle support.'
+                ],
+                closing: 'I’m here when you’re ready.'
+            });
+        } finally {
             sendBtn.disabled = false;
             inputEl.focus();
-        }, 350);
+        }
     }
 
     function init() {
