@@ -8,17 +8,16 @@ Respect privacy and avoid requesting personal data.
 Use relatable teen examples when helpful.
 `.trim();
 
-function buildPayload(messages, model) {
+function buildPrompt(messages) {
     const safeMessages = Array.isArray(messages) ? messages.slice(-12) : [];
-    return {
-        model,
-        temperature: 0.7,
-        max_tokens: 400,
-        messages: [
-            { role: 'system', content: SYSTEM_PROMPT },
-            ...safeMessages
-        ]
-    };
+    const history = safeMessages
+        .map((message) => {
+            const role = message.role === 'assistant' ? 'Assistant' : 'User';
+            return `${role}: ${String(message.content || '').trim()}`;
+        })
+        .join('\n');
+
+    return `${SYSTEM_PROMPT}\n\n${history}\nAssistant:`;
 }
 
 export default async function handler(req, res) {
@@ -35,15 +34,26 @@ export default async function handler(req, res) {
         return;
     }
 
-    const apiKey = process.env.AI_API_KEY || process.env.OPENAI_API_KEY;
+    const apiKey = process.env.HF_API_KEY || process.env.HUGGINGFACE_API_KEY;
     if (!apiKey) {
-        res.status(500).json({ error: 'AI API key not configured.' });
+        res.status(500).json({ error: 'Hugging Face API key not configured.' });
         return;
     }
 
-    const apiUrl = process.env.AI_API_URL || 'https://api.openai.com/v1/chat/completions';
-    const model = process.env.AI_MODEL || 'gpt-4o-mini';
-    const payload = buildPayload(req.body?.messages, model);
+    const model = process.env.HF_MODEL || 'deepseek-ai/DeepSeek-R1-Distill-Qwen-32B';
+    const apiUrl = process.env.HF_API_URL || `https://api-inference.huggingface.co/models/${model}`;
+    const prompt = buildPrompt(req.body?.messages);
+    const payload = {
+        inputs: prompt,
+        parameters: {
+            max_new_tokens: 400,
+            temperature: 0.7,
+            top_p: 0.9
+        },
+        options: {
+            wait_for_model: true
+        }
+    };
 
     try {
         const response = await fetch(apiUrl, {
@@ -62,7 +72,8 @@ export default async function handler(req, res) {
             return;
         }
 
-        const reply = data?.choices?.[0]?.message?.content?.trim() || '';
+        const generated = Array.isArray(data) ? data[0]?.generated_text : data?.generated_text;
+        const reply = String(generated || '').replace(prompt, '').trim();
         res.status(200).json({ reply });
     } catch (error) {
         res.status(502).json({ error: 'Unable to reach AI service.' });
