@@ -47,7 +47,7 @@
 
             if ((isBlogPost || isBlogPostTemplate || isBlogRoot) && isBlogLink) {
                 link.classList.add('active');
-            } else if (!isBlogPost && !isTeamProfile && !isSubscribePage) {
+            } else if (!isBlogPost && !isBlogPostTemplate && !isBlogRoot && !isTeamProfile && !isSubscribePage) {
                 if (linkSegment === currentPath || 
                     (currentPath === '' && linkSegment === 'index.html') ||
                     (currentPath === 'index.html' && linkSegment === 'index.html') ||
