@@ -9,6 +9,10 @@
 /blog/ /blog/index.html 200
 /blog/* /blog-post.html?slug=:splat 200
 
+# Legacy blog-post path (no slug)
+/blog-post /blog-post/index.html 200
+/blog-post/ /blog-post/index.html 200
+
 # Subscribe page routing
 /subscribe /subscribe/index.html 200
 /subscribe/ /subscribe/index.html 200

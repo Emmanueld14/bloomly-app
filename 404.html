@@ -23,6 +23,12 @@
                 return;
             }
 
+            // Handle /blog-post root (missing slug)
+            if (path === '/blog-post' || path === '/blog-post/') {
+                window.location.replace('/blog-post/index.html');
+                return;
+            }
+
             // Handle /subscribe root
             if (path === '/subscribe' || path === '/subscribe/') {
                 window.location.replace('/subscribe/index.html');
