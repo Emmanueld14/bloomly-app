@@ -9,8 +9,10 @@
 /blog/ /blog/index.html 200
 
 # Legacy blog-post path (no slug)
-/blog-post /blog/index.html 200
-/blog-post/ /blog/index.html 200
+/blog-post /blog-post/index.html 200
+/blog-post/ /blog-post/index.html 200
+/blog.html /blog/index.html 301
+/blog-post.html /blog-post/index.html 301
 
 # Subscribe page routing
 /subscribe /subscribe/index.html 200

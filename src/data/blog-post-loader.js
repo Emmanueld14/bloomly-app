@@ -192,18 +192,37 @@
         return path === '/blog-post' || path.endsWith('/blog-post/index.html') || path.endsWith('/blog-post.html');
     }
 
+    function showBlogListFallback() {
+        const listBlocks = document.querySelectorAll('[data-blog-list-fallback]');
+        if (!listBlocks.length) {
+            return false;
+        }
+
+        listBlocks.forEach((block) => {
+            block.removeAttribute('hidden');
+        });
+
+        const postWrapper = document.querySelector('.post');
+        if (postWrapper) {
+            postWrapper.setAttribute('hidden', '');
+            postWrapper.setAttribute('aria-hidden', 'true');
+        }
+
+        return true;
+    }
+
     // Load and render the post
     async function loadPost() {
         const slug = (window.BloomlyBlog?.resolveBlogSlug || resolveBlogSlug)();
         if (!slug) {
-            if (isBlogPostRoot()) {
-                window.location.replace('/blog');
-                return;
-            }
             document.body.dataset.postSlugMissing = 'true';
             document.body.dataset.postUnavailable = 'true';
             setCanonicalUrl(null);
             setPostUnavailableState(true);
+            if (isBlogPostRoot() && showBlogListFallback()) {
+                document.title = 'Blog - Bloomly';
+                return;
+            }
             renderFallback({
                 title: 'Post Not Found',
                 message: 'We could not find that post. Please return to the blog.'
@@ -213,6 +232,8 @@
 
         delete document.body.dataset.postSlugMissing;
         delete document.body.dataset.postUnavailable;
+        setCanonicalUrl(slug);
+        setPostUnavailableState(false);
 
         // Keep post wrapper in sync for modular interactions
         const postWrapper = document.querySelector('.post');
@@ -249,8 +270,8 @@
             metaDesc.content = post.metadata?.summary || '';
 
             // Format date
-            const dateStr = formatDate(post.metadata.date);
-            const category = post.metadata.category || 'Mental Health';
+            const dateStr = formatDate(post.metadata?.date);
+            const category = post.metadata?.category || 'Mental Health';
             const wordCount = post.body.split(' ').length;
             const readTime = Math.ceil(wordCount / 200);
             const categorySlug = window.BloomlyBlog?.normalizeCategory
@@ -260,8 +281,8 @@
             if (window.BloomlyBlog?.renderBlogCategoryPanel) {
                 const defaults = window.BloomlyBlog.getDefaultBlogCategories?.() || [];
                 const hasCategory = defaults.some((item) => {
-                    const slug = window.BloomlyBlog.normalizeCategory(item.label || item.slug || '');
-                    return slug === categorySlug;
+                    const slugValue = window.BloomlyBlog.normalizeCategory(item.label || item.slug || '');
+                    return slugValue === categorySlug;
                 });
                 const categories = hasCategory
                     ? defaults
@@ -292,10 +313,10 @@
                 bodyEl.innerHTML = html;
 
                 // Add featured image if available
-                if (post.metadata.featuredImage) {
+                if (post.metadata?.featuredImage) {
                     const img = document.createElement('img');
                     img.src = post.metadata.featuredImage;
-                    img.alt = post.metadata.title;
+                    img.alt = postTitle;
                     img.style.cssText = 'width: 100%; border-radius: var(--radius-xl); margin-bottom: var(--space-xl);';
                     bodyEl.insertBefore(img, bodyEl.firstChild);
                 }
@@ -311,18 +332,14 @@
                 bodyEl.appendChild(cta);
             }
 
-            setCanonicalUrl(slug);
-            setPostUnavailableState(false);
             logDebug(`Post loaded successfully: ${slug}`);
 
         } catch (error) {
             warnDebug('Error loading post:', error);
-            document.body.dataset.postUnavailable = 'true';
-            setCanonicalUrl(slug);
             setPostUnavailableState(true);
             renderFallback({
-                title: 'Post Unavailable',
-                message: 'We could not load this post right now. Please try again later.',
+                title: 'Post Not Found',
+                message: 'We could not load this post right now. Please return to the blog.',
                 showRetry: true
             });
         }
