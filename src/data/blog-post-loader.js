@@ -50,6 +50,10 @@
         const firstParam = urlParams.values().next().value;
         const normalizedFirst = normalizeSlug(firstParam);
         if (normalizedFirst) return normalizedFirst;
+
+        const firstKey = urlParams.keys().next().value;
+        const normalizedKey = normalizeSlug(firstKey);
+        if (normalizedKey) return normalizedKey;
         
         const path = window.location.pathname;
         const match = path.match(/\/blog\/([^\/?#]+)(?:\/|\.html)?$/);

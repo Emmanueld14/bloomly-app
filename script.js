@@ -478,9 +478,19 @@
             return slugParam;
         }
 
-        const compatParam = params.get('id') || params.get('post') || params.get('postId');
+        const compatParam = params.get('id') || params.get('post') || params.get('postId') || params.get('splat');
         if (compatParam) {
             return compatParam;
+        }
+
+        const firstValue = params.values().next().value;
+        if (firstValue) {
+            return firstValue;
+        }
+
+        const firstKey = params.keys().next().value;
+        if (firstKey) {
+            return firstKey;
         }
 
         const match = window.location.pathname.match(/\/blog\/([^\/?#]+)(?:\/|\.html)?$/);
