@@ -278,7 +278,9 @@
             const category = post.metadata?.category || 'Mental Health';
             const categorySlug = getCategorySlug(category);
             const slug = post.slug || post.metadata?.slug || (post.name ? post.name.replace('.md', '') : '');
-            const permalink = post.permalink || post.metadata?.permalink || `/blog/${encodeURIComponent(slug)}`;
+            const permalink = post.permalink
+                || post.metadata?.permalink
+                || `/blog-post?slug=${encodeURIComponent(slug)}`;
 
             if (!slug) {
                 warnDebug('Skipped blog post without slug.', post);

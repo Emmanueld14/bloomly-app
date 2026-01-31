@@ -32,7 +32,7 @@
 
             // Handle /blog-post root (missing slug)
             if (path === '/blog-post' || path === '/blog-post/') {
-                window.location.replace('/blog/index.html');
+                window.location.replace('/blog-post/index.html');
                 return;
             }
 
@@ -50,7 +50,7 @@
                     window.location.replace(`/blog/${slug}.html`);
                     return;
                 }
-                window.location.replace(`/blog-post.html?slug=${slug}`);
+                window.location.replace(`/blog-post?slug=${slug}`);
                 return;
             }
             

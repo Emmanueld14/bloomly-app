@@ -37,58 +37,137 @@
         return;
     }
 
-    // Get slug from URL
-    function normalizeSlug(value) {
+    // Shared slug helpers (reuse BloomlyBlog when available)
+    const sharedBlog = window.BloomlyBlog || {};
+
+    const normalizeBlogSlug = sharedBlog.normalizeBlogSlug || function normalizeBlogSlug(value) {
         if (!value) return null;
-        const decoded = decodeURIComponent(String(value)).trim();
-        const cleaned = decoded.replace(/^\/+/, '').replace(/\/+$/, '').replace(/\.html$/, '');
+        let decoded = '';
+        try {
+            decoded = decodeURIComponent(String(value));
+        } catch (error) {
+            decoded = String(value);
+        }
+        const cleaned = decoded.trim().replace(/^\/+/, '').replace(/\/+$/, '').replace(/\.html$/, '');
         return cleaned || null;
-    }
+    };
 
-    function getSlugFromURL() {
+    const resolveBlogSlug = sharedBlog.resolveBlogSlug || function resolveBlogSlug() {
         const urlParams = new URLSearchParams(window.location.search);
-        const slugParam = urlParams.get('slug');
-        const normalizedSlug = normalizeSlug(slugParam);
-        if (normalizedSlug) return normalizedSlug;
+        const slugParam = normalizeBlogSlug(urlParams.get('slug'));
+        if (slugParam) return slugParam;
 
-        const compatParam = urlParams.get('id') || urlParams.get('post') || urlParams.get('postId') || urlParams.get('splat');
-        const normalizedCompat = normalizeSlug(compatParam);
-        if (normalizedCompat) return normalizedCompat;
+        const compatParam = normalizeBlogSlug(
+            urlParams.get('id') || urlParams.get('post') || urlParams.get('postId') || urlParams.get('splat')
+        );
+        if (compatParam) return compatParam;
 
-        const firstParam = urlParams.values().next().value;
-        const normalizedFirst = normalizeSlug(firstParam);
-        if (normalizedFirst) return normalizedFirst;
+        const firstParam = normalizeBlogSlug(urlParams.values().next().value);
+        if (firstParam) return firstParam;
 
-        const firstKey = urlParams.keys().next().value;
-        const normalizedKey = normalizeSlug(firstKey);
-        if (normalizedKey) return normalizedKey;
-        
+        const firstKey = normalizeBlogSlug(urlParams.keys().next().value);
+        if (firstKey) return firstKey;
+
         const path = window.location.pathname;
         const match = path.match(/\/blog\/([^\/?#]+)(?:\/|\.html)?$/);
-        const normalizedPath = normalizeSlug(match ? match[1] : null);
+        const normalizedPath = normalizeBlogSlug(match ? match[1] : null);
         if (normalizedPath) return normalizedPath;
 
         const hash = window.location.hash || '';
         const hashMatch = hash.match(/\/blog\/([^\/?#]+)(?:\/|\.html)?$/);
-        const normalizedHash = normalizeSlug(hashMatch ? hashMatch[1] : null);
+        const normalizedHash = normalizeBlogSlug(hashMatch ? hashMatch[1] : null);
         if (normalizedHash) return normalizedHash;
 
         const referrer = document.referrer || '';
         const refMatch = referrer.match(/\/blog\/([^\/?#]+)(?:\/|\.html)?$/);
-        return normalizeSlug(refMatch ? refMatch[1] : null);
+        return normalizeBlogSlug(refMatch ? refMatch[1] : null);
+    };
+
+    if (!sharedBlog.normalizeBlogSlug || !sharedBlog.resolveBlogSlug) {
+        window.BloomlyBlog = {
+            ...sharedBlog,
+            normalizeBlogSlug,
+            resolveBlogSlug
+        };
     }
 
-    function renderNotFound() {
+    function setCanonicalUrl(slug) {
+        const canonicalHref = slug
+            ? `${window.location.origin}/blog/${encodeURIComponent(slug)}`
+            : `${window.location.origin}/blog`;
+        let canonicalEl = document.querySelector('link[rel="canonical"]');
+        if (!canonicalEl) {
+            canonicalEl = document.createElement('link');
+            canonicalEl.rel = 'canonical';
+            document.head.appendChild(canonicalEl);
+        }
+        canonicalEl.href = canonicalHref;
+    }
+
+    function setPostUnavailableState(isUnavailable) {
+        const engagementSection = document.querySelector('.post-engagement');
+        if (!engagementSection) return;
+        if (isUnavailable) {
+            engagementSection.setAttribute('hidden', '');
+            engagementSection.setAttribute('aria-hidden', 'true');
+        } else {
+            engagementSection.removeAttribute('hidden');
+            engagementSection.setAttribute('aria-hidden', 'false');
+        }
+    }
+
+    function renderFallback({ title, message, showRetry } = {}) {
+        const fallbackTitle = title || 'Post Not Found';
+        const fallbackMessage = message || 'We could not find that post.';
+
+        document.title = `${fallbackTitle} - Bloomly Blog`;
+
+        let metaDesc = document.querySelector('meta[name="description"]');
+        if (!metaDesc) {
+            metaDesc = document.createElement('meta');
+            metaDesc.name = 'description';
+            document.head.appendChild(metaDesc);
+        }
+        metaDesc.content = fallbackMessage;
+
+        const titleEl = document.getElementById('articleTitle');
+        if (titleEl) {
+            titleEl.textContent = fallbackTitle;
+        }
+
+        const metaEl = document.getElementById('articleMeta');
+        if (metaEl) {
+            metaEl.innerHTML = '';
+        }
+
         const bodyEl = document.getElementById('articleBody');
         if (bodyEl) {
-            bodyEl.innerHTML = `
-                <div style="text-align: center; padding: var(--space-2xl);">
-                    <p style="margin-bottom: var(--space-md); color: var(--color-gray-600);">
-                        We could not find that post.
-                    </p>
+            const actions = showRetry
+                ? `
+                    <button type="button" class="btn btn-primary" data-retry-post>Try Again</button>
+                    <a href="/blog" class="btn btn-secondary">Back to Blog</a>
+                `
+                : `
                     <a href="/blog" class="btn btn-primary">Back to Blog</a>
+                    <a href="/index.html" class="btn btn-secondary">Go Home</a>
+                `;
+
+            bodyEl.innerHTML = `
+                <div class="glass-card" style="padding: var(--space-2xl); text-align: center; max-width: 720px; margin: 0 auto;">
+                    <h2 style="margin-bottom: var(--space-md);">${fallbackTitle}</h2>
+                    <p style="margin-bottom: var(--space-lg); color: var(--color-gray-600);">
+                        ${fallbackMessage}
+                    </p>
+                    <div style="display: flex; flex-wrap: wrap; gap: var(--space-md); justify-content: center;">
+                        ${actions}
+                    </div>
                 </div>
             `;
+
+            const retryButton = bodyEl.querySelector('[data-retry-post]');
+            if (retryButton) {
+                retryButton.addEventListener('click', () => window.location.reload());
+            }
         }
     }
 
@@ -113,24 +192,57 @@
         return path === '/blog-post' || path.endsWith('/blog-post/index.html') || path.endsWith('/blog-post.html');
     }
 
+    function showBlogListFallback() {
+        const listBlocks = document.querySelectorAll('[data-blog-list-fallback]');
+        if (!listBlocks.length) {
+            return false;
+        }
+
+        listBlocks.forEach((block) => {
+            block.removeAttribute('hidden');
+        });
+
+        const postWrapper = document.querySelector('.post');
+        if (postWrapper) {
+            postWrapper.setAttribute('hidden', '');
+            postWrapper.setAttribute('aria-hidden', 'true');
+        }
+
+        return true;
+    }
+
     // Load and render the post
     async function loadPost() {
-        const slug = getSlugFromURL();
+        const slug = (window.BloomlyBlog?.resolveBlogSlug || resolveBlogSlug)();
         if (!slug) {
-            if (isBlogPostRoot()) {
-                window.location.replace('/blog');
+            document.body.dataset.postSlugMissing = 'true';
+            document.body.dataset.postUnavailable = 'true';
+            setCanonicalUrl(null);
+            setPostUnavailableState(true);
+            if (isBlogPostRoot() && showBlogListFallback()) {
+                document.title = 'Blog - Bloomly';
                 return;
             }
-            document.body.dataset.postSlugMissing = 'true';
-            showError('We could not find that post. Please return to the blog.');
-            renderNotFound();
+            renderFallback({
+                title: 'Post Not Found',
+                message: 'We could not find that post. Please return to the blog.'
+            });
             return;
         }
+
+        delete document.body.dataset.postSlugMissing;
+        delete document.body.dataset.postUnavailable;
+        setCanonicalUrl(slug);
+        setPostUnavailableState(false);
 
         // Keep post wrapper in sync for modular interactions
         const postWrapper = document.querySelector('.post');
         if (postWrapper) {
             postWrapper.setAttribute('data-post-id', slug);
+        }
+        const interactionBlock = document.querySelector('[data-post-interactions]');
+        if (interactionBlock) {
+            interactionBlock.setAttribute('data-post-id', slug);
         }
 
         try {
@@ -141,11 +253,12 @@
             const html = blogAPI.markdownToHTML(post.body);
 
             // Update page title
+            const postTitle = post.metadata?.title || slug.replace(/-/g, ' ');
             const titleEl = document.getElementById('articleTitle');
             if (titleEl) {
-                titleEl.textContent = post.metadata.title;
+                titleEl.textContent = postTitle;
             }
-            document.title = `${post.metadata.title} - Bloomly Blog`;
+            document.title = `${postTitle} - Bloomly Blog`;
 
             // Update meta description
             let metaDesc = document.querySelector('meta[name="description"]');
@@ -154,11 +267,11 @@
                 metaDesc.name = 'description';
                 document.head.appendChild(metaDesc);
             }
-            metaDesc.content = post.metadata.summary || '';
+            metaDesc.content = post.metadata?.summary || '';
 
             // Format date
-            const dateStr = formatDate(post.metadata.date);
-            const category = post.metadata.category || 'Mental Health';
+            const dateStr = formatDate(post.metadata?.date);
+            const category = post.metadata?.category || 'Mental Health';
             const wordCount = post.body.split(' ').length;
             const readTime = Math.ceil(wordCount / 200);
             const categorySlug = window.BloomlyBlog?.normalizeCategory
@@ -168,8 +281,8 @@
             if (window.BloomlyBlog?.renderBlogCategoryPanel) {
                 const defaults = window.BloomlyBlog.getDefaultBlogCategories?.() || [];
                 const hasCategory = defaults.some((item) => {
-                    const slug = window.BloomlyBlog.normalizeCategory(item.label || item.slug || '');
-                    return slug === categorySlug;
+                    const slugValue = window.BloomlyBlog.normalizeCategory(item.label || item.slug || '');
+                    return slugValue === categorySlug;
                 });
                 const categories = hasCategory
                     ? defaults
@@ -200,10 +313,10 @@
                 bodyEl.innerHTML = html;
 
                 // Add featured image if available
-                if (post.metadata.featuredImage) {
+                if (post.metadata?.featuredImage) {
                     const img = document.createElement('img');
                     img.src = post.metadata.featuredImage;
-                    img.alt = post.metadata.title;
+                    img.alt = postTitle;
                     img.style.cssText = 'width: 100%; border-radius: var(--radius-xl); margin-bottom: var(--space-xl);';
                     bodyEl.insertBefore(img, bodyEl.firstChild);
                 }
@@ -223,41 +336,12 @@
 
         } catch (error) {
             warnDebug('Error loading post:', error);
-            showError('We could not load this post right now. Please return to the blog.');
-        }
-    }
-
-    // Show error message
-    function showError(message) {
-        const titleEl = document.getElementById('articleTitle');
-        const bodyEl = document.getElementById('articleBody');
-        
-        if (titleEl) {
-            titleEl.textContent = 'Post Not Found';
-        }
-        
-        if (bodyEl) {
-            bodyEl.innerHTML = `
-                <div style="text-align: center; padding: var(--space-2xl);">
-                    <p style="margin-bottom: var(--space-md); color: var(--color-gray-600);">
-                        ${message}
-                    </p>
-                    <button onclick="window.location.reload(true)" 
-                            style="padding: var(--space-md) var(--space-xl); 
-                                   background: var(--gradient-primary); 
-                                   color: var(--color-white); 
-                                   border: none; 
-                                   border-radius: var(--radius-lg); 
-                                   font-weight: 600; 
-                                   cursor: pointer;
-                                   font-size: var(--text-base);">
-                        🔄 Retry
-                    </button>
-                    <p style="margin-top: var(--space-md);">
-                        <a href="/blog" style="color: var(--color-blue); text-decoration: underline;">Return to blog</a>
-                    </p>
-                </div>
-            `;
+            setPostUnavailableState(true);
+            renderFallback({
+                title: 'Post Not Found',
+                message: 'We could not load this post right now. Please return to the blog.',
+                showRetry: true
+            });
         }
     }
 

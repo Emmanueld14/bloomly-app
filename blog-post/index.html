@@ -45,6 +45,36 @@
     </nav>
 
     <main class="post-page">
+        <section class="section" data-blog-list-fallback hidden>
+            <div class="container">
+                <div class="section-header">
+                    <h1>Bloomly Blog</h1>
+                    <p>Short reflections and helpful guides to support your mental health journey.</p>
+                </div>
+                <div style="display: flex; flex-wrap: wrap; gap: var(--space-md); justify-content: center; margin-bottom: var(--space-xl);">
+                    <a href="/subscribe" class="btn btn-primary">Get Updates</a>
+                </div>
+            </div>
+        </section>
+
+        <section class="blog-category-panel" aria-label="Blog categories" data-blog-list-fallback hidden>
+            <div class="container">
+                <nav class="blog-category-nav" data-blog-category-panel>
+                    <!-- Categories injected by script -->
+                </nav>
+            </div>
+        </section>
+
+        <section class="section" data-blog-list-fallback hidden>
+            <div class="container">
+                <div class="blog-grid" id="blogGrid">
+                    <div style="text-align: center; padding: var(--space-2xl); color: var(--color-gray-600);">
+                        <p>Loading blog posts...</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <!-- Post Wrapper (required for modularity) -->
         <div class="post" data-post-id="">
             <!-- Article Header -->
@@ -161,6 +191,7 @@
     </footer>
 
     <script src="/src/data/blog-api.js"></script>
+    <script src="/src/data/blog-loader.js"></script>
     <script src="/src/data/blog-post-loader.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="/script.js"></script>
