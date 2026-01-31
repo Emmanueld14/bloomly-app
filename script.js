@@ -22,6 +22,7 @@
         const isBlogPostTemplate = path.includes('/blog-post');
         const isTeamProfile = path.includes('/team/');
         const isSubscribePage = path.includes('/subscribe') || path.endsWith('subscribe.html');
+        const isAiPage = path.includes('/bloomly-ai');
         
         links.forEach(link => {
             const linkPath = link.getAttribute('href') || '';
@@ -30,6 +31,7 @@
             const isBlogLink = normalizedLinkPath.endsWith('blog.html') || normalizedLinkPath.endsWith('/blog');
             const isAboutLink = normalizedLinkPath.endsWith('about.html');
             const isSubscribeLink = normalizedLinkPath.endsWith('subscribe.html') || normalizedLinkPath.endsWith('/subscribe');
+            const isAiLink = normalizedLinkPath.endsWith('/bloomly-ai') || normalizedLinkPath.endsWith('bloomly-ai.html');
             
             // Remove active class first
             link.classList.remove('active');
@@ -45,9 +47,14 @@
                 return;
             }
 
+            if (isAiPage && isAiLink) {
+                link.classList.add('active');
+                return;
+            }
+
             if ((isBlogPost || isBlogPostTemplate || isBlogRoot) && isBlogLink) {
                 link.classList.add('active');
-            } else if (!isBlogPost && !isBlogPostTemplate && !isBlogRoot && !isTeamProfile && !isSubscribePage) {
+            } else if (!isBlogPost && !isBlogPostTemplate && !isBlogRoot && !isTeamProfile && !isSubscribePage && !isAiPage) {
                 if (linkSegment === currentPath || 
                     (currentPath === '' && linkSegment === 'index.html') ||
                     (currentPath === 'index.html' && linkSegment === 'index.html') ||
