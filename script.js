@@ -1101,22 +1101,23 @@
         {
             slug: 'manuel-muhunami',
             name: 'Manuel Muhunami',
-            role: 'Founder & Community Lead',
+            role: 'CEO & Founder',
             image: '/logo.svg',
             accent: 'sage',
             details: [
-                'Community safety & trust',
-                'Platform vision & partnerships',
-                'Teen support strategy'
+                'Vision & Strategy',
+                'Product Leadership',
+                'Partnerships & Growth',
+                'Innovation & Debate'
             ],
-            panelSummary: 'Keeps Bloomly rooted in empathy, safety, and belonging.',
+            panelSummary: 'Guides Bloomly’s direction with care, clarity, and bold ideas.',
             bio: 'Manuel began journaling as a way to survive heavy days. Bloomly grew from that quiet practice into a shared space for teens who want to feel seen.',
             work: {
-                summary: 'Manuel guides Bloomly with an emphasis on trust, care, and real stories.',
+                summary: 'Manuel shapes Bloomly’s long-term vision and the partnerships that keep the community thriving.',
                 highlights: [
-                    'Shapes the platform roadmap and community values.',
-                    'Partners with schools and youth advocates to expand support.',
-                    'Keeps every experience grounded in empathy and safety.'
+                    'Sets the product roadmap and community values.',
+                    'Builds partnerships with schools and youth advocates.',
+                    'Keeps Bloomly rooted in empathy, safety, and belonging.'
                 ]
             },
             links: [
@@ -1127,22 +1128,23 @@
         {
             slug: 'vinny-kangara',
             name: 'Vinny Kangara',
-            role: 'Outreach and Business Manager',
+            role: 'Head of Marketing',
             image: '/logo.svg',
             accent: 'mist',
             details: [
-                'Community partnerships',
-                'Impact storytelling',
-                'Sustainable growth'
+                'Brand Strategy',
+                'Outreach Campaigns',
+                'Community Engagement',
+                'Business Development'
             ],
-            panelSummary: 'Builds partnerships that extend Bloomly support with care.',
+            panelSummary: 'Shapes the Bloomly brand with warmth, clarity, and community focus.',
             bio: 'Vinny connects people, ideas, and resources so Bloomly can show up for more teens. Their work blends relationship-building with thoughtful strategy to keep every collaboration grounded in care.',
             work: {
-                summary: 'Vinny leads outreach and business efforts, making sure every partnership feels authentic and mission-aligned.',
+                summary: 'Vinny leads marketing and outreach so Bloomly feels welcoming, clear, and human.',
                 highlights: [
-                    'Nurtures relationships with schools and youth groups.',
-                    'Shapes partnership strategies that prioritize teen wellbeing.',
-                    'Coordinates outreach campaigns with a gentle, supportive voice.'
+                    'Develops the Bloomly brand voice and campaigns.',
+                    'Designs outreach efforts that prioritize teen wellbeing.',
+                    'Builds partnerships that expand Bloomly’s impact.'
                 ]
             },
             links: [
@@ -1152,22 +1154,23 @@
         {
             slug: 'ryan-kuria',
             name: 'Ryan Kuria',
-            role: 'Head of Software',
+            role: 'Software Engineer',
             image: '/logo.svg',
             accent: 'stone',
             details: [
-                'Platform engineering',
-                'Reliability & security',
-                'Product experience'
+                'Full-Stack Development',
+                'System Architecture',
+                'Performance Optimization',
+                'UI/UX Engineering'
             ],
-            panelSummary: 'Builds the systems that keep Bloomly calm and reliable.',
+            panelSummary: 'Builds the systems that keep Bloomly calm, fast, and reliable.',
             bio: 'Ryan loves turning big ideas into reliable, friendly experiences. He focuses on software that feels calm and secure, so teens can access Bloomly without friction.',
             work: {
-                summary: 'Ryan leads Bloomly software development to keep the platform fast, safe, and easy to navigate.',
+                summary: 'Ryan builds Bloomly’s core platform so the experience stays smooth and supportive.',
                 highlights: [
-                    'Architects core platform features and data flows.',
-                    'Builds reliability checks that protect user trust.',
-                    'Collaborates with the team to keep the experience gentle and intuitive.'
+                    'Architects the platform and key data flows.',
+                    'Optimizes performance for faster, calmer sessions.',
+                    'Collaborates on UI details that keep the experience gentle.'
                 ]
             },
             links: [
@@ -1241,7 +1244,7 @@
 
         const detailList = document.createElement('ul');
         detailList.className = 'bloomly-team-details';
-        (member.details || []).slice(0, 3).forEach((detail) => {
+        (member.details || []).slice(0, 4).forEach((detail) => {
             const item = document.createElement('li');
             item.textContent = detail;
             detailList.appendChild(item);
