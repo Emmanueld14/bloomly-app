@@ -209,7 +209,7 @@
 
         const adminKey = getAdminPublishKey();
         if (!adminKey) {
-            setEmailPostMessage('Admin publish key is required.', 'error');
+            setEmailPostMessage('Admin publish key not configured. Email update skipped.', 'success');
             return;
         }
 
