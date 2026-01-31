@@ -1117,10 +1117,11 @@
                 'Partnerships & Growth',
                 'Innovation & Debate'
             ],
-            panelSummary: 'Guides Bloomly’s direction with care, clarity, and bold ideas.',
+            panelSummary: 'Guides Bloomly\'s direction with care, clarity, and bold ideas.',
+            summary: 'Builds Bloomly\'s long-term vision and keeps the community anchored in empathy.',
             bio: 'Manuel began journaling as a way to survive heavy days. Bloomly grew from that quiet practice into a shared space for teens who want to feel seen.',
             work: {
-                summary: 'Manuel shapes Bloomly’s long-term vision and the partnerships that keep the community thriving.',
+                summary: 'Manuel shapes Bloomly\'s long-term vision and the partnerships that keep the community thriving.',
                 highlights: [
                     'Sets the product roadmap and community values.',
                     'Builds partnerships with schools and youth advocates.',
@@ -1130,7 +1131,40 @@
             links: [
                 { label: 'LinkedIn', url: 'https://www.linkedin.com/in/manuel-muhunami' },
                 { label: 'Portfolio', url: 'https://www.behance.net/manuel-muhunami' }
-            ]
+            ],
+            skills: [
+                'Leadership',
+                'Vision Strategy',
+                'Product Direction',
+                'Community Building',
+                'Partnership Growth'
+            ],
+            portfolio: [
+                {
+                    title: 'Bloomly Vision Deck',
+                    description: 'A living roadmap that keeps Bloomly aligned with teen-centered support.',
+                    icon: '🗺️',
+                    link: 'https://bloomly.co.ke'
+                },
+                {
+                    title: 'Community Partnerships',
+                    description: 'Collaborations with schools and youth groups to expand care and access.',
+                    icon: '🤝'
+                },
+                {
+                    title: 'Launch Strategy',
+                    description: 'Guided the launch plan that introduced Bloomly\'s calm, welcoming voice.',
+                    icon: '🚀'
+                }
+            ],
+            extra: {
+                highlights: [
+                    'Founded Bloomly from a personal journaling practice.',
+                    'Hosts monthly listening circles with teen advisors.',
+                    'Believes every product decision should reduce stigma.'
+                ],
+                quote: 'Build with empathy first, then everything else follows.'
+            }
         },
         {
             slug: 'vinny-kangara',
@@ -1145,18 +1179,51 @@
                 'Business Development'
             ],
             panelSummary: 'Shapes the Bloomly brand with warmth, clarity, and community focus.',
+            summary: 'Connects Bloomly to teens and partners through story-driven outreach.',
             bio: 'Vinny connects people, ideas, and resources so Bloomly can show up for more teens. Their work blends relationship-building with thoughtful strategy to keep every collaboration grounded in care.',
             work: {
                 summary: 'Vinny leads marketing and outreach so Bloomly feels welcoming, clear, and human.',
                 highlights: [
                     'Develops the Bloomly brand voice and campaigns.',
                     'Designs outreach efforts that prioritize teen wellbeing.',
-                    'Builds partnerships that expand Bloomly’s impact.'
+                    'Builds partnerships that expand Bloomly\'s impact.'
                 ]
             },
             links: [
                 { label: 'LinkedIn', url: 'https://www.linkedin.com/' }
-            ]
+            ],
+            skills: [
+                'Brand Strategy',
+                'Community Engagement',
+                'Campaign Planning',
+                'Content Storytelling',
+                'Partnership Growth'
+            ],
+            portfolio: [
+                {
+                    title: 'Bloomly Brand Playbook',
+                    description: 'Defines the tone, visuals, and messaging that keep Bloomly warm and clear.',
+                    icon: '🎨'
+                },
+                {
+                    title: 'School Outreach Series',
+                    description: 'Designed outreach campaigns that bring Bloomly tools to more students.',
+                    icon: '📣'
+                },
+                {
+                    title: 'Community Collaborations',
+                    description: 'Built partnerships with youth organizers and wellness mentors.',
+                    icon: '🌿'
+                }
+            ],
+            extra: {
+                highlights: [
+                    'Curates Bloomly\'s weekly storytelling themes.',
+                    'Leads peer-to-peer ambassador programs.',
+                    'Believes marketing should feel like a warm welcome.'
+                ],
+                quote: 'Marketing is a conversation that makes people feel seen.'
+            }
         },
         {
             slug: 'ryan-kuria',
@@ -1171,9 +1238,10 @@
                 'UI/UX Engineering'
             ],
             panelSummary: 'Builds the systems that keep Bloomly calm, fast, and reliable.',
+            summary: 'Turns Bloomly ideas into stable, thoughtful experiences for teens.',
             bio: 'Ryan loves turning big ideas into reliable, friendly experiences. He focuses on software that feels calm and secure, so teens can access Bloomly without friction.',
             work: {
-                summary: 'Ryan builds Bloomly’s core platform so the experience stays smooth and supportive.',
+                summary: 'Ryan builds Bloomly\'s core platform so the experience stays smooth and supportive.',
                 highlights: [
                     'Architects the platform and key data flows.',
                     'Optimizes performance for faster, calmer sessions.',
@@ -1182,7 +1250,39 @@
             },
             links: [
                 { label: 'GitHub', url: 'https://github.com/' }
-            ]
+            ],
+            skills: [
+                'Full-Stack Development',
+                'System Architecture',
+                'Performance Optimization',
+                'UI/UX Engineering',
+                'Security Mindset'
+            ],
+            portfolio: [
+                {
+                    title: 'Blog Platform Refresh',
+                    description: 'Rebuilt the blog experience for fast, reliable reading on any device.',
+                    icon: '📝'
+                },
+                {
+                    title: 'Bloomly AI Interface',
+                    description: 'Designed the chat interface that keeps support accessible and calm.',
+                    icon: '✨'
+                },
+                {
+                    title: 'Performance Tuning',
+                    description: 'Reduced page load times with careful optimization and caching.',
+                    icon: '⚡'
+                }
+            ],
+            extra: {
+                highlights: [
+                    'Focuses on calm UI motion and accessibility.',
+                    'Builds systems that protect teen privacy.',
+                    'Believes performance is part of wellbeing.'
+                ],
+                quote: 'Fast, reliable experiences help people feel safe online.'
+            }
         }
     ];
 
@@ -1418,10 +1518,14 @@
         const backLink = document.createElement('a');
         backLink.className = 'back-button';
         backLink.href = '/about.html';
-        backLink.textContent = 'Back to About';
+        backLink.textContent = 'Return to Team';
 
         const profileCard = document.createElement('div');
-        profileCard.className = 'glass-card team-profile-card fade-in';
+        profileCard.className = 'glass-card team-profile-card team-profile-card--hero fade-in';
+        profileCard.dataset.accent = member.accent || 'sage';
+
+        const heroMain = document.createElement('div');
+        heroMain.className = 'team-profile-hero-main';
 
         const avatar = document.createElement('div');
         avatar.className = 'team-profile-avatar';
@@ -1448,11 +1552,18 @@
         role.className = 'team-profile-role';
         role.textContent = member.role;
 
-        const bio = document.createElement('p');
-        bio.className = 'team-profile-bio';
-        bio.textContent = member.bio;
+        const summary = document.createElement('p');
+        summary.className = 'team-profile-summary';
+        summary.textContent = member.summary || member.work?.summary || member.bio;
 
-        info.append(eyebrow, name, role, bio);
+        const panelToggle = document.createElement('button');
+        panelToggle.className = 'team-profile-panel-toggle';
+        panelToggle.type = 'button';
+        panelToggle.setAttribute('aria-expanded', 'false');
+        panelToggle.setAttribute('aria-controls', `team-profile-panel-${member.slug}`);
+        panelToggle.textContent = 'More details';
+
+        info.append(eyebrow, name, role, summary, panelToggle);
 
         if (Array.isArray(member.links) && member.links.length) {
             const links = document.createElement('div');
@@ -1471,46 +1582,193 @@
             info.appendChild(links);
         }
 
-        profileCard.append(avatar, info);
+        heroMain.append(avatar, info);
+
+        const panel = document.createElement('aside');
+        panel.className = 'team-profile-panel';
+        panel.id = `team-profile-panel-${member.slug}`;
+        panel.setAttribute('aria-hidden', 'true');
+
+        const panelTitle = document.createElement('p');
+        panelTitle.className = 'team-profile-panel-title';
+        panelTitle.textContent = 'Extra details';
+
+        const panelSummary = document.createElement('p');
+        panelSummary.className = 'team-profile-panel-summary';
+        panelSummary.textContent = member.panelSummary || '';
+
+        const panelList = document.createElement('ul');
+        panelList.className = 'team-profile-panel-list';
+        const panelHighlights = member.extra?.highlights || member.details || [];
+        panelHighlights.slice(0, 4).forEach((item) => {
+            const listItem = document.createElement('li');
+            listItem.textContent = item;
+            panelList.appendChild(listItem);
+        });
+
+        panel.append(panelTitle, panelSummary, panelList);
+
+        if (member.extra?.quote) {
+            const panelQuote = document.createElement('p');
+            panelQuote.className = 'team-profile-panel-quote';
+            panelQuote.textContent = member.extra.quote;
+            panel.appendChild(panelQuote);
+        }
+
+        profileCard.append(heroMain, panel);
+
+        const togglePanel = () => {
+            const expanded = profileCard.classList.toggle('is-expanded');
+            panelToggle.setAttribute('aria-expanded', String(expanded));
+            panel.setAttribute('aria-hidden', String(!expanded));
+        };
+
+        panelToggle.addEventListener('click', togglePanel);
         heroContainer.append(backLink, profileCard);
         heroSection.appendChild(heroContainer);
 
-        const workSection = document.createElement('section');
-        workSection.className = 'section team-profile-work';
+        const aboutSection = document.createElement('section');
+        aboutSection.className = 'section team-profile-about';
 
-        const workContainer = document.createElement('div');
-        workContainer.className = 'container';
+        const aboutContainer = document.createElement('div');
+        aboutContainer.className = 'container';
 
-        const workCard = document.createElement('div');
-        workCard.className = 'glass-card team-profile-work-card fade-in';
+        const aboutCard = document.createElement('div');
+        aboutCard.className = 'glass-card team-profile-about-card fade-in';
 
-        const workTitle = document.createElement('h2');
-        workTitle.textContent = 'Work at Bloomly';
-        workTitle.id = `work-at-bloomly-${member.slug}`;
-        workSection.setAttribute('aria-labelledby', workTitle.id);
+        const aboutTitle = document.createElement('h2');
+        aboutTitle.textContent = 'About';
+        aboutTitle.id = `about-${member.slug}`;
+        aboutSection.setAttribute('aria-labelledby', aboutTitle.id);
 
-        const workCopy = document.createElement('p');
-        workCopy.className = 'team-profile-work-copy';
-        workCopy.textContent = member.work?.summary || '';
+        const aboutCopy = document.createElement('p');
+        aboutCopy.className = 'team-profile-about-copy';
+        aboutCopy.textContent = member.bio;
 
-        workCard.append(workTitle, workCopy);
+        aboutCard.append(aboutTitle, aboutCopy);
+        aboutContainer.appendChild(aboutCard);
+        aboutSection.appendChild(aboutContainer);
 
-        if (Array.isArray(member.work?.highlights) && member.work.highlights.length) {
-            const grid = document.createElement('div');
-            grid.className = 'team-profile-work-grid';
-            member.work.highlights.forEach((item) => {
-                const workItem = document.createElement('div');
-                workItem.className = 'team-profile-work-item';
-                workItem.textContent = item;
-                grid.appendChild(workItem);
+        const skillsSection = document.createElement('section');
+        skillsSection.className = 'section team-profile-skills';
+
+        const skillsContainer = document.createElement('div');
+        skillsContainer.className = 'container';
+
+        const skillsCard = document.createElement('div');
+        skillsCard.className = 'glass-card team-profile-skills-card fade-in';
+
+        const skillsTitle = document.createElement('h2');
+        skillsTitle.textContent = 'Skills & Expertise';
+        skillsTitle.id = `skills-${member.slug}`;
+        skillsSection.setAttribute('aria-labelledby', skillsTitle.id);
+
+        const skillsList = document.createElement('div');
+        skillsList.className = 'team-profile-skill-list';
+        (member.skills || member.details || []).forEach((skill) => {
+            const skillPill = document.createElement('span');
+            skillPill.className = 'team-profile-skill';
+            skillPill.textContent = skill;
+            skillsList.appendChild(skillPill);
+        });
+
+        skillsCard.append(skillsTitle, skillsList);
+        skillsContainer.appendChild(skillsCard);
+        skillsSection.appendChild(skillsContainer);
+
+        const portfolioSection = document.createElement('section');
+        portfolioSection.className = 'section team-profile-portfolio';
+
+        const portfolioContainer = document.createElement('div');
+        portfolioContainer.className = 'container';
+
+        const portfolioHeader = document.createElement('div');
+        portfolioHeader.className = 'section-header';
+
+        const portfolioTitle = document.createElement('h2');
+        portfolioTitle.textContent = 'Portfolio Highlights';
+        portfolioTitle.id = `portfolio-${member.slug}`;
+        portfolioSection.setAttribute('aria-labelledby', portfolioTitle.id);
+
+        const portfolioSub = document.createElement('p');
+        portfolioSub.textContent = 'A snapshot of work and impact inside Bloomly.';
+        portfolioHeader.append(portfolioTitle, portfolioSub);
+
+        const portfolioGrid = document.createElement('div');
+        portfolioGrid.className = 'team-profile-portfolio-grid';
+        (member.portfolio || []).forEach((item) => {
+            const card = document.createElement('article');
+            card.className = 'team-profile-portfolio-card';
+
+            const icon = document.createElement('span');
+            icon.className = 'team-profile-portfolio-icon';
+            icon.textContent = item.icon || '✨';
+
+            const title = document.createElement('h3');
+            title.textContent = item.title || 'Project';
+
+            const description = document.createElement('p');
+            description.textContent = item.description || '';
+
+            card.append(icon, title, description);
+
+            if (item.link) {
+                const link = document.createElement('a');
+                link.className = 'team-profile-portfolio-link';
+                link.href = item.link;
+                link.target = '_blank';
+                link.rel = 'noopener noreferrer';
+                link.textContent = 'View work';
+                card.appendChild(link);
+            }
+
+            portfolioGrid.appendChild(card);
+        });
+
+        portfolioContainer.append(portfolioHeader, portfolioGrid);
+        portfolioSection.appendChild(portfolioContainer);
+
+        const contactSection = document.createElement('section');
+        contactSection.className = 'section team-profile-contact';
+
+        const contactContainer = document.createElement('div');
+        contactContainer.className = 'container';
+
+        const contactCard = document.createElement('div');
+        contactCard.className = 'glass-card team-profile-contact-card fade-in';
+
+        const contactTitle = document.createElement('h2');
+        contactTitle.textContent = 'Connect';
+
+        const contactCopy = document.createElement('p');
+        contactCopy.textContent = 'Want to reach this team member or explore more of Bloomly?';
+
+        const contactActions = document.createElement('div');
+        contactActions.className = 'team-profile-contact-actions';
+
+        const returnLink = document.createElement('a');
+        returnLink.className = 'btn btn-primary';
+        returnLink.href = '/about.html';
+        returnLink.textContent = 'Return to Team Page';
+        contactActions.appendChild(returnLink);
+
+        if (Array.isArray(member.links) && member.links.length) {
+            member.links.forEach((linkData) => {
+                const link = document.createElement('a');
+                link.className = 'btn btn-neutral';
+                link.href = linkData.url;
+                link.target = '_blank';
+                link.rel = 'noopener noreferrer';
+                link.textContent = linkData.label;
+                contactActions.appendChild(link);
             });
-            workCard.appendChild(grid);
         }
 
-        workContainer.appendChild(workCard);
-        workSection.appendChild(workContainer);
+        contactCard.append(contactTitle, contactCopy, contactActions);
+        contactContainer.appendChild(contactCard);
+        contactSection.appendChild(contactContainer);
 
-        container.append(heroSection, workSection);
+        container.append(heroSection, aboutSection, portfolioSection, skillsSection, contactSection);
     }
 
     // ========== Initialize Everything ==========
