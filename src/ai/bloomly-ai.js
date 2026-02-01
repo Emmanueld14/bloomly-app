@@ -157,6 +157,33 @@
         saveSession(conversation);
     }
 
+    async function checkAiConfiguration() {
+        try {
+            const response = await fetch(`${API_ENDPOINT}?status=1`, {
+                method: 'GET'
+            });
+            const payload = await response.json().catch(() => ({}));
+            if (!response.ok) {
+                const errorMessage = payload.error || 'Bloomly AI could not respond right now.';
+                const error = new Error(errorMessage);
+                error.status = response.status;
+                error.payload = payload;
+                throw error;
+            }
+
+            if (payload.configured === false) {
+                const error = new Error(payload.error || 'AI API key not configured.');
+                error.status = 500;
+                error.payload = payload;
+                throw error;
+            }
+
+            return true;
+        } catch (error) {
+            return error;
+        }
+    }
+
     async function requestAIResponse(message) {
         const response = await fetch(API_ENDPOINT, {
             method: 'POST',
@@ -204,7 +231,13 @@
         }
     }
 
-    function init() {
+    async function init() {
+        const status = await checkAiConfiguration();
+        if (status !== true) {
+            addMessage({ sender: 'bot', ...buildErrorReply(status) });
+            return;
+        }
+
         addMessage({
             sender: 'bot',
             opener: 'Hey! I’m Bloomly AI.',

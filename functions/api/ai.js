@@ -30,6 +30,23 @@ export async function onRequestOptions() {
     return new Response(null, { status: 204, headers: corsHeaders });
 }
 
+export async function onRequestGet(context) {
+    const { env } = context;
+    const apiKey = env.HF_API_KEY
+        || env.HUGGINGFACE_API_KEY
+        || env.AI_API_KEY
+        || env.BLOOMLY_AI_KEY;
+    const payload = { configured: Boolean(apiKey) };
+    if (!apiKey) {
+        payload.error = 'AI API key not configured.';
+    }
+
+    return new Response(JSON.stringify(payload), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json', ...corsHeaders }
+    });
+}
+
 export async function onRequestPost(context) {
     const { request, env } = context;
     let body = null;

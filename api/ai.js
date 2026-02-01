@@ -29,15 +29,25 @@ export default async function handler(req, res) {
         return;
     }
 
+    const apiKey = process.env.HF_API_KEY
+        || process.env.HUGGINGFACE_API_KEY
+        || process.env.AI_API_KEY
+        || process.env.BLOOMLY_AI_KEY;
+
+    if (req.method === 'GET') {
+        const payload = { configured: Boolean(apiKey) };
+        if (!apiKey) {
+            payload.error = 'AI API key not configured.';
+        }
+        res.status(200).json(payload);
+        return;
+    }
+
     if (req.method !== 'POST') {
         res.status(405).json({ error: 'Method not allowed.' });
         return;
     }
 
-    const apiKey = process.env.HF_API_KEY
-        || process.env.HUGGINGFACE_API_KEY
-        || process.env.AI_API_KEY
-        || process.env.BLOOMLY_AI_KEY;
     if (!apiKey) {
         res.status(500).json({ error: 'AI API key not configured.' });
         return;
