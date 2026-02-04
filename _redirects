@@ -23,12 +23,10 @@
 /bloomly-ai/ /bloomly-ai/index.html 200
 
 # Team profile routing - redirect /team/slug to team profile template
-/team /team/index.html 200
-/team/ /team/index.html 200
-/team/* /team/index.html?slug=:splat 200
+/team/:slug /team/index.html?slug=:slug 200
 
 # Profile routing - use team profile template
-/profile /team/index.html 200
-/profile/ /team/index.html 200
-/profile/* /team/index.html?slug=:splat 200
+/profile /about.html 301
+/profile/ /about.html 301
+/profile/:slug /team/index.html?slug=:slug 200
 
