@@ -1540,13 +1540,13 @@
             return slugParam;
         }
 
-        const pathMatch = window.location.pathname.match(/\/(team|profile|people)\/([^\/?#]+)(?:\.html)?$/);
+        const pathMatch = window.location.pathname.match(/\/(team|profile|people)\/([^\/?#]+)(?:\.html)?\/?$/);
         const pathSlug = normalizeTeamSlug(pathMatch ? pathMatch[2] : null);
         if (pathSlug) {
             return pathSlug;
         }
 
-        const hashMatch = (window.location.hash || '').match(/\/(team|profile|people)\/([^\/?#]+)(?:\.html)?$/);
+        const hashMatch = (window.location.hash || '').match(/\/(team|profile|people)\/([^\/?#]+)(?:\.html)?\/?$/);
         return normalizeTeamSlug(hashMatch ? hashMatch[2] : null);
     }
 
