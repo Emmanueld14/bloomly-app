@@ -128,6 +128,10 @@
             document.getElementById('userName').textContent = githubUser.name || githubUser.login;
             document.getElementById('userEmail').textContent = githubUser.email || 'No email';
         }
+
+        if (window.AppointmentsAdmin && typeof window.AppointmentsAdmin.init === 'function') {
+            window.AppointmentsAdmin.init();
+        }
     }
 
     // Initialize Supabase client for notifications

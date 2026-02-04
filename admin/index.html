@@ -290,6 +290,88 @@
             border-radius: var(--radius-md);
             margin-bottom: var(--space-lg);
         }
+
+        .appointments-admin-section {
+            margin-top: var(--space-3xl);
+            padding-top: var(--space-2xl);
+            border-top: 1px solid rgba(var(--color-black-rgb), 0.08);
+        }
+
+        .appointments-admin-section h2 {
+            margin-bottom: var(--space-sm);
+        }
+
+        .appointments-day-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--space-sm);
+            align-items: center;
+            margin-bottom: var(--space-sm);
+        }
+
+        .appointments-day-row label {
+            display: flex;
+            align-items: center;
+            gap: var(--space-xs);
+            min-width: 140px;
+            font-weight: 600;
+        }
+
+        .appointments-day-row input[type="text"] {
+            flex: 1;
+            min-width: 220px;
+        }
+
+        .blackout-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--space-sm);
+            align-items: center;
+        }
+
+        .blackout-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--space-sm);
+            margin-top: var(--space-sm);
+        }
+
+        .blackout-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-xs);
+            background: rgba(var(--color-black-rgb), 0.05);
+            border-radius: var(--radius-full);
+            padding: 0.35rem 0.75rem;
+            font-size: var(--text-sm);
+        }
+
+        .blackout-chip button {
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-weight: 700;
+            color: var(--color-danger);
+        }
+
+        .appointments-admin-message {
+            margin-top: var(--space-sm);
+            font-size: var(--text-sm);
+            padding: 0.5rem 0.75rem;
+            border-radius: var(--radius-md);
+            background: rgba(var(--color-black-rgb), 0.05);
+            color: var(--color-gray-650);
+        }
+
+        .appointments-admin-message.success {
+            background: rgba(var(--color-success-rgb), 0.15);
+            color: var(--color-success);
+        }
+
+        .appointments-admin-message.error {
+            background: rgba(var(--color-danger-rgb), 0.15);
+            color: var(--color-danger);
+        }
         
         /* Modal Styles */
         .modal {
@@ -555,6 +637,89 @@
                         <p id="emailPostMessage" class="email-post-message"></p>
                     </form>
                 </div>
+
+                <div class="appointments-admin-section" id="appointmentsAdminSection">
+                    <h2>Appointments</h2>
+                    <p>Control booking availability, pricing, and blackout days.</p>
+
+                    <form id="appointmentsSettingsForm">
+                        <div class="form-group">
+                            <label for="appointmentsEnabled">Enable appointment booking</label>
+                            <input type="checkbox" id="appointmentsEnabled">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="appointmentPrice">Appointment price</label>
+                            <div class="blackout-controls">
+                                <input type="number" id="appointmentPrice" min="0" step="1" placeholder="e.g. 1500">
+                                <select id="appointmentCurrency">
+                                    <option value="KES">KES</option>
+                                    <option value="USD">USD</option>
+                                    <option value="GBP">GBP</option>
+                                    <option value="EUR">EUR</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group" id="appointmentsAdminKeyGroup">
+                            <label for="appointmentsAdminKey">Appointments admin key</label>
+                            <input type="password" id="appointmentsAdminKey" placeholder="Enter your appointments admin key">
+                            <p style="margin-top: var(--space-xs); font-size: var(--text-sm); color: var(--color-gray-550);">
+                                This key protects appointment settings from public updates.
+                            </p>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Available days and time slots</label>
+                            <div class="appointments-day-row">
+                                <label><input type="checkbox" data-day-toggle="mon"> Monday</label>
+                                <input type="text" data-day-slots="mon" placeholder="09:00, 13:30, 16:00">
+                            </div>
+                            <div class="appointments-day-row">
+                                <label><input type="checkbox" data-day-toggle="tue"> Tuesday</label>
+                                <input type="text" data-day-slots="tue" placeholder="09:00, 13:30, 16:00">
+                            </div>
+                            <div class="appointments-day-row">
+                                <label><input type="checkbox" data-day-toggle="wed"> Wednesday</label>
+                                <input type="text" data-day-slots="wed" placeholder="09:00, 13:30, 16:00">
+                            </div>
+                            <div class="appointments-day-row">
+                                <label><input type="checkbox" data-day-toggle="thu"> Thursday</label>
+                                <input type="text" data-day-slots="thu" placeholder="09:00, 13:30, 16:00">
+                            </div>
+                            <div class="appointments-day-row">
+                                <label><input type="checkbox" data-day-toggle="fri"> Friday</label>
+                                <input type="text" data-day-slots="fri" placeholder="09:00, 13:30, 16:00">
+                            </div>
+                            <div class="appointments-day-row">
+                                <label><input type="checkbox" data-day-toggle="sat"> Saturday</label>
+                                <input type="text" data-day-slots="sat" placeholder="09:00, 13:30, 16:00">
+                            </div>
+                            <div class="appointments-day-row">
+                                <label><input type="checkbox" data-day-toggle="sun"> Sunday</label>
+                                <input type="text" data-day-slots="sun" placeholder="09:00, 13:30, 16:00">
+                            </div>
+                            <p style="margin-top: var(--space-xs); font-size: var(--text-sm); color: var(--color-gray-550);">
+                                Use 24-hour time. Separate multiple slots with commas.
+                            </p>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Blackout dates</label>
+                            <div class="blackout-controls">
+                                <input type="date" id="blackoutDateInput">
+                                <button type="button" class="btn-save" id="addBlackoutDate">Add date</button>
+                            </div>
+                            <div class="blackout-list" data-blackout-list></div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" class="btn-cancel" id="appointmentsRefreshBtn">Refresh</button>
+                            <button type="submit" class="btn-save" id="appointmentsSaveBtn">Save settings</button>
+                        </div>
+                        <p class="appointments-admin-message" id="appointmentsAdminMessage"></p>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
@@ -616,6 +781,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="/src/data/blog-api.js"></script>
     <script src="/src/admin/blog-admin.js"></script>
+    <script src="/admin/appointments.js"></script>
     <script src="/admin/admin.js"></script>
 </body>
 </html>

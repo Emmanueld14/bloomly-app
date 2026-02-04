@@ -35,8 +35,14 @@ const SUPABASE_CONFIG = {
     adminPublishKey: 'REPLACE_WITH_ADMIN_PUBLISH_KEY'
 };
 
+// Appointments admin configuration
+const APPOINTMENTS_CONFIG = {
+    apiBase: '/api',
+    adminKey: 'REPLACE_WITH_APPOINTMENTS_ADMIN_KEY'
+};
+
 // Export for use in other files
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { GITHUB_CONFIG, SUPABASE_CONFIG };
+    module.exports = { GITHUB_CONFIG, SUPABASE_CONFIG, APPOINTMENTS_CONFIG };
 }
 
