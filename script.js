@@ -1562,6 +1562,18 @@
         }) || null;
     }
 
+    function syncProfileUrl(slug) {
+        if (!slug || !window.history || typeof window.history.replaceState !== 'function') {
+            return;
+        }
+        const targetPath = `/people/${slug}`;
+        const currentPath = window.location.pathname.replace(/\/+$/, '');
+        const normalizedTarget = targetPath.replace(/\/+$/, '');
+        if (currentPath !== normalizedTarget) {
+            window.history.replaceState({}, '', targetPath);
+        }
+    }
+
     function fetchTeamMember(slug) {
         const normalized = normalizeTeamSlug(slug);
         return new Promise((resolve) => {
@@ -1891,6 +1903,7 @@
             return;
         }
 
+        syncProfileUrl(member.slug);
         document.title = `${member.name} | Bloomly`;
 
         container.innerHTML = '';
