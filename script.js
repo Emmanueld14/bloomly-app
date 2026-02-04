@@ -20,7 +20,7 @@
         const isBlogRoot = path === '/blog' || path === '/blog/';
         const isBlogPost = path.includes('/blog/') && !path.endsWith('blog.html') && !isBlogRoot;
         const isBlogPostTemplate = path.includes('/blog-post');
-        const isTeamProfile = path.includes('/team/');
+        const isTeamProfile = /\/(team|profile)(\/|$)/.test(path);
         const isSubscribePage = path.includes('/subscribe') || path.endsWith('subscribe.html');
         const isAiPage = path.includes('/bloomly-ai');
         
@@ -1352,7 +1352,7 @@
 
         const link = document.createElement('a');
         link.className = 'bloomly-team-link';
-        link.href = `/team/${member.slug}`;
+        link.href = `/profile/${member.slug}`;
         link.textContent = 'View Profile';
 
         info.append(eyebrow, name, role, link);
@@ -1482,15 +1482,81 @@
     }
 
     // ========== Team Profile Page ==========
+    const TEAM_PROFILE_LOADING_DELAY = 180;
+
+    function normalizeTeamSlug(value) {
+        if (!value) return null;
+        let decoded = '';
+        try {
+            decoded = decodeURIComponent(String(value));
+        } catch (error) {
+            decoded = String(value);
+        }
+        const cleaned = decoded.trim().replace(/^\/+/, '').replace(/\/+$/, '').replace(/\.html$/, '');
+        return cleaned || null;
+    }
+
     function resolveTeamSlug() {
         const params = new URLSearchParams(window.location.search);
-        const slugParam = params.get('slug');
+        const slugParam = normalizeTeamSlug(
+            params.get('slug') || params.get('id') || params.get('member') || params.get('profile')
+        );
         if (slugParam) {
-            return slugParam.replace(/\.html$/, '');
+            return slugParam;
         }
 
-        const match = window.location.pathname.match(/\/team\/([^\/?#]+)(?:\.html)?$/);
-        return match ? match[1] : null;
+        const pathMatch = window.location.pathname.match(/\/(team|profile)\/([^\/?#]+)(?:\.html)?$/);
+        const pathSlug = normalizeTeamSlug(pathMatch ? pathMatch[2] : null);
+        if (pathSlug) {
+            return pathSlug;
+        }
+
+        const hashMatch = (window.location.hash || '').match(/\/(team|profile)\/([^\/?#]+)(?:\.html)?$/);
+        return normalizeTeamSlug(hashMatch ? hashMatch[2] : null);
+    }
+
+    function findTeamMemberBySlug(slug) {
+        if (!slug) return null;
+        const normalized = normalizeTeamSlug(slug);
+        if (!normalized) return null;
+        return BLOOMLY_TEAM_MEMBERS.find((item) => item.slug === normalized || item.id === normalized) || null;
+    }
+
+    function fetchTeamMember(slug) {
+        const normalized = normalizeTeamSlug(slug);
+        return new Promise((resolve) => {
+            window.setTimeout(() => {
+                resolve(findTeamMemberBySlug(normalized));
+            }, TEAM_PROFILE_LOADING_DELAY);
+        });
+    }
+
+    function renderTeamProfileLoading(container) {
+        if (!container) return;
+        container.innerHTML = '';
+
+        const section = document.createElement('section');
+        section.className = 'team-profile-hero';
+
+        const wrapper = document.createElement('div');
+        wrapper.className = 'container';
+
+        const card = document.createElement('div');
+        card.className = 'glass-card team-profile-card team-profile-loading';
+        card.setAttribute('role', 'status');
+        card.setAttribute('aria-live', 'polite');
+
+        const spinner = document.createElement('div');
+        spinner.className = 'team-profile-spinner';
+        spinner.setAttribute('aria-hidden', 'true');
+
+        const message = document.createElement('p');
+        message.textContent = 'Loading profile...';
+
+        card.append(spinner, message);
+        wrapper.appendChild(card);
+        section.appendChild(wrapper);
+        container.appendChild(section);
     }
 
     function renderTeamProfileNotFound(container) {
@@ -1505,12 +1571,12 @@
         card.className = 'glass-card team-profile-card team-profile-notice fade-in';
 
         const message = document.createElement('p');
-        message.textContent = 'We could not find this team profile. Please return to the About page to meet the team.';
+        message.textContent = 'We could not find this profile. Please return to the team page to meet the team.';
 
         const link = document.createElement('a');
         link.className = 'btn btn-primary';
         link.href = '/about.html';
-        link.textContent = 'Back to About';
+        link.textContent = 'Back to Team Page';
 
         card.append(message, link);
         wrapper.appendChild(card);
@@ -1518,12 +1584,16 @@
         container.appendChild(section);
     }
 
-    function initTeamProfilePage() {
+    async function initTeamProfilePage() {
         const container = document.querySelector('[data-team-profile]');
         if (!container) return;
 
+        container.setAttribute('aria-busy', 'true');
+        renderTeamProfileLoading(container);
+
         const slug = resolveTeamSlug();
-        const member = BLOOMLY_TEAM_MEMBERS.find((item) => item.slug === slug);
+        const member = await fetchTeamMember(slug);
+        container.setAttribute('aria-busy', 'false');
         if (!member) {
             renderTeamProfileNotFound(container);
             return;
@@ -1673,6 +1743,49 @@
         aboutContainer.appendChild(aboutCard);
         aboutSection.appendChild(aboutContainer);
 
+        const workSection = document.createElement('section');
+        workSection.className = 'section team-profile-work';
+
+        const workContainer = document.createElement('div');
+        workContainer.className = 'container';
+
+        const workCard = document.createElement('div');
+        workCard.className = 'glass-card team-profile-work-card fade-in';
+
+        const workTitle = document.createElement('h2');
+        workTitle.textContent = 'Work & Impact';
+        workTitle.id = `work-${member.slug}`;
+        workSection.setAttribute('aria-labelledby', workTitle.id);
+
+        const workCopy = document.createElement('p');
+        workCopy.className = 'team-profile-work-copy';
+        workCopy.textContent = member.work?.summary || member.summary || member.bio;
+
+        const workGrid = document.createElement('div');
+        workGrid.className = 'team-profile-work-grid';
+
+        const workHighlights = Array.isArray(member.work?.highlights) && member.work.highlights.length
+            ? member.work.highlights
+            : (member.details || member.skills || []);
+
+        if (workHighlights.length) {
+            workHighlights.slice(0, 6).forEach((item) => {
+                const workItem = document.createElement('div');
+                workItem.className = 'team-profile-work-item';
+                workItem.textContent = item;
+                workGrid.appendChild(workItem);
+            });
+        } else {
+            const workItem = document.createElement('div');
+            workItem.className = 'team-profile-work-item';
+            workItem.textContent = 'Bloomly initiatives, community care, and ongoing support.';
+            workGrid.appendChild(workItem);
+        }
+
+        workCard.append(workTitle, workCopy, workGrid);
+        workContainer.appendChild(workCard);
+        workSection.appendChild(workContainer);
+
         const skillsSection = document.createElement('section');
         skillsSection.className = 'section team-profile-skills';
 
@@ -1792,7 +1905,7 @@
         contactContainer.appendChild(contactCard);
         contactSection.appendChild(contactContainer);
 
-        container.append(heroSection, aboutSection, portfolioSection, skillsSection, contactSection);
+        container.append(heroSection, aboutSection, workSection, portfolioSection, skillsSection, contactSection);
     }
 
     // ========== Initialize Everything ==========
@@ -1822,7 +1935,7 @@
         void initPostInteractions();
         initNewsletterForms();
         initBloomlyTeamCards();
-        initTeamProfilePage();
+        void initTeamProfilePage();
         
         // Trigger initial scroll check
         handleNavbarScroll();
