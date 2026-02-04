@@ -8,6 +8,18 @@
       "maxDuration": 10
     }
   },
+  "redirects": [
+    { "source": "/team", "destination": "/about.html", "permanent": true },
+    { "source": "/team/", "destination": "/about.html", "permanent": true },
+    { "source": "/team/:slug", "destination": "/people/:slug", "permanent": true },
+    { "source": "/team/:slug/", "destination": "/people/:slug", "permanent": true },
+    { "source": "/profile", "destination": "/about.html", "permanent": true },
+    { "source": "/profile/", "destination": "/about.html", "permanent": true },
+    { "source": "/profile/:slug", "destination": "/people/:slug", "permanent": true },
+    { "source": "/profile/:slug/", "destination": "/people/:slug", "permanent": true },
+    { "source": "/people", "destination": "/about.html", "permanent": true },
+    { "source": "/people/", "destination": "/about.html", "permanent": true }
+  ],
   "rewrites": [
     { "source": "/blog", "destination": "/blog/index.html" },
     { "source": "/blog/", "destination": "/blog/index.html" },
@@ -19,10 +31,8 @@
     { "source": "/subscribe/", "destination": "/subscribe/index.html" },
     { "source": "/bloomly-ai", "destination": "/bloomly-ai/index.html" },
     { "source": "/bloomly-ai/", "destination": "/bloomly-ai/index.html" },
-    { "source": "/team", "destination": "/team/index.html" },
-    { "source": "/team/", "destination": "/team/index.html" },
-    { "source": "/team/:slug", "destination": "/team/index.html?slug=:slug" },
-    { "source": "/team/:slug/", "destination": "/team/index.html?slug=:slug" }
+    { "source": "/people/:slug", "destination": "/people/index.html?slug=:slug" },
+    { "source": "/people/:slug/", "destination": "/people/index.html?slug=:slug" }
   ]
 }
 
