@@ -22,7 +22,7 @@
         const isBlogPostTemplate = path.includes('/blog-post');
         const isTeamProfile = /\/(team|profile|people)(\/|$)/.test(path);
         const isSubscribePage = path.includes('/subscribe') || path.endsWith('subscribe.html');
-        const isAiPage = path.includes('/bloomly-ai');
+        const isAppointmentsPage = path.includes('/appointments');
         
         links.forEach(link => {
             const linkPath = link.getAttribute('href') || '';
@@ -31,7 +31,7 @@
             const isBlogLink = normalizedLinkPath.endsWith('blog.html') || normalizedLinkPath.endsWith('/blog');
             const isAboutLink = normalizedLinkPath.endsWith('about.html');
             const isSubscribeLink = normalizedLinkPath.endsWith('subscribe.html') || normalizedLinkPath.endsWith('/subscribe');
-            const isAiLink = normalizedLinkPath.endsWith('/bloomly-ai') || normalizedLinkPath.endsWith('bloomly-ai.html');
+            const isAppointmentsLink = normalizedLinkPath.endsWith('/appointments') || normalizedLinkPath.endsWith('appointments.html');
             
             // Remove active class first
             link.classList.remove('active');
@@ -47,14 +47,14 @@
                 return;
             }
 
-            if (isAiPage && isAiLink) {
+            if (isAppointmentsPage && isAppointmentsLink) {
                 link.classList.add('active');
                 return;
             }
 
             if ((isBlogPost || isBlogPostTemplate || isBlogRoot) && isBlogLink) {
                 link.classList.add('active');
-            } else if (!isBlogPost && !isBlogPostTemplate && !isBlogRoot && !isTeamProfile && !isSubscribePage && !isAiPage) {
+            } else if (!isBlogPost && !isBlogPostTemplate && !isBlogRoot && !isTeamProfile && !isSubscribePage && !isAppointmentsPage) {
                 if (linkSegment === currentPath || 
                     (currentPath === '' && linkSegment === 'index.html') ||
                     (currentPath === 'index.html' && linkSegment === 'index.html') ||
@@ -1314,9 +1314,9 @@
                     icon: '📝'
                 },
                 {
-                    title: 'Bloomly AI Interface',
-                    description: 'Designed the chat interface that keeps support accessible and calm.',
-                    icon: '✨'
+                    title: 'Appointments Experience',
+                    description: 'Shaped the booking flow so support feels calm and easy to access.',
+                    icon: '📅'
                 },
                 {
                     title: 'Performance Tuning',

@@ -18,9 +18,9 @@
 /subscribe /subscribe/index.html 200
 /subscribe/ /subscribe/index.html 200
 
-# Bloomly AI routing
-/bloomly-ai /bloomly-ai/index.html 200
-/bloomly-ai/ /bloomly-ai/index.html 200
+# Appointments routing
+/appointments /appointments/index.html 200
+/appointments/ /appointments/index.html 200
 
 # Team profile routing - legacy routes
 /team /about.html 301

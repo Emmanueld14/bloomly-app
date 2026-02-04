@@ -2705,185 +2705,198 @@ a:hover {
     }
 }
 
-/* ========== Bloomly AI Page ========== */
-.ai-page {
+/* ========== Appointments Page ========== */
+.appointments-page {
     background: linear-gradient(180deg, var(--color-white) 0%, var(--color-page-bg) 100%);
 }
 
-.ai-hero {
+.appointments-hero {
     padding: calc(var(--space-4xl) + 80px) 0 var(--space-4xl);
     background: var(--gradient-hero);
     position: relative;
     overflow: hidden;
+}
+
+.appointments-hero-content {
+    position: relative;
+    z-index: 2;
+    max-width: 780px;
+    margin: 0 auto;
     text-align: center;
 }
 
-.ai-hero-content {
-    position: relative;
-    z-index: 2;
-    max-width: 720px;
-    margin: 0 auto;
-}
-
-.ai-hero h1 {
+.appointments-hero h1 {
     color: var(--color-white);
     text-shadow: 0 2px 20px rgba(var(--color-black-rgb), 0.2);
     margin-bottom: var(--space-md);
 }
 
-.ai-hero p {
+.appointments-hero p {
     color: rgba(var(--color-white-rgb), 0.95);
     font-size: var(--text-xl);
-    margin-bottom: 0;
+    margin-bottom: var(--space-md);
 }
 
-.ai-chat-section {
+.appointments-price {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: 0.45rem 1rem;
+    border-radius: var(--radius-full);
+    background: rgba(var(--color-white-rgb), 0.2);
+    border: 1px solid rgba(var(--color-white-rgb), 0.35);
+    color: var(--color-white);
+    font-weight: 600;
+}
+
+.appointments-section {
     background: var(--color-offwhite);
 }
 
-.ai-chat-card {
-    background: rgba(var(--color-white-rgb), 0.8);
+.appointments-shell {
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+    gap: var(--space-2xl);
+    align-items: start;
+}
+
+.appointments-card {
+    background: rgba(var(--color-white-rgb), 0.95);
     border-radius: var(--radius-2xl);
     padding: var(--space-2xl);
+    border: 1px solid rgba(var(--color-black-rgb), 0.08);
     box-shadow: 0 24px 50px rgba(var(--color-black-rgb), 0.12);
-    border: 1px solid rgba(var(--color-white-rgb), 0.8);
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
 }
 
-.ai-chat-header {
-    display: flex;
-    justify-content: space-between;
-    gap: var(--space-lg);
-    margin-bottom: var(--space-lg);
+.appointments-card h2 {
+    margin-bottom: var(--space-sm);
 }
 
-.ai-chat-header h2 {
-    margin-bottom: var(--space-xs);
-}
-
-.ai-chat-header p {
-    margin-bottom: 0;
+.appointments-helper {
     color: var(--color-gray-550);
-}
-
-.ai-chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-sm);
+    font-size: var(--text-sm);
     margin-bottom: var(--space-lg);
 }
 
-.ai-chip {
-    border-radius: var(--radius-full);
-    border: 1px solid rgba(var(--color-blue-rgb), 0.25);
-    background: rgba(var(--color-white-rgb), 0.85);
-    padding: 0.4rem 1rem;
+.appointments-date-list,
+.appointments-slot-list {
+    display: grid;
+    gap: var(--space-sm);
+}
+
+.appointments-date-list {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+}
+
+.appointments-slot-list {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+}
+
+.appointments-date-button,
+.appointments-slot-button {
+    padding: 0.65rem 0.75rem;
+    border-radius: var(--radius-lg);
+    border: 1px solid rgba(var(--color-black-rgb), 0.1);
+    background: rgba(var(--color-white-rgb), 0.9);
     font-weight: 600;
-    font-size: var(--text-sm);
     color: var(--color-heading);
     cursor: pointer;
     transition: transform var(--transition-base), box-shadow var(--transition-base), border-color var(--transition-base);
 }
 
-.ai-chip:hover {
+.appointments-date-button.is-active,
+.appointments-slot-button.is-active {
+    border-color: rgba(var(--color-blue-rgb), 0.4);
+    box-shadow: 0 14px 24px rgba(var(--color-black-rgb), 0.12);
     transform: translateY(-2px);
-    border-color: rgba(var(--color-pink-rgb), 0.4);
-    box-shadow: 0 10px 20px rgba(var(--color-black-rgb), 0.12);
 }
 
-.ai-chat-log {
-    display: flex;
-    flex-direction: column;
+.appointments-date-button.is-disabled,
+.appointments-slot-button.is-disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+    box-shadow: none;
+    transform: none;
+}
+
+.appointments-form {
+    display: grid;
     gap: var(--space-md);
-    padding: var(--space-lg);
-    background: rgba(var(--color-white-rgb), 0.7);
-    border-radius: var(--radius-xl);
-    border: 1px solid rgba(var(--color-black-rgb), 0.05);
-    max-height: 420px;
-    overflow-y: auto;
-    margin-bottom: var(--space-lg);
 }
 
-.ai-message {
-    display: flex;
-    animation: aiFadeUp 0.35s ease-out;
-}
-
-.ai-message--user {
-    justify-content: flex-end;
-}
-
-.ai-message--bot {
-    justify-content: flex-start;
-}
-
-.ai-bubble {
-    max-width: min(70%, 520px);
-    padding: var(--space-md) var(--space-lg);
-    border-radius: var(--radius-xl);
-    background: rgba(var(--color-white-rgb), 0.92);
-    box-shadow: 0 12px 24px rgba(var(--color-black-rgb), 0.08);
-    color: var(--color-text);
-}
-
-.ai-message--user .ai-bubble {
-    background: var(--gradient-primary);
-    color: var(--color-white);
-}
-
-.ai-bubble p {
-    margin-bottom: var(--space-sm);
-}
-
-.ai-bubble p:last-child {
-    margin-bottom: 0;
-}
-
-.ai-bullets {
-    margin: var(--space-sm) 0 var(--space-sm) var(--space-md);
-    color: inherit;
-}
-
-.ai-bullets li {
+.appointments-field label {
+    display: block;
+    font-weight: 600;
     margin-bottom: 0.35rem;
 }
 
-.ai-chat-input {
-    display: flex;
-    gap: var(--space-sm);
-    align-items: center;
-}
-
-.ai-chat-input input {
-    flex: 1;
-    padding: 0.85rem 1rem;
-    border-radius: var(--radius-full);
+.appointments-field input,
+.appointments-field textarea {
+    width: 100%;
+    padding: 0.75rem 0.9rem;
+    border-radius: var(--radius-md);
     border: 1px solid rgba(var(--color-black-rgb), 0.12);
-    font-size: var(--text-base);
     font-family: var(--font-primary);
+    font-size: var(--text-base);
 }
 
-.ai-chat-input input:focus {
-    outline: none;
-    border-color: rgba(var(--color-blue-rgb), 0.5);
-    box-shadow: 0 0 0 3px rgba(var(--color-blue-rgb), 0.15);
+.appointments-field textarea {
+    min-height: 120px;
+    resize: vertical;
 }
 
-.ai-disclaimer {
-    margin-top: var(--space-md);
+.appointments-summary {
+    background: rgba(var(--color-blue-rgb), 0.08);
+    border-radius: var(--radius-lg);
+    padding: var(--space-md);
     font-size: var(--text-sm);
-    color: var(--color-gray-550);
+    color: var(--color-gray-650);
 }
 
-@keyframes aiFadeUp {
-    from {
-        opacity: 0;
-        transform: translateY(8px);
-    }
+.appointments-message {
+    font-size: var(--text-sm);
+    padding: 0.6rem 0.9rem;
+    border-radius: var(--radius-md);
+    background: rgba(var(--color-black-rgb), 0.04);
+    color: var(--color-gray-650);
+}
+
+.appointments-message.is-error {
+    background: rgba(var(--color-danger-rgb), 0.12);
+    color: var(--color-danger);
+}
+
+.appointments-message.is-success {
+    background: rgba(var(--color-success-rgb), 0.12);
+    color: var(--color-success);
+}
+
+.appointments-loading {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    font-size: var(--text-sm);
+}
+
+.appointments-loading::before {
+    content: "";
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 2px solid rgba(var(--color-black-rgb), 0.2);
+    border-top-color: rgba(var(--color-blue-rgb), 0.6);
+    animation: appointments-spin 0.8s linear infinite;
+}
+
+@keyframes appointments-spin {
     to {
-        opacity: 1;
-        transform: translateY(0);
+        transform: rotate(360deg);
+    }
+}
+
+@media (max-width: 960px) {
+    .appointments-shell {
+        grid-template-columns: 1fr;
     }
 }
 
