@@ -27,3 +27,8 @@
 /team/ /team/index.html 200
 /team/* /team/index.html?slug=:splat 200
 
+# Profile routing - use team profile template
+/profile /team/index.html 200
+/profile/ /team/index.html 200
+/profile/* /team/index.html?slug=:splat 200
+
