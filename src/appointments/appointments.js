@@ -13,7 +13,8 @@
         bookings: [],
         selectedDate: null,
         selectedTime: null,
-        loading: false
+        loading: false,
+        crisisLocked: false
     };
 
     const elements = {
@@ -23,6 +24,11 @@
         price: document.querySelector('[data-appointments-price]'),
         summary: document.querySelector('[data-appointments-summary]'),
         form: document.querySelector('[data-appointments-form]'),
+        purpose: document.querySelector('[data-appointments-purpose]'),
+        consentGroup: document.querySelector('[data-appointments-consent]'),
+        consentCheckboxes: Array.from(document.querySelectorAll('[data-appointments-consent-checkbox]')),
+        crisisAlert: document.querySelector('[data-appointments-crisis]'),
+        crisisLink: document.querySelector('[data-appointments-crisis-link]'),
         message: document.querySelector('[data-appointments-message]'),
         submit: document.querySelector('[data-appointments-submit]')
     };
@@ -30,6 +36,32 @@
     const MAX_LOOKAHEAD_DAYS = 30;
     const DATE_OPTIONS = { weekday: 'short', month: 'short', day: 'numeric' };
     const DAY_KEYS = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+    const CONSENT_KEYS = [
+        'friendToFriend',
+        'noGuarantees',
+        'responsibility',
+        'noProfessionalSupport',
+        'termsAccepted'
+    ];
+    const CRISIS_REDIRECT_URL = '/appointments/crisis';
+    const CRISIS_PATTERNS = [
+        /\b(suicid|suicide|suicidal)\b/i,
+        /\bself[-\s]?harm\b/i,
+        /\bkill myself\b/i,
+        /\bend my life\b/i,
+        /\bwant to die\b/i,
+        /\boverdose\b/i,
+        /\bcrisis\b/i,
+        /\bemergency\b/i,
+        /\bimmediate help\b/i,
+        /\burgent help\b/i,
+        /\bcan'?t keep myself safe\b/i,
+        /\bhurt myself\b/i
+    ];
+    const PROFESSIONAL_SEEKING_PATTERNS = [
+        /\b(need|looking for|seek|seeking|want|require|request|would like)\b/i,
+        /\b(therap(y|ist)|counsell(or|ing)|counsel(or|ing)|psychiatrist|psychologist|professional help|professional support|mental health support|medical help|medical advice|doctor|clinical support|emergency help)\b/i
+    ];
 
     function toDateKey(date) {
         const year = date.getFullYear();
@@ -51,6 +83,69 @@
         } catch (error) {
             return `${amount.toFixed(2)} ${code}`;
         }
+    }
+
+    function getConsentState() {
+        const consents = {};
+        if (!elements.consentCheckboxes.length) return consents;
+        elements.consentCheckboxes.forEach((checkbox) => {
+            const key = checkbox.dataset.consentKey;
+            if (key) {
+                consents[key] = checkbox.checked;
+            }
+        });
+        return consents;
+    }
+
+    function areConsentsAccepted(consents) {
+        if (!elements.consentCheckboxes.length) return false;
+        return CONSENT_KEYS.every((key) => Boolean(consents[key]));
+    }
+
+    function resetConsents() {
+        if (!elements.consentCheckboxes.length) return;
+        elements.consentCheckboxes.forEach((checkbox) => {
+            checkbox.checked = false;
+        });
+    }
+
+    function detectCrisisReason(text) {
+        const value = String(text || '');
+        if (!value) return null;
+        const hasCrisisLanguage = CRISIS_PATTERNS.some((pattern) => pattern.test(value));
+        if (hasCrisisLanguage) return 'crisis';
+        const hasSeekingLanguage = PROFESSIONAL_SEEKING_PATTERNS.every((pattern) => pattern.test(value));
+        if (hasSeekingLanguage) return 'professional';
+        return null;
+    }
+
+    function lockForCrisis() {
+        if (state.crisisLocked) return;
+        state.crisisLocked = true;
+        setLoading(false);
+        if (elements.form) {
+            elements.form.classList.add('is-blocked');
+            const fields = elements.form.querySelectorAll('input, textarea, button, select');
+            fields.forEach((field) => {
+                field.disabled = true;
+            });
+        }
+        if (elements.crisisAlert) {
+            elements.crisisAlert.hidden = false;
+        }
+        if (elements.crisisLink) {
+            window.setTimeout(() => {
+                elements.crisisLink.focus();
+            }, 0);
+        }
+        setMessage('', null);
+        renderDates();
+        renderSlots();
+        updateSummary();
+        updateSubmitState();
+        window.setTimeout(() => {
+            window.location.href = CRISIS_REDIRECT_URL;
+        }, 1200);
     }
 
     function setMessage(text, type) {
@@ -83,11 +178,14 @@
 
     function updateSubmitState() {
         if (!elements.submit) return;
+        const consentsAccepted = areConsentsAccepted(getConsentState());
         const ready = Boolean(
             !state.loading &&
             state.settings?.bookingEnabled &&
             state.selectedDate &&
-            state.selectedTime
+            state.selectedTime &&
+            consentsAccepted &&
+            !state.crisisLocked
         );
         elements.submit.disabled = !ready;
     }
@@ -152,7 +250,7 @@
             button.textContent = date.toLocaleDateString(undefined, DATE_OPTIONS);
 
             const available = hasAvailableSlots(dateKey);
-            if (!available) {
+            if (!available || state.crisisLocked) {
                 button.classList.add('is-disabled');
                 button.disabled = true;
             }
@@ -178,6 +276,11 @@
     function renderSlots() {
         if (!elements.slots) return;
         elements.slots.innerHTML = '';
+
+        if (state.crisisLocked) {
+            elements.slots.textContent = 'Booking is unavailable for crisis or professional support.';
+            return;
+        }
 
         if (!state.selectedDate) {
             elements.slots.textContent = 'Select a date to see time slots.';
@@ -223,6 +326,11 @@
 
     function updateSummary() {
         if (!elements.summary) return;
+        if (state.crisisLocked) {
+            elements.summary.textContent = 'This booking cannot continue because the request indicates a need for crisis or professional support.';
+            updateSubmitState();
+            return;
+        }
         if (!state.settings?.bookingEnabled) {
             elements.summary.textContent = 'Appointments are currently closed. Please check back soon.';
             updateSubmitState();
@@ -242,6 +350,7 @@
     function clearSelections() {
         state.selectedDate = null;
         state.selectedTime = null;
+        resetConsents();
     }
 
     async function fetchAvailability(options = {}) {
@@ -283,6 +392,10 @@
 
     async function handleBooking(event) {
         event.preventDefault();
+        if (state.crisisLocked) {
+            lockForCrisis();
+            return;
+        }
         if (!state.settings?.bookingEnabled) {
             setMessage('Appointments are currently closed.', 'error');
             return;
@@ -296,9 +409,20 @@
         const name = String(formData.get('name') || '').trim();
         const email = String(formData.get('email') || '').trim();
         const purpose = String(formData.get('purpose') || '').trim();
+        const consents = getConsentState();
 
         if (!name || !email || !purpose) {
             setMessage('Please complete all required fields.', 'error');
+            return;
+        }
+        if (!areConsentsAccepted(consents)) {
+            setMessage('Please confirm each required checkbox before continuing.', 'error');
+            updateSubmitState();
+            return;
+        }
+
+        if (detectCrisisReason(purpose)) {
+            lockForCrisis();
             return;
         }
 
@@ -314,12 +438,20 @@
                     email,
                     purpose,
                     date: state.selectedDate,
-                    time: state.selectedTime
+                    time: state.selectedTime,
+                    consents
                 })
             });
 
             const result = await response.json().catch(() => ({}));
             if (!response.ok) {
+                if (result?.crisis || result?.redirectUrl) {
+                    lockForCrisis();
+                    if (result.redirectUrl) {
+                        window.location.href = result.redirectUrl;
+                    }
+                    return;
+                }
                 throw new Error(result.error || 'Unable to start booking.');
             }
 
@@ -359,8 +491,12 @@
                 state.selectedTime = result.booking.time;
                 updateSummary();
                 await fetchAvailability({ preserveSelection: true });
+                resetConsents();
+                updateSubmitState();
             } else {
                 setMessage('Payment confirmed. We will email your appointment details shortly.', 'success');
+                resetConsents();
+                updateSubmitState();
             }
         } catch (error) {
             console.error('Payment confirmation error', error);
@@ -374,6 +510,8 @@
         const params = new URLSearchParams(window.location.search);
         if (params.get('canceled') === '1') {
             setMessage('Payment was canceled. Your slot was not booked.', 'error');
+            resetConsents();
+            updateSubmitState();
         }
         const success = params.get('success') === '1';
         const sessionId = params.get('session_id');
@@ -385,6 +523,23 @@
     if (elements.form) {
         elements.form.addEventListener('submit', handleBooking);
     }
+    if (elements.purpose) {
+        elements.purpose.addEventListener('input', (event) => {
+            if (state.crisisLocked) return;
+            if (detectCrisisReason(event.target.value)) {
+                lockForCrisis();
+            }
+        });
+    }
+    if (elements.consentCheckboxes.length) {
+        elements.consentCheckboxes.forEach((checkbox) => {
+            checkbox.addEventListener('change', updateSubmitState);
+        });
+    }
+    window.addEventListener('pageshow', () => {
+        resetConsents();
+        updateSubmitState();
+    });
 
     updatePriceLabel();
     fetchAvailability();

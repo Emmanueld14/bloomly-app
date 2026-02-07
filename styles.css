@@ -2853,6 +2853,108 @@ a:hover {
     color: var(--color-gray-650);
 }
 
+.appointments-disclaimer {
+    background: rgba(var(--color-blue-rgb), 0.06);
+    border-radius: var(--radius-lg);
+    border: 1px solid rgba(var(--color-blue-rgb), 0.2);
+    padding: var(--space-md);
+    font-size: var(--text-sm);
+    color: var(--color-gray-650);
+    margin: var(--space-lg) 0;
+}
+
+.appointments-disclaimer h3 {
+    font-size: var(--text-lg);
+    margin-bottom: var(--space-sm);
+    color: var(--color-heading);
+}
+
+.appointments-disclaimer ul {
+    margin: 0;
+    padding-left: 1.1rem;
+    display: grid;
+    gap: var(--space-xs);
+}
+
+.appointments-disclaimer li {
+    margin: 0;
+}
+
+.appointments-crisis-alert {
+    border-radius: var(--radius-lg);
+    border: 1px solid rgba(var(--color-blue-rgb), 0.28);
+    background: rgba(var(--color-blue-rgb), 0.08);
+    padding: var(--space-md);
+    margin-bottom: var(--space-lg);
+    color: var(--color-gray-650);
+}
+
+.appointments-crisis-alert h3 {
+    font-size: var(--text-lg);
+    margin-bottom: var(--space-xs);
+    color: var(--color-heading);
+}
+
+.appointments-crisis-alert p {
+    margin-bottom: var(--space-sm);
+}
+
+.appointments-crisis-alert .btn {
+    margin-top: var(--space-xs);
+}
+
+.appointments-consent {
+    border: 1px solid rgba(var(--color-black-rgb), 0.08);
+    border-radius: var(--radius-lg);
+    padding: var(--space-md);
+    display: grid;
+    gap: var(--space-sm);
+    background: rgba(var(--color-white-rgb), 0.9);
+    margin: 0;
+}
+
+.appointments-consent legend {
+    font-weight: 600;
+    margin-bottom: var(--space-xs);
+    color: var(--color-heading);
+    padding: 0;
+}
+
+.appointments-consent-item {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-sm);
+    font-size: var(--text-sm);
+    color: var(--color-gray-600);
+}
+
+.appointments-consent-item input {
+    margin-top: 0.25rem;
+}
+
+.appointments-form.is-blocked {
+    opacity: 0.6;
+}
+
+.appointments-crisis-card {
+    max-width: 780px;
+    margin: 0 auto;
+}
+
+.appointments-crisis-list {
+    margin: 0 0 var(--space-md);
+    padding-left: 1.1rem;
+    display: grid;
+    gap: var(--space-xs);
+    color: var(--color-gray-600);
+}
+
+.appointments-crisis-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+}
+
 .appointments-message {
     font-size: var(--text-sm);
     padding: 0.6rem 0.9rem;

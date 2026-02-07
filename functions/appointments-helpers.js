@@ -112,6 +112,57 @@ export function normalizeBookingPayload(payload = {}) {
     };
 }
 
+const CONSENT_KEYS = [
+    'friendToFriend',
+    'noGuarantees',
+    'responsibility',
+    'noProfessionalSupport',
+    'termsAccepted'
+];
+const CRISIS_PATTERNS = [
+    /\b(suicid|suicide|suicidal)\b/i,
+    /\bself[-\s]?harm\b/i,
+    /\bkill myself\b/i,
+    /\bend my life\b/i,
+    /\bwant to die\b/i,
+    /\boverdose\b/i,
+    /\bcrisis\b/i,
+    /\bemergency\b/i,
+    /\bimmediate help\b/i,
+    /\burgent help\b/i,
+    /\bcan'?t keep myself safe\b/i,
+    /\bhurt myself\b/i
+];
+const PROFESSIONAL_SEEKING_PATTERNS = [
+    /\b(need|looking for|seek|seeking|want|require|request|would like)\b/i,
+    /\b(therap(y|ist)|counsell(or|ing)|counsel(or|ing)|psychiatrist|psychologist|professional help|professional support|mental health support|medical help|medical advice|doctor|clinical support|emergency help)\b/i
+];
+
+export function normalizeConsentPayload(payload = {}) {
+    const source = payload.consents || payload.consent || {};
+    return {
+        friendToFriend: source.friendToFriend === true,
+        noGuarantees: source.noGuarantees === true,
+        responsibility: source.responsibility === true,
+        noProfessionalSupport: source.noProfessionalSupport === true,
+        termsAccepted: source.termsAccepted === true
+    };
+}
+
+export function missingConsents(consents = {}) {
+    return CONSENT_KEYS.filter((key) => !consents[key]);
+}
+
+export function detectCrisisReason(text) {
+    const value = String(text || '');
+    if (!value) return null;
+    const hasCrisisLanguage = CRISIS_PATTERNS.some((pattern) => pattern.test(value));
+    if (hasCrisisLanguage) return 'crisis';
+    const hasSeekingLanguage = PROFESSIONAL_SEEKING_PATTERNS.every((pattern) => pattern.test(value));
+    if (hasSeekingLanguage) return 'professional';
+    return null;
+}
+
 export function isValidDate(value) {
     return /^\d{4}-\d{2}-\d{2}$/.test(value);
 }

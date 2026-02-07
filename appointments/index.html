@@ -75,6 +75,27 @@
                         Select a date and time to continue.
                     </div>
 
+                    <div class="appointments-disclaimer" data-appointments-disclaimer>
+                        <h3>Mandatory booking disclaimer</h3>
+                        <ul>
+                            <li>This is a friend-to-friend talk programme only.</li>
+                            <li>We do NOT offer counselling, therapy, medical advice, or professional mental health services.</li>
+                            <li>Conversations are informal, peer-based, and opinion-driven.</li>
+                            <li>No outcomes, solutions, or results are guaranteed.</li>
+                            <li>Users must independently validate any advice before acting on it.</li>
+                            <li>Serious, ongoing, or urgent issues must be handled by a licensed counsellor, medical professional, or emergency services.</li>
+                            <li>All programmes are paid to support platform operations and compensate members.</li>
+                        </ul>
+                    </div>
+
+                    <div class="appointments-crisis-alert" data-appointments-crisis hidden aria-live="polite">
+                        <h3>We want you to get the right support</h3>
+                        <p>This platform is not equipped to handle crisis situations or professional mental health support.</p>
+                        <p>Your concern is important and valid. For your safety, this booking cannot continue.</p>
+                        <p>Please visit our support page to find licensed counsellors, medical professionals, or local emergency services.</p>
+                        <a class="btn btn-secondary" href="/appointments/crisis" data-appointments-crisis-link>Go to support resources</a>
+                    </div>
+
                     <form class="appointments-form" data-appointments-form>
                         <div class="appointments-field">
                             <label for="appointmentName">Full name</label>
@@ -86,10 +107,34 @@
                         </div>
                         <div class="appointments-field">
                             <label for="appointmentPurpose">Purpose of appointment</label>
-                            <textarea id="appointmentPurpose" name="purpose" required placeholder="What would you like to focus on?"></textarea>
+                            <textarea id="appointmentPurpose" name="purpose" required placeholder="What would you like to focus on?" data-appointments-purpose></textarea>
                         </div>
 
-                        <button class="btn btn-primary" type="submit" data-appointments-submit>
+                        <fieldset class="appointments-consent" data-appointments-consent>
+                            <legend>Confirm before continuing</legend>
+                            <label class="appointments-consent-item">
+                                <input type="checkbox" name="consentFriendToFriend" data-appointments-consent-checkbox data-consent-key="friendToFriend" required>
+                                <span>I understand this is a friend-to-friend talk service, not counselling or therapy.</span>
+                            </label>
+                            <label class="appointments-consent-item">
+                                <input type="checkbox" name="consentNoGuarantees" data-appointments-consent-checkbox data-consent-key="noGuarantees" required>
+                                <span>I understand that results or solutions are not guaranteed.</span>
+                            </label>
+                            <label class="appointments-consent-item">
+                                <input type="checkbox" name="consentResponsibility" data-appointments-consent-checkbox data-consent-key="responsibility" required>
+                                <span>I agree to take responsibility for how I use any advice shared.</span>
+                            </label>
+                            <label class="appointments-consent-item">
+                                <input type="checkbox" name="consentNoProfessionalSupport" data-appointments-consent-checkbox data-consent-key="noProfessionalSupport" required>
+                                <span>I confirm I am not seeking professional or emergency mental health support.</span>
+                            </label>
+                            <label class="appointments-consent-item">
+                                <input type="checkbox" name="consentTerms" data-appointments-consent-checkbox data-consent-key="termsAccepted" required>
+                                <span>I agree to the Terms and Conditions (Last updated: 7th February 2026).</span>
+                            </label>
+                        </fieldset>
+
+                        <button class="btn btn-primary" type="submit" data-appointments-submit disabled>
                             Pay booking fee
                         </button>
                     </form>
