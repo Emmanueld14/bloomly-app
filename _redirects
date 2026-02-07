@@ -23,17 +23,17 @@
 /appointments/ /appointments/index.html 200
 
 # Team profile routing - legacy routes
-/team/* /profile/:splat 301
+/team/* /people/:splat 301
 /team /about.html 301
 /team/ /about.html 301
 
-# Profile routing
-/profile/* /profile/index.html?slug=:splat 200
-/profile /profile/index.html 200
-/profile/ /profile/index.html 200
+# Profile routing (legacy)
+/profile/* /people/:splat 301
+/profile /people/index.html 200
+/profile/ /people/index.html 200
 
-# People profile routing (legacy)
-/people/* /profile/:splat 301
-/people /profile/index.html 200
-/people/ /profile/index.html 200
+# People profile routing
+/people/* /people/index.html?slug=:splat 200
+/people /people/index.html 200
+/people/ /people/index.html 200
 

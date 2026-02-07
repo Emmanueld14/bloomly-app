@@ -1377,7 +1377,7 @@
 
         const link = document.createElement('a');
         link.className = 'bloomly-team-link';
-        link.href = `/profile/${member.slug}`;
+        link.href = `/people/${member.slug}`;
         link.textContent = 'View Profile';
 
         info.append(eyebrow, name, role, link);
@@ -1566,7 +1566,7 @@
         if (!slug || !window.history || typeof window.history.replaceState !== 'function') {
             return;
         }
-        const targetPath = `/profile/${slug}`;
+        const targetPath = `/people/${slug}`;
         const currentPath = window.location.pathname.replace(/\/+$/, '');
         const normalizedTarget = targetPath.replace(/\/+$/, '');
         if (currentPath !== normalizedTarget) {
