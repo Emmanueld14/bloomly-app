@@ -133,6 +133,6 @@ export default async function handler(req, res) {
 
         return res.status(200).json({ booking: updatedBooking });
     } catch (error) {
-        return res.status(500).json({ error: error.message || 'Unable to confirm appointment.' });
+        return res.status(500).json({ error: error.message || 'Unable to confirm Charla.' });
     }
 }

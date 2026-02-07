@@ -1314,7 +1314,7 @@
                     icon: '📝'
                 },
                 {
-                    title: 'Appointments Experience',
+                    title: 'Charla Experience',
                     description: 'Shaped the booking flow so support feels calm and easy to access.',
                     icon: '📅'
                 },
