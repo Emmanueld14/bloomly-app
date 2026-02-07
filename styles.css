@@ -2080,6 +2080,46 @@ a:hover {
     outline-offset: 2px;
 }
 
+/* ========== Terms & Conditions Section ========== */
+.terms-conditions {
+    background: var(--color-page-bg);
+}
+
+.terms-conditions-content {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.terms-conditions-content h3 {
+    font-size: var(--text-2xl);
+    margin-bottom: var(--space-sm);
+}
+
+.terms-conditions-content p {
+    font-size: var(--text-lg);
+    line-height: 1.8;
+}
+
+.terms-conditions-content ol,
+.terms-conditions-content ul {
+    margin-left: var(--space-xl);
+    line-height: 1.8;
+}
+
+.terms-conditions-content li {
+    margin-bottom: var(--space-lg);
+    color: var(--color-gray-600);
+}
+
+.terms-conditions-content ul {
+    margin-top: var(--space-sm);
+    margin-bottom: var(--space-md);
+}
+
+.terms-conditions-content ul li {
+    margin-bottom: var(--space-xs);
+}
+
 .bloomly-team-panel {
     position: absolute;
     top: 0;
