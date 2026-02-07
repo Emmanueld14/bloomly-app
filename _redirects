@@ -29,11 +29,11 @@
 
 # Profile routing
 /profile/* /profile/index.html?slug=:splat 200
-/profile /about.html 301
-/profile/ /about.html 301
+/profile /profile/index.html 200
+/profile/ /profile/index.html 200
 
 # People profile routing (legacy)
 /people/* /profile/:splat 301
-/people /about.html 301
-/people/ /about.html 301
+/people /profile/index.html 200
+/people/ /profile/index.html 200
 
