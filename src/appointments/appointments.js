@@ -332,7 +332,7 @@
             return;
         }
         if (!state.settings?.bookingEnabled) {
-            elements.summary.textContent = 'Appointments are currently closed. Please check back soon.';
+            elements.summary.textContent = 'Charla sessions are currently closed. Please check back soon.';
             updateSubmitState();
             return;
         }
@@ -363,7 +363,7 @@
 
             const response = await fetch(`/api/appointments-availability?start=${encodeURIComponent(start)}&end=${encodeURIComponent(end)}`);
             if (!response.ok) {
-                throw new Error('Unable to load appointment availability.');
+                throw new Error('Unable to load Charla availability.');
             }
             const payload = await response.json();
             state.settings = payload.settings;
@@ -372,7 +372,7 @@
             updatePriceLabel();
 
             if (!state.settings?.bookingEnabled) {
-                setStatus('Appointments are currently closed.');
+                setStatus('Charla sessions are currently closed.');
             } else {
                 setStatus('Choose a date that works for you.');
             }
@@ -384,8 +384,8 @@
             renderSlots();
             updateSummary();
         } catch (error) {
-            console.error('Appointments availability error', error);
-            setStatus('Appointments are currently unavailable. Please try again soon.');
+            console.error('Charla availability error', error);
+            setStatus('Charla sessions are currently unavailable. Please try again soon.');
             updateSubmitState();
         }
     }
@@ -397,7 +397,7 @@
             return;
         }
         if (!state.settings?.bookingEnabled) {
-            setMessage('Appointments are currently closed.', 'error');
+            setMessage('Charla sessions are currently closed.', 'error');
             return;
         }
         if (!state.selectedDate || !state.selectedTime) {
@@ -481,12 +481,12 @@
 
             const result = await response.json().catch(() => ({}));
             if (!response.ok) {
-                throw new Error(result.error || 'Unable to confirm appointment.');
+                throw new Error(result.error || 'Unable to confirm Charla.');
             }
 
             if (result.booking) {
                 const dateLabel = parseDateKey(result.booking.date).toLocaleDateString(undefined, DATE_OPTIONS);
-                setMessage(`Appointment confirmed for ${dateLabel} at ${result.booking.time}.`, 'success');
+                setMessage(`Charla session confirmed for ${dateLabel} at ${result.booking.time}.`, 'success');
                 state.selectedDate = result.booking.date;
                 state.selectedTime = result.booking.time;
                 updateSummary();
@@ -494,7 +494,7 @@
                 resetConsents();
                 updateSubmitState();
             } else {
-                setMessage('Payment confirmed. We will email your appointment details shortly.', 'success');
+                setMessage('Payment confirmed. We will email your Charla details shortly.', 'success');
                 resetConsents();
                 updateSubmitState();
             }

@@ -43,19 +43,19 @@
             }
 
             // Handle /people and legacy team/profile routes
-            if (path === '/people' || path === '/people/') {
+            if (path === '/people' || path === '/people/' || path === '/profile' || path === '/profile/') {
+                window.location.replace('/people/index.html');
+                return;
+            }
+
+            if (path === '/team' || path === '/team/') {
                 window.location.replace('/about.html');
                 return;
             }
 
-            if (path === '/team' || path === '/team/' || path === '/profile' || path === '/profile/') {
-                window.location.replace('/about.html');
-                return;
-            }
-
-            const peopleMatch = path.match(/^\/(people|team|profile)\/(.+)$/);
-            if (peopleMatch) {
-                const slug = peopleMatch[2]
+            const profileMatch = path.match(/^\/(people|team|profile)\/(.+)$/);
+            if (profileMatch) {
+                const slug = profileMatch[2]
                     .replace(/^\/+/, '')
                     .replace(/\/+$/, '')
                     .replace(/\.html$/, '');

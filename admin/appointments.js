@@ -125,18 +125,18 @@
     }
 
     async function loadSettings() {
-        setMessage('Loading appointment settings...', null);
+        setMessage('Loading Charla settings...', null);
         try {
             const response = await fetch(`${config.apiBase || '/api'}/appointments-settings`);
             if (!response.ok) {
-                throw new Error('Unable to load appointment settings.');
+                throw new Error('Unable to load Charla settings.');
             }
             const payload = await response.json();
             applySettings(payload.settings || {}, payload.blackouts || []);
             setMessage('Settings loaded.', 'success');
         } catch (error) {
-            console.error('Appointments settings load failed', error);
-            setMessage(error.message || 'Unable to load appointment settings.', 'error');
+            console.error('Charla settings load failed', error);
+            setMessage(error.message || 'Unable to load Charla settings.', 'error');
         }
     }
 
@@ -171,12 +171,12 @@
         event.preventDefault();
         const adminKey = getAdminKey();
         if (!adminKey) {
-            setMessage('Appointments admin key is required.', 'error');
+            setMessage('Charla admin key is required.', 'error');
             return;
         }
 
         const payload = collectSettings();
-        setMessage('Saving appointment settings...', null);
+        setMessage('Saving Charla settings...', null);
 
         try {
             const response = await fetch(`${config.apiBase || '/api'}/appointments-settings`, {
@@ -194,9 +194,9 @@
             }
 
             applySettings(result.settings || payload, result.blackouts || payload.blackouts);
-            setMessage('Appointment settings updated.', 'success');
+            setMessage('Charla settings updated.', 'success');
         } catch (error) {
-            console.error('Appointments settings save failed', error);
+            console.error('Charla settings save failed', error);
             setMessage(error.message || 'Unable to save settings.', 'error');
         }
     }

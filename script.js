@@ -1320,7 +1320,7 @@
                     icon: '📝'
                 },
                 {
-                    title: 'Appointments Experience',
+                    title: 'Charla Experience',
                     description: 'Shaped the booking flow so support feels calm and easy to access.',
                     icon: '📅'
                 },
@@ -1384,7 +1384,6 @@
         const link = document.createElement('a');
         link.className = 'bloomly-team-link';
         link.href = `/people/${member.slug}`;
-        link.dataset.profileLink = member.slug;
         link.textContent = 'View Profile';
 
         info.append(eyebrow, name, role, link);
@@ -1434,23 +1433,6 @@
         renderTeamGrid();
         const cards = document.querySelectorAll('[data-team-card]');
         if (!cards.length) return;
-
-        const debugProfileNav = new URLSearchParams(window.location.search).get('profile-debug') === '1';
-        const profileLinks = document.querySelectorAll('[data-profile-link]');
-        profileLinks.forEach((link) => {
-            link.addEventListener('click', (event) => {
-                const slug = link.dataset.profileLink;
-                const target = `/people/${slug}`;
-                if (debugProfileNav) {
-                    console.info('[ProfileNav] click', { slug, target, current: window.location.pathname });
-                }
-                if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
-                    return;
-                }
-                event.preventDefault();
-                window.location.href = target;
-            });
-        });
 
         const supportsHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
 
@@ -1916,28 +1898,15 @@
         const container = document.querySelector('[data-profile-page]') || document.querySelector('[data-team-profile]');
         if (!container) return;
 
-        const debugProfileNav = new URLSearchParams(window.location.search).get('profile-debug') === '1';
-
         container.setAttribute('aria-busy', 'true');
         renderTeamProfileLoading(container);
 
         const slug = resolveTeamSlug();
-        if (debugProfileNav) {
-            console.info('[ProfileNav] profile page init', {
-                path: window.location.pathname,
-                slug,
-                search: window.location.search
-            });
-        }
         const member = await fetchTeamMember(slug);
         container.setAttribute('aria-busy', 'false');
         if (!member) {
             renderTeamProfileNotFound(container);
             return;
-        }
-
-        if (debugProfileNav) {
-            console.info('[ProfileNav] profile resolved', { slug: member.slug, name: member.name });
         }
         syncProfileUrl(member.slug);
         document.title = `${member.name} | Bloomly`;

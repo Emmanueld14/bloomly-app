@@ -13,12 +13,10 @@
     { "source": "/team/", "destination": "/about.html", "permanent": true },
     { "source": "/team/:slug", "destination": "/people/:slug", "permanent": true },
     { "source": "/team/:slug/", "destination": "/people/:slug", "permanent": true },
-    { "source": "/profile", "destination": "/about.html", "permanent": true },
-    { "source": "/profile/", "destination": "/about.html", "permanent": true },
-    { "source": "/profile/:slug", "destination": "/people/:slug", "permanent": true },
-    { "source": "/profile/:slug/", "destination": "/people/:slug", "permanent": true },
     { "source": "/people", "destination": "/about.html", "permanent": true },
-    { "source": "/people/", "destination": "/about.html", "permanent": true }
+    { "source": "/people/", "destination": "/about.html", "permanent": true },
+    { "source": "/profile/:slug", "destination": "/people/:slug", "permanent": true },
+    { "source": "/profile/:slug/", "destination": "/people/:slug", "permanent": true }
   ],
   "rewrites": [
     { "source": "/blog", "destination": "/blog/index.html" },
@@ -31,6 +29,8 @@
     { "source": "/subscribe/", "destination": "/subscribe/index.html" },
     { "source": "/appointments", "destination": "/appointments/index.html" },
     { "source": "/appointments/", "destination": "/appointments/index.html" },
+    { "source": "/people", "destination": "/people/index.html" },
+    { "source": "/people/", "destination": "/people/index.html" },
     { "source": "/people/:slug", "destination": "/people/index.html?slug=:slug" },
     { "source": "/people/:slug/", "destination": "/people/index.html?slug=:slug" }
   ]

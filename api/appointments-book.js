@@ -59,10 +59,10 @@ export default async function handler(req, res) {
         const blackouts = await loadBlackouts(config);
 
         if (!settings.bookingEnabled) {
-            return res.status(400).json({ error: 'Appointments are currently closed.' });
+            return res.status(400).json({ error: 'Charla sessions are currently closed.' });
         }
         if (!settings.priceCents || settings.priceCents <= 0) {
-            return res.status(400).json({ error: 'Appointment pricing is not configured.' });
+            return res.status(400).json({ error: 'Charla pricing is not configured.' });
         }
 
         const dayKey = getDayKey(booking.date);
@@ -163,7 +163,7 @@ export default async function handler(req, res) {
         stripePayload.set('line_items[0][quantity]', '1');
         stripePayload.set('line_items[0][price_data][currency]', settings.currency);
         stripePayload.set('line_items[0][price_data][unit_amount]', String(settings.priceCents));
-        stripePayload.set('line_items[0][price_data][product_data][name]', 'Bloomly Appointment');
+        stripePayload.set('line_items[0][price_data][product_data][name]', 'Bloomly Charla');
 
         const stripeResponse = await fetch('https://api.stripe.com/v1/checkout/sessions', {
             method: 'POST',

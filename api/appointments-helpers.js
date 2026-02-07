@@ -48,7 +48,7 @@ export async function loadSettings(config) {
         { method: 'GET' }
     );
     if (!response.ok) {
-        throw new Error('Unable to load appointment settings.');
+        throw new Error('Unable to load Charla settings.');
     }
     const data = await response.json();
     const row = Array.isArray(data) ? data[0] : null;
