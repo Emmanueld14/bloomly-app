@@ -11,12 +11,14 @@
   "redirects": [
     { "source": "/team", "destination": "/about.html", "permanent": true },
     { "source": "/team/", "destination": "/about.html", "permanent": true },
-    { "source": "/team/:slug", "destination": "/people/:slug", "permanent": true },
-    { "source": "/team/:slug/", "destination": "/people/:slug", "permanent": true },
-    { "source": "/people", "destination": "/about.html", "permanent": true },
-    { "source": "/people/", "destination": "/about.html", "permanent": true },
-    { "source": "/profile/:slug", "destination": "/people/:slug", "permanent": true },
-    { "source": "/profile/:slug/", "destination": "/people/:slug", "permanent": true }
+    { "source": "/team/:slug", "destination": "/members/:slug", "permanent": true },
+    { "source": "/team/:slug/", "destination": "/members/:slug", "permanent": true },
+    { "source": "/people", "destination": "/members", "permanent": true },
+    { "source": "/people/", "destination": "/members", "permanent": true },
+    { "source": "/profile/:slug", "destination": "/members/:slug", "permanent": true },
+    { "source": "/profile/:slug/", "destination": "/members/:slug", "permanent": true },
+    { "source": "/people/:slug", "destination": "/members/:slug", "permanent": true },
+    { "source": "/people/:slug/", "destination": "/members/:slug", "permanent": true }
   ],
   "rewrites": [
     { "source": "/blog", "destination": "/blog/index.html" },
@@ -29,10 +31,10 @@
     { "source": "/subscribe/", "destination": "/subscribe/index.html" },
     { "source": "/appointments", "destination": "/appointments/index.html" },
     { "source": "/appointments/", "destination": "/appointments/index.html" },
-    { "source": "/people", "destination": "/people/index.html" },
-    { "source": "/people/", "destination": "/people/index.html" },
-    { "source": "/people/:slug", "destination": "/people/index.html?slug=:slug" },
-    { "source": "/people/:slug/", "destination": "/people/index.html?slug=:slug" }
+    { "source": "/members", "destination": "/members/index.html" },
+    { "source": "/members/", "destination": "/members/index.html" },
+    { "source": "/members/:slug", "destination": "/members/index.html?slug=:slug" },
+    { "source": "/members/:slug/", "destination": "/members/index.html?slug=:slug" }
   ]
 }
 

@@ -43,8 +43,9 @@
             }
 
             // Handle /people and legacy team/profile routes
-            if (path === '/people' || path === '/people/' || path === '/profile' || path === '/profile/') {
-                window.location.replace('/people/index.html');
+            if (path === '/people' || path === '/people/' || path === '/profile' || path === '/profile/' ||
+                path === '/members' || path === '/members/') {
+                window.location.replace('/members/index.html');
                 return;
             }
 
@@ -53,14 +54,14 @@
                 return;
             }
 
-            const profileMatch = path.match(/^\/(people|team|profile)\/(.+)$/);
+            const profileMatch = path.match(/^\/(people|team|profile|members)\/(.+)$/);
             if (profileMatch) {
                 const slug = profileMatch[2]
                     .replace(/^\/+/, '')
                     .replace(/\/+$/, '')
                     .replace(/\.html$/, '');
                 if (slug) {
-                    window.location.replace(`/people/index.html?slug=${encodeURIComponent(slug)}`);
+                    window.location.replace(`/members/index.html?slug=${encodeURIComponent(slug)}`);
                     return;
                 }
             }

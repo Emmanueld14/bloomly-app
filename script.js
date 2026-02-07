@@ -1377,7 +1377,7 @@
 
         const link = document.createElement('a');
         link.className = 'bloomly-team-link';
-        link.href = `/people/${member.slug}`;
+        link.href = `/members/${member.slug}`;
         link.textContent = 'View Profile';
 
         info.append(eyebrow, name, role, link);
@@ -1540,13 +1540,13 @@
             return slugParam;
         }
 
-        const pathMatch = window.location.pathname.match(/\/(team|profile|people)\/([^\/?#]+)(?:\.html)?\/?$/);
+        const pathMatch = window.location.pathname.match(/\/(team|profile|people|members)\/([^\/?#]+)(?:\.html)?\/?$/);
         const pathSlug = normalizeTeamSlug(pathMatch ? pathMatch[2] : null);
         if (pathSlug) {
             return pathSlug;
         }
 
-        const hashMatch = (window.location.hash || '').match(/\/(team|profile|people)\/([^\/?#]+)(?:\.html)?\/?$/);
+        const hashMatch = (window.location.hash || '').match(/\/(team|profile|people|members)\/([^\/?#]+)(?:\.html)?\/?$/);
         return normalizeTeamSlug(hashMatch ? hashMatch[2] : null);
     }
 
@@ -1566,7 +1566,7 @@
         if (!slug || !window.history || typeof window.history.replaceState !== 'function') {
             return;
         }
-        const targetPath = `/people/${slug}`;
+        const targetPath = `/members/${slug}`;
         const currentPath = window.location.pathname.replace(/\/+$/, '');
         const normalizedTarget = targetPath.replace(/\/+$/, '');
         if (currentPath !== normalizedTarget) {
