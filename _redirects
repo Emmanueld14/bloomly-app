@@ -28,9 +28,9 @@
 /team/ /about.html 301
 
 # Profile routing
-/profile/* /profile.html?slug=:splat 200
-/profile /profile.html 200
-/profile/ /profile.html 200
+/profile/* /profile/index.html?slug=:splat 200
+/profile /profile/index.html 200
+/profile/ /profile/index.html 200
 
 # People profile routing (legacy)
 /people/* /profile/:splat 301
