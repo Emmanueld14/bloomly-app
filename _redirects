@@ -25,15 +25,15 @@
 # Team profile routing - legacy routes
 /team /about.html 301
 /team/ /about.html 301
-/team/* /people/:splat 301
+/team/* /profile/:splat 301
 
-# Profile routing - legacy routes
+# Profile routing
 /profile /about.html 301
 /profile/ /about.html 301
-/profile/* /people/:splat 301
+/profile/* /profile/index.html?slug=:splat 200
 
-# People profile routing
+# People profile routing (legacy)
 /people /about.html 301
 /people/ /about.html 301
-/people/* /people/index.html?slug=:splat 200
+/people/* /profile/:splat 301
 
