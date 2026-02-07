@@ -21,6 +21,7 @@
         const isBlogPost = path.includes('/blog/') && !path.endsWith('blog.html') && !isBlogRoot;
         const isBlogPostTemplate = path.includes('/blog-post');
         const isTeamProfile = /\/(team|profile|people)(\/|$)/.test(path);
+        const isAboutPage = path.includes('/about') || path.endsWith('/about.html');
         const isSubscribePage = path.includes('/subscribe') || path.endsWith('subscribe.html');
         const isAppointmentsPage = path.includes('/appointments');
         
@@ -29,7 +30,7 @@
             const normalizedLinkPath = linkPath.split('?')[0];
             const linkSegment = normalizedLinkPath.split('/').pop();
             const isBlogLink = normalizedLinkPath.endsWith('blog.html') || normalizedLinkPath.endsWith('/blog');
-            const isAboutLink = normalizedLinkPath.endsWith('about.html');
+            const isAboutLink = normalizedLinkPath.endsWith('about.html') || normalizedLinkPath.endsWith('/about');
             const isSubscribeLink = normalizedLinkPath.endsWith('subscribe.html') || normalizedLinkPath.endsWith('/subscribe');
             const isAppointmentsLink = normalizedLinkPath.endsWith('/appointments') || normalizedLinkPath.endsWith('appointments.html');
             
@@ -38,6 +39,11 @@
             
             // Check if this link should be active
             if (isTeamProfile && isAboutLink) {
+                link.classList.add('active');
+                return;
+            }
+
+            if (isAboutPage && isAboutLink) {
                 link.classList.add('active');
                 return;
             }
@@ -54,7 +60,7 @@
 
             if ((isBlogPost || isBlogPostTemplate || isBlogRoot) && isBlogLink) {
                 link.classList.add('active');
-            } else if (!isBlogPost && !isBlogPostTemplate && !isBlogRoot && !isTeamProfile && !isSubscribePage && !isAppointmentsPage) {
+            } else if (!isBlogPost && !isBlogPostTemplate && !isBlogRoot && !isTeamProfile && !isAboutPage && !isSubscribePage && !isAppointmentsPage) {
                 if (linkSegment === currentPath || 
                     (currentPath === '' && linkSegment === 'index.html') ||
                     (currentPath === 'index.html' && linkSegment === 'index.html') ||
