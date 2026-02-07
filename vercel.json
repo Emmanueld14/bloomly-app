@@ -29,10 +29,10 @@
     { "source": "/subscribe/", "destination": "/subscribe/index.html" },
     { "source": "/appointments", "destination": "/appointments/index.html" },
     { "source": "/appointments/", "destination": "/appointments/index.html" },
-    { "source": "/profile", "destination": "/profile/index.html" },
-    { "source": "/profile/", "destination": "/profile/index.html" },
-    { "source": "/profile/:slug", "destination": "/profile/index.html?slug=:slug" },
-    { "source": "/profile/:slug/", "destination": "/profile/index.html?slug=:slug" }
+    { "source": "/profile", "destination": "/profile.html" },
+    { "source": "/profile/", "destination": "/profile.html" },
+    { "source": "/profile/:slug", "destination": "/profile.html?slug=:slug" },
+    { "source": "/profile/:slug/", "destination": "/profile.html?slug=:slug" }
   ]
 }
 

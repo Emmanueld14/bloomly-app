@@ -44,7 +44,7 @@
 
             // Handle /people and legacy team/profile routes
             if (path === '/people' || path === '/people/' || path === '/profile' || path === '/profile/') {
-                window.location.replace('/profile/index.html');
+                window.location.replace('/profile.html');
                 return;
             }
 
@@ -60,7 +60,7 @@
                     .replace(/\/+$/, '')
                     .replace(/\.html$/, '');
                 if (slug) {
-                    window.location.replace(`/profile/index.html?slug=${encodeURIComponent(slug)}`);
+                    window.location.replace(`/profile.html?slug=${encodeURIComponent(slug)}`);
                     return;
                 }
             }
