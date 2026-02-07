@@ -130,6 +130,6 @@ export async function onRequestPost({ request, env }) {
 
         return jsonResponse({ booking: updatedBooking });
     } catch (error) {
-        return jsonResponse({ error: error.message || 'Unable to confirm appointment.' }, 500);
+        return jsonResponse({ error: error.message || 'Unable to confirm Charla.' }, 500);
     }
 }
