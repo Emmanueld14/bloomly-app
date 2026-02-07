@@ -1352,7 +1352,7 @@
 
         const link = document.createElement('a');
         link.className = 'bloomly-team-link';
-        link.href = `/profile/${member.slug}`;
+        link.href = `/people/${member.slug}`;
         link.textContent = 'View Profile';
 
         info.append(eyebrow, name, role, link);
