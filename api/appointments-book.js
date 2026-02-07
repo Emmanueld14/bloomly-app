@@ -6,9 +6,12 @@ import {
     loadSettings,
     loadBlackouts,
     normalizeBookingPayload,
+    normalizeConsentPayload,
+    missingConsents,
     isValidDate,
     isValidTime,
-    getDayKey
+    getDayKey,
+    detectCrisisReason
 } from './appointments-helpers.js';
 
 const HOLD_MINUTES = 15;
@@ -30,11 +33,25 @@ export default async function handler(req, res) {
     }
 
     const booking = normalizeBookingPayload(req.body || {});
+    const consents = normalizeConsentPayload(req.body || {});
+    const missingConsentKeys = missingConsents(consents);
+    if (missingConsentKeys.length) {
+        return res.status(400).json({ error: 'Please confirm each required acknowledgement before booking.' });
+    }
     if (!booking.name || !booking.email || !booking.purpose) {
         return res.status(400).json({ error: 'Name, email, and purpose are required.' });
     }
     if (!isValidDate(booking.date) || !isValidTime(booking.time)) {
         return res.status(400).json({ error: 'Invalid date or time.' });
+    }
+    const crisisReason = detectCrisisReason(booking.purpose);
+    if (crisisReason) {
+        return res.status(403).json({
+            error: 'This platform is not equipped to handle crisis situations or professional mental health support. Your concern is important and valid. Please seek help from a licensed counsellor, medical professional, or emergency services.',
+            crisis: true,
+            redirectUrl: '/appointments/crisis',
+            reason: crisisReason
+        });
     }
 
     try {
