@@ -1334,8 +1334,14 @@
             }
         }
     ];
+    const BLOOMLY_FOUNDER_PROFILE_ID = 'manuel-muhunami';
 
     // ========== Bloomly Team Cards ==========
+    function isAboutPagePath() {
+        const normalizedPath = (window.location.pathname || '').replace(/\/+$/, '') || '/';
+        return normalizedPath === '/about' || normalizedPath === '/about.html';
+    }
+
     function resolveTeamProfileId(member) {
         if (!member || typeof member !== 'object') return null;
         return normalizeTeamSlug(member.id || member.slug || member.name);
@@ -1345,6 +1351,9 @@
         const profileId = resolveTeamProfileId(member);
         if (!profileId) {
             return '/members/';
+        }
+        if (isAboutPagePath()) {
+            return `#profile-${profileId}`;
         }
         return `/members/?id=${encodeURIComponent(profileId)}`;
     }
@@ -1904,6 +1913,105 @@
         return section;
     }
 
+    function renderAboutMemberSection(member) {
+        const profileId = resolveTeamProfileId(member) || member.slug || 'member';
+        const section = document.createElement('section');
+        section.className = 'section team-profile-about profile-story';
+        section.id = `profile-${profileId}`;
+
+        const container = document.createElement('div');
+        container.className = 'container';
+
+        const card = document.createElement('div');
+        card.className = 'glass-card team-profile-about-card profile-story-card fade-in';
+
+        const title = document.createElement('h2');
+        title.textContent = profileId === BLOOMLY_FOUNDER_PROFILE_ID
+            ? 'Founder Profile'
+            : `${member.name} Profile`;
+
+        const roleLine = document.createElement('p');
+        roleLine.className = 'team-profile-about-copy';
+        roleLine.textContent = `${member.name} - ${member.role}`;
+
+        const storyBody = document.createElement('div');
+        storyBody.className = 'profile-story-content';
+        const paragraphs = getStoryParagraphs(member);
+
+        if (paragraphs.length) {
+            paragraphs.slice(0, 3).forEach((text) => {
+                const paragraph = document.createElement('p');
+                paragraph.textContent = text;
+                storyBody.appendChild(paragraph);
+            });
+        } else if (member.summary || member.bio) {
+            const paragraph = document.createElement('p');
+            paragraph.textContent = member.summary || member.bio || '';
+            storyBody.appendChild(paragraph);
+        }
+
+        card.append(title, roleLine, storyBody);
+
+        const focusAreas = Array.isArray(member.work?.highlights) && member.work.highlights.length
+            ? member.work.highlights
+            : (member.details || member.values || []);
+
+        if (focusAreas.length) {
+            const panelTitle = document.createElement('p');
+            panelTitle.className = 'team-profile-panel-title';
+            panelTitle.textContent = 'Focus areas';
+
+            const panelList = document.createElement('ul');
+            panelList.className = 'team-profile-panel-list';
+            focusAreas.slice(0, 4).forEach((item) => {
+                const listItem = document.createElement('li');
+                listItem.textContent = item;
+                panelList.appendChild(listItem);
+            });
+
+            card.append(panelTitle, panelList);
+        }
+
+        if (Array.isArray(member.links) && member.links.length) {
+            const actions = document.createElement('div');
+            actions.className = 'team-profile-contact-actions';
+
+            member.links.forEach((linkData) => {
+                const link = document.createElement('a');
+                link.className = 'btn btn-secondary';
+                link.href = linkData.url;
+                link.target = '_blank';
+                link.rel = 'noopener noreferrer';
+                link.textContent = linkData.label;
+                actions.appendChild(link);
+            });
+
+            card.appendChild(actions);
+        }
+
+        container.appendChild(card);
+        section.appendChild(container);
+
+        return section;
+    }
+
+    function initAboutTeamProfiles() {
+        const mount = document.querySelector('[data-team-profiles]');
+        if (!mount) return;
+
+        if (!Array.isArray(BLOOMLY_TEAM_MEMBERS) || !BLOOMLY_TEAM_MEMBERS.length) {
+            mount.innerHTML = '';
+            return;
+        }
+
+        mount.innerHTML = '';
+        const fragment = document.createDocumentFragment();
+        BLOOMLY_TEAM_MEMBERS.forEach((member) => {
+            fragment.appendChild(renderAboutMemberSection(member));
+        });
+        mount.appendChild(fragment);
+    }
+
     async function initTeamProfilePage() {
         const container = document.querySelector('[data-profile-page]') || document.querySelector('[data-team-profile]');
         if (!container) return;
@@ -2077,6 +2185,7 @@
         void initPostInteractions();
         initNewsletterForms();
         initBloomlyTeamCards();
+        initAboutTeamProfiles();
         void initTeamProfilePage();
         
         // Trigger initial scroll check
