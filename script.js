@@ -20,7 +20,7 @@
         const isBlogRoot = path === '/blog' || path === '/blog/';
         const isBlogPost = path.includes('/blog/') && !path.endsWith('blog.html') && !isBlogRoot;
         const isBlogPostTemplate = path.includes('/blog-post');
-        const isTeamProfile = /\/(team|profile|people)(\/|$)/.test(path);
+        const isTeamProfile = /\/(team|profile|people|members)(\/|$)/.test(path);
         const isSubscribePage = path.includes('/subscribe') || path.endsWith('subscribe.html');
         const isAppointmentsPage = path.includes('/appointments');
         
@@ -1336,6 +1336,19 @@
     ];
 
     // ========== Bloomly Team Cards ==========
+    function resolveTeamProfileId(member) {
+        if (!member || typeof member !== 'object') return null;
+        return normalizeTeamSlug(member.id || member.slug || member.name);
+    }
+
+    function buildTeamProfileHref(member) {
+        const profileId = resolveTeamProfileId(member);
+        if (!profileId) {
+            return '/members/index.html';
+        }
+        return `/members/index.html?id=${encodeURIComponent(profileId)}`;
+    }
+
     function buildTeamCard(member, index) {
         const wrapper = document.createElement('article');
         wrapper.className = 'bloomly-team-item';
@@ -1377,7 +1390,7 @@
 
         const link = document.createElement('a');
         link.className = 'bloomly-team-link';
-        link.href = `/members/${member.slug}`;
+        link.href = buildTeamProfileHref(member);
         link.textContent = 'View Profile';
 
         info.append(eyebrow, name, role, link);
@@ -1562,14 +1575,17 @@
         }) || null;
     }
 
-    function syncProfileUrl(slug) {
-        if (!slug || !window.history || typeof window.history.replaceState !== 'function') {
+    function syncProfileUrl(member) {
+        const profileId = resolveTeamProfileId(member);
+        if (!profileId || !window.history || typeof window.history.replaceState !== 'function') {
             return;
         }
-        const targetPath = `/members/${slug}`;
+        const currentParams = new URLSearchParams(window.location.search);
+        const currentId = normalizeTeamSlug(currentParams.get('id'));
         const currentPath = window.location.pathname.replace(/\/+$/, '');
-        const normalizedTarget = targetPath.replace(/\/+$/, '');
-        if (currentPath !== normalizedTarget) {
+        const canonicalPath = '/members/index.html';
+        if (currentPath !== canonicalPath || currentId !== profileId) {
+            const targetPath = `${canonicalPath}?id=${encodeURIComponent(profileId)}`;
             window.history.replaceState({}, '', targetPath);
         }
     }
@@ -1902,7 +1918,7 @@
             renderTeamProfileNotFound(container);
             return;
         }
-        syncProfileUrl(member.slug);
+        syncProfileUrl(member);
         document.title = `${member.name} | Bloomly`;
 
         container.innerHTML = '';
