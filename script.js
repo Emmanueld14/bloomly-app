@@ -1344,9 +1344,9 @@
     function buildTeamProfileHref(member) {
         const profileId = resolveTeamProfileId(member);
         if (!profileId) {
-            return '/members/index.html';
+            return '/members/';
         }
-        return `/members/index.html?id=${encodeURIComponent(profileId)}`;
+        return `/members/?id=${encodeURIComponent(profileId)}`;
     }
 
     function buildTeamCard(member, index) {
@@ -1582,10 +1582,10 @@
         }
         const currentParams = new URLSearchParams(window.location.search);
         const currentId = normalizeTeamSlug(currentParams.get('id'));
-        const currentPath = window.location.pathname.replace(/\/+$/, '');
-        const canonicalPath = '/members/index.html';
+        const currentPath = window.location.pathname.replace(/\/+$/, '') || '/';
+        const canonicalPath = '/members';
         if (currentPath !== canonicalPath || currentId !== profileId) {
-            const targetPath = `${canonicalPath}?id=${encodeURIComponent(profileId)}`;
+            const targetPath = `/members/?id=${encodeURIComponent(profileId)}`;
             window.history.replaceState({}, '', targetPath);
         }
     }
