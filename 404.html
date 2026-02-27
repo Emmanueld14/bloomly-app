@@ -45,7 +45,7 @@
             // Handle /people and legacy team/profile routes
             if (path === '/people' || path === '/people/' || path === '/profile' || path === '/profile/' ||
                 path === '/members' || path === '/members/') {
-                window.location.replace('/members/index.html');
+                window.location.replace('/members/');
                 return;
             }
 
@@ -61,7 +61,11 @@
                     .replace(/\/+$/, '')
                     .replace(/\.html$/, '');
                 if (slug) {
-                    window.location.replace(`/members/index.html?slug=${encodeURIComponent(slug)}`);
+                    if (slug === 'index') {
+                        window.location.replace('/members/');
+                        return;
+                    }
+                    window.location.replace(`/members/?id=${encodeURIComponent(slug)}`);
                     return;
                 }
             }
