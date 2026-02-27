@@ -162,23 +162,47 @@
     }
 
     // ========== Scroll Animations ==========
-    function initScrollAnimations() {
-        const observerOptions = {
-            threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
-        };
+    let fadeInObserver = null;
 
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
+    function getFadeInObserver() {
+        if (fadeInObserver || typeof window.IntersectionObserver !== 'function') {
+            return fadeInObserver;
+        }
+
+        fadeInObserver = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
                 if (entry.isIntersecting) {
                     entry.target.classList.add('visible');
+                    fadeInObserver.unobserve(entry.target);
                 }
             });
-        }, observerOptions);
+        }, {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        });
 
-        // Observe all fade-in elements
-        const fadeElements = document.querySelectorAll('.fade-in');
-        fadeElements.forEach(el => observer.observe(el));
+        return fadeInObserver;
+    }
+
+    function initScrollAnimations(scope = document) {
+        const fadeElements = scope.querySelectorAll('.fade-in');
+        if (!fadeElements.length) return;
+
+        const observer = getFadeInObserver();
+        fadeElements.forEach((element) => {
+            if (element.dataset.fadeObserved === 'true') {
+                return;
+            }
+
+            if (!observer) {
+                element.classList.add('visible');
+                element.dataset.fadeObserved = 'true';
+                return;
+            }
+
+            observer.observe(element);
+            element.dataset.fadeObserved = 'true';
+        });
     }
 
     // ========== Smooth Scrolling ==========
@@ -1663,6 +1687,347 @@
             .filter(Boolean);
     }
 
+    const FOUNDER_PROFILE_SLUG = 'manuel-muhunami';
+    const FOUNDER_PULL_QUOTE = "Wherever you are, whatever you're going through, don't hate yourself.";
+    const FOUNDER_STORY_TITLES = [
+        'The spark',
+        'Curiosity into action',
+        'Building a living platform',
+        'Leading with conversation'
+    ];
+    const FOUNDER_TEAM_STORIES = {
+        'ryan-kuria': {
+            headline: 'The Code Whisperer.',
+            cue: ['</>', 'lo-fi beats'],
+            passion: 'Ryan turns product chaos into calm engineering clarity. He designs systems that stay stable under pressure, so Bloomly can feel safe, fast, and dependable for every teen who lands here.',
+            humanSide: 'Away from standups, Ryan is usually with a cup of coffee, sketching interface ideas, or prototyping side projects that teach him new ways to simplify complex problems.'
+        },
+        'vinny-kangara': {
+            headline: 'The Creative Spark.',
+            cue: ['camera', 'mountain', 'lightbulb'],
+            passion: 'Vinny makes marketing feel human by translating community needs into stories people can trust. She builds campaigns around connection first, so every message feels like a conversation, not a broadcast.',
+            humanSide: 'She finds inspiration in the everyday rhythm of city life, weekend hikes, and moments that reveal what people truly care about, then brings that insight back into Bloomly.'
+        }
+    };
+
+    function isFounderProfile(member) {
+        const slug = normalizeTeamSlug(member?.slug || member?.id || member?.name);
+        return slug === FOUNDER_PROFILE_SLUG;
+    }
+
+    function getFounderCoreTeamMembers() {
+        return ['ryan-kuria', 'vinny-kangara']
+            .map((slug) => {
+                const member = findTeamMemberBySlug(slug);
+                if (!member) return null;
+                return {
+                    ...member,
+                    founderStory: FOUNDER_TEAM_STORIES[slug] || null
+                };
+            })
+            .filter(Boolean);
+    }
+
+    function renderFounderHeroSection(member) {
+        const section = document.createElement('section');
+        section.className = 'team-profile-hero founder-profile-hero';
+
+        const container = document.createElement('div');
+        container.className = 'container';
+
+        const backLink = document.createElement('a');
+        backLink.className = 'back-button';
+        backLink.href = '/about.html';
+        backLink.textContent = 'Return to Team';
+
+        const card = document.createElement('article');
+        card.className = 'glass-card team-profile-card founder-profile-card fade-in';
+        card.dataset.accent = member.accent || 'sage';
+
+        const shell = document.createElement('div');
+        shell.className = 'founder-profile-shell';
+
+        const portrait = document.createElement('figure');
+        portrait.className = 'founder-profile-portrait';
+        portrait.dataset.founderParallax = '';
+
+        const image = document.createElement('img');
+        image.className = 'team-profile-image founder-profile-image';
+        image.src = member.image || '/logo.svg';
+        image.alt = `${member.name} smiling portrait`;
+        image.decoding = 'async';
+        image.fetchPriority = 'high';
+        image.width = 560;
+        image.height = 560;
+
+        const caption = document.createElement('figcaption');
+        caption.className = 'founder-profile-caption';
+        caption.textContent = 'Founder, student builder, and community listener';
+
+        portrait.append(image, caption);
+
+        const content = document.createElement('div');
+        content.className = 'founder-profile-content';
+
+        const eyebrow = document.createElement('p');
+        eyebrow.className = 'team-profile-eyebrow';
+        eyebrow.textContent = 'Meet the founder';
+
+        const name = document.createElement('h1');
+        name.className = 'team-profile-name founder-profile-name';
+        name.textContent = member.name;
+
+        const role = document.createElement('p');
+        role.className = 'team-profile-role founder-profile-role';
+        role.textContent = member.role;
+
+        const lead = document.createElement('p');
+        lead.className = 'founder-profile-lead';
+        lead.textContent = 'Manuel is building Bloomly as a warm, practical space where teens can heal, reflect, and grow in community.';
+
+        const quote = document.createElement('blockquote');
+        quote.className = 'founder-profile-quote';
+        quote.textContent = FOUNDER_PULL_QUOTE;
+
+        const promise = document.createElement('p');
+        promise.className = 'founder-profile-promise';
+        promise.innerHTML = 'This mission is grounded in one promise: <span class="founder-emphasis">you don\'t have to face it alone.</span>';
+
+        const jumpLinks = document.createElement('nav');
+        jumpLinks.className = 'founder-profile-jump-links';
+        jumpLinks.setAttribute('aria-label', 'Profile sections');
+
+        const storyLink = document.createElement('a');
+        storyLink.className = 'founder-profile-jump-link';
+        storyLink.href = '#founding-story';
+        storyLink.textContent = 'Read the founding story';
+
+        const teamLink = document.createElement('a');
+        teamLink.className = 'founder-profile-jump-link';
+        teamLink.href = '#core-team';
+        teamLink.textContent = 'Meet the core team';
+
+        jumpLinks.append(storyLink, teamLink);
+
+        content.append(eyebrow, name, role, lead, quote, promise, jumpLinks);
+        shell.append(portrait, content);
+        card.appendChild(shell);
+        container.append(backLink, card);
+        section.appendChild(container);
+
+        return section;
+    }
+
+    function renderFounderStorySection(member) {
+        const section = document.createElement('section');
+        section.className = 'section founder-story-section';
+        section.id = 'founding-story';
+
+        const container = document.createElement('div');
+        container.className = 'container';
+
+        const card = document.createElement('article');
+        card.className = 'glass-card founder-story-card fade-in';
+
+        const title = document.createElement('h2');
+        title.id = 'founding-story-title';
+        title.className = 'founder-story-title';
+        title.textContent = 'About Manuel';
+        section.setAttribute('aria-labelledby', title.id);
+
+        const intro = document.createElement('p');
+        intro.className = 'founder-story-intro';
+        intro.textContent = 'A personal builder story about curiosity, responsibility, and creating safer digital spaces for young people.';
+
+        const supportLine = document.createElement('p');
+        supportLine.className = 'founder-story-support';
+        supportLine.innerHTML = 'Every section of Bloomly is designed to remind people that <span class="founder-emphasis">you don\'t have to face it alone.</span>';
+
+        const storyFlow = document.createElement('div');
+        storyFlow.className = 'founder-story-flow';
+
+        const paragraphs = getStoryParagraphs(member);
+        paragraphs.forEach((text, index) => {
+            const step = document.createElement('article');
+            step.className = 'founder-story-step fade-in';
+
+            const marker = document.createElement('span');
+            marker.className = 'founder-story-step-index';
+            marker.textContent = String(index + 1).padStart(2, '0');
+            marker.setAttribute('aria-hidden', 'true');
+
+            const copy = document.createElement('div');
+            copy.className = 'founder-story-step-copy';
+
+            const heading = document.createElement('h3');
+            heading.className = 'founder-story-step-title';
+            heading.textContent = FOUNDER_STORY_TITLES[index] || `Chapter ${index + 1}`;
+
+            const paragraph = document.createElement('p');
+            paragraph.textContent = text;
+
+            copy.append(heading, paragraph);
+            step.append(marker, copy);
+            storyFlow.appendChild(step);
+        });
+
+        if (!paragraphs.length) {
+            const emptyState = document.createElement('p');
+            emptyState.textContent = member.bio || member.summary || '';
+            storyFlow.appendChild(emptyState);
+        }
+
+        card.append(title, intro, supportLine, storyFlow);
+        container.appendChild(card);
+        section.appendChild(container);
+        return section;
+    }
+
+    function renderFounderTeamCard(member) {
+        const founderStory = member.founderStory || {};
+        const card = document.createElement('article');
+        card.className = 'glass-card founder-team-card fade-in';
+        card.dataset.accent = member.accent || 'sage';
+
+        const top = document.createElement('div');
+        top.className = 'founder-team-top';
+
+        const avatar = document.createElement('div');
+        avatar.className = 'founder-team-avatar-wrap';
+
+        const image = document.createElement('img');
+        image.className = 'founder-team-avatar';
+        image.src = member.image || '/logo.svg';
+        image.alt = `${member.name} portrait`;
+        image.loading = 'lazy';
+        image.decoding = 'async';
+        image.width = 180;
+        image.height = 180;
+        avatar.appendChild(image);
+
+        const intro = document.createElement('div');
+        intro.className = 'founder-team-intro';
+
+        const name = document.createElement('h3');
+        name.className = 'founder-team-name';
+        name.textContent = member.name;
+
+        const role = document.createElement('p');
+        role.className = 'founder-team-role';
+        role.textContent = member.role;
+
+        const headline = document.createElement('p');
+        headline.className = 'founder-team-headline';
+        headline.textContent = founderStory.headline || member.panelSummary || '';
+
+        const cue = document.createElement('div');
+        cue.className = 'founder-team-cue';
+        cue.setAttribute('aria-hidden', 'true');
+        (founderStory.cue || []).forEach((item) => {
+            const cuePill = document.createElement('span');
+            cuePill.className = 'founder-team-cue-pill';
+            cuePill.textContent = item;
+            cue.appendChild(cuePill);
+        });
+
+        intro.append(name, role, headline, cue);
+        top.append(avatar, intro);
+
+        const passionBlock = document.createElement('div');
+        passionBlock.className = 'founder-team-story-block';
+        const passionTitle = document.createElement('h4');
+        passionTitle.textContent = 'Professional passion';
+        const passionCopy = document.createElement('p');
+        passionCopy.textContent = founderStory.passion || member.summary || member.bio || '';
+        passionBlock.append(passionTitle, passionCopy);
+
+        const humanBlock = document.createElement('div');
+        humanBlock.className = 'founder-team-story-block';
+        const humanTitle = document.createElement('h4');
+        humanTitle.textContent = 'Human side';
+        const humanCopy = document.createElement('p');
+        humanCopy.textContent = founderStory.humanSide || member.bio || member.summary || '';
+        humanBlock.append(humanTitle, humanCopy);
+
+        const profileLink = document.createElement('a');
+        profileLink.className = 'founder-team-link';
+        profileLink.href = buildTeamProfileHref(member);
+        profileLink.textContent = 'View full profile';
+
+        card.append(top, passionBlock, humanBlock, profileLink);
+        return card;
+    }
+
+    function renderFounderTeamSection() {
+        const section = document.createElement('section');
+        section.className = 'section founder-team-section';
+        section.id = 'core-team';
+
+        const container = document.createElement('div');
+        container.className = 'container';
+
+        const header = document.createElement('div');
+        header.className = 'section-header founder-team-header fade-in';
+
+        const title = document.createElement('h2');
+        title.id = 'core-team-title';
+        title.textContent = 'The Team';
+        section.setAttribute('aria-labelledby', title.id);
+
+        const subtitle = document.createElement('p');
+        subtitle.textContent = 'The people around Manuel are trusted builders and storytellers who make Bloomly feel grounded, credible, and deeply human.';
+        header.append(title, subtitle);
+
+        const grid = document.createElement('div');
+        grid.className = 'founder-team-grid';
+
+        const teammates = getFounderCoreTeamMembers();
+        if (!teammates.length) {
+            const empty = document.createElement('p');
+            empty.className = 'founder-team-empty';
+            empty.textContent = 'Core team profiles are being updated.';
+            grid.appendChild(empty);
+        } else {
+            teammates.forEach((member) => {
+                grid.appendChild(renderFounderTeamCard(member));
+            });
+        }
+
+        container.append(header, grid);
+        section.appendChild(container);
+        return section;
+    }
+
+    function initFounderHeroParallax() {
+        const portrait = document.querySelector('[data-founder-parallax]');
+        if (!portrait) return;
+
+        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+        if (reduceMotion.matches) {
+            portrait.style.setProperty('--founder-parallax-y', '0px');
+            return;
+        }
+
+        let frameId = null;
+        const updateParallax = () => {
+            const rect = portrait.getBoundingClientRect();
+            const viewportHeight = window.innerHeight || 1;
+            const distanceFromCenter = ((rect.top + (rect.height / 2)) - (viewportHeight / 2)) / viewportHeight;
+            const offset = Math.max(-18, Math.min(18, distanceFromCenter * -34));
+            portrait.style.setProperty('--founder-parallax-y', `${offset.toFixed(2)}px`);
+            frameId = null;
+        };
+
+        const requestUpdate = () => {
+            if (frameId !== null) return;
+            frameId = window.requestAnimationFrame(updateParallax);
+        };
+
+        requestUpdate();
+        window.addEventListener('scroll', requestUpdate, { passive: true });
+        window.addEventListener('resize', requestUpdate);
+    }
+
     function renderProfileStorySection(member) {
         const section = document.createElement('section');
         section.className = 'section team-profile-about profile-story';
@@ -1919,9 +2284,23 @@
             return;
         }
         syncProfileUrl(member);
-        document.title = `${member.name} | Bloomly`;
+        const isFounderPage = isFounderProfile(member);
+        document.title = isFounderPage
+            ? `${member.name} | Meet the Founders | Bloomly`
+            : `${member.name} | Bloomly`;
 
         container.innerHTML = '';
+
+        if (isFounderPage) {
+            const founderHeroSection = renderFounderHeroSection(member);
+            const founderStorySection = renderFounderStorySection(member);
+            const founderTeamSection = renderFounderTeamSection();
+            const founderContactSection = renderProfileContactSection(member);
+            container.append(founderHeroSection, founderStorySection, founderTeamSection, founderContactSection);
+            initScrollAnimations(container);
+            initFounderHeroParallax();
+            return;
+        }
 
         const heroSection = document.createElement('section');
         heroSection.className = 'team-profile-hero';
@@ -2048,6 +2427,7 @@
         const contactSection = renderProfileContactSection(member);
 
         container.append(heroSection, storySection, workSection, projectsSection, valuesSection, contactSection);
+        initScrollAnimations(container);
     }
 
     // ========== Initialize Everything ==========
