@@ -61,6 +61,16 @@ npx serve . -p 3000
 4. Enable Git Gateway
 5. Your site will auto-deploy
 
+## Supabase Setup (Charla + newsletter + interactions)
+
+If you want database-backed features (Charla bookings, likes/comments, and
+newsletter/post notifications), follow:
+
+- [SUPABASE_SETUP.md](./SUPABASE_SETUP.md)
+
+That guide includes migration, environment variables, and Edge Function deploy
+steps.
+
 ## Content Management
 
 ### Accessing the CMS

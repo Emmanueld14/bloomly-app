@@ -965,11 +965,9 @@
             return { status: 'error', error: new Error('Supabase client unavailable') };
         }
 
-        const { data, error } = await supabaseClient
+        const { error } = await supabaseClient
             .from('subscribers')
-            .insert({ email })
-            .select('id, email')
-            .single();
+            .insert({ email });
 
         if (error) {
             if (isDuplicateDatabaseError(error)) {
@@ -978,7 +976,7 @@
             return { status: 'error', error };
         }
 
-        return { status: 'subscribed', subscriber: data };
+        return { status: 'subscribed' };
     }
 
     function setNewsletterLoading(form, button, isLoading) {

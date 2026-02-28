@@ -1,0 +1,10 @@
+project_id = "YOUR_PROJECT_REF"
+
+[functions.subscribe-newsletter]
+verify_jwt = false
+
+[functions.publish-post]
+verify_jwt = false
+
+[functions.notify-subscribers]
+verify_jwt = false
