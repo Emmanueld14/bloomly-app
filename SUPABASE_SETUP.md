@@ -25,9 +25,11 @@ Then update:
 
 ## 2) Apply database schema
 
-The migration file is:
+Migration files:
 
 - `supabase/migrations/202602280001_init_bloomly_supabase.sql`
+- `supabase/migrations/202602280002_harden_existing_tables.sql`
+- `supabase/migrations/202602280003_add_payment_attempts.sql`
 
 Apply it with either:
 
@@ -48,7 +50,22 @@ Use `.env.example` as reference.
 - `SUPABASE_URL`
 - `SUPABASE_SERVICE_KEY` (or `SUPABASE_SERVICE_ROLE_KEY`)
 - `APPOINTMENTS_ADMIN_KEY`
-- `STRIPE_SECRET_KEY`
+- `SITE_URL`
+- `STRIPE_SECRET_KEY` (optional if using Stripe flow)
+
+### Required for multi-method Charla payments
+
+- `PAYPAL_CLIENT_ID`
+- `PAYPAL_CLIENT_SECRET`
+- `PAYPAL_BASE_URL` (`https://api-m.sandbox.paypal.com` for sandbox)
+- `MPESA_CONSUMER_KEY`
+- `MPESA_CONSUMER_SECRET`
+- `MPESA_SHORTCODE`
+- `MPESA_PASSKEY`
+- `MPESA_CALLBACK_URL` (or `MPESA_WEBHOOK_SECRET` and default callback)
+- `AIRTEL_CLIENT_ID`
+- `AIRTEL_CLIENT_SECRET`
+- `AIRTEL_CALLBACK_URL` (or `AIRTEL_WEBHOOK_SECRET` and default callback)
 
 ### Required for frontend Supabase client features
 
@@ -71,6 +88,14 @@ Use `.env.example` as reference.
 supabase functions deploy subscribe-newsletter
 supabase functions deploy publish-post
 supabase functions deploy notify-subscribers
+supabase functions deploy appointments-settings
+supabase functions deploy appointments-availability
+supabase functions deploy appointments-book
+supabase functions deploy payments-status
+supabase functions deploy payments-initiate
+supabase functions deploy payments-paypal-capture
+supabase functions deploy appointments-webhook-mpesa
+supabase functions deploy appointments-webhook-airtel
 ```
 
 `supabase/config.toml` is configured with `verify_jwt = false` for these functions because they use either:

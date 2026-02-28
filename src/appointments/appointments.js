@@ -303,7 +303,7 @@
         }
 
         setLoading(true);
-        setMessage('Redirecting to secure payment...', null);
+        setMessage('Preparing your Charla booking...', null);
 
         try {
             const response = await fetch('/api/appointments-book', {
@@ -321,6 +321,11 @@
             const result = await response.json().catch(() => ({}));
             if (!response.ok) {
                 throw new Error(result.error || 'Unable to start booking.');
+            }
+
+            if (result.paymentUrl) {
+                window.location.href = result.paymentUrl;
+                return;
             }
 
             if (result.checkoutUrl) {
