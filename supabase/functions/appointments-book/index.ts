@@ -10,9 +10,8 @@ const corsHeaders = {
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") || "";
 const SUPABASE_SERVICE_ROLE_KEY =
   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
-const STRIPE_SECRET_KEY = Deno.env.get("STRIPE_SECRET_KEY") || "";
 const SITE_URL = Deno.env.get("SITE_URL") || "https://bloomly.co.ke";
-const HOLD_MINUTES = 15;
+const HOLD_MINUTES = 30;
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
@@ -191,76 +190,13 @@ Deno.serve(async (req) => {
   }
   const bookingRow = insertedRows[0];
 
-  if (!STRIPE_SECRET_KEY) {
-    const { data: confirmedRows, error: confirmWriteError } = await supabase
-      .from("appointment_bookings")
-      .update({
-        status: "confirmed",
-        paid_at: new Date().toISOString(),
-        hold_expires_at: null,
-      })
-      .eq("id", bookingRow.id)
-      .select("*");
-
-    if (confirmWriteError) {
-      return jsonResponse({ error: "Unable to confirm booking." }, 500);
-    }
-
-    return jsonResponse({
-      booking: confirmedRows?.[0] || bookingRow,
-      paymentRequired: false,
-      message: "Charla confirmed without online payment.",
-    });
-  }
-
-  const successUrl = `${SITE_URL}/appointments?success=1&session_id={CHECKOUT_SESSION_ID}`;
-  const cancelUrl = `${SITE_URL}/appointments?canceled=1`;
-
-  const stripePayload = new URLSearchParams();
-  stripePayload.set("mode", "payment");
-  stripePayload.set("success_url", successUrl);
-  stripePayload.set("cancel_url", cancelUrl);
-  stripePayload.set("client_reference_id", bookingRow.id);
-  stripePayload.set("payment_method_types[]", "card");
-  stripePayload.set("metadata[booking_id]", bookingRow.id);
-  stripePayload.set("metadata[date]", booking.date);
-  stripePayload.set("metadata[time]", booking.time);
-  stripePayload.set("line_items[0][quantity]", "1");
-  stripePayload.set("line_items[0][price_data][currency]", settings.currency);
-  stripePayload.set(
-    "line_items[0][price_data][unit_amount]",
-    String(settings.priceCents),
-  );
-  stripePayload.set("line_items[0][price_data][product_data][name]", "Bloomly Charla");
-
-  const stripeResponse = await fetch("https://api.stripe.com/v1/checkout/sessions", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${STRIPE_SECRET_KEY}`,
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
-    body: stripePayload.toString(),
+  return jsonResponse({
+    booking: bookingRow,
+    paymentRequired: true,
+    paymentUrl: `${SITE_URL}/appointments/pay?booking_id=${encodeURIComponent(
+      bookingRow.id,
+    )}`,
+    amountCents: settings.priceCents,
+    currency: settings.currency,
   });
-  const stripeData = await stripeResponse.json().catch(() => ({}));
-
-  if (!stripeResponse.ok) {
-    await supabase
-      .from("appointment_bookings")
-      .update({ status: "failed" })
-      .eq("id", bookingRow.id);
-    return jsonResponse(
-      { error: stripeData.error?.message || "Unable to create payment session." },
-      500,
-    );
-  }
-
-  await supabase
-    .from("appointment_bookings")
-    .update({
-      stripe_session_id: stripeData.id,
-      stripe_payment_intent_id: stripeData.payment_intent || null,
-    })
-    .eq("id", bookingRow.id);
-
-  return jsonResponse({ checkoutUrl: stripeData.url, sessionId: stripeData.id });
 });

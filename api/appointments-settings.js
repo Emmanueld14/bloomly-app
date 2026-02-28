@@ -5,6 +5,8 @@ import {
     supabaseRequest,
     loadSettings,
     loadBlackouts,
+    loadDateOverrides,
+    normalizeDateOverrides,
     normalizeSettings
 } from './appointments-helpers.js';
 
@@ -24,7 +26,8 @@ export default async function handler(req, res) {
         try {
             const settings = await loadSettings(config);
             const blackouts = await loadBlackouts(config);
-            return res.status(200).json({ settings, blackouts });
+            const dateOverrides = await loadDateOverrides(config);
+            return res.status(200).json({ settings, blackouts, dateOverrides });
         } catch (error) {
             return res.status(500).json({ error: error.message || 'Unable to load settings.' });
         }
@@ -46,6 +49,7 @@ export default async function handler(req, res) {
 
     const normalized = normalizeSettings(req.body || {});
     const blackoutDates = Array.isArray(req.body?.blackouts) ? req.body.blackouts : [];
+    const dateOverrides = normalizeDateOverrides(req.body?.dateOverrides || []);
 
     try {
         const settingsPayload = {
@@ -99,9 +103,43 @@ export default async function handler(req, res) {
             }
         }
 
+        const dateOverrideDeleteResponse = await supabaseRequest(
+            config,
+            '/rest/v1/appointment_date_overrides',
+            { method: 'DELETE' }
+        );
+        if (!dateOverrideDeleteResponse.ok) {
+            const errorText = await dateOverrideDeleteResponse.text();
+            throw new Error(errorText || 'Unable to reset date overrides.');
+        }
+
+        if (dateOverrides.length) {
+            const overridePayload = dateOverrides.map((entry) => ({
+                date: entry.date,
+                time_slots: entry.timeSlots
+            }));
+            const overrideResponse = await supabaseRequest(
+                config,
+                '/rest/v1/appointment_date_overrides',
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Prefer: 'return=representation'
+                    },
+                    body: JSON.stringify(overridePayload)
+                }
+            );
+            if (!overrideResponse.ok) {
+                const errorText = await overrideResponse.text();
+                throw new Error(errorText || 'Unable to update date overrides.');
+            }
+        }
+
         const settings = await loadSettings(config);
         const blackouts = await loadBlackouts(config);
-        return res.status(200).json({ settings, blackouts });
+        const savedDateOverrides = await loadDateOverrides(config);
+        return res.status(200).json({ settings, blackouts, dateOverrides: savedDateOverrides });
     } catch (error) {
         return res.status(500).json({ error: error.message || 'Unable to update settings.' });
     }

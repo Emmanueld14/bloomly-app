@@ -5,6 +5,7 @@ import {
     supabaseRequest,
     loadSettings,
     loadBlackouts,
+    loadDateOverrides,
     normalizeBookingPayload,
     isValidDate,
     isValidTime,
@@ -40,6 +41,7 @@ export default async function handler(req, res) {
     try {
         const settings = await loadSettings(config);
         const blackouts = await loadBlackouts(config);
+        const dateOverrides = await loadDateOverrides(config);
 
         if (!settings.bookingEnabled) {
             return res.status(400).json({ error: 'Charla sessions are currently closed.' });
@@ -49,15 +51,18 @@ export default async function handler(req, res) {
         }
 
         const dayKey = getDayKey(booking.date);
-        if (!settings.availableDays.includes(dayKey)) {
-            return res.status(400).json({ error: 'Selected date is not available.' });
-        }
         if (blackouts.includes(booking.date)) {
             return res.status(400).json({ error: 'Selected date is unavailable.' });
         }
 
         const allowedSlots = settings.timeSlots?.[dayKey] || [];
-        if (!allowedSlots.includes(booking.time)) {
+        const override = dateOverrides.find((entry) => entry.date === booking.date) || null;
+        const effectiveSlots = override ? override.timeSlots : allowedSlots;
+
+        if (!override && !settings.availableDays.includes(dayKey)) {
+            return res.status(400).json({ error: 'Selected date is not available.' });
+        }
+        if (!effectiveSlots.includes(booking.time)) {
             return res.status(400).json({ error: 'Selected time is not available.' });
         }
 

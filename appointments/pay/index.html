@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Complete your Bloomly Charla payment with M-Pesa, Airtel Money, or PayPal.">
+    <title>Charla Payment - Bloomly</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body class="appointments-page">
+    <nav class="navbar" id="navbar">
+        <div class="navbar-content">
+            <a href="/index.html" class="logo-container">
+                <img src="/logo.svg" alt="Bloomly Logo" class="logo-icon">
+                <span class="logo-text">Bloomly</span>
+            </a>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="/index.html">Home</a></li>
+                <li><a href="/about.html">About</a></li>
+                <li><a href="/blog">Blog</a></li>
+                <li><a href="/appointments" class="active">Charla</a></li>
+                <li><a href="/subscribe">Subscribe</a></li>
+            </ul>
+            <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Toggle menu">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 12h18M3 6h18M3 18h18"/>
+                </svg>
+            </button>
+        </div>
+    </nav>
+
+    <main>
+        <section class="appointments-hero">
+            <div class="container appointments-hero-content">
+                <h1>Complete payment</h1>
+                <p>Finish your Charla booking with your preferred payment method.</p>
+                <div class="appointments-price" data-payment-amount>Loading booking amount...</div>
+            </div>
+        </section>
+
+        <section class="section appointments-section">
+            <div class="container appointments-shell">
+                <div class="appointments-card">
+                    <h2>Booking summary</h2>
+                    <p class="appointments-helper" data-payment-status>Loading booking...</p>
+                    <div class="appointments-summary" data-payment-summary>
+                        Waiting for booking details.
+                    </div>
+                    <div class="appointments-field" style="margin-top: var(--space-lg);">
+                        <label>Booking ID</label>
+                        <input type="text" data-payment-booking-id readonly>
+                    </div>
+                </div>
+
+                <div class="appointments-card">
+                    <h2>Choose payment method</h2>
+                    <p class="appointments-helper">Select one option below to continue.</p>
+
+                    <form data-payment-form>
+                        <div class="appointments-field">
+                            <label>
+                                <input type="radio" name="provider" value="mpesa" checked>
+                                M-Pesa
+                            </label>
+                            <label style="margin-top: var(--space-sm);">
+                                <input type="radio" name="provider" value="airtel">
+                                Airtel Money
+                            </label>
+                            <label style="margin-top: var(--space-sm);">
+                                <input type="radio" name="provider" value="paypal">
+                                PayPal
+                            </label>
+                        </div>
+
+                        <div class="appointments-field" data-payment-phone-group>
+                            <label for="paymentPhone">Phone number (for M-Pesa/Airtel)</label>
+                            <input id="paymentPhone" name="phone" type="tel" placeholder="e.g. 2547XXXXXXXX">
+                        </div>
+
+                        <button class="btn btn-primary" type="submit" data-payment-submit>
+                            Continue to payment
+                        </button>
+                    </form>
+
+                    <p class="appointments-message" data-payment-message aria-live="polite"></p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="/script.js"></script>
+    <script src="/appointments/config.js"></script>
+    <script src="/src/appointments/payments.js"></script>
+</body>
+</html>

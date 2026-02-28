@@ -336,6 +336,179 @@
             margin-top: var(--space-sm);
         }
 
+        .date-override-list {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-sm);
+            margin-top: var(--space-sm);
+        }
+
+        .date-override-item {
+            display: flex;
+            justify-content: space-between;
+            gap: var(--space-sm);
+            align-items: center;
+            padding: 0.5rem 0.75rem;
+            border-radius: var(--radius-md);
+            background: rgba(var(--color-black-rgb), 0.04);
+        }
+
+        .date-override-item-text {
+            font-size: var(--text-sm);
+            color: var(--color-text);
+            overflow-wrap: anywhere;
+        }
+
+        .date-override-remove {
+            white-space: nowrap;
+            padding: 0.35rem 0.75rem;
+            font-size: var(--text-xs);
+        }
+
+        .date-override-calendar {
+            margin-top: var(--space-sm);
+            border: 1px solid rgba(var(--color-black-rgb), 0.1);
+            border-radius: var(--radius-md);
+            padding: 0.75rem;
+            background: rgba(var(--color-black-rgb), 0.02);
+        }
+
+        .date-override-calendar-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            gap: var(--space-sm);
+        }
+
+        .date-override-calendar-nav {
+            border: 1px solid rgba(var(--color-black-rgb), 0.15);
+            border-radius: var(--radius-sm);
+            background: var(--color-white);
+            width: 2rem;
+            height: 2rem;
+            cursor: pointer;
+            font-size: 1rem;
+            line-height: 1;
+        }
+
+        .date-override-calendar-month {
+            font-weight: 700;
+            color: var(--color-text);
+        }
+
+        .date-override-calendar-weekdays,
+        .date-override-calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, minmax(0, 1fr));
+            gap: 0.25rem;
+        }
+
+        .date-override-calendar-weekday {
+            text-align: center;
+            font-size: 0.75rem;
+            color: var(--color-gray-550);
+            padding: 0.25rem 0;
+            font-weight: 600;
+        }
+
+        .date-override-calendar-empty {
+            min-height: 2.25rem;
+        }
+
+        .date-override-calendar-day {
+            position: relative;
+            min-height: 2.25rem;
+            border: 1px solid rgba(var(--color-black-rgb), 0.1);
+            border-radius: var(--radius-sm);
+            background: var(--color-white);
+            cursor: pointer;
+            font-size: 0.85rem;
+            color: var(--color-text);
+        }
+
+        .date-override-calendar-day:hover {
+            border-color: var(--color-blue);
+        }
+
+        .date-override-calendar-day.is-selected {
+            border-color: var(--color-blue);
+            background: rgba(var(--color-blue-rgb), 0.15);
+        }
+
+        .date-override-calendar-day.is-today {
+            box-shadow: inset 0 0 0 1px rgba(var(--color-blue-rgb), 0.4);
+        }
+
+        .date-override-calendar-day.is-overridden::after {
+            content: '';
+            position: absolute;
+            right: 0.25rem;
+            bottom: 0.25rem;
+            width: 0.35rem;
+            height: 0.35rem;
+            border-radius: 999px;
+            background: var(--color-success);
+        }
+
+        .date-override-calendar-day.is-blackout {
+            border-color: var(--color-danger);
+            background: rgba(var(--color-danger-rgb), 0.1);
+        }
+
+        .payment-diagnostics-results {
+            margin-top: var(--space-sm);
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: var(--space-sm);
+        }
+
+        .payment-diagnostics-card {
+            border: 1px solid rgba(var(--color-black-rgb), 0.1);
+            border-radius: var(--radius-md);
+            background: rgba(var(--color-black-rgb), 0.02);
+            padding: 0.75rem;
+        }
+
+        .payment-diagnostics-card h4 {
+            margin: 0 0 0.35rem 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: var(--space-sm);
+        }
+
+        .payment-diagnostics-badge {
+            font-size: 0.7rem;
+            font-weight: 700;
+            border-radius: 999px;
+            padding: 0.2rem 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        .payment-diagnostics-badge.ok {
+            background: rgba(var(--color-success-rgb), 0.15);
+            color: var(--color-success);
+        }
+
+        .payment-diagnostics-badge.warn {
+            background: rgba(var(--color-blue-rgb), 0.15);
+            color: var(--color-blue-strong);
+        }
+
+        .payment-diagnostics-badge.error {
+            background: rgba(var(--color-danger-rgb), 0.15);
+            color: var(--color-danger);
+        }
+
+        .payment-diagnostics-card ul {
+            margin: 0.4rem 0 0 1rem;
+            padding: 0;
+            font-size: 0.85rem;
+            color: var(--color-gray-650);
+        }
+
         .blackout-chip {
             display: inline-flex;
             align-items: center;
@@ -711,6 +884,48 @@
                                 <button type="button" class="btn-save" id="addBlackoutDate">Add date</button>
                             </div>
                             <div class="blackout-list" data-blackout-list></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Specific date time slots (override weekly schedule)</label>
+                            <div class="date-override-calendar" id="dateOverrideCalendar">
+                                <div class="date-override-calendar-header">
+                                    <button type="button" class="date-override-calendar-nav" id="dateOverridePrevMonth" aria-label="Previous month">&lt;</button>
+                                    <div class="date-override-calendar-month" id="dateOverrideMonthLabel"></div>
+                                    <button type="button" class="date-override-calendar-nav" id="dateOverrideNextMonth" aria-label="Next month">&gt;</button>
+                                </div>
+                                <div class="date-override-calendar-weekdays">
+                                    <div class="date-override-calendar-weekday">Sun</div>
+                                    <div class="date-override-calendar-weekday">Mon</div>
+                                    <div class="date-override-calendar-weekday">Tue</div>
+                                    <div class="date-override-calendar-weekday">Wed</div>
+                                    <div class="date-override-calendar-weekday">Thu</div>
+                                    <div class="date-override-calendar-weekday">Fri</div>
+                                    <div class="date-override-calendar-weekday">Sat</div>
+                                </div>
+                                <div class="date-override-calendar-grid" id="dateOverrideCalendarGrid"></div>
+                            </div>
+                            <div class="blackout-controls">
+                                <input type="date" id="dateOverrideInput">
+                                <input type="text" id="dateOverrideSlotsInput" placeholder="09:00, 13:30, 16:00">
+                                <button type="button" class="btn-save" id="addDateOverride">Add custom date</button>
+                            </div>
+                            <p style="margin-top: var(--space-xs); font-size: var(--text-sm); color: var(--color-gray-550);">
+                                For dates listed here, these slots are used instead of the weekly day template.
+                            </p>
+                            <div class="date-override-list" data-date-override-list></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Payment diagnostics</label>
+                            <p style="margin-top: var(--space-xs); font-size: var(--text-sm); color: var(--color-gray-550);">
+                                Run a quick provider readiness check before opening bookings.
+                            </p>
+                            <div class="form-actions">
+                                <button type="button" class="btn-save" id="runPaymentsDiagnosticsBtn">Run payment diagnostics</button>
+                            </div>
+                            <p class="appointments-admin-message" id="paymentsDiagnosticsMessage">Diagnostics have not been run yet.</p>
+                            <div class="payment-diagnostics-results" id="paymentsDiagnosticsResults"></div>
                         </div>
 
                         <div class="form-actions">

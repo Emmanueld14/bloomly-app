@@ -20,3 +20,18 @@ verify_jwt = false
 
 [functions.appointments-confirm]
 verify_jwt = false
+
+[functions.payments-initiate]
+verify_jwt = false
+
+[functions.payments-status]
+verify_jwt = false
+
+[functions.payments-paypal-capture]
+verify_jwt = false
+
+[functions.appointments-webhook-mpesa]
+verify_jwt = false
+
+[functions.appointments-webhook-airtel]
+verify_jwt = false

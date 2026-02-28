@@ -29,7 +29,23 @@ export function getEnvConfig() {
         supabaseServiceKey,
         supabaseAnonKey,
         adminKey,
-        stripeSecretKey: process.env.STRIPE_SECRET_KEY || ''
+        stripeSecretKey: process.env.STRIPE_SECRET_KEY || '',
+        siteUrl: process.env.SITE_URL || '',
+        paypalBaseUrl: process.env.PAYPAL_BASE_URL || 'https://api-m.sandbox.paypal.com',
+        paypalClientId: process.env.PAYPAL_CLIENT_ID || '',
+        paypalClientSecret: process.env.PAYPAL_CLIENT_SECRET || '',
+        mpesaBaseUrl: process.env.MPESA_BASE_URL || 'https://sandbox.safaricom.co.ke',
+        mpesaConsumerKey: process.env.MPESA_CONSUMER_KEY || '',
+        mpesaConsumerSecret: process.env.MPESA_CONSUMER_SECRET || '',
+        mpesaShortcode: process.env.MPESA_SHORTCODE || '',
+        mpesaPasskey: process.env.MPESA_PASSKEY || '',
+        mpesaCallbackUrl: process.env.MPESA_CALLBACK_URL || '',
+        airtelBaseUrl: process.env.AIRTEL_BASE_URL || 'https://openapiuat.airtel.africa',
+        airtelClientId: process.env.AIRTEL_CLIENT_ID || '',
+        airtelClientSecret: process.env.AIRTEL_CLIENT_SECRET || '',
+        airtelCountry: process.env.AIRTEL_COUNTRY || 'KE',
+        airtelCurrency: process.env.AIRTEL_CURRENCY || 'KES',
+        airtelCallbackUrl: process.env.AIRTEL_CALLBACK_URL || ''
     };
 }
 
@@ -78,6 +94,25 @@ export async function loadBlackouts(config) {
     return Array.isArray(data) ? data.map((row) => row.date).filter(Boolean) : [];
 }
 
+export async function loadDateOverrides(config) {
+    const response = await supabaseRequest(
+        config,
+        '/rest/v1/appointment_date_overrides?select=date,time_slots&order=date.asc',
+        { method: 'GET' }
+    );
+    if (!response.ok) {
+        throw new Error('Unable to load date overrides.');
+    }
+    const data = await response.json();
+    if (!Array.isArray(data)) return [];
+    return data
+        .map((row) => ({
+            date: String(row.date || ''),
+            timeSlots: normalizeSlots(row.time_slots || [])
+        }))
+        .filter((row) => isValidDate(row.date));
+}
+
 export function normalizeSettings(row) {
     if (!row) return { ...DEFAULT_SETTINGS };
     return {
@@ -88,6 +123,46 @@ export function normalizeSettings(row) {
         timeSlots: row.time_slots || row.timeSlots || {},
         timezone: row.timezone || DEFAULT_SETTINGS.timezone
     };
+}
+
+export function normalizeSlots(value) {
+    const source = Array.isArray(value)
+        ? value
+        : String(value || '')
+            .split(',')
+            .map((entry) => String(entry || '').trim())
+            .filter(Boolean);
+
+    const normalized = source
+        .map((slot) => {
+            const parts = String(slot).split(':');
+            if (parts.length !== 2) return '';
+            const hours = String(parts[0]).padStart(2, '0');
+            const minutes = String(parts[1]).padStart(2, '0');
+            return `${hours}:${minutes}`;
+        })
+        .filter((slot) => isValidTime(slot));
+
+    return [...new Set(normalized)].sort();
+}
+
+export function normalizeDateOverrides(overrides = []) {
+    if (!Array.isArray(overrides)) return [];
+    const byDate = new Map();
+
+    overrides.forEach((entry) => {
+        const date = String(entry?.date || '').trim();
+        if (!isValidDate(date)) return;
+
+        const timeSlots = normalizeSlots(
+            entry?.timeSlots ?? entry?.time_slots ?? entry?.slots ?? []
+        );
+        if (!timeSlots.length) return;
+
+        byDate.set(date, { date, timeSlots });
+    });
+
+    return [...byDate.values()].sort((a, b) => a.date.localeCompare(b.date));
 }
 
 export function normalizeBookingPayload(payload = {}) {

@@ -13,6 +13,7 @@
     const state = {
         settings: null,
         blackouts: [],
+        dateOverrides: {},
         bookings: [],
         selectedDate: null,
         selectedTime: null,
@@ -119,7 +120,15 @@
         return state.blackouts.includes(dateKey);
     }
 
+    function getDateOverride(dateKey) {
+        return state.dateOverrides?.[dateKey] || null;
+    }
+
     function getSlotsForDate(dateKey) {
+        const override = getDateOverride(dateKey);
+        if (override) {
+            return (override.timeSlots || []).filter(Boolean);
+        }
         const dayKey = getDayKey(dateKey);
         const slots = state.settings?.timeSlots?.[dayKey] || [];
         return slots.filter(Boolean);
@@ -133,8 +142,13 @@
 
     function hasAvailableSlots(dateKey) {
         if (!state.settings?.bookingEnabled) return false;
-        if (!state.settings?.availableDays?.includes(getDayKey(dateKey))) return false;
         if (isBlackout(dateKey)) return false;
+
+        const override = getDateOverride(dateKey);
+        if (!override && !state.settings?.availableDays?.includes(getDayKey(dateKey))) {
+            return false;
+        }
+
         const slots = getSlotsForDate(dateKey);
         if (!slots.length) return false;
         const booked = new Set(getBookedSlots(dateKey));
@@ -269,6 +283,18 @@
             const payload = await response.json();
             state.settings = payload.settings;
             state.blackouts = payload.blackouts || [];
+            state.dateOverrides = Array.isArray(payload.dateOverrides)
+                ? payload.dateOverrides.reduce((map, entry) => {
+                    const date = String(entry?.date || '').trim();
+                    if (!date) return map;
+                    const rawSlots = entry?.timeSlots ?? entry?.time_slots ?? [];
+                    const slots = Array.isArray(rawSlots)
+                        ? rawSlots.filter(Boolean)
+                        : [];
+                    map[date] = { date, timeSlots: slots };
+                    return map;
+                }, {})
+                : {};
             state.bookings = payload.bookings || [];
             updatePriceLabel();
 
@@ -313,7 +339,7 @@
         }
 
         setLoading(true);
-        setMessage('Redirecting to secure payment...', null);
+        setMessage('Preparing your Charla booking...', null);
 
         try {
             const response = await fetch(buildApiUrl('appointments-book'), {
@@ -331,6 +357,11 @@
             const result = await response.json().catch(() => ({}));
             if (!response.ok) {
                 throw new Error(result.error || 'Unable to start booking.');
+            }
+
+            if (result.paymentUrl) {
+                window.location.href = result.paymentUrl;
+                return;
             }
 
             if (result.checkoutUrl) {
