@@ -17,6 +17,10 @@
         currency: document.getElementById('appointmentCurrency'),
         adminKeyGroup: document.getElementById('appointmentsAdminKeyGroup'),
         adminKeyInput: document.getElementById('appointmentsAdminKey'),
+        dateOverrideInput: document.getElementById('dateOverrideInput'),
+        dateOverrideSlotsInput: document.getElementById('dateOverrideSlotsInput'),
+        dateOverrideAdd: document.getElementById('addDateOverride'),
+        dateOverrideList: document.querySelector('[data-date-override-list]'),
         blackoutInput: document.getElementById('blackoutDateInput'),
         blackoutAdd: document.getElementById('addBlackoutDate'),
         blackoutList: document.querySelector('[data-blackout-list]'),
@@ -26,7 +30,8 @@
 
     const DAY_KEYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
     const state = {
-        blackouts: []
+        blackouts: [],
+        dateOverrides: []
     };
 
     function setMessage(text, type) {
@@ -77,6 +82,19 @@
         }
     }
 
+    function normalizeDateOverrides(overrides) {
+        if (!Array.isArray(overrides)) return [];
+        const byDate = new Map();
+        overrides.forEach((entry) => {
+            const date = String(entry?.date || '').trim();
+            if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return;
+            const slots = normalizeSlots(entry?.timeSlots ?? entry?.time_slots ?? entry?.slots ?? []);
+            if (!slots.length) return;
+            byDate.set(date, { date, timeSlots: slots });
+        });
+        return [...byDate.values()].sort((a, b) => a.date.localeCompare(b.date));
+    }
+
     function renderBlackouts() {
         if (!elements.blackoutList) return;
         elements.blackoutList.innerHTML = '';
@@ -100,6 +118,36 @@
         elements.blackoutList.appendChild(fragment);
     }
 
+    function renderDateOverrides() {
+        if (!elements.dateOverrideList) return;
+        elements.dateOverrideList.innerHTML = '';
+        const fragment = document.createDocumentFragment();
+
+        state.dateOverrides.forEach((entry) => {
+            const row = document.createElement('div');
+            row.className = 'date-override-item';
+
+            const text = document.createElement('span');
+            text.className = 'date-override-item-text';
+            text.textContent = `${entry.date} -> ${entry.timeSlots.join(', ')}`;
+            row.appendChild(text);
+
+            const removeButton = document.createElement('button');
+            removeButton.type = 'button';
+            removeButton.className = 'btn-cancel date-override-remove';
+            removeButton.textContent = 'Remove';
+            removeButton.addEventListener('click', () => {
+                state.dateOverrides = state.dateOverrides.filter((item) => item.date !== entry.date);
+                renderDateOverrides();
+            });
+            row.appendChild(removeButton);
+
+            fragment.appendChild(row);
+        });
+
+        elements.dateOverrideList.appendChild(fragment);
+    }
+
     function applySettings(settings, blackouts) {
         if (elements.enabled) {
             elements.enabled.checked = Boolean(settings.bookingEnabled);
@@ -121,7 +169,9 @@
         });
 
         state.blackouts = Array.isArray(blackouts) ? [...new Set(blackouts)] : [];
+        state.dateOverrides = normalizeDateOverrides(settings.dateOverrides || []);
         renderBlackouts();
+        renderDateOverrides();
     }
 
     async function loadSettings() {
@@ -132,7 +182,13 @@
                 throw new Error('Unable to load Charla settings.');
             }
             const payload = await response.json();
-            applySettings(payload.settings || {}, payload.blackouts || []);
+            applySettings(
+                {
+                    ...(payload.settings || {}),
+                    dateOverrides: payload.dateOverrides || []
+                },
+                payload.blackouts || []
+            );
             setMessage('Settings loaded.', 'success');
         } catch (error) {
             console.error('Charla settings load failed', error);
@@ -163,7 +219,8 @@
             availableDays,
             timeSlots,
             timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC',
-            blackouts: state.blackouts
+            blackouts: state.blackouts,
+            dateOverrides: state.dateOverrides
         };
     }
 
@@ -193,7 +250,13 @@
                 throw new Error(result.error || 'Unable to save settings.');
             }
 
-            applySettings(result.settings || payload, result.blackouts || payload.blackouts);
+            applySettings(
+                {
+                    ...(result.settings || payload),
+                    dateOverrides: result.dateOverrides || payload.dateOverrides
+                },
+                result.blackouts || payload.blackouts
+            );
             setMessage('Charla settings updated.', 'success');
         } catch (error) {
             console.error('Charla settings save failed', error);
@@ -213,6 +276,30 @@
         elements.blackoutInput.value = '';
     }
 
+    function addDateOverride() {
+        const dateValue = elements.dateOverrideInput ? elements.dateOverrideInput.value : '';
+        const slotsValue = elements.dateOverrideSlotsInput ? elements.dateOverrideSlotsInput.value : '';
+        if (!dateValue) {
+            setMessage('Select a date before adding a custom schedule.', 'error');
+            return;
+        }
+
+        const slots = normalizeSlots(slotsValue);
+        if (!slots.length) {
+            setMessage('Add at least one valid time slot (HH:MM).', 'error');
+            return;
+        }
+
+        state.dateOverrides = state.dateOverrides.filter((entry) => entry.date !== dateValue);
+        state.dateOverrides.push({ date: dateValue, timeSlots: slots });
+        state.dateOverrides.sort((a, b) => a.date.localeCompare(b.date));
+        renderDateOverrides();
+
+        if (elements.dateOverrideInput) elements.dateOverrideInput.value = '';
+        if (elements.dateOverrideSlotsInput) elements.dateOverrideSlotsInput.value = '';
+        setMessage('Date-specific slots added. Save settings to apply.', null);
+    }
+
     let initialized = false;
 
     function init() {
@@ -221,6 +308,9 @@
         configureAdminKeyVisibility();
         if (elements.blackoutAdd) {
             elements.blackoutAdd.addEventListener('click', addBlackoutDate);
+        }
+        if (elements.dateOverrideAdd) {
+            elements.dateOverrideAdd.addEventListener('click', addDateOverride);
         }
         if (elements.refreshBtn) {
             elements.refreshBtn.addEventListener('click', loadSettings);

@@ -30,6 +30,7 @@ Migration files:
 - `supabase/migrations/202602280001_init_bloomly_supabase.sql`
 - `supabase/migrations/202602280002_harden_existing_tables.sql`
 - `supabase/migrations/202602280003_add_payment_attempts.sql`
+- `supabase/migrations/202602280004_add_appointment_date_overrides.sql`
 
 Apply it with either:
 

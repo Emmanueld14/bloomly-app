@@ -68,6 +68,25 @@ export async function loadBlackouts(config) {
     return Array.isArray(data) ? data.map((row) => row.date).filter(Boolean) : [];
 }
 
+export async function loadDateOverrides(config) {
+    const response = await supabaseRequest(
+        config,
+        '/rest/v1/appointment_date_overrides?select=date,time_slots&order=date.asc',
+        { method: 'GET' }
+    );
+    if (!response.ok) {
+        throw new Error('Unable to load date overrides.');
+    }
+    const data = await response.json();
+    if (!Array.isArray(data)) return [];
+    return data
+        .map((row) => ({
+            date: String(row.date || ''),
+            timeSlots: normalizeSlots(row.time_slots || [])
+        }))
+        .filter((row) => isValidDate(row.date));
+}
+
 export function normalizeSettings(row) {
     if (!row) return { ...DEFAULT_SETTINGS };
     return {
@@ -78,6 +97,46 @@ export function normalizeSettings(row) {
         timeSlots: row.time_slots || row.timeSlots || {},
         timezone: row.timezone || DEFAULT_SETTINGS.timezone
     };
+}
+
+export function normalizeSlots(value) {
+    const source = Array.isArray(value)
+        ? value
+        : String(value || '')
+            .split(',')
+            .map((entry) => String(entry || '').trim())
+            .filter(Boolean);
+
+    const normalized = source
+        .map((slot) => {
+            const parts = String(slot).split(':');
+            if (parts.length !== 2) return '';
+            const hours = String(parts[0]).padStart(2, '0');
+            const minutes = String(parts[1]).padStart(2, '0');
+            return `${hours}:${minutes}`;
+        })
+        .filter((slot) => isValidTime(slot));
+
+    return [...new Set(normalized)].sort();
+}
+
+export function normalizeDateOverrides(overrides = []) {
+    if (!Array.isArray(overrides)) return [];
+    const byDate = new Map();
+
+    overrides.forEach((entry) => {
+        const date = String(entry?.date || '').trim();
+        if (!isValidDate(date)) return;
+
+        const timeSlots = normalizeSlots(
+            entry?.timeSlots ?? entry?.time_slots ?? entry?.slots ?? []
+        );
+        if (!timeSlots.length) return;
+
+        byDate.set(date, { date, timeSlots });
+    });
+
+    return [...byDate.values()].sort((a, b) => a.date.localeCompare(b.date));
 }
 
 export function normalizeBookingPayload(payload = {}) {

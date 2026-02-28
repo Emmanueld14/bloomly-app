@@ -336,6 +336,35 @@
             margin-top: var(--space-sm);
         }
 
+        .date-override-list {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-sm);
+            margin-top: var(--space-sm);
+        }
+
+        .date-override-item {
+            display: flex;
+            justify-content: space-between;
+            gap: var(--space-sm);
+            align-items: center;
+            padding: 0.5rem 0.75rem;
+            border-radius: var(--radius-md);
+            background: rgba(var(--color-black-rgb), 0.04);
+        }
+
+        .date-override-item-text {
+            font-size: var(--text-sm);
+            color: var(--color-text);
+            overflow-wrap: anywhere;
+        }
+
+        .date-override-remove {
+            white-space: nowrap;
+            padding: 0.35rem 0.75rem;
+            font-size: var(--text-xs);
+        }
+
         .blackout-chip {
             display: inline-flex;
             align-items: center;
@@ -711,6 +740,19 @@
                                 <button type="button" class="btn-save" id="addBlackoutDate">Add date</button>
                             </div>
                             <div class="blackout-list" data-blackout-list></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Specific date time slots (override weekly schedule)</label>
+                            <div class="blackout-controls">
+                                <input type="date" id="dateOverrideInput">
+                                <input type="text" id="dateOverrideSlotsInput" placeholder="09:00, 13:30, 16:00">
+                                <button type="button" class="btn-save" id="addDateOverride">Add custom date</button>
+                            </div>
+                            <p style="margin-top: var(--space-xs); font-size: var(--text-sm); color: var(--color-gray-550);">
+                                For dates listed here, these slots are used instead of the weekly day template.
+                            </p>
+                            <div class="date-override-list" data-date-override-list></div>
                         </div>
 
                         <div class="form-actions">

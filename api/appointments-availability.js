@@ -4,7 +4,8 @@ import {
     ensureConfig,
     supabaseRequest,
     loadSettings,
-    loadBlackouts
+    loadBlackouts,
+    loadDateOverrides
 } from './appointments-helpers.js';
 
 function toDateKey(date) {
@@ -38,6 +39,7 @@ export default async function handler(req, res) {
 
         const settings = await loadSettings(config);
         const blackouts = await loadBlackouts(config);
+        const dateOverrides = await loadDateOverrides(config);
 
         const query = new URLSearchParams();
         query.set('select', 'id,date,time,status,hold_expires_at');
@@ -66,7 +68,7 @@ export default async function handler(req, res) {
             }))
             : [];
 
-        return res.status(200).json({ settings, blackouts, bookings });
+        return res.status(200).json({ settings, blackouts, dateOverrides, bookings });
     } catch (error) {
         return res.status(500).json({ error: error.message || 'Unable to load availability.' });
     }

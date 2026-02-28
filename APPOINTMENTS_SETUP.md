@@ -12,6 +12,7 @@ Supabase migrations for Charla are:
 
 - `supabase/migrations/202602280001_init_bloomly_supabase.sql`
 - `supabase/migrations/202602280003_add_payment_attempts.sql`
+- `supabase/migrations/202602280004_add_appointment_date_overrides.sql`
 
 That migration creates:
 
@@ -19,6 +20,7 @@ That migration creates:
 - `appointment_blackouts`
 - `appointment_bookings`
 - `payment_attempts`
+- `appointment_date_overrides`
 
 ## Minimum environment variables
 
