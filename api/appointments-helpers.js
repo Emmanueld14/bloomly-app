@@ -19,7 +19,23 @@ export function getEnvConfig() {
         supabaseServiceKey: process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY || '',
         supabaseAnonKey: process.env.SUPABASE_ANON_KEY || '',
         adminKey: process.env.APPOINTMENTS_ADMIN_KEY || '',
-        stripeSecretKey: process.env.STRIPE_SECRET_KEY || ''
+        stripeSecretKey: process.env.STRIPE_SECRET_KEY || '',
+        siteUrl: process.env.SITE_URL || '',
+        paypalBaseUrl: process.env.PAYPAL_BASE_URL || 'https://api-m.sandbox.paypal.com',
+        paypalClientId: process.env.PAYPAL_CLIENT_ID || '',
+        paypalClientSecret: process.env.PAYPAL_CLIENT_SECRET || '',
+        mpesaBaseUrl: process.env.MPESA_BASE_URL || 'https://sandbox.safaricom.co.ke',
+        mpesaConsumerKey: process.env.MPESA_CONSUMER_KEY || '',
+        mpesaConsumerSecret: process.env.MPESA_CONSUMER_SECRET || '',
+        mpesaShortcode: process.env.MPESA_SHORTCODE || '',
+        mpesaPasskey: process.env.MPESA_PASSKEY || '',
+        mpesaCallbackUrl: process.env.MPESA_CALLBACK_URL || '',
+        airtelBaseUrl: process.env.AIRTEL_BASE_URL || 'https://openapiuat.airtel.africa',
+        airtelClientId: process.env.AIRTEL_CLIENT_ID || '',
+        airtelClientSecret: process.env.AIRTEL_CLIENT_SECRET || '',
+        airtelCountry: process.env.AIRTEL_COUNTRY || 'KE',
+        airtelCurrency: process.env.AIRTEL_CURRENCY || 'KES',
+        airtelCallbackUrl: process.env.AIRTEL_CALLBACK_URL || ''
     };
 }
 

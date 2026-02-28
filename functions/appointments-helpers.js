@@ -36,7 +36,23 @@ export function getEnvConfig(env) {
         supabaseServiceKey,
         supabaseAnonKey,
         adminKey: env.APPOINTMENTS_ADMIN_KEY || '',
-        stripeSecretKey: env.STRIPE_SECRET_KEY || ''
+        stripeSecretKey: env.STRIPE_SECRET_KEY || '',
+        siteUrl: env.SITE_URL || '',
+        paypalBaseUrl: env.PAYPAL_BASE_URL || 'https://api-m.sandbox.paypal.com',
+        paypalClientId: env.PAYPAL_CLIENT_ID || '',
+        paypalClientSecret: env.PAYPAL_CLIENT_SECRET || '',
+        mpesaBaseUrl: env.MPESA_BASE_URL || 'https://sandbox.safaricom.co.ke',
+        mpesaConsumerKey: env.MPESA_CONSUMER_KEY || '',
+        mpesaConsumerSecret: env.MPESA_CONSUMER_SECRET || '',
+        mpesaShortcode: env.MPESA_SHORTCODE || '',
+        mpesaPasskey: env.MPESA_PASSKEY || '',
+        mpesaCallbackUrl: env.MPESA_CALLBACK_URL || '',
+        airtelBaseUrl: env.AIRTEL_BASE_URL || 'https://openapiuat.airtel.africa',
+        airtelClientId: env.AIRTEL_CLIENT_ID || '',
+        airtelClientSecret: env.AIRTEL_CLIENT_SECRET || '',
+        airtelCountry: env.AIRTEL_COUNTRY || 'KE',
+        airtelCurrency: env.AIRTEL_CURRENCY || 'KES',
+        airtelCallbackUrl: env.AIRTEL_CALLBACK_URL || ''
     };
 }
 

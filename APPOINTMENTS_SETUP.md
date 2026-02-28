@@ -51,4 +51,9 @@ Optional but recommended:
 - `AIRTEL_CALLBACK_URL`
 - `PAYPAL_BASE_URL` (sandbox vs live)
 
+## Admin quality-of-life tools
+
+- The Charla admin screen now includes a **mini calendar picker** for date-specific slot overrides.
+- It also includes a **payment diagnostics** button that checks provider config/readiness for Stripe, PayPal, M-Pesa, and Airtel Money.
+
 > The appointments API routes use service-role credentials server-side, so Charla tables do not need public RLS policies.
