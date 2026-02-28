@@ -35,3 +35,6 @@ verify_jwt = false
 
 [functions.appointments-webhook-airtel]
 verify_jwt = false
+
+[functions.appointments-payment-diagnostics]
+verify_jwt = false
