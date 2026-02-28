@@ -3353,6 +3353,10 @@ a:hover {
 }
 
 @media (max-width: 900px) {
+    .about-team-hero {
+        overflow: visible;
+    }
+
     .bloomly-team-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
@@ -3366,19 +3370,41 @@ a:hover {
     }
 
     .bloomly-team-panel {
-        left: 0;
-        top: calc(100% + var(--space-sm));
+        position: static;
         width: 100%;
-        height: auto;
-        transform: translateY(-12px);
+        min-height: 0;
+        margin-top: var(--space-sm);
+        opacity: 0;
+        max-height: 0;
+        overflow: hidden;
+        padding: 0 var(--space-lg);
+        border-width: 0;
+        transform: none;
+        pointer-events: none;
+        transition:
+            max-height 300ms var(--bloomly-team-ease, cubic-bezier(0.22, 1, 0.36, 1)),
+            opacity 200ms var(--bloomly-team-ease, cubic-bezier(0.22, 1, 0.36, 1)),
+            padding 300ms var(--bloomly-team-ease, cubic-bezier(0.22, 1, 0.36, 1)),
+            border-width 300ms var(--bloomly-team-ease, cubic-bezier(0.22, 1, 0.36, 1));
     }
 
-    .bloomly-team-item.is-expanded .bloomly-team-panel {
-        transform: translateY(0);
-    }
-
+    .bloomly-team-item.is-expanded .bloomly-team-panel,
     .bloomly-team-item:focus-within .bloomly-team-panel {
-        transform: translateY(0);
+        opacity: 1;
+        max-height: 32rem;
+        padding: var(--space-lg);
+        border-width: 1px;
+        transform: none;
+        pointer-events: auto;
+    }
+
+    .bloomly-team-item:hover .bloomly-team-panel {
+        opacity: 1;
+        max-height: 32rem;
+        padding: var(--space-lg);
+        border-width: 1px;
+        transform: none;
+        pointer-events: auto;
     }
 
     .team-profile-card {
