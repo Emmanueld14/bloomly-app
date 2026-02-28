@@ -33,6 +33,42 @@ function isValidTime(value: string) {
   return /^\d{2}:\d{2}$/.test(value);
 }
 
+function normalizeTimeSlot(value: unknown) {
+  const raw = String(value || "").trim();
+  if (!raw) return "";
+
+  const compact = raw.replace(/\s+/g, "");
+  const noColonDigits = compact.replace(/[^\d]/g, "");
+  if (!compact.includes(":") && /^\d{3,4}$/.test(noColonDigits)) {
+    const padded = noColonDigits.padStart(4, "0");
+    const hours = Number(padded.slice(0, 2));
+    const minutes = Number(padded.slice(2));
+    if (hours <= 23 && minutes <= 59) {
+      return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+    }
+  }
+
+  const parts = compact.split(":");
+  if (parts.length !== 2) return "";
+  const hours = Number(parts[0]);
+  const minutes = Number(parts[1]);
+  if (!Number.isFinite(hours) || !Number.isFinite(minutes)) return "";
+  if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59) return "";
+  return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+}
+
+function normalizeSlotList(values: unknown) {
+  const source = Array.isArray(values)
+    ? values
+    : String(values || "")
+      .split(",")
+      .map((entry) => String(entry || "").trim());
+  const normalized = source
+    .map((slot) => normalizeTimeSlot(slot))
+    .filter(Boolean);
+  return [...new Set(normalized)].sort();
+}
+
 function getDayKey(dateValue: string) {
   const [year, month, day] = dateValue.split("-").map(Number);
   const date = new Date(year, month - 1, day);
@@ -86,7 +122,7 @@ Deno.serve(async (req) => {
     email: String(payload.email || "").trim().toLowerCase(),
     purpose: String(payload.purpose || "").trim(),
     date: String(payload.date || "").trim(),
-    time: String(payload.time || "").trim(),
+    time: normalizeTimeSlot(payload.time) || String(payload.time || "").trim(),
   };
 
   if (!booking.name || !booking.email || !booking.purpose) {
@@ -118,6 +154,21 @@ Deno.serve(async (req) => {
       .filter(Boolean),
   );
 
+  const { data: overridesRows, error: overridesError } = await supabase
+    .from("appointment_date_overrides")
+    .select("date,time_slots");
+  if (overridesError) {
+    return jsonResponse({ error: "Unable to load date overrides." }, 500);
+  }
+  const overrideByDate = new Map<string, string[]>();
+  (overridesRows || []).forEach((row) => {
+    const date = String((row as { date?: string }).date || "").trim();
+    if (!date) return;
+    const slots = normalizeSlotList((row as { time_slots?: unknown }).time_slots || []);
+    if (!slots.length) return;
+    overrideByDate.set(date, slots);
+  });
+
   if (!settings.bookingEnabled) {
     return jsonResponse({ error: "Charla sessions are currently closed." }, 400);
   }
@@ -126,8 +177,11 @@ Deno.serve(async (req) => {
   }
 
   const dayKey = getDayKey(booking.date);
-  const allowedSlots = settings.timeSlots?.[dayKey] || [];
-  if (!settings.availableDays.includes(dayKey)) {
+  const hasDateOverride = overrideByDate.has(booking.date);
+  const allowedSlots = hasDateOverride
+    ? normalizeSlotList(overrideByDate.get(booking.date) || [])
+    : normalizeSlotList(settings.timeSlots?.[dayKey] || []);
+  if (!hasDateOverride && !settings.availableDays.includes(dayKey)) {
     return jsonResponse({ error: "Selected date is not available." }, 400);
   }
   if (!allowedSlots.includes(booking.time)) {
@@ -151,11 +205,15 @@ Deno.serve(async (req) => {
   }
 
   const nowIso = new Date().toISOString();
+  const legacyCompactTime = booking.time.replace(":", "");
+  const conflictTimeCandidates = legacyCompactTime === booking.time
+    ? [booking.time]
+    : [booking.time, legacyCompactTime];
   const { data: conflicts, error: conflictError } = await supabase
     .from("appointment_bookings")
     .select("id")
     .eq("date", booking.date)
-    .eq("time", booking.time)
+    .in("time", conflictTimeCandidates)
     .or(`status.eq.confirmed,and(status.eq.pending,hold_expires_at.gt.${nowIso})`);
 
   if (conflictError) {

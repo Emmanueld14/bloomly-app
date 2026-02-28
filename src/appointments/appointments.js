@@ -62,6 +62,42 @@
         }
     }
 
+    function normalizeTimeSlot(value) {
+        const raw = String(value || '').trim();
+        if (!raw) return '';
+
+        const compact = raw.replace(/\s+/g, '');
+        const noColonDigits = compact.replace(/[^\d]/g, '');
+        if (!compact.includes(':') && /^\d{3,4}$/.test(noColonDigits)) {
+            const padded = noColonDigits.padStart(4, '0');
+            const hours = Number(padded.slice(0, 2));
+            const minutes = Number(padded.slice(2));
+            if (hours <= 23 && minutes <= 59) {
+                return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+            }
+        }
+
+        const parts = compact.split(':');
+        if (parts.length !== 2) return '';
+        const hours = Number(parts[0]);
+        const minutes = Number(parts[1]);
+        if (!Number.isFinite(hours) || !Number.isFinite(minutes)) return '';
+        if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59) return '';
+        return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+    }
+
+    function normalizeSlotsList(value) {
+        const source = Array.isArray(value)
+            ? value
+            : String(value || '')
+                .split(',')
+                .map((entry) => String(entry || '').trim());
+        const normalized = source
+            .map((slot) => normalizeTimeSlot(slot))
+            .filter(Boolean);
+        return [...new Set(normalized)].sort();
+    }
+
     function setMessage(text, type) {
         if (!elements.message) return;
         elements.message.textContent = text || '';
@@ -127,17 +163,18 @@
     function getSlotsForDate(dateKey) {
         const override = getDateOverride(dateKey);
         if (override) {
-            return (override.timeSlots || []).filter(Boolean);
+            return normalizeSlotsList(override.timeSlots || []);
         }
         const dayKey = getDayKey(dateKey);
         const slots = state.settings?.timeSlots?.[dayKey] || [];
-        return slots.filter(Boolean);
+        return normalizeSlotsList(slots);
     }
 
     function getBookedSlots(dateKey) {
         return state.bookings
             .filter((booking) => booking.date === dateKey)
-            .map((booking) => booking.time);
+            .map((booking) => normalizeTimeSlot(booking.time))
+            .filter(Boolean);
     }
 
     function hasAvailableSlots(dateKey) {
@@ -232,7 +269,7 @@
             }
 
             button.addEventListener('click', () => {
-                state.selectedTime = slot;
+                state.selectedTime = normalizeTimeSlot(slot) || slot;
                 renderSlots();
                 updateSummary();
             });
@@ -281,21 +318,34 @@
                 throw new Error('Unable to load Charla availability.');
             }
             const payload = await response.json();
-            state.settings = payload.settings;
+            const rawSettings = payload.settings || {};
+            const rawTimeSlots = rawSettings.timeSlots || rawSettings.time_slots || {};
+            const normalizedTimeSlots = Object.entries(rawTimeSlots).reduce((acc, [day, slots]) => {
+                acc[day] = normalizeSlotsList(slots);
+                return acc;
+            }, {});
+
+            state.settings = {
+                ...rawSettings,
+                timeSlots: normalizedTimeSlots
+            };
             state.blackouts = payload.blackouts || [];
             state.dateOverrides = Array.isArray(payload.dateOverrides)
                 ? payload.dateOverrides.reduce((map, entry) => {
                     const date = String(entry?.date || '').trim();
                     if (!date) return map;
                     const rawSlots = entry?.timeSlots ?? entry?.time_slots ?? [];
-                    const slots = Array.isArray(rawSlots)
-                        ? rawSlots.filter(Boolean)
-                        : [];
+                    const slots = normalizeSlotsList(rawSlots);
                     map[date] = { date, timeSlots: slots };
                     return map;
                 }, {})
                 : {};
-            state.bookings = payload.bookings || [];
+            state.bookings = Array.isArray(payload.bookings)
+                ? payload.bookings.map((booking) => ({
+                    ...booking,
+                    time: normalizeTimeSlot(booking?.time || '')
+                }))
+                : [];
             updatePriceLabel();
 
             if (!state.settings?.bookingEnabled) {
@@ -350,7 +400,7 @@
                     email,
                     purpose,
                     date: state.selectedDate,
-                    time: state.selectedTime
+                    time: normalizeTimeSlot(state.selectedTime) || state.selectedTime
                 })
             });
 
@@ -375,7 +425,7 @@
                     'success'
                 );
                 state.selectedDate = result.booking.date;
-                state.selectedTime = result.booking.time;
+                state.selectedTime = normalizeTimeSlot(result.booking.time) || result.booking.time;
                 updateSummary();
                 await fetchAvailability({ preserveSelection: true });
                 setLoading(false);
@@ -413,7 +463,7 @@
                 const dateLabel = parseDateKey(result.booking.date).toLocaleDateString(undefined, DATE_OPTIONS);
                 setMessage(`Charla session confirmed for ${dateLabel} at ${result.booking.time}.`, 'success');
                 state.selectedDate = result.booking.date;
-                state.selectedTime = result.booking.time;
+                state.selectedTime = normalizeTimeSlot(result.booking.time) || result.booking.time;
                 updateSummary();
                 await fetchAvailability({ preserveSelection: true });
             } else {

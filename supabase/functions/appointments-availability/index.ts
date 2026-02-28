@@ -23,6 +23,42 @@ function jsonResponse(body: unknown, status = 200) {
   });
 }
 
+function normalizeTimeSlot(value: unknown) {
+  const raw = String(value || "").trim();
+  if (!raw) return "";
+
+  const compact = raw.replace(/\s+/g, "");
+  const noColonDigits = compact.replace(/[^\d]/g, "");
+  if (!compact.includes(":") && /^\d{3,4}$/.test(noColonDigits)) {
+    const padded = noColonDigits.padStart(4, "0");
+    const hours = Number(padded.slice(0, 2));
+    const minutes = Number(padded.slice(2));
+    if (hours <= 23 && minutes <= 59) {
+      return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+    }
+  }
+
+  const parts = compact.split(":");
+  if (parts.length !== 2) return "";
+  const hours = Number(parts[0]);
+  const minutes = Number(parts[1]);
+  if (!Number.isFinite(hours) || !Number.isFinite(minutes)) return "";
+  if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59) return "";
+  return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+}
+
+function normalizeSlotList(values: unknown) {
+  const source = Array.isArray(values)
+    ? values
+    : String(values || "")
+      .split(",")
+      .map((entry) => String(entry || "").trim());
+  const normalized = source
+    .map((slot) => normalizeTimeSlot(slot))
+    .filter(Boolean);
+  return [...new Set(normalized)].sort();
+}
+
 function toDateKey(date: Date) {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -42,6 +78,15 @@ function normalizeSettings(row: Record<string, unknown> | null) {
     };
   }
 
+  const rawTimeSlots =
+    (row.time_slots as Record<string, unknown>) ||
+    (row.timeSlots as Record<string, unknown>) ||
+    {};
+  const normalizedTimeSlots: Record<string, string[]> = {};
+  for (const [day, values] of Object.entries(rawTimeSlots)) {
+    normalizedTimeSlots[day] = normalizeSlotList(values);
+  }
+
   return {
     bookingEnabled: Boolean(row.booking_enabled ?? row.bookingEnabled),
     priceCents: Number(row.price_cents ?? row.priceCents ?? 0),
@@ -51,10 +96,7 @@ function normalizeSettings(row: Record<string, unknown> | null) {
       : Array.isArray(row.availableDays)
       ? (row.availableDays as string[])
       : [],
-    timeSlots:
-      (row.time_slots as Record<string, string[]>) ||
-      (row.timeSlots as Record<string, string[]>) ||
-      {},
+    timeSlots: normalizedTimeSlots,
     timezone: String(row.timezone ?? "UTC"),
   };
 }
@@ -97,6 +139,14 @@ Deno.serve(async (req) => {
     return jsonResponse({ error: "Unable to load blackout dates." }, 500);
   }
 
+  const { data: overridesRows, error: overridesError } = await supabase
+    .from("appointment_date_overrides")
+    .select("date,time_slots")
+    .order("date", { ascending: true });
+  if (overridesError) {
+    return jsonResponse({ error: "Unable to load date overrides." }, 500);
+  }
+
   const nowIso = new Date().toISOString();
   const { data: bookingsRows, error: bookingsError } = await supabase
     .from("appointment_bookings")
@@ -111,7 +161,7 @@ Deno.serve(async (req) => {
 
   const bookings = (bookingsRows || []).map((booking) => ({
     date: booking.date,
-    time: booking.time,
+    time: normalizeTimeSlot(booking.time) || booking.time,
     status: booking.status,
   }));
 
@@ -122,6 +172,12 @@ Deno.serve(async (req) => {
   return jsonResponse({
     settings: normalizeSettings(settingsRow as Record<string, unknown> | null),
     blackouts,
+    dateOverrides: (overridesRows || [])
+      .map((row) => ({
+        date: String((row as { date?: string }).date || ""),
+        timeSlots: normalizeSlotList((row as { time_slots?: unknown }).time_slots || []),
+      }))
+      .filter((entry) => /^\d{4}-\d{2}-\d{2}$/.test(entry.date)),
     bookings,
   });
 });

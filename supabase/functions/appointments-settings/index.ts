@@ -24,6 +24,11 @@ type SettingsPayload = {
   timezone: string;
 };
 
+type DateOverride = {
+  date: string;
+  timeSlots: string[];
+};
+
 function jsonResponse(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
@@ -32,6 +37,61 @@ function jsonResponse(body: unknown, status = 200) {
       "Content-Type": "application/json",
     },
   });
+}
+
+function normalizeTimeSlot(value: unknown) {
+  const raw = String(value || "").trim();
+  if (!raw) return "";
+
+  const compact = raw.replace(/\s+/g, "");
+  const noColonDigits = compact.replace(/[^\d]/g, "");
+  if (!compact.includes(":") && /^\d{3,4}$/.test(noColonDigits)) {
+    const padded = noColonDigits.padStart(4, "0");
+    const hours = Number(padded.slice(0, 2));
+    const minutes = Number(padded.slice(2));
+    if (hours <= 23 && minutes <= 59) {
+      return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+    }
+  }
+
+  const parts = compact.split(":");
+  if (parts.length !== 2) return "";
+  const hours = Number(parts[0]);
+  const minutes = Number(parts[1]);
+  if (!Number.isFinite(hours) || !Number.isFinite(minutes)) return "";
+  if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59) return "";
+  return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+}
+
+function normalizeSlotList(values: unknown) {
+  const source = Array.isArray(values)
+    ? values
+    : String(values || "")
+      .split(",")
+      .map((entry) => String(entry || "").trim());
+  const normalized = source
+    .map((slot) => normalizeTimeSlot(slot))
+    .filter(Boolean);
+  return [...new Set(normalized)].sort();
+}
+
+function normalizeDateOverrides(input: unknown): DateOverride[] {
+  if (!Array.isArray(input)) return [];
+  const byDate = new Map<string, DateOverride>();
+
+  input.forEach((entry) => {
+    const date = String((entry as { date?: string })?.date || "").trim();
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return;
+
+    const rawSlots = (entry as { timeSlots?: unknown; time_slots?: unknown })
+      ?.timeSlots ?? (entry as { time_slots?: unknown })?.time_slots ?? [];
+    const timeSlots = normalizeSlotList(rawSlots);
+    if (!timeSlots.length) return;
+
+    byDate.set(date, { date, timeSlots });
+  });
+
+  return [...byDate.values()].sort((a, b) => a.date.localeCompare(b.date));
 }
 
 function normalizeSettings(row: Record<string, unknown> | null): SettingsPayload {
@@ -46,6 +106,15 @@ function normalizeSettings(row: Record<string, unknown> | null): SettingsPayload
     };
   }
 
+  const rawTimeSlots =
+    (row.time_slots as Record<string, unknown>) ||
+    (row.timeSlots as Record<string, unknown>) ||
+    {};
+  const normalizedTimeSlots: Record<string, string[]> = {};
+  for (const [day, values] of Object.entries(rawTimeSlots)) {
+    normalizedTimeSlots[day] = normalizeSlotList(values);
+  }
+
   return {
     bookingEnabled: Boolean(row.booking_enabled ?? row.bookingEnabled),
     priceCents: Number(row.price_cents ?? row.priceCents ?? 0),
@@ -55,10 +124,7 @@ function normalizeSettings(row: Record<string, unknown> | null): SettingsPayload
       : Array.isArray(row.availableDays)
       ? (row.availableDays as string[])
       : [],
-    timeSlots:
-      (row.time_slots as Record<string, string[]>) ||
-      (row.timeSlots as Record<string, string[]>) ||
-      {},
+    timeSlots: normalizedTimeSlots,
     timezone: String(row.timezone ?? "UTC"),
   };
 }
@@ -67,9 +133,7 @@ function normalizeInput(input: Record<string, unknown>): SettingsPayload {
   const normalized = normalizeSettings(input);
   const safeSlots: Record<string, string[]> = {};
   for (const [day, values] of Object.entries(normalized.timeSlots || {})) {
-    safeSlots[day] = Array.isArray(values)
-      ? values.map((value) => String(value).trim()).filter(Boolean)
-      : [];
+    safeSlots[day] = normalizeSlotList(values);
   }
 
   return {
@@ -104,11 +168,25 @@ async function loadSettingsAndBlackouts() {
     throw new Error("Unable to load blackout dates.");
   }
 
+  const { data: overridesRows, error: overridesError } = await supabase
+    .from("appointment_date_overrides")
+    .select("date,time_slots")
+    .order("date", { ascending: true });
+  if (overridesError) {
+    throw new Error("Unable to load date overrides.");
+  }
+
   return {
     settings: normalizeSettings(settingsRow as Record<string, unknown> | null),
     blackouts: (blackoutsRows || [])
       .map((row) => String((row as { date?: string }).date || ""))
       .filter(Boolean),
+    dateOverrides: (overridesRows || [])
+      .map((row) => ({
+        date: String((row as { date?: string }).date || ""),
+        timeSlots: normalizeSlotList((row as { time_slots?: unknown }).time_slots || []),
+      }))
+      .filter((row) => /^\d{4}-\d{2}-\d{2}$/.test(row.date)),
   };
 }
 
@@ -153,6 +231,7 @@ Deno.serve(async (req) => {
   const blackoutDates = Array.isArray(body.blackouts)
     ? body.blackouts.map((value) => String(value).trim()).filter(Boolean)
     : [];
+  const dateOverrides = normalizeDateOverrides(body.dateOverrides);
 
   const { error: settingsWriteError } = await supabase
     .from("appointment_settings")
@@ -190,6 +269,27 @@ Deno.serve(async (req) => {
       .insert(rows);
     if (insertBlackoutsError) {
       return jsonResponse({ error: "Unable to update blackout dates." }, 500);
+    }
+  }
+
+  const { error: deleteOverridesError } = await supabase
+    .from("appointment_date_overrides")
+    .delete()
+    .gte("date", "1900-01-01");
+  if (deleteOverridesError) {
+    return jsonResponse({ error: "Unable to update date overrides." }, 500);
+  }
+
+  if (dateOverrides.length) {
+    const rows = dateOverrides.map((entry) => ({
+      date: entry.date,
+      time_slots: entry.timeSlots,
+    }));
+    const { error: insertOverridesError } = await supabase
+      .from("appointment_date_overrides")
+      .insert(rows);
+    if (insertOverridesError) {
+      return jsonResponse({ error: "Unable to update date overrides." }, 500);
     }
   }
 

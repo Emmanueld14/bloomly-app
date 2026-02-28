@@ -95,24 +95,48 @@
         elements.adminKeyGroup.style.display = hasKey ? 'none' : 'block';
     }
 
+    function normalizeTimeSlot(value) {
+        const raw = String(value || '').trim();
+        if (!raw) return '';
+
+        const compact = raw.replace(/\s+/g, '');
+        const noColonDigits = compact.replace(/[^\d]/g, '');
+        if (!compact.includes(':') && /^\d{3,4}$/.test(noColonDigits)) {
+            const padded = noColonDigits.padStart(4, '0');
+            const hours = Number(padded.slice(0, 2));
+            const minutes = Number(padded.slice(2));
+            if (hours <= 23 && minutes <= 59) {
+                return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+            }
+        }
+
+        const parts = compact.split(':');
+        if (parts.length !== 2) return '';
+        const hours = Number(parts[0]);
+        const minutes = Number(parts[1]);
+        if (!Number.isFinite(hours) || !Number.isFinite(minutes)) return '';
+        if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59) return '';
+        return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+    }
+
     function normalizeSlots(value) {
-        return String(value || '')
-            .split(',')
-            .map((slot) => slot.trim())
-            .filter(Boolean)
-            .map((slot) => {
-                const parts = slot.split(':');
-                if (parts.length !== 2) return slot;
-                const hours = String(parts[0]).padStart(2, '0');
-                const minutes = String(parts[1]).padStart(2, '0');
-                return `${hours}:${minutes}`;
-            });
+        const source = Array.isArray(value)
+            ? value
+            : String(value || '')
+                .split(',')
+                .map((slot) => String(slot).trim());
+
+        const normalized = source
+            .map((slot) => normalizeTimeSlot(slot))
+            .filter(Boolean);
+
+        return [...new Set(normalized)].sort();
     }
 
     function setDaySlots(dayKey, slots) {
         const input = document.querySelector(`[data-day-slots="${dayKey}"]`);
         if (input) {
-            input.value = Array.isArray(slots) ? slots.join(', ') : '';
+            input.value = normalizeSlots(slots).join(', ');
         }
     }
 

@@ -134,12 +134,17 @@ export async function loadDateOverrides(config) {
 
 export function normalizeSettings(row) {
     if (!row) return { ...DEFAULT_SETTINGS };
+    const rawTimeSlots = row.time_slots || row.timeSlots || {};
+    const normalizedTimeSlots = Object.entries(rawTimeSlots || {}).reduce((acc, [day, slots]) => {
+        acc[day] = normalizeSlots(slots);
+        return acc;
+    }, {});
     return {
         bookingEnabled: Boolean(row.booking_enabled ?? row.bookingEnabled),
         priceCents: Number(row.price_cents ?? row.priceCents ?? 0),
         currency: row.currency || DEFAULT_SETTINGS.currency,
         availableDays: row.available_days || row.availableDays || [],
-        timeSlots: row.time_slots || row.timeSlots || {},
+        timeSlots: normalizedTimeSlots,
         timezone: row.timezone || DEFAULT_SETTINGS.timezone
     };
 }
@@ -154,11 +159,27 @@ export function normalizeSlots(value) {
 
     const normalized = source
         .map((slot) => {
-            const parts = String(slot).split(':');
+            const raw = String(slot || '').trim();
+            if (!raw) return '';
+
+            const compact = raw.replace(/\s+/g, '');
+            const noColonDigits = compact.replace(/[^\d]/g, '');
+            if (!compact.includes(':') && /^\d{3,4}$/.test(noColonDigits)) {
+                const padded = noColonDigits.padStart(4, '0');
+                const hours = Number(padded.slice(0, 2));
+                const minutes = Number(padded.slice(2));
+                if (hours <= 23 && minutes <= 59) {
+                    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+                }
+            }
+
+            const parts = compact.split(':');
             if (parts.length !== 2) return '';
-            const hours = String(parts[0]).padStart(2, '0');
-            const minutes = String(parts[1]).padStart(2, '0');
-            return `${hours}:${minutes}`;
+            const hours = Number(parts[0]);
+            const minutes = Number(parts[1]);
+            if (!Number.isFinite(hours) || !Number.isFinite(minutes)) return '';
+            if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59) return '';
+            return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
         })
         .filter((slot) => isValidTime(slot));
 
@@ -185,12 +206,13 @@ export function normalizeDateOverrides(overrides = []) {
 }
 
 export function normalizeBookingPayload(payload = {}) {
+    const normalizedTime = normalizeSlots([payload.time || ''])[0] || String(payload.time || '').trim();
     return {
         name: String(payload.name || '').trim(),
         email: String(payload.email || '').trim().toLowerCase(),
         purpose: String(payload.purpose || '').trim(),
         date: String(payload.date || '').trim(),
-        time: String(payload.time || '').trim()
+        time: normalizedTime
     };
 }
 
