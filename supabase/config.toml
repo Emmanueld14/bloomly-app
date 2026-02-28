@@ -8,3 +8,15 @@ verify_jwt = false
 
 [functions.notify-subscribers]
 verify_jwt = false
+
+[functions.appointments-settings]
+verify_jwt = false
+
+[functions.appointments-availability]
+verify_jwt = false
+
+[functions.appointments-book]
+verify_jwt = false
+
+[functions.appointments-confirm]
+verify_jwt = false

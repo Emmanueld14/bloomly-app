@@ -7,6 +7,9 @@
     const container = document.querySelector('[data-appointments-dates]');
     if (!container) return;
 
+    const appointmentsConfig = window.APPOINTMENTS_PUBLIC_CONFIG || window.APPOINTMENTS_CONFIG || {};
+    const apiBase = String(appointmentsConfig.apiBase || '/api').replace(/\/$/, '');
+
     const state = {
         settings: null,
         blackouts: [],
@@ -30,6 +33,11 @@
     const MAX_LOOKAHEAD_DAYS = 30;
     const DATE_OPTIONS = { weekday: 'short', month: 'short', day: 'numeric' };
     const DAY_KEYS = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+
+    function buildApiUrl(path) {
+        const normalizedPath = String(path || '').replace(/^\/+/, '');
+        return `${apiBase}/${normalizedPath}`;
+    }
 
     function toDateKey(date) {
         const year = date.getFullYear();
@@ -252,7 +260,9 @@
             endDate.setDate(endDate.getDate() + MAX_LOOKAHEAD_DAYS);
             const end = toDateKey(endDate);
 
-            const response = await fetch(`/api/appointments-availability?start=${encodeURIComponent(start)}&end=${encodeURIComponent(end)}`);
+            const response = await fetch(
+                `${buildApiUrl('appointments-availability')}?start=${encodeURIComponent(start)}&end=${encodeURIComponent(end)}`
+            );
             if (!response.ok) {
                 throw new Error('Unable to load Charla availability.');
             }
@@ -306,7 +316,7 @@
         setMessage('Redirecting to secure payment...', null);
 
         try {
-            const response = await fetch('/api/appointments-book', {
+            const response = await fetch(buildApiUrl('appointments-book'), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -341,7 +351,7 @@
         setLoading(true);
         setMessage('Confirming your payment...', null);
         try {
-            const response = await fetch('/api/appointments-confirm', {
+            const response = await fetch(buildApiUrl('appointments-confirm'), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ sessionId })

@@ -37,7 +37,7 @@ const SUPABASE_CONFIG = {
 
 // Appointments admin configuration
 const APPOINTMENTS_CONFIG = {
-    apiBase: '/api',
+    apiBase: 'https://xmhyjttyarskimsxcfhl.supabase.co/functions/v1',
     adminKey: 'BloomlyCharla2026!'
 };
 
