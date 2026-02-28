@@ -38,7 +38,7 @@ const SUPABASE_CONFIG = {
 // Appointments admin configuration
 const APPOINTMENTS_CONFIG = {
     apiBase: '/api',
-    adminKey: 'REPLACE_WITH_APPOINTMENTS_ADMIN_KEY'
+    adminKey: 'BloomlyCharla2026!'
 };
 
 // Export for use in other files

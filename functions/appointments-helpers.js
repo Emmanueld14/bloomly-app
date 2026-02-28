@@ -7,6 +7,12 @@ const DEFAULT_SETTINGS = {
     timezone: 'UTC'
 };
 
+// Fallback values keep Charla operational even when host env vars are missing.
+// Replace with environment variables in production for stronger security control.
+const FALLBACK_SUPABASE_URL = 'https://xmhyjttyarskimsxcfhl.supabase.co';
+const FALLBACK_SUPABASE_ANON_KEY = 'sb_publishable_IOs-j6rgWuDnwrymIIUHxQ_wCTmcaMp';
+const FALLBACK_APPOINTMENTS_ADMIN_KEY = 'BloomlyCharla2026!';
+
 function buildCorsHeaders() {
     return {
         'Content-Type': 'application/json',
@@ -28,14 +34,14 @@ export function optionsResponse() {
 }
 
 export function getEnvConfig(env) {
-    const supabaseUrl = env.SUPABASE_URL || env.SUPABASE_PROJECT_URL || '';
-    const supabaseServiceKey = env.SUPABASE_SERVICE_KEY || env.SUPABASE_SERVICE_ROLE_KEY || '';
-    const supabaseAnonKey = env.SUPABASE_ANON_KEY || '';
+    const supabaseUrl = env.SUPABASE_URL || env.SUPABASE_PROJECT_URL || FALLBACK_SUPABASE_URL;
+    const supabaseAnonKey = env.SUPABASE_ANON_KEY || FALLBACK_SUPABASE_ANON_KEY;
+    const supabaseServiceKey = env.SUPABASE_SERVICE_KEY || env.SUPABASE_SERVICE_ROLE_KEY || supabaseAnonKey;
     return {
         supabaseUrl,
         supabaseServiceKey,
         supabaseAnonKey,
-        adminKey: env.APPOINTMENTS_ADMIN_KEY || '',
+        adminKey: env.APPOINTMENTS_ADMIN_KEY || FALLBACK_APPOINTMENTS_ADMIN_KEY,
         stripeSecretKey: env.STRIPE_SECRET_KEY || ''
     };
 }
