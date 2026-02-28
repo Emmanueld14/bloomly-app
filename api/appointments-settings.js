@@ -81,7 +81,12 @@ export default async function handler(req, res) {
             throw new Error(errorText || 'Unable to update settings.');
         }
 
-        await supabaseRequest(config, '/rest/v1/appointment_blackouts', { method: 'DELETE' });
+        // Supabase/PostgREST safe-update may reject DELETE without a filter.
+        await supabaseRequest(
+            config,
+            '/rest/v1/appointment_blackouts?id=not.is.null',
+            { method: 'DELETE' }
+        );
 
         if (blackoutDates.length) {
             const inserts = blackoutDates.map((date) => ({ date }));
@@ -105,7 +110,7 @@ export default async function handler(req, res) {
 
         const dateOverrideDeleteResponse = await supabaseRequest(
             config,
-            '/rest/v1/appointment_date_overrides',
+            '/rest/v1/appointment_date_overrides?date=not.is.null',
             { method: 'DELETE' }
         );
         if (!dateOverrideDeleteResponse.ok) {

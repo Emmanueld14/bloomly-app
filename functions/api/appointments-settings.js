@@ -81,7 +81,7 @@ export async function onRequestPost({ request, env }) {
 
         await supabaseRequest(
             config,
-            '/rest/v1/appointment_blackouts',
+            '/rest/v1/appointment_blackouts?id=not.is.null',
             { method: 'DELETE' }
         );
 
@@ -107,7 +107,7 @@ export async function onRequestPost({ request, env }) {
 
         const dateOverrideDeleteResponse = await supabaseRequest(
             config,
-            '/rest/v1/appointment_date_overrides',
+            '/rest/v1/appointment_date_overrides?date=not.is.null',
             { method: 'DELETE' }
         );
         if (!dateOverrideDeleteResponse.ok) {
