@@ -337,8 +337,24 @@
                 window.location.href = result.checkoutUrl;
                 return;
             }
+            if (result.booking) {
+                const dateLabel = parseDateKey(result.booking.date).toLocaleDateString(undefined, DATE_OPTIONS);
+                setMessage(
+                    result.message || `Charla session confirmed for ${dateLabel} at ${result.booking.time}.`,
+                    'success'
+                );
+                state.selectedDate = result.booking.date;
+                state.selectedTime = result.booking.time;
+                updateSummary();
+                await fetchAvailability({ preserveSelection: true });
+                setLoading(false);
+                if (elements.form && typeof elements.form.reset === 'function') {
+                    elements.form.reset();
+                }
+                return;
+            }
 
-            throw new Error('Payment session could not be created.');
+            throw new Error('Booking response was incomplete.');
         } catch (error) {
             console.error('Booking error', error);
             setMessage(error.message || 'Unable to start booking. Please try again.', 'error');

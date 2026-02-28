@@ -192,11 +192,25 @@ Deno.serve(async (req) => {
   const bookingRow = insertedRows[0];
 
   if (!STRIPE_SECRET_KEY) {
-    await supabase
+    const { data: confirmedRows, error: confirmWriteError } = await supabase
       .from("appointment_bookings")
-      .update({ status: "failed" })
-      .eq("id", bookingRow.id);
-    return jsonResponse({ error: "Stripe secret key is missing." }, 500);
+      .update({
+        status: "confirmed",
+        paid_at: new Date().toISOString(),
+        hold_expires_at: null,
+      })
+      .eq("id", bookingRow.id)
+      .select("*");
+
+    if (confirmWriteError) {
+      return jsonResponse({ error: "Unable to confirm booking." }, 500);
+    }
+
+    return jsonResponse({
+      booking: confirmedRows?.[0] || bookingRow,
+      paymentRequired: false,
+      message: "Charla confirmed without online payment.",
+    });
   }
 
   const successUrl = `${SITE_URL}/appointments?success=1&session_id={CHECKOUT_SESSION_ID}`;
