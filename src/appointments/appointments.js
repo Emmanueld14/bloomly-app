@@ -17,13 +17,17 @@
         bookings: [],
         selectedDate: null,
         selectedTime: null,
-        loading: false
+        loading: false,
+        weekOffset: 0
     };
 
     const elements = {
         dates: container,
         slots: document.querySelector('[data-appointments-slots]'),
         status: document.querySelector('[data-appointments-status]'),
+        weekLabel: document.querySelector('[data-appointments-week-label]'),
+        weekPrev: document.querySelector('[data-appointments-week-prev]'),
+        weekNext: document.querySelector('[data-appointments-week-next]'),
         price: document.querySelector('[data-appointments-price]'),
         summary: document.querySelector('[data-appointments-summary]'),
         form: document.querySelector('[data-appointments-form]'),
@@ -31,7 +35,8 @@
         submit: document.querySelector('[data-appointments-submit]')
     };
 
-    const MAX_LOOKAHEAD_DAYS = 30;
+    const MAX_WEEKS_AHEAD = 8;
+    const MAX_LOOKAHEAD_DAYS = (MAX_WEEKS_AHEAD + 1) * 7;
     const DATE_OPTIONS = { weekday: 'short', month: 'short', day: 'numeric' };
     const DAY_KEYS = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
 
@@ -50,6 +55,55 @@
     function parseDateKey(key) {
         const [year, month, day] = key.split('-').map(Number);
         return new Date(year, month - 1, day);
+    }
+
+    function startOfDay(date) {
+        const copy = new Date(date);
+        copy.setHours(0, 0, 0, 0);
+        return copy;
+    }
+
+    function addDays(date, days) {
+        const copy = new Date(date);
+        copy.setDate(copy.getDate() + days);
+        return copy;
+    }
+
+    function startOfWeek(date) {
+        const day = date.getDay();
+        const offset = (day + 6) % 7; // Monday-first week
+        return startOfDay(addDays(date, -offset));
+    }
+
+    function isPastDate(dateKey) {
+        const today = startOfDay(new Date());
+        return startOfDay(parseDateKey(dateKey)) < today;
+    }
+
+    function getVisibleWeekStart() {
+        const today = startOfDay(new Date());
+        const firstWeek = startOfWeek(today);
+        return addDays(firstWeek, state.weekOffset * 7);
+    }
+
+    function getVisibleWeekDates() {
+        const weekStart = getVisibleWeekStart();
+        return Array.from({ length: 7 }, (_, index) => addDays(weekStart, index));
+    }
+
+    function formatWeekRangeLabel(weekStart) {
+        const weekEnd = addDays(weekStart, 6);
+        const sameMonth = weekStart.getMonth() === weekEnd.getMonth();
+        const sameYear = weekStart.getFullYear() === weekEnd.getFullYear();
+
+        if (sameMonth && sameYear) {
+            const monthLabel = weekStart.toLocaleDateString(undefined, { month: 'short', year: 'numeric' });
+            return `${monthLabel} ${weekStart.getDate()} - ${weekEnd.getDate()}`;
+        }
+
+        const startLabel = weekStart.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+        const endLabel = weekEnd.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+        return `${startLabel} - ${endLabel}`;
     }
 
     function formatCurrency(amountCents, currency) {
@@ -177,8 +231,16 @@
             .filter(Boolean);
     }
 
+    function getOpenSlots(dateKey) {
+        const slots = getSlotsForDate(dateKey);
+        if (!slots.length) return [];
+        const booked = new Set(getBookedSlots(dateKey));
+        return slots.filter((slot) => !booked.has(slot));
+    }
+
     function hasAvailableSlots(dateKey) {
         if (!state.settings?.bookingEnabled) return false;
+        if (isPastDate(dateKey)) return false;
         if (isBlackout(dateKey)) return false;
 
         const override = getDateOverride(dateKey);
@@ -186,35 +248,42 @@
             return false;
         }
 
-        const slots = getSlotsForDate(dateKey);
-        if (!slots.length) return false;
-        const booked = new Set(getBookedSlots(dateKey));
-        return slots.some((slot) => !booked.has(slot));
+        return getOpenSlots(dateKey).length > 0;
     }
 
     function renderDates() {
         if (!elements.dates) return;
         elements.dates.innerHTML = '';
-
-        const today = new Date();
         const fragment = document.createDocumentFragment();
+        const weekStart = getVisibleWeekStart();
+        const weekDates = getVisibleWeekDates();
 
-        for (let i = 0; i < MAX_LOOKAHEAD_DAYS; i += 1) {
-            const date = new Date(today);
-            date.setDate(today.getDate() + i);
+        if (elements.weekLabel) {
+            elements.weekLabel.textContent = formatWeekRangeLabel(weekStart);
+        }
+        if (elements.weekPrev) {
+            elements.weekPrev.disabled = state.weekOffset <= 0;
+        }
+        if (elements.weekNext) {
+            elements.weekNext.disabled = state.weekOffset >= MAX_WEEKS_AHEAD;
+        }
+
+        const availableDateKeys = [];
+        weekDates.forEach((date) => {
             const dateKey = toDateKey(date);
+            if (!hasAvailableSlots(dateKey)) return;
+            const openSlots = getOpenSlots(dateKey);
+            availableDateKeys.push(dateKey);
 
             const button = document.createElement('button');
             button.type = 'button';
             button.className = 'appointments-date-button';
             button.dataset.date = dateKey;
-            button.textContent = date.toLocaleDateString(undefined, DATE_OPTIONS);
-
-            const available = hasAvailableSlots(dateKey);
-            if (!available) {
-                button.classList.add('is-disabled');
-                button.disabled = true;
-            }
+            button.innerHTML = `
+                <span class="appointments-date-day">${date.toLocaleDateString(undefined, { weekday: 'short' })}</span>
+                <span class="appointments-date-number">${date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span>
+                <span class="appointments-date-meta">${openSlots.length} slot${openSlots.length === 1 ? '' : 's'} available</span>
+            `;
 
             if (state.selectedDate === dateKey) {
                 button.classList.add('is-active');
@@ -229,6 +298,18 @@
             });
 
             fragment.appendChild(button);
+        });
+
+        if (state.selectedDate && !availableDateKeys.includes(state.selectedDate)) {
+            state.selectedDate = null;
+            state.selectedTime = null;
+        }
+
+        if (!availableDateKeys.length) {
+            const emptyState = document.createElement('div');
+            emptyState.className = 'appointments-date-empty';
+            emptyState.textContent = 'No available dates this week. Try next week.';
+            fragment.appendChild(emptyState);
         }
 
         elements.dates.appendChild(fragment);
@@ -487,6 +568,22 @@
         if (success && sessionId) {
             confirmBooking(sessionId);
         }
+    }
+
+    function changeWeek(delta) {
+        const next = state.weekOffset + delta;
+        if (next < 0 || next > MAX_WEEKS_AHEAD) return;
+        state.weekOffset = next;
+        renderDates();
+        renderSlots();
+        updateSummary();
+    }
+
+    if (elements.weekPrev) {
+        elements.weekPrev.addEventListener('click', () => changeWeek(-1));
+    }
+    if (elements.weekNext) {
+        elements.weekNext.addEventListener('click', () => changeWeek(1));
     }
 
     if (elements.form) {
