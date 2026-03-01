@@ -1919,7 +1919,8 @@ a:hover {
 
 .bloomly-team-grid {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(300px, 360px));
+    justify-content: center;
     gap: var(--space-2xl);
 }
 
@@ -1951,7 +1952,7 @@ a:hover {
     box-shadow: 0 18px 40px rgba(var(--color-black-rgb), 0.12);
     backdrop-filter: blur(18px) saturate(160%);
     -webkit-backdrop-filter: blur(18px) saturate(160%);
-    min-height: 240px;
+    min-height: 320px;
     transition: box-shadow 360ms var(--bloomly-team-ease, cubic-bezier(0.22, 1, 0.36, 1));
     z-index: 2;
 }
@@ -2020,6 +2021,34 @@ a:hover {
     font-size: var(--text-sm);
     color: rgba(var(--color-black-rgb), 0.75);
     font-weight: 500;
+}
+
+.bloomly-team-summary {
+    margin-top: var(--space-xs);
+    color: rgba(var(--color-black-rgb), 0.72);
+    font-size: var(--text-sm);
+    line-height: 1.7;
+    max-width: 30ch;
+}
+
+.bloomly-team-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    justify-content: center;
+    margin-top: var(--space-xs);
+}
+
+.bloomly-team-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.2rem 0.65rem;
+    border-radius: var(--radius-full);
+    border: 1px solid rgba(var(--bloomly-accent), 0.35);
+    background: rgba(var(--bloomly-accent), 0.14);
+    color: rgba(var(--color-black-rgb), 0.78);
+    font-size: 0.72rem;
+    font-weight: 600;
 }
 
 .bloomly-team-link {
@@ -2263,6 +2292,190 @@ a:hover {
 .team-profile-card--hero {
     display: block;
     overflow: visible;
+}
+
+.team-profile-card--clean {
+    max-width: 1080px;
+    overflow: hidden;
+    background: rgba(var(--color-white-rgb), 0.95) !important;
+}
+
+.team-profile-hero--clean {
+    background: linear-gradient(
+        145deg,
+        rgba(var(--color-white-rgb), 0.98) 0%,
+        rgba(var(--color-blue-rgb), 0.14) 52%,
+        rgba(var(--color-pink-rgb), 0.12) 100%
+    );
+}
+
+.team-profile-clean-shell {
+    display: grid;
+    grid-template-columns: minmax(0, 360px) minmax(0, 1fr);
+    gap: var(--space-2xl);
+    align-items: center;
+}
+
+.team-profile-clean-portrait {
+    margin: 0;
+}
+
+.team-profile-clean-image {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+    border-radius: var(--radius-xl);
+    border: 3px solid rgba(var(--color-white-rgb), 0.92);
+    background: linear-gradient(160deg, rgba(var(--color-white-rgb), 0.94), rgba(var(--color-lilac-rgb), 0.22));
+    box-shadow: 0 20px 42px rgba(var(--color-black-rgb), 0.14);
+}
+
+.team-profile-clean-caption {
+    margin-top: var(--space-sm);
+    margin-bottom: 0;
+    color: rgba(var(--color-black-rgb), 0.62);
+    font-size: var(--text-sm);
+}
+
+.team-profile-clean-content {
+    max-width: 640px;
+}
+
+.team-profile-clean-summary {
+    color: rgba(var(--color-black-rgb), 0.8);
+    font-size: var(--text-lg);
+    line-height: 1.85;
+    margin-bottom: var(--space-md);
+}
+
+.team-profile-clean-focus {
+    color: rgba(var(--color-black-rgb), 0.74);
+    margin-bottom: var(--space-md);
+}
+
+.team-profile-clean-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+    margin-bottom: var(--space-md);
+}
+
+.team-profile-clean-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.3rem 0.8rem;
+    border-radius: var(--radius-full);
+    background: rgba(var(--bloomly-accent), 0.16);
+    border: 1px solid rgba(var(--bloomly-accent), 0.35);
+    color: rgba(var(--color-black-rgb), 0.78);
+    font-weight: 600;
+    font-size: 0.78rem;
+}
+
+.team-profile-clean-links {
+    margin-top: var(--space-xs);
+}
+
+.team-profile-clean-overview {
+    background: linear-gradient(
+        180deg,
+        rgba(var(--color-white-rgb), 0.98) 0%,
+        rgba(var(--color-lilac-rgb), 0.08) 100%
+    );
+}
+
+.team-profile-clean-overview-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+    gap: var(--space-xl);
+    align-items: start;
+}
+
+.team-profile-clean-card {
+    background: rgba(var(--color-white-rgb), 0.96) !important;
+    border: 1px solid rgba(var(--color-black-rgb), 0.08);
+    box-shadow: 0 18px 38px rgba(var(--color-black-rgb), 0.08);
+}
+
+.team-profile-clean-card h2 {
+    margin-bottom: var(--space-sm);
+}
+
+.team-profile-clean-story-content {
+    color: rgba(var(--color-black-rgb), 0.75);
+    font-size: var(--text-lg);
+    line-height: 1.9;
+}
+
+.team-profile-clean-story-content p {
+    margin: 0;
+}
+
+.team-profile-clean-story-content p + p {
+    margin-top: var(--space-md);
+}
+
+.team-profile-clean-work-copy {
+    color: rgba(var(--color-black-rgb), 0.74);
+    line-height: 1.75;
+    margin-bottom: var(--space-md);
+}
+
+.team-profile-clean-list {
+    list-style: none;
+    display: grid;
+    gap: var(--space-xs);
+    margin: 0;
+    padding: 0;
+}
+
+.team-profile-clean-list li {
+    position: relative;
+    padding-left: 1.1rem;
+    color: rgba(var(--color-black-rgb), 0.8);
+    line-height: 1.65;
+}
+
+.team-profile-clean-list li::before {
+    content: "";
+    position: absolute;
+    top: 0.55rem;
+    left: 0;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: rgba(var(--bloomly-accent), 0.75);
+}
+
+.team-profile-clean-values {
+    margin-top: var(--space-md);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+}
+
+.team-profile-clean-value {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.28rem 0.75rem;
+    border-radius: var(--radius-full);
+    border: 1px solid rgba(var(--color-black-rgb), 0.12);
+    background: rgba(var(--color-white-rgb), 0.86);
+    color: rgba(var(--color-black-rgb), 0.76);
+    font-weight: 600;
+    font-size: 0.74rem;
+}
+
+.team-profile-clean-quote {
+    margin-top: var(--space-md);
+    margin-bottom: 0;
+    padding: var(--space-sm) var(--space-md);
+    border-left: 3px solid rgba(var(--color-pink-rgb), 0.45);
+    border-radius: var(--radius-md);
+    background: rgba(var(--color-white-rgb), 0.8);
+    color: rgba(var(--color-black-rgb), 0.7);
+    font-style: italic;
 }
 
 .team-profile-card.team-profile-notice {
@@ -3430,7 +3643,7 @@ a:hover {
     }
 
     .bloomly-team-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
     }
 
     .bloomly-team-card {
@@ -3490,6 +3703,25 @@ a:hover {
     .team-profile-links {
         justify-content: center;
     }
+
+    .team-profile-clean-shell {
+        grid-template-columns: 1fr;
+        justify-items: center;
+        text-align: center;
+    }
+
+    .team-profile-clean-content {
+        max-width: 720px;
+    }
+
+    .team-profile-clean-badges,
+    .team-profile-clean-links {
+        justify-content: center;
+    }
+
+    .team-profile-clean-overview-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 @media (max-width: 640px) {
@@ -3510,6 +3742,10 @@ a:hover {
     .team-profile-avatar {
         width: 180px;
         height: 180px;
+    }
+
+    .team-profile-clean-image {
+        max-width: 300px;
     }
 }
 

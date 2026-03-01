@@ -1220,140 +1220,6 @@
                 ],
                 quote: 'Build with empathy first, then everything else follows.'
             }
-        },
-        {
-            id: 'vinny-kangara',
-            slug: 'vinny-kangara',
-            name: 'Vinny Kangara',
-            role: 'Head of Marketing',
-            image: '/logo.svg',
-            accent: 'mist',
-            details: [
-                'Brand Strategy',
-                'Outreach Campaigns',
-                'Community Engagement',
-                'Business Development'
-            ],
-            panelSummary: 'Shapes the Bloomly brand with warmth, clarity, and community focus.',
-            summary: 'Connects Bloomly to teens and partners through story-driven outreach.',
-            story: 'Vinny Kangara shapes the Bloomly brand with warmth and clarity, making sure teens feel welcomed the moment they arrive. Their work blends relationship building with thoughtful strategy so every message feels human and grounded in care.\n\nVinny listens closely to what teens need, then turns those insights into campaigns that amplify support without losing the personal touch. They focus on partnerships that grow Bloomly\'s reach while protecting the calm, affirming tone of the community.\n\nBeyond campaigns, Vinny curates collaborations and mentors ambassadors who share Bloomly\'s voice with empathy and confidence.',
-            bio: 'Vinny connects people, ideas, and resources so Bloomly can show up for more teens.',
-            work: {
-                summary: 'Vinny leads marketing and outreach so Bloomly feels welcoming, clear, and human.',
-                highlights: [
-                    'Develops the Bloomly brand voice and campaigns.',
-                    'Designs outreach efforts that prioritize teen wellbeing.',
-                    'Builds partnerships that expand Bloomly\'s impact.'
-                ]
-            },
-            values: [
-                'Listen first, speak with care.',
-                'Marketing should feel like a warm welcome.',
-                'Community trust is the strongest metric.',
-                'Stories build belonging.'
-            ],
-            links: [
-                { label: 'LinkedIn', url: 'https://www.linkedin.com/' }
-            ],
-            skills: [
-                'Brand Strategy',
-                'Community Engagement',
-                'Campaign Planning',
-                'Content Storytelling',
-                'Partnership Growth'
-            ],
-            projects: [
-                {
-                    title: 'Bloomly Brand Playbook',
-                    description: 'Defines the tone, visuals, and messaging that keep Bloomly warm and clear.',
-                    icon: '🎨'
-                },
-                {
-                    title: 'School Outreach Series',
-                    description: 'Designed outreach campaigns that bring Bloomly tools to more students.',
-                    icon: '📣'
-                },
-                {
-                    title: 'Community Collaborations',
-                    description: 'Built partnerships with youth organizers and wellness mentors.',
-                    icon: '🌿'
-                }
-            ],
-            extra: {
-                highlights: [
-                    'Curates Bloomly\'s weekly storytelling themes.',
-                    'Leads peer-to-peer ambassador programs.',
-                    'Believes marketing should feel like a warm welcome.'
-                ],
-                quote: 'Marketing is a conversation that makes people feel seen.'
-            }
-        },
-        {
-            id: 'ryan-kuria',
-            slug: 'ryan-kuria',
-            name: 'Ryan Kuria',
-            role: 'Software Engineer',
-            image: '/logo.svg',
-            accent: 'stone',
-            details: [
-                'Full-Stack Development',
-                'System Architecture',
-                'Performance Optimization',
-                'UI/UX Engineering'
-            ],
-            panelSummary: 'Builds the systems that keep Bloomly calm, fast, and reliable.',
-            summary: 'Turns Bloomly ideas into stable, thoughtful experiences for teens.',
-            story: 'Ryan Kuria is a software engineer focused on calm, reliable experiences. He turns Bloomly ideas into stable systems that feel safe and fast for teens.\n\nHe cares deeply about architecture, performance, and accessibility, believing that technical quality is part of wellbeing. His approach favors quiet craftsmanship - the kind of work that users feel even when they do not notice it.\n\nWhen he is not coding, Ryan explores new tools and looks for ways to make systems more resilient and future-ready.',
-            bio: 'Ryan loves turning big ideas into reliable, friendly experiences.',
-            work: {
-                summary: 'Ryan builds Bloomly\'s core platform so the experience stays smooth and supportive.',
-                highlights: [
-                    'Architects the platform and key data flows.',
-                    'Optimizes performance for faster, calmer sessions.',
-                    'Collaborates on UI details that keep the experience gentle.'
-                ]
-            },
-            values: [
-                'Performance is part of wellbeing.',
-                'Build for safety and privacy.',
-                'Reliability builds trust.',
-                'Simple systems scale with care.'
-            ],
-            links: [
-                { label: 'GitHub', url: 'https://github.com/' }
-            ],
-            skills: [
-                'Full-Stack Development',
-                'System Architecture',
-                'Performance Optimization',
-                'UI/UX Engineering',
-                'Security Mindset'
-            ],
-            projects: [
-                {
-                    title: 'Blog Platform Refresh',
-                    description: 'Rebuilt the blog experience for fast, reliable reading on any device.',
-                    icon: '📝'
-                },
-                {
-                    title: 'Charla Experience',
-                    description: 'Shaped the booking flow so support feels calm and easy to access.',
-                    icon: '📅'
-                },
-                {
-                    title: 'Performance Tuning',
-                    description: 'Reduced page load times with careful optimization and caching.',
-                    icon: '⚡'
-                }
-            ],
-            extra: {
-                highlights: [
-                    'Focuses on calm UI motion and accessibility.',
-                    'Builds systems that protect teen privacy.',
-                    'Believes performance is part of wellbeing.'
-                ],
-                quote: 'Fast, reliable experiences help people feel safe online.'
-            }
         }
     ];
     // ========== Bloomly Team Cards ==========
@@ -1371,13 +1237,12 @@
         return `/members/?id=${encodeURIComponent(profileId)}`;
     }
 
-    function buildTeamCard(member, index) {
+    function buildTeamCard(member) {
         const wrapper = document.createElement('article');
         wrapper.className = 'bloomly-team-item';
         wrapper.dataset.teamCard = '';
         wrapper.dataset.accent = member.accent || 'sage';
         wrapper.dataset.slug = member.slug;
-        wrapper.setAttribute('aria-expanded', 'false');
 
         const card = document.createElement('div');
         card.className = 'bloomly-team-card';
@@ -1410,39 +1275,32 @@
         role.className = 'bloomly-team-role';
         role.textContent = member.role;
 
+        const summary = document.createElement('p');
+        summary.className = 'bloomly-team-summary';
+        summary.textContent = member.panelSummary || member.summary || '';
+
+        const chips = document.createElement('div');
+        chips.className = 'bloomly-team-chips';
+        (member.details || []).slice(0, 3).forEach((detail) => {
+            const chip = document.createElement('span');
+            chip.className = 'bloomly-team-chip';
+            chip.textContent = detail;
+            chips.appendChild(chip);
+        });
+
         const link = document.createElement('a');
         link.className = 'bloomly-team-link';
         link.href = buildTeamProfileHref(member);
         link.textContent = 'View Profile';
 
-        info.append(eyebrow, name, role, link);
+        info.append(eyebrow, name, role, summary);
+        if (chips.childElementCount > 0) {
+            info.appendChild(chips);
+        }
+        info.appendChild(link);
         core.append(avatar, info);
         card.appendChild(core);
-
-        const panel = document.createElement('aside');
-        panel.className = 'bloomly-team-panel';
-        panel.dataset.teamPanel = '';
-        panel.id = `bloomly-team-panel-${index + 1}`;
-        panel.setAttribute('aria-hidden', 'true');
-
-        const panelTitle = document.createElement('p');
-        panelTitle.className = 'bloomly-team-panel-title';
-        panelTitle.textContent = 'Focus areas';
-
-        const panelSummary = document.createElement('p');
-        panelSummary.className = 'bloomly-team-panel-summary';
-        panelSummary.textContent = member.panelSummary || '';
-
-        const detailList = document.createElement('ul');
-        detailList.className = 'bloomly-team-details';
-        (member.details || []).slice(0, 4).forEach((detail) => {
-            const item = document.createElement('li');
-            item.textContent = detail;
-            detailList.appendChild(item);
-        });
-
-        panel.append(panelTitle, panelSummary, detailList);
-        wrapper.append(card, panel);
+        wrapper.appendChild(card);
 
         return wrapper;
     }
@@ -1452,93 +1310,14 @@
         if (!grid) return;
         grid.innerHTML = '';
         const fragment = document.createDocumentFragment();
-        BLOOMLY_TEAM_MEMBERS.forEach((member, index) => {
-            fragment.appendChild(buildTeamCard(member, index));
+        BLOOMLY_TEAM_MEMBERS.forEach((member) => {
+            fragment.appendChild(buildTeamCard(member));
         });
         grid.appendChild(fragment);
     }
 
     function initBloomlyTeamCards() {
         renderTeamGrid();
-        const cards = document.querySelectorAll('[data-team-card]');
-        if (!cards.length) return;
-
-        const supportsHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
-
-        const closeCard = (card) => {
-            if (!card) return;
-            card.classList.remove('is-expanded');
-            card.setAttribute('aria-expanded', 'false');
-            const panel = card.querySelector('[data-team-panel]');
-            if (panel) {
-                panel.setAttribute('aria-hidden', 'true');
-            }
-        };
-
-        const openCard = (card) => {
-            if (!card) return;
-            card.classList.add('is-expanded');
-            card.setAttribute('aria-expanded', 'true');
-            const panel = card.querySelector('[data-team-panel]');
-            if (panel) {
-                panel.setAttribute('aria-hidden', 'false');
-            }
-        };
-
-        const closeAllCards = () => {
-            cards.forEach(card => closeCard(card));
-        };
-
-        cards.forEach((card) => {
-            const panel = card.querySelector('[data-team-panel]');
-            if (panel) {
-                panel.setAttribute('aria-hidden', 'true');
-            }
-
-            if (!supportsHover) {
-                card.setAttribute('tabindex', '0');
-
-                const toggleCard = () => {
-                    if (card.classList.contains('is-expanded')) {
-                        closeCard(card);
-                    } else {
-                        closeAllCards();
-                        openCard(card);
-                    }
-                };
-
-                card.addEventListener('click', (event) => {
-                    if (event.target.closest('a')) {
-                        return;
-                    }
-                    if (event.target.closest('[data-team-panel]')) {
-                        return;
-                    }
-                    toggleCard();
-                });
-
-                card.addEventListener('keydown', (event) => {
-                    if (event.key === 'Enter' || event.key === ' ') {
-                        event.preventDefault();
-                        toggleCard();
-                    }
-                });
-            }
-        });
-
-        if (!supportsHover) {
-            document.addEventListener('click', (event) => {
-                if (!event.target.closest('[data-team-card]')) {
-                    closeAllCards();
-                }
-            });
-
-            document.addEventListener('keydown', (event) => {
-                if (event.key === 'Escape') {
-                    closeAllCards();
-                }
-            });
-        }
     }
 
     // ========== Team Profile Page ==========
@@ -1693,20 +1472,7 @@
         'Building a living platform',
         'Leading with conversation'
     ];
-    const FOUNDER_TEAM_STORIES = {
-        'ryan-kuria': {
-            headline: 'The Code Whisperer.',
-            cue: ['</>', 'lo-fi beats'],
-            passion: 'Ryan turns product chaos into calm engineering clarity. He designs systems that stay stable under pressure, so Bloomly can feel safe, fast, and dependable for every teen who lands here.',
-            humanSide: 'Away from standups, Ryan is usually with a cup of coffee, sketching interface ideas, or prototyping side projects that teach him new ways to simplify complex problems.'
-        },
-        'vinny-kangara': {
-            headline: 'The Creative Spark.',
-            cue: ['camera', 'mountain', 'lightbulb'],
-            passion: 'Vinny makes marketing feel human by translating community needs into stories people can trust. She builds campaigns around connection first, so every message feels like a conversation, not a broadcast.',
-            humanSide: 'She finds inspiration in the everyday rhythm of city life, weekend hikes, and moments that reveal what people truly care about, then brings that insight back into Bloomly.'
-        }
-    };
+    const FOUNDER_TEAM_STORIES = {};
 
     function isFounderProfile(member) {
         const slug = normalizeTeamSlug(member?.slug || member?.id || member?.name);
@@ -1714,16 +1480,7 @@
     }
 
     function getFounderCoreTeamMembers() {
-        return ['ryan-kuria', 'vinny-kangara']
-            .map((slug) => {
-                const member = findTeamMemberBySlug(slug);
-                if (!member) return null;
-                return {
-                    ...member,
-                    founderStory: FOUNDER_TEAM_STORIES[slug] || null
-                };
-            })
-            .filter(Boolean);
+        return [];
     }
 
     function renderFounderHeroSection(member) {
@@ -2267,6 +2024,195 @@
         return section;
     }
 
+    function renderCleanProfileHero(member) {
+        const section = document.createElement('section');
+        section.className = 'team-profile-hero team-profile-hero--clean';
+
+        const container = document.createElement('div');
+        container.className = 'container';
+
+        const backLink = document.createElement('a');
+        backLink.className = 'back-button';
+        backLink.href = '/about.html';
+        backLink.textContent = 'Return to Team';
+
+        const card = document.createElement('article');
+        card.className = 'glass-card team-profile-card team-profile-card--clean fade-in';
+        card.dataset.accent = member.accent || 'sage';
+
+        const shell = document.createElement('div');
+        shell.className = 'team-profile-clean-shell';
+
+        const portrait = document.createElement('figure');
+        portrait.className = 'team-profile-clean-portrait';
+
+        const image = document.createElement('img');
+        image.className = 'team-profile-clean-image';
+        image.src = member.image || '/logo.svg';
+        image.alt = `${member.name} portrait`;
+        image.decoding = 'async';
+        image.fetchPriority = 'high';
+        image.width = 520;
+        image.height = 620;
+
+        const caption = document.createElement('figcaption');
+        caption.className = 'team-profile-clean-caption';
+        caption.textContent = member.role || 'Bloomly Team';
+
+        portrait.append(image, caption);
+
+        const content = document.createElement('div');
+        content.className = 'team-profile-clean-content';
+
+        const eyebrow = document.createElement('p');
+        eyebrow.className = 'team-profile-eyebrow';
+        eyebrow.textContent = 'Bloomly Team';
+
+        const name = document.createElement('h1');
+        name.className = 'team-profile-name';
+        name.textContent = member.name;
+
+        const role = document.createElement('p');
+        role.className = 'team-profile-role';
+        role.textContent = member.role || '';
+
+        const summary = document.createElement('p');
+        summary.className = 'team-profile-clean-summary';
+        summary.textContent = member.summary || member.work?.summary || member.bio || '';
+
+        const focus = document.createElement('p');
+        focus.className = 'team-profile-clean-focus';
+        focus.textContent = member.panelSummary || '';
+
+        const badges = document.createElement('div');
+        badges.className = 'team-profile-clean-badges';
+        const detailTags = Array.isArray(member.details) && member.details.length
+            ? member.details.slice(0, 4)
+            : (member.skills || []).slice(0, 4);
+        detailTags.forEach((detail) => {
+            const badge = document.createElement('span');
+            badge.className = 'team-profile-clean-badge';
+            badge.textContent = detail;
+            badges.appendChild(badge);
+        });
+
+        content.append(eyebrow, name, role, summary);
+        if (focus.textContent) {
+            content.appendChild(focus);
+        }
+        if (badges.childElementCount > 0) {
+            content.appendChild(badges);
+        }
+
+        if (Array.isArray(member.links) && member.links.length) {
+            const links = document.createElement('div');
+            links.className = 'team-profile-links team-profile-clean-links';
+            member.links.forEach((linkData) => {
+                const link = document.createElement('a');
+                link.className = 'team-profile-link';
+                link.href = linkData.url;
+                link.target = '_blank';
+                link.rel = 'noopener noreferrer';
+                link.textContent = linkData.label;
+                links.appendChild(link);
+            });
+            content.appendChild(links);
+        }
+
+        shell.append(portrait, content);
+        card.appendChild(shell);
+        container.append(backLink, card);
+        section.appendChild(container);
+        return section;
+    }
+
+    function renderCleanProfileOverview(member) {
+        const section = document.createElement('section');
+        section.className = 'section team-profile-clean-overview';
+
+        const container = document.createElement('div');
+        container.className = 'container';
+
+        const grid = document.createElement('div');
+        grid.className = 'team-profile-clean-overview-grid';
+
+        const storyCard = document.createElement('article');
+        storyCard.className = 'glass-card team-profile-clean-card team-profile-clean-story fade-in';
+
+        const storyTitle = document.createElement('h2');
+        storyTitle.textContent = 'Personal Story';
+
+        const storyBody = document.createElement('div');
+        storyBody.className = 'team-profile-clean-story-content';
+        const storyParagraphs = getStoryParagraphs(member);
+        if (storyParagraphs.length) {
+            storyParagraphs.forEach((text) => {
+                const paragraph = document.createElement('p');
+                paragraph.textContent = text;
+                storyBody.appendChild(paragraph);
+            });
+        } else {
+            const paragraph = document.createElement('p');
+            paragraph.textContent = member.bio || member.summary || '';
+            storyBody.appendChild(paragraph);
+        }
+        storyCard.append(storyTitle, storyBody);
+
+        const focusCard = document.createElement('article');
+        focusCard.className = 'glass-card team-profile-clean-card team-profile-clean-focus-card fade-in';
+
+        const focusTitle = document.createElement('h2');
+        focusTitle.textContent = 'Current Focus at Bloomly';
+
+        const focusCopy = document.createElement('p');
+        focusCopy.className = 'team-profile-clean-work-copy';
+        focusCopy.textContent = member.work?.summary || member.summary || member.bio || '';
+
+        const highlights = Array.isArray(member.work?.highlights) && member.work.highlights.length
+            ? member.work.highlights
+            : (member.details || member.skills || []);
+        const list = document.createElement('ul');
+        list.className = 'team-profile-clean-list';
+        highlights.slice(0, 6).forEach((item) => {
+            const listItem = document.createElement('li');
+            listItem.textContent = item;
+            list.appendChild(listItem);
+        });
+        if (!list.childElementCount) {
+            const listItem = document.createElement('li');
+            listItem.textContent = 'Community care, platform reliability, and meaningful support.';
+            list.appendChild(listItem);
+        }
+
+        const values = Array.isArray(member.values) && member.values.length
+            ? member.values
+            : (member.extra?.highlights || []);
+        const valuesWrap = document.createElement('div');
+        valuesWrap.className = 'team-profile-clean-values';
+        values.slice(0, 4).forEach((value) => {
+            const valueTag = document.createElement('span');
+            valueTag.className = 'team-profile-clean-value';
+            valueTag.textContent = value;
+            valuesWrap.appendChild(valueTag);
+        });
+
+        focusCard.append(focusTitle, focusCopy, list);
+        if (valuesWrap.childElementCount) {
+            focusCard.appendChild(valuesWrap);
+        }
+        if (member.extra?.quote) {
+            const quote = document.createElement('blockquote');
+            quote.className = 'team-profile-clean-quote';
+            quote.textContent = member.extra.quote;
+            focusCard.appendChild(quote);
+        }
+
+        grid.append(storyCard, focusCard);
+        container.appendChild(grid);
+        section.appendChild(container);
+        return section;
+    }
+
     async function initTeamProfilePage() {
         const container = document.querySelector('[data-profile-page]') || document.querySelector('[data-team-profile]');
         if (!container) return;
@@ -2282,149 +2228,15 @@
             return;
         }
         syncProfileUrl(member);
-        const isFounderPage = isFounderProfile(member);
-        document.title = isFounderPage
-            ? `${member.name} | Meet the Founders | Bloomly`
-            : `${member.name} | Bloomly`;
+        document.title = `${member.name} | Bloomly`;
 
         container.innerHTML = '';
-
-        if (isFounderPage) {
-            const founderHeroSection = renderFounderHeroSection(member);
-            const founderStorySection = renderFounderStorySection(member);
-            const founderTeamSection = renderFounderTeamSection();
-            const founderContactSection = renderProfileContactSection(member);
-            container.append(founderHeroSection, founderStorySection, founderTeamSection, founderContactSection);
-            initScrollAnimations(container);
-            initFounderHeroParallax();
-            return;
-        }
-
-        const heroSection = document.createElement('section');
-        heroSection.className = 'team-profile-hero';
-
-        const heroContainer = document.createElement('div');
-        heroContainer.className = 'container';
-
-        const backLink = document.createElement('a');
-        backLink.className = 'back-button';
-        backLink.href = '/about.html';
-        backLink.textContent = 'Return to Team';
-
-        const profileCard = document.createElement('div');
-        profileCard.className = 'glass-card team-profile-card team-profile-card--hero fade-in';
-        profileCard.dataset.accent = member.accent || 'sage';
-
-        const heroMain = document.createElement('div');
-        heroMain.className = 'team-profile-hero-main';
-
-        const avatar = document.createElement('div');
-        avatar.className = 'team-profile-avatar';
-
-        const image = document.createElement('img');
-        image.className = 'team-profile-image';
-        image.src = member.image || '/logo.svg';
-        image.alt = `${member.name} portrait`;
-
-        avatar.appendChild(image);
-
-        const info = document.createElement('div');
-        info.className = 'team-profile-info';
-
-        const eyebrow = document.createElement('p');
-        eyebrow.className = 'team-profile-eyebrow';
-        eyebrow.textContent = 'Bloomly Team';
-
-        const name = document.createElement('h1');
-        name.className = 'team-profile-name';
-        name.textContent = member.name;
-
-        const role = document.createElement('p');
-        role.className = 'team-profile-role';
-        role.textContent = member.role;
-
-        const summary = document.createElement('p');
-        summary.className = 'team-profile-summary';
-        summary.textContent = member.summary || member.work?.summary || member.bio;
-
-        const panelToggle = document.createElement('button');
-        panelToggle.className = 'team-profile-panel-toggle';
-        panelToggle.type = 'button';
-        panelToggle.setAttribute('aria-expanded', 'false');
-        panelToggle.setAttribute('aria-controls', `team-profile-panel-${member.slug}`);
-        panelToggle.textContent = 'Quick highlights';
-
-        info.append(eyebrow, name, role, summary, panelToggle);
-
-        if (Array.isArray(member.links) && member.links.length) {
-            const links = document.createElement('div');
-            links.className = 'team-profile-links';
-
-            member.links.forEach((linkData) => {
-                const link = document.createElement('a');
-                link.className = 'team-profile-link';
-                link.href = linkData.url;
-                link.target = '_blank';
-                link.rel = 'noopener noreferrer';
-                link.textContent = linkData.label;
-                links.appendChild(link);
-            });
-
-            info.appendChild(links);
-        }
-
-        heroMain.append(avatar, info);
-
-        const panel = document.createElement('aside');
-        panel.className = 'team-profile-panel';
-        panel.id = `team-profile-panel-${member.slug}`;
-        panel.setAttribute('aria-hidden', 'true');
-
-        const panelTitle = document.createElement('p');
-        panelTitle.className = 'team-profile-panel-title';
-        panelTitle.textContent = 'Focus areas';
-
-        const panelSummary = document.createElement('p');
-        panelSummary.className = 'team-profile-panel-summary';
-        panelSummary.textContent = member.panelSummary || '';
-
-        const panelList = document.createElement('ul');
-        panelList.className = 'team-profile-panel-list';
-        const panelHighlights = member.extra?.highlights || member.details || [];
-        panelHighlights.slice(0, 4).forEach((item) => {
-            const listItem = document.createElement('li');
-            listItem.textContent = item;
-            panelList.appendChild(listItem);
-        });
-
-        panel.append(panelTitle, panelSummary, panelList);
-
-        if (member.extra?.quote) {
-            const panelQuote = document.createElement('p');
-            panelQuote.className = 'team-profile-panel-quote';
-            panelQuote.textContent = member.extra.quote;
-            panel.appendChild(panelQuote);
-        }
-
-        profileCard.append(heroMain, panel);
-
-        const togglePanel = () => {
-            const expanded = profileCard.classList.toggle('is-expanded');
-            panelToggle.setAttribute('aria-expanded', String(expanded));
-            panel.setAttribute('aria-hidden', String(!expanded));
-        };
-
-        panelToggle.addEventListener('click', togglePanel);
-        heroContainer.append(backLink, profileCard);
-        heroSection.appendChild(heroContainer);
-
-        const storySection = renderProfileStorySection(member);
-        const workSection = renderProfileWorkSection(member);
+        const heroSection = renderCleanProfileHero(member);
+        const overviewSection = renderCleanProfileOverview(member);
         const projectsSection = renderProfileProjectsSection(member);
-        const valuesSection = renderProfileValuesSection(member);
         const contactSection = renderProfileContactSection(member);
 
-        container.append(heroSection, storySection, workSection, projectsSection, valuesSection, contactSection);
+        container.append(heroSection, overviewSection, projectsSection, contactSection);
         initScrollAnimations(container);
     }
 
