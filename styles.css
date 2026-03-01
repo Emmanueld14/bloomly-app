@@ -3221,11 +3221,46 @@ a:hover {
 }
 
 .appointments-date-list {
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
 }
 
 .appointments-slot-list {
     grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+}
+
+.appointments-week-controls {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-md);
+}
+
+.appointments-week-label {
+    text-align: center;
+    font-weight: 700;
+    font-size: var(--text-base);
+    color: var(--color-heading);
+    background: rgba(var(--color-blue-rgb), 0.08);
+    border: 1px solid rgba(var(--color-blue-rgb), 0.18);
+    border-radius: var(--radius-lg);
+    padding: 0.55rem 0.75rem;
+}
+
+.appointments-week-nav {
+    width: 2.35rem;
+    height: 2.35rem;
+    border-radius: var(--radius-lg);
+    border: 1px solid rgba(var(--color-black-rgb), 0.12);
+    background: rgba(var(--color-white-rgb), 0.95);
+    font-weight: 700;
+    font-size: 1.05rem;
+    cursor: pointer;
+}
+
+.appointments-week-nav:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
 }
 
 .appointments-date-button,
@@ -3238,6 +3273,33 @@ a:hover {
     color: var(--color-heading);
     cursor: pointer;
     transition: transform var(--transition-base), box-shadow var(--transition-base), border-color var(--transition-base);
+}
+
+.appointments-date-button {
+    min-height: 6.1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 0.2rem;
+    padding: 0.8rem 0.9rem;
+}
+
+.appointments-date-day {
+    font-size: var(--text-sm);
+    font-weight: 700;
+    color: var(--color-heading);
+}
+
+.appointments-date-number {
+    font-size: var(--text-base);
+    font-weight: 700;
+    color: var(--color-heading);
+}
+
+.appointments-date-meta {
+    font-size: 0.78rem;
+    color: var(--color-gray-550);
 }
 
 .appointments-date-button.is-active,
@@ -3253,6 +3315,16 @@ a:hover {
     opacity: 0.5;
     box-shadow: none;
     transform: none;
+}
+
+.appointments-date-empty {
+    grid-column: 1 / -1;
+    border: 1px dashed rgba(var(--color-black-rgb), 0.2);
+    border-radius: var(--radius-lg);
+    padding: 0.85rem 1rem;
+    color: var(--color-gray-550);
+    font-size: var(--text-sm);
+    text-align: center;
 }
 
 .appointments-form {
