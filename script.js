@@ -651,7 +651,7 @@
 
         const { data, error } = await supabaseClient
             .from('comments')
-            .select('id, post_id, nick, text, timestamp')
+            .select('*')
             .eq('post_id', postId)
             .order('timestamp', { ascending: false });
 
@@ -669,7 +669,7 @@
         const { data, error } = await supabaseClient
             .from('comments')
             .insert({ post_id: postId, nick: nickname || null, text })
-            .select('id, post_id, nick, text, timestamp')
+            .select('*')
             .single();
 
         if (error) {
@@ -678,6 +678,29 @@
         }
 
         return data;
+    }
+
+    function getCommentAuthorName(comment) {
+        return comment.nick || comment.nickname || comment.author || 'Anonymous';
+    }
+
+    function getCommentInitials(name) {
+        const parts = String(name || 'A')
+            .trim()
+            .split(/\s+/)
+            .filter(Boolean)
+            .slice(0, 2);
+        if (!parts.length) return 'A';
+        return parts.map((part) => part.charAt(0).toUpperCase()).join('');
+    }
+
+    function isReplyComment(comment) {
+        return Boolean(
+            comment?.parent_id ||
+            comment?.parentId ||
+            comment?.reply_to ||
+            comment?.replyTo
+        );
     }
 
     function renderComments(list, comments) {
@@ -691,30 +714,52 @@
             return;
         }
 
-        comments.forEach(comment => {
+        comments.forEach((comment, index) => {
             const item = document.createElement('div');
             item.className = 'comment-item';
+            if (isReplyComment(comment)) {
+                item.classList.add('is-reply');
+            }
+            if (index < 2) {
+                item.classList.add('is-new');
+            }
+
+            const avatar = document.createElement('span');
+            avatar.className = 'comment-avatar';
+            const authorName = getCommentAuthorName(comment);
+            avatar.textContent = getCommentInitials(authorName);
+
+            const content = document.createElement('div');
+            content.className = 'comment-content';
 
             const meta = document.createElement('div');
             meta.className = 'comment-meta';
 
             const author = document.createElement('span');
             author.className = 'comment-author';
-            author.textContent = comment.nick || comment.nickname || 'Anonymous';
+            author.textContent = authorName;
 
             const time = document.createElement('span');
             time.className = 'comment-time';
             time.textContent = formatTimestamp(comment.timestamp);
 
             meta.appendChild(author);
+            if (isReplyComment(comment)) {
+                const replyLabel = document.createElement('span');
+                replyLabel.className = 'comment-reply-label';
+                replyLabel.textContent = 'Reply';
+                meta.appendChild(replyLabel);
+            }
             meta.appendChild(time);
 
             const text = document.createElement('p');
             text.className = 'comment-text';
             text.textContent = comment.text || '';
 
-            item.appendChild(meta);
-            item.appendChild(text);
+            content.appendChild(meta);
+            content.appendChild(text);
+            item.appendChild(avatar);
+            item.appendChild(content);
             list.appendChild(item);
         });
     }
@@ -783,7 +828,33 @@
         const form = container.querySelector('[data-comment-form]');
         const list = container.querySelector('[data-comment-list]');
         const messageEl = container.querySelector('[data-comment-message]');
+        const commentPanel = container.querySelector('[data-comment-panel]');
+        const commentToggle = container.querySelector('[data-comment-toggle]');
+        const commentPanelBody = container.querySelector('[data-comment-panel-body]');
         if (!form || !list) return;
+
+        let isCommentsCollapsed = false;
+        const applyCommentPanelState = (collapsed) => {
+            isCommentsCollapsed = collapsed;
+            if (commentPanel) {
+                commentPanel.classList.toggle('is-collapsed', collapsed);
+            }
+            if (commentToggle) {
+                commentToggle.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+                commentToggle.textContent = collapsed ? 'Show comments' : 'Hide comments';
+            }
+        };
+
+        if (commentToggle && commentPanelBody) {
+            if (!commentPanelBody.id) {
+                commentPanelBody.id = `post-comments-panel-${postId}`;
+            }
+            commentToggle.setAttribute('aria-controls', commentPanelBody.id);
+            applyCommentPanelState(false);
+            commentToggle.addEventListener('click', () => {
+                applyCommentPanelState(!isCommentsCollapsed);
+            });
+        }
 
         const commentsKey = `bloomly:comments:${postId}`;
         let comments = [];
@@ -837,6 +908,10 @@
                 safeStorageSet(commentsKey, JSON.stringify(comments));
                 renderComments(list, comments);
                 setFormMessage(messageEl, 'Thanks! Your comment is saved on this device.', 'success');
+            }
+
+            if (isCommentsCollapsed) {
+                applyCommentPanelState(false);
             }
 
             if (commentInput) {

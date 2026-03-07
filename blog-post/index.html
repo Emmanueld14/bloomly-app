@@ -106,34 +106,50 @@
                             <h2>Join the conversation</h2>
                             <p>Like this post or leave a supportive comment for others to read.</p>
                         </div>
-
-                        <div class="post-actions">
-                            <button class="like-button" type="button" data-like-button aria-pressed="false">
-                                <span class="like-icon">💗</span>
-                                <span class="like-text">Like</span>
-                            </button>
-                            <span class="like-count" data-like-count>0 likes</span>
-                        </div>
-
-                        <div class="comment-section">
-                            <h3>Comments</h3>
-                            <form class="comment-form" data-comment-form novalidate>
-                                <label class="comment-label">
-                                    Nickname (optional)
-                                    <input type="text" name="nickname" maxlength="40" placeholder="Your nickname">
-                                </label>
-                                <label class="comment-label">
-                                    Comment
-                                    <textarea name="comment" rows="4" maxlength="500" placeholder="Share your thoughts..." required></textarea>
-                                </label>
-                                <div class="comment-actions">
-                                    <button type="submit" class="btn btn-primary">Post Comment</button>
-                                    <span class="form-message" data-comment-message aria-live="polite"></span>
+                        <div class="engagement-layout">
+                            <div class="engagement-main">
+                                <div class="post-actions">
+                                    <button class="like-button" type="button" data-like-button aria-pressed="false">
+                                        <span class="like-icon">💗</span>
+                                        <span class="like-text">Like</span>
+                                    </button>
+                                    <span class="like-count" data-like-count>0 likes</span>
                                 </div>
-                            </form>
-                            <div class="comment-list" data-comment-list>
-                                <p class="comment-empty">No comments yet. Be the first to share.</p>
                             </div>
+
+                            <aside class="comment-section" data-comment-panel>
+                                <div class="comment-section-header">
+                                    <h3 class="comment-section-title">Comments</h3>
+                                    <button
+                                        type="button"
+                                        class="comment-toggle"
+                                        data-comment-toggle
+                                        aria-expanded="true"
+                                        aria-controls="post-comments-panel"
+                                    >
+                                        Hide comments
+                                    </button>
+                                </div>
+                                <div class="comment-section-body" id="post-comments-panel" data-comment-panel-body>
+                                    <form class="comment-form" data-comment-form novalidate>
+                                        <label class="comment-label">
+                                            Nickname (optional)
+                                            <input type="text" name="nickname" maxlength="40" placeholder="Your nickname">
+                                        </label>
+                                        <label class="comment-label">
+                                            Comment
+                                            <textarea name="comment" rows="4" maxlength="500" placeholder="Share your thoughts..." required></textarea>
+                                        </label>
+                                        <div class="comment-actions">
+                                            <button type="submit" class="btn btn-primary">Post Comment</button>
+                                            <span class="form-message" data-comment-message aria-live="polite"></span>
+                                        </div>
+                                    </form>
+                                    <div class="comment-list" data-comment-list>
+                                        <p class="comment-empty">No comments yet. Be the first to share.</p>
+                                    </div>
+                                </div>
+                            </aside>
                         </div>
                     </div>
                 </div>
