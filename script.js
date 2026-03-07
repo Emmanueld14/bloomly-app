@@ -2208,17 +2208,27 @@
         const container = document.createElement('div');
         container.className = 'container';
 
-        const grid = document.createElement('div');
-        grid.className = 'team-profile-clean-overview-grid';
-
         const storyCard = document.createElement('article');
-        storyCard.className = 'glass-card team-profile-clean-card team-profile-clean-story fade-in';
+        storyCard.className = 'about-story-article profile-story-blog fade-in';
+
+        const storyHeader = document.createElement('header');
+        storyHeader.className = 'about-story-article-header';
+
+        const storyLabel = document.createElement('p');
+        storyLabel.className = 'about-story-label';
+        storyLabel.textContent = 'My Story';
 
         const storyTitle = document.createElement('h2');
-        storyTitle.textContent = 'Personal Story';
+        storyTitle.textContent = `${member.name}`;
+
+        const storyMeta = document.createElement('p');
+        storyMeta.className = 'about-story-meta';
+        storyMeta.textContent = `${member.role || 'Bloomly Team'} · Bloomly`;
+
+        storyHeader.append(storyLabel, storyTitle, storyMeta);
 
         const storyBody = document.createElement('div');
-        storyBody.className = 'team-profile-clean-story-content';
+        storyBody.className = 'about-story-article-body profile-story-blog-content';
         const storyParagraphs = getStoryParagraphs(member);
         if (storyParagraphs.length) {
             storyParagraphs.forEach((text) => {
@@ -2231,59 +2241,8 @@
             paragraph.textContent = member.bio || member.summary || '';
             storyBody.appendChild(paragraph);
         }
-        storyCard.append(storyTitle, storyBody);
-
-        const focusCard = document.createElement('article');
-        focusCard.className = 'glass-card team-profile-clean-card team-profile-clean-focus-card fade-in';
-
-        const focusTitle = document.createElement('h2');
-        focusTitle.textContent = 'Current Focus at Bloomly';
-
-        const focusCopy = document.createElement('p');
-        focusCopy.className = 'team-profile-clean-work-copy';
-        focusCopy.textContent = member.work?.summary || member.summary || member.bio || '';
-
-        const highlights = Array.isArray(member.work?.highlights) && member.work.highlights.length
-            ? member.work.highlights
-            : (member.details || member.skills || []);
-        const list = document.createElement('ul');
-        list.className = 'team-profile-clean-list';
-        highlights.slice(0, 6).forEach((item) => {
-            const listItem = document.createElement('li');
-            listItem.textContent = item;
-            list.appendChild(listItem);
-        });
-        if (!list.childElementCount) {
-            const listItem = document.createElement('li');
-            listItem.textContent = 'Community care, platform reliability, and meaningful support.';
-            list.appendChild(listItem);
-        }
-
-        const values = Array.isArray(member.values) && member.values.length
-            ? member.values
-            : (member.extra?.highlights || []);
-        const valuesWrap = document.createElement('div');
-        valuesWrap.className = 'team-profile-clean-values';
-        values.slice(0, 4).forEach((value) => {
-            const valueTag = document.createElement('span');
-            valueTag.className = 'team-profile-clean-value';
-            valueTag.textContent = value;
-            valuesWrap.appendChild(valueTag);
-        });
-
-        focusCard.append(focusTitle, focusCopy, list);
-        if (valuesWrap.childElementCount) {
-            focusCard.appendChild(valuesWrap);
-        }
-        if (member.extra?.quote) {
-            const quote = document.createElement('blockquote');
-            quote.className = 'team-profile-clean-quote';
-            quote.textContent = member.extra.quote;
-            focusCard.appendChild(quote);
-        }
-
-        grid.append(storyCard, focusCard);
-        container.appendChild(grid);
+        storyCard.append(storyHeader, storyBody);
+        container.appendChild(storyCard);
         section.appendChild(container);
         return section;
     }
@@ -2308,10 +2267,9 @@
         container.innerHTML = '';
         const heroSection = renderCleanProfileHero(member);
         const overviewSection = renderCleanProfileOverview(member);
-        const projectsSection = renderProfileProjectsSection(member);
         const contactSection = renderProfileContactSection(member);
 
-        container.append(heroSection, overviewSection, projectsSection, contactSection);
+        container.append(heroSection, overviewSection, contactSection);
         initScrollAnimations(container);
     }
 

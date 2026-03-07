@@ -51,7 +51,7 @@
             if (error) {
                 document.querySelector('.loading p').textContent = 'Authentication failed: ' + error;
                 setTimeout(() => {
-                    window.location.href = '/admin/dashboard.html';
+                    window.location.href = '/admin/';
                 }, 3000);
                 return;
             }
@@ -59,7 +59,7 @@
             if (!code) {
                 document.querySelector('.loading p').textContent = 'No authorization code received';
                 setTimeout(() => {
-                    window.location.href = '/admin/dashboard.html';
+                    window.location.href = '/admin/';
                 }, 3000);
                 return;
             }
@@ -146,7 +146,7 @@
                 sessionStorage.setItem('github_user', JSON.stringify(user));
                 
                 // Redirect to admin page
-                window.location.href = '/admin/dashboard.html';
+                window.location.href = '/admin/';
             })
             .catch(error => {
                 console.error('Auth error:', error);
@@ -156,7 +156,7 @@
                     errorMsg + 
                     '<br><br><small>Check the browser console (F12) for more details.</small>';
                 setTimeout(() => {
-                    window.location.href = '/admin/dashboard.html';
+                    window.location.href = '/admin/';
                 }, 5000);
             });
         })();
