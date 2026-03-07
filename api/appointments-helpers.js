@@ -16,7 +16,7 @@ const FALLBACK_APPOINTMENTS_ADMIN_KEY = 'BloomlyCharla2026!';
 export function setCors(res) {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-Admin-Key');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-Admin-Key, Authorization');
 }
 
 export function getEnvConfig() {

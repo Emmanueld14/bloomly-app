@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bloomly Admin Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="/admin/dashboard.css">
+</head>
+<body>
+    <main class="admin-auth-screen" id="authScreen">
+        <section class="admin-auth-card">
+            <div class="admin-auth-header">
+                <h1>Bloomly Admin</h1>
+                <p>Sign in to access role-based tools for blogs, Charla records, reports, and permissions.</p>
+            </div>
+            <button class="github-login-btn" id="githubLoginBtn" type="button">
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path fill="currentColor" d="M12 .3A12 12 0 0 0 8.2 23.7c.6.1.8-.3.8-.6v-2.2c-3.3.7-4-1.4-4-1.4-.5-1.4-1.3-1.7-1.3-1.7-1.1-.8.1-.8.1-.8 1.2.1 1.8 1.2 1.8 1.2 1.1 1.9 2.8 1.3 3.5 1 .1-.8.4-1.3.8-1.6-2.7-.3-5.5-1.3-5.5-5.9 0-1.3.5-2.4 1.2-3.2-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.3 1.2a11.7 11.7 0 0 1 6 0c2.3-1.5 3.3-1.2 3.3-1.2.7 1.7.3 2.9.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0 0 12 .3Z"></path>
+                </svg>
+                Continue with GitHub
+            </button>
+            <p class="auth-help-text">Your role and page access are applied automatically after login.</p>
+            <p id="authError" class="inline-error" hidden></p>
+        </section>
+    </main>
+
+    <main class="admin-app-shell" id="adminShell" hidden>
+        <aside class="admin-sidebar">
+            <div class="sidebar-brand">
+                <h2>Bloomly</h2>
+                <p>Admin workspace</p>
+            </div>
+            <nav class="sidebar-nav" id="sidebarNav" aria-label="Admin sections">
+                <button type="button" class="sidebar-link is-active" data-view="dashboard">
+                    <span>Dashboard</span>
+                </button>
+                <button type="button" class="sidebar-link" data-view="blogs">
+                    <span>Blog Management</span>
+                    <span class="nav-badge" id="blogReviewBadge" hidden>0</span>
+                </button>
+                <button type="button" class="sidebar-link" data-view="sessions">
+                    <span>Charla Records</span>
+                </button>
+                <button type="button" class="sidebar-link" data-view="reports">
+                    <span>Employee Reports</span>
+                </button>
+                <button type="button" class="sidebar-link" data-view="permissions">
+                    <span>User Permissions</span>
+                </button>
+            </nav>
+            <div class="sidebar-user">
+                <img id="sidebarUserAvatar" class="sidebar-user-avatar" alt="User avatar" src="">
+                <div class="sidebar-user-copy">
+                    <strong id="sidebarUserName"></strong>
+                    <span id="sidebarUserRole"></span>
+                </div>
+            </div>
+        </aside>
+
+        <section class="admin-main">
+            <header class="admin-topbar">
+                <button type="button" class="mobile-nav-toggle" id="mobileNavToggle" aria-label="Toggle navigation" aria-expanded="false">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+                <div>
+                    <h1 id="viewTitle">Dashboard</h1>
+                    <p id="viewSubtitle">Overview metrics and quick access tools.</p>
+                </div>
+                <div class="topbar-actions">
+                    <button type="button" class="btn btn-neutral btn-sm" id="refreshCurrentViewBtn">Refresh view</button>
+                    <button type="button" class="btn btn-secondary btn-sm" id="logoutBtn">Logout</button>
+                </div>
+            </header>
+
+            <div id="globalMessage" class="global-message" hidden></div>
+
+            <section class="admin-view is-active" id="view-dashboard" data-view-panel="dashboard">
+                <div class="metric-grid">
+                    <article class="metric-card">
+                        <p>Published blog posts</p>
+                        <h2 id="metricPublishedPosts">0</h2>
+                    </article>
+                    <article class="metric-card">
+                        <p>Drafts pending review</p>
+                        <h2 id="metricPendingDrafts">0</h2>
+                    </article>
+                    <article class="metric-card">
+                        <p>Confirmed Charla sessions</p>
+                        <h2 id="metricConfirmedSessions">0</h2>
+                    </article>
+                    <article class="metric-card">
+                        <p>Reports submitted</p>
+                        <h2 id="metricReportsTotal">0</h2>
+                    </article>
+                </div>
+
+                <div class="panel-grid panel-grid-2">
+                    <article class="dashboard-panel">
+                        <h3>Quick Actions</h3>
+                        <div class="quick-actions">
+                            <button type="button" class="btn btn-primary" data-quick-view="blogs">Review blogs</button>
+                            <button type="button" class="btn btn-neutral" data-quick-view="sessions">Track Charla payments</button>
+                            <button type="button" class="btn btn-secondary" data-quick-view="reports">Open employee reports</button>
+                            <button type="button" class="btn btn-neutral" data-quick-view="permissions">Manage user access</button>
+                        </div>
+                    </article>
+
+                    <article class="dashboard-panel">
+                        <h3>Needs attention</h3>
+                        <ul id="dashboardAttentionList" class="inline-list">
+                            <li class="inline-empty">Loading dashboard activity...</li>
+                        </ul>
+                    </article>
+                </div>
+            </section>
+
+            <section class="admin-view" id="view-blogs" data-view-panel="blogs">
+                <div class="toolbar-row">
+                    <h2>Blog workflow</h2>
+                    <div class="toolbar-actions">
+                        <button type="button" class="btn btn-primary btn-sm" id="newDraftBtn">New draft</button>
+                        <button type="button" class="btn btn-neutral btn-sm" id="refreshBlogDataBtn">Refresh blog data</button>
+                    </div>
+                </div>
+
+                <article class="admin-panel">
+                    <div class="panel-headline">
+                        <h3>Draft review queue</h3>
+                        <p>Submit drafts for review, approve content, and publish when ready.</p>
+                    </div>
+                    <div class="table-wrap">
+                        <table class="admin-table" aria-label="Blog draft workflow table">
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Status</th>
+                                    <th>Author</th>
+                                    <th>Updated</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="draftsTableBody">
+                                <tr>
+                                    <td colspan="5" class="inline-empty">Loading drafts...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </article>
+
+                <article class="admin-panel">
+                    <div class="panel-headline">
+                        <h3>Published posts</h3>
+                        <p>Create revision drafts or remove outdated content.</p>
+                    </div>
+                    <div class="table-wrap">
+                        <table class="admin-table" aria-label="Published blog posts table">
+                            <thead>
+                                <tr>
+                                    <th>Post</th>
+                                    <th>Category</th>
+                                    <th>Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="publishedTableBody">
+                                <tr>
+                                    <td colspan="4" class="inline-empty">Loading published posts...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </article>
+            </section>
+
+            <section class="admin-view" id="view-sessions" data-view-panel="sessions">
+                <div class="toolbar-row">
+                    <h2>Charla session records & payment tracking</h2>
+                    <div class="toolbar-actions">
+                        <button type="button" class="btn btn-neutral btn-sm" id="exportSessionsCsvBtn">Export CSV</button>
+                        <button type="button" class="btn btn-secondary btn-sm" id="exportSessionsPdfBtn">Export PDF</button>
+                    </div>
+                </div>
+
+                <article class="admin-panel">
+                    <div class="filters-grid">
+                        <label>
+                            From
+                            <input type="date" id="sessionFilterFrom">
+                        </label>
+                        <label>
+                            To
+                            <input type="date" id="sessionFilterTo">
+                        </label>
+                        <label>
+                            Employee
+                            <select id="sessionFilterEmployee">
+                                <option value="">All employees</option>
+                            </select>
+                        </label>
+                        <label>
+                            Session type
+                            <select id="sessionFilterType">
+                                <option value="">All types</option>
+                            </select>
+                        </label>
+                        <label>
+                            Payment/session status
+                            <select id="sessionFilterStatus">
+                                <option value="">All statuses</option>
+                                <option value="confirmed">Confirmed</option>
+                                <option value="pending">Pending</option>
+                                <option value="failed">Failed</option>
+                                <option value="paid">Paid</option>
+                            </select>
+                        </label>
+                        <div class="filter-actions">
+                            <button type="button" class="btn btn-neutral btn-sm" id="applySessionFiltersBtn">Apply filters</button>
+                            <button type="button" class="btn btn-secondary btn-sm" id="resetSessionFiltersBtn">Reset</button>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="admin-panel">
+                    <div class="table-wrap">
+                        <table class="admin-table" aria-label="Charla session and payment records table">
+                            <thead>
+                                <tr>
+                                    <th>Date & time</th>
+                                    <th>Participant</th>
+                                    <th>Facilitator</th>
+                                    <th>Participants</th>
+                                    <th>Session type</th>
+                                    <th>Payment</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="sessionRecordsBody">
+                                <tr>
+                                    <td colspan="8" class="inline-empty">Loading session records...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </article>
+            </section>
+
+            <section class="admin-view" id="view-reports" data-view-panel="reports">
+                <div class="toolbar-row">
+                    <h2>Employee reports & activity logging</h2>
+                    <div class="toolbar-actions">
+                        <button type="button" class="btn btn-neutral btn-sm" id="refreshReportsBtn">Refresh reports</button>
+                    </div>
+                </div>
+
+                <article class="admin-panel">
+                    <h3>Submit session report</h3>
+                    <form id="sessionReportForm" class="form-grid">
+                        <label>
+                            Booking ID (optional)
+                            <input type="text" id="reportBookingId" placeholder="Booking reference">
+                        </label>
+                        <label>
+                            Session date
+                            <input type="date" id="reportSessionDate" required>
+                        </label>
+                        <label>
+                            Session type
+                            <select id="reportSessionType" required>
+                                <option value="charla">Charla</option>
+                                <option value="group">Group</option>
+                                <option value="check-in">Check-in</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </label>
+                        <label>
+                            Participant count
+                            <input type="number" id="reportParticipantCount" min="1" value="1" required>
+                        </label>
+                        <label>
+                            Engagement level
+                            <select id="reportEngagement" required>
+                                <option value="high">High</option>
+                                <option value="medium">Medium</option>
+                                <option value="low">Low</option>
+                            </select>
+                        </label>
+                        <label>
+                            Session rating (1-5)
+                            <input type="number" id="reportRating" min="1" max="5" value="4" required>
+                        </label>
+                        <label class="full-width">
+                            Session summary
+                            <textarea id="reportSummary" rows="4" required placeholder="What happened in this session?"></textarea>
+                        </label>
+                        <label class="full-width">
+                            Challenges observed
+                            <textarea id="reportChallenges" rows="3" placeholder="Any blockers or concerns?"></textarea>
+                        </label>
+                        <label class="full-width">
+                            Additional notes
+                            <textarea id="reportNotes" rows="3" placeholder="Follow-up actions, referrals, or context"></textarea>
+                        </label>
+                        <label class="full-width">
+                            Attachments (optional)
+                            <input type="file" id="reportAttachments" multiple>
+                            <span class="field-hint">Attachment metadata (name/type/size) is saved for reporting logs.</span>
+                        </label>
+                        <div class="full-width form-submit-row">
+                            <button type="submit" class="btn btn-primary">Submit report</button>
+                        </div>
+                    </form>
+                </article>
+
+                <article class="admin-panel">
+                    <h3>Submitted reports</h3>
+                    <div class="table-wrap">
+                        <table class="admin-table" aria-label="Employee reports table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Facilitator</th>
+                                    <th>Type</th>
+                                    <th>Participants</th>
+                                    <th>Engagement</th>
+                                    <th>Rating</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="reportsTableBody">
+                                <tr>
+                                    <td colspan="8" class="inline-empty">No reports submitted yet.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </article>
+
+                <article class="admin-panel">
+                    <h3>Activity log</h3>
+                    <div class="table-wrap">
+                        <table class="admin-table" aria-label="Activity log table">
+                            <thead>
+                                <tr>
+                                    <th>Time</th>
+                                    <th>Actor</th>
+                                    <th>Module</th>
+                                    <th>Action</th>
+                                    <th>Details</th>
+                                </tr>
+                            </thead>
+                            <tbody id="activityTableBody">
+                                <tr>
+                                    <td colspan="5" class="inline-empty">No activity logged yet.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </article>
+            </section>
+
+            <section class="admin-view" id="view-permissions" data-view-panel="permissions">
+                <div class="toolbar-row">
+                    <h2>User permissions & account authorization</h2>
+                    <div class="toolbar-actions">
+                        <button type="button" class="btn btn-neutral btn-sm" id="refreshPermissionsBtn">Refresh permissions</button>
+                    </div>
+                </div>
+
+                <article class="admin-panel">
+                    <h3>Authorize account</h3>
+                    <form id="addPermissionUserForm" class="form-grid">
+                        <label>
+                            GitHub login
+                            <input type="text" id="permUserLogin" required placeholder="username">
+                        </label>
+                        <label>
+                            Name
+                            <input type="text" id="permUserName" placeholder="Display name">
+                        </label>
+                        <label>
+                            Email
+                            <input type="email" id="permUserEmail" placeholder="user@example.com">
+                        </label>
+                        <label>
+                            Role
+                            <select id="permUserRole" required>
+                                <option value="blog_contributor">Blog-only contributor</option>
+                                <option value="facilitator">Charla facilitator</option>
+                                <option value="hybrid">Hybrid employee</option>
+                                <option value="admin">Admin</option>
+                            </select>
+                        </label>
+                        <div class="full-width form-submit-row">
+                            <button type="submit" class="btn btn-primary">Authorize account</button>
+                        </div>
+                    </form>
+                </article>
+
+                <article class="admin-panel">
+                    <h3>Role assignments</h3>
+                    <div id="permissionsCards" class="permissions-cards">
+                        <p class="inline-empty">Loading account permissions...</p>
+                    </div>
+                </article>
+            </section>
+        </section>
+    </main>
+
+    <div class="draft-modal" id="draftModal" hidden>
+        <div class="draft-modal-content">
+            <div class="draft-modal-header">
+                <h3 id="draftModalTitle">Draft editor</h3>
+                <button type="button" class="close-draft-modal" id="closeDraftModalBtn" aria-label="Close draft editor">&times;</button>
+            </div>
+            <form id="draftEditorForm" class="form-grid">
+                <input type="hidden" id="draftEditorId">
+                <input type="hidden" id="draftEditorPublishedSlug">
+                <label>
+                    Title
+                    <input type="text" id="draftEditorTitle" required>
+                </label>
+                <label>
+                    Publish date
+                    <input type="datetime-local" id="draftEditorDate" required>
+                </label>
+                <label>
+                    Category
+                    <input type="text" id="draftEditorCategory" placeholder="Mental Health">
+                </label>
+                <label>
+                    Emoji
+                    <input type="text" id="draftEditorEmoji" maxlength="2" placeholder="💙">
+                </label>
+                <label class="full-width">
+                    Summary
+                    <textarea id="draftEditorSummary" rows="3" required></textarea>
+                </label>
+                <label class="full-width">
+                    Content (Markdown)
+                    <textarea id="draftEditorContent" rows="14" required></textarea>
+                </label>
+                <label class="full-width">
+                    Review notes
+                    <textarea id="draftEditorReviewNotes" rows="2" placeholder="Optional notes for reviewer or publisher"></textarea>
+                </label>
+                <div class="full-width modal-actions" id="draftModalActions">
+                    <button type="button" class="btn btn-neutral btn-sm" id="deleteDraftBtn">Delete draft</button>
+                    <button type="button" class="btn btn-secondary btn-sm" id="saveDraftBtn">Save draft</button>
+                    <button type="button" class="btn btn-neutral btn-sm" id="submitDraftReviewBtn">Submit for review</button>
+                    <button type="button" class="btn btn-neutral btn-sm" id="approveDraftBtn">Approve</button>
+                    <button type="button" class="btn btn-secondary btn-sm" id="requestChangesDraftBtn">Request changes</button>
+                    <button type="button" class="btn btn-primary btn-sm" id="publishDraftBtn">Publish</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="/admin/config.js"></script>
+    <script src="/src/admin/blog-admin.js"></script>
+    <script src="/admin/dashboard.js"></script>
+</body>
+</html>

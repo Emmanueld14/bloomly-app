@@ -41,8 +41,17 @@ const APPOINTMENTS_CONFIG = {
     adminKey: 'BloomlyCharla2026!'
 };
 
+// Modular dashboard storage and default admin access
+const ADMIN_DASHBOARD_CONFIG = {
+    permissionsFilePath: 'content/admin/permissions.json',
+    draftsFilePath: 'content/admin/blog-drafts.json',
+    reportsFilePath: 'content/admin/session-reports.json',
+    activityFilePath: 'content/admin/activity-log.json',
+    defaultAdminLogins: ['Emmanueld14']
+};
+
 // Export for use in other files
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { GITHUB_CONFIG, SUPABASE_CONFIG, APPOINTMENTS_CONFIG };
+    module.exports = { GITHUB_CONFIG, SUPABASE_CONFIG, APPOINTMENTS_CONFIG, ADMIN_DASHBOARD_CONFIG };
 }
 
