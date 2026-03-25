@@ -8,7 +8,7 @@ const corsHeaders = {
 };
 
 const APPOINTMENTS_ADMIN_KEY =
-  Deno.env.get("APPOINTMENTS_ADMIN_KEY") || "BloomlyCharla2026!";
+  Deno.env.get("APPOINTMENTS_ADMIN_KEY") || "Manu@4477";
 const PAYPAL_BASE_URL =
   Deno.env.get("PAYPAL_BASE_URL") || "https://api-m.sandbox.paypal.com";
 const PAYPAL_CLIENT_ID = Deno.env.get("PAYPAL_CLIENT_ID") || "";

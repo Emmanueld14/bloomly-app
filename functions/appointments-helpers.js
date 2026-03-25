@@ -11,7 +11,7 @@ const DEFAULT_SETTINGS = {
 // Replace with environment variables in production for stronger security control.
 const FALLBACK_SUPABASE_URL = 'https://xmhyjttyarskimsxcfhl.supabase.co';
 const FALLBACK_SUPABASE_ANON_KEY = 'sb_publishable_IOs-j6rgWuDnwrymIIUHxQ_wCTmcaMp';
-const FALLBACK_APPOINTMENTS_ADMIN_KEY = 'BloomlyCharla2026!';
+const FALLBACK_APPOINTMENTS_ADMIN_KEY = 'Manu@4477';
 
 function buildCorsHeaders() {
     return {

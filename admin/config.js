@@ -38,7 +38,7 @@ const SUPABASE_CONFIG = {
 // Appointments admin configuration
 const APPOINTMENTS_CONFIG = {
     apiBase: 'https://xmhyjttyarskimsxcfhl.supabase.co/functions/v1',
-    adminKey: 'BloomlyCharla2026!'
+    adminKey: 'Manu@4477'
 };
 
 // Modular dashboard storage and default admin access
