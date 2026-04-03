@@ -22,13 +22,12 @@ export async function onRequestPost({ request, env }) {
             );
         }
         
-        // Get credentials from environment variables (preferred) or request body (fallback)
         const clientId = env.GITHUB_CLIENT_ID || body.client_id;
-        const clientSecret = env.GITHUB_CLIENT_SECRET || body.client_secret;
-        
+        const clientSecret = env.GITHUB_CLIENT_SECRET;
+
         if (!clientId || !clientSecret) {
             return new Response(
-                JSON.stringify({ 
+                JSON.stringify({
                     error: 'Missing OAuth credentials',
                     hint: 'Set GITHUB_CLIENT_ID and GITHUB_CLIENT_SECRET in Cloudflare Pages Environment Variables'
                 }),

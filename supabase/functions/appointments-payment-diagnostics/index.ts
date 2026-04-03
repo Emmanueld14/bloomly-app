@@ -7,8 +7,7 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-const APPOINTMENTS_ADMIN_KEY =
-  Deno.env.get("APPOINTMENTS_ADMIN_KEY") || "BloomlyCharla2026!";
+const APPOINTMENTS_ADMIN_KEY = Deno.env.get("APPOINTMENTS_ADMIN_KEY") || "";
 const PAYPAL_BASE_URL =
   Deno.env.get("PAYPAL_BASE_URL") || "https://api-m.sandbox.paypal.com";
 const PAYPAL_CLIENT_ID = Deno.env.get("PAYPAL_CLIENT_ID") || "";
@@ -176,6 +175,13 @@ Deno.serve(async (req) => {
   }
   if (req.method !== "POST") {
     return jsonResponse({ error: "Method not allowed" }, 405);
+  }
+
+  if (!APPOINTMENTS_ADMIN_KEY) {
+    return jsonResponse(
+      { error: "Server misconfiguration: set APPOINTMENTS_ADMIN_KEY." },
+      500,
+    );
   }
 
   const providedKey = req.headers.get("x-admin-key") || "";

@@ -11,6 +11,8 @@
         return;
     }
 
+    const ADMIN_SESSION_KEY = 'bloomly_admin_password';
+
     const elements = {
         enabled: document.getElementById('appointmentsEnabled'),
         price: document.getElementById('appointmentPrice'),
@@ -81,18 +83,15 @@
     }
 
     function getAdminKey() {
-        const configured = String(config.adminKey || '').trim();
-        if (configured && configured !== 'REPLACE_WITH_APPOINTMENTS_ADMIN_KEY') {
-            return configured;
-        }
+        const fromSession = (sessionStorage.getItem(ADMIN_SESSION_KEY) || '').trim();
+        if (fromSession) return fromSession;
         return elements.adminKeyInput ? elements.adminKeyInput.value.trim() : '';
     }
 
     function configureAdminKeyVisibility() {
-        if (!elements.adminKeyGroup) return;
-        const configured = String(config.adminKey || '').trim();
-        const hasKey = configured && configured !== 'REPLACE_WITH_APPOINTMENTS_ADMIN_KEY';
-        elements.adminKeyGroup.style.display = hasKey ? 'none' : 'block';
+        if (elements.adminKeyGroup) {
+            elements.adminKeyGroup.style.display = 'none';
+        }
     }
 
     function normalizeTimeSlot(value) {
@@ -437,7 +436,7 @@
         event.preventDefault();
         const adminKey = getAdminKey();
         if (!adminKey) {
-            setMessage('Charla admin key is required.', 'error');
+            setMessage('Enter your admin password on the unlock screen first (sidebar).', 'error');
             return;
         }
 
@@ -476,7 +475,7 @@
     async function runPaymentDiagnostics() {
         const adminKey = getAdminKey();
         if (!adminKey) {
-            setDiagnosticsMessage('Charla admin key is required for diagnostics.', 'error');
+            setDiagnosticsMessage('Unlock admin with your password first.', 'error');
             return;
         }
 

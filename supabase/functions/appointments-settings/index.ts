@@ -10,8 +10,7 @@ const corsHeaders = {
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") || "";
 const SUPABASE_SERVICE_ROLE_KEY =
   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
-const APPOINTMENTS_ADMIN_KEY =
-  Deno.env.get("APPOINTMENTS_ADMIN_KEY") || "BloomlyCharla2026!";
+const APPOINTMENTS_ADMIN_KEY = Deno.env.get("APPOINTMENTS_ADMIN_KEY") || "";
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
@@ -197,6 +196,13 @@ Deno.serve(async (req) => {
 
   if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
     return jsonResponse({ error: "Supabase service role key is missing." }, 500);
+  }
+
+  if (req.method === "POST" && !APPOINTMENTS_ADMIN_KEY) {
+    return jsonResponse(
+      { error: "Server misconfiguration: set APPOINTMENTS_ADMIN_KEY." },
+      500,
+    );
   }
 
   if (req.method === "GET") {
