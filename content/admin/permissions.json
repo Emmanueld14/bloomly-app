@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "updatedAt": "2026-04-06T17:18:28.757Z",
+  "accounts": [
+    {
+      "id": "acct-11a3f9a4-5d03-40f1-802b-f2e2c6039dc8",
+      "login": "emmanueld14",
+      "email": "",
+      "name": "Emmanueld14",
+      "role": "admin",
+      "active": true,
+      "permissions": {
+        "dashboard": true,
+        "blogAccess": true,
+        "blogReview": true,
+        "blogPublish": true,
+        "sessionRecords": true,
+        "reportsSubmit": true,
+        "reportsReview": true,
+        "userPermissions": true
+      },
+      "updatedAt": "2026-04-06T17:18:28.757Z"
+    }
+  ]
+}
