@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "updatedAt": "2026-04-06T17:18:31.398Z",
+  "entries": [
+    {
+      "id": "activity-d8fa453a-e6a3-4bfb-a199-9efb8d757eb0",
+      "timestamp": "2026-04-06T17:18:31.398Z",
+      "actorLogin": "emmanueld14",
+      "actorRole": "admin",
+      "module": "auth",
+      "action": "login",
+      "target": "Emmanueld14",
+      "details": "Dashboard session started"
+    }
+  ]
+}
