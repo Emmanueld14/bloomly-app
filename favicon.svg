@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Bloomly favicon">
+  <defs>
+    <linearGradient id="bloomlyGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF78B9"/>
+      <stop offset="50%" stop-color="#C8A7FF"/>
+      <stop offset="100%" stop-color="#5FA8FF"/>
+    </linearGradient>
+  </defs>
+  <rect x="2" y="2" width="60" height="60" rx="16" fill="#ffffff"/>
+  <path
+    d="M32 13c6.9 0 12.5 5.6 12.5 12.5 0 6.2-4.5 11.3-10.4 12.3l8.1 12.7h-9.1l-6.3-10.9-6.1 10.9h-9.2l8.2-13A12.5 12.5 0 0 1 19.5 13C24.2 13 28.3 15.6 30.4 19.5 32.6 15.6 36.7 13 41.4 13z"
+    fill="url(#bloomlyGradient)"
+  />
+</svg>
