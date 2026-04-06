@@ -5,11 +5,33 @@
     'use strict';
 
     const config = window.APPOINTMENTS_CONFIG || {};
+    const ADMIN_SESSION_KEY = 'bloomly_admin_password';
     const form = document.getElementById('appointmentsSettingsForm');
     if (!form) {
         window.AppointmentsAdmin = { init: () => {} };
         return;
     }
+
+    function resolveApiBase() {
+        const configuredBase = String(config.apiBase || '').trim();
+        if (configuredBase) {
+            return configuredBase.replace(/\/$/, '');
+        }
+
+        const publicBase = String((window.APPOINTMENTS_PUBLIC_CONFIG || {}).apiBase || '').trim();
+        if (publicBase) {
+            return publicBase.replace(/\/$/, '');
+        }
+
+        const supabaseUrl = String((window.SUPABASE_CONFIG || {}).url || '').trim();
+        if (supabaseUrl) {
+            return `${supabaseUrl.replace(/\/$/, '')}/functions/v1`;
+        }
+
+        return '/api';
+    }
+
+    const apiBase = resolveApiBase();
 
     const elements = {
         enabled: document.getElementById('appointmentsEnabled'),
@@ -81,18 +103,45 @@
     }
 
     function getAdminKey() {
+        const fromSession = String(sessionStorage.getItem(ADMIN_SESSION_KEY) || '').trim();
+        if (fromSession) return fromSession;
+
+        const fromInput = elements.adminKeyInput ? elements.adminKeyInput.value.trim() : '';
+        if (fromInput) return fromInput;
+
         const configured = String(config.adminKey || '').trim();
-        if (configured && configured !== 'REPLACE_WITH_APPOINTMENTS_ADMIN_KEY') {
-            return configured;
-        }
-        return elements.adminKeyInput ? elements.adminKeyInput.value.trim() : '';
+        if (configured && configured !== 'REPLACE_WITH_APPOINTMENTS_ADMIN_KEY') return configured;
+
+        return '';
     }
 
     function configureAdminKeyVisibility() {
         if (!elements.adminKeyGroup) return;
+        const fromSession = String(sessionStorage.getItem(ADMIN_SESSION_KEY) || '').trim();
+        if (fromSession) {
+            elements.adminKeyGroup.style.display = 'none';
+            return;
+        }
         const configured = String(config.adminKey || '').trim();
         const hasKey = configured && configured !== 'REPLACE_WITH_APPOINTMENTS_ADMIN_KEY';
         elements.adminKeyGroup.style.display = hasKey ? 'none' : 'block';
+    }
+
+    function normalizeAdminError(message) {
+        const text = String(message || '').trim();
+        if (!text) {
+            return 'Unable to complete request.';
+        }
+
+        if (/missing required configuration:\s*adminkey/i.test(text)) {
+            return 'Payment diagnostics is using a legacy API route without APPOINTMENTS_ADMIN_KEY. Set APPOINTMENTS_CONFIG.apiBase to your Supabase functions URL.';
+        }
+
+        if (/unauthorized/i.test(text)) {
+            return 'Admin key/password was rejected. Use the same value as APPOINTMENTS_ADMIN_KEY in Supabase.';
+        }
+
+        return text;
     }
 
     function normalizeTimeSlot(value) {
@@ -386,9 +435,10 @@
     async function loadSettings() {
         setMessage('Loading Charla settings...', null);
         try {
-            const response = await fetch(`${config.apiBase || '/api'}/appointments-settings`);
+            const response = await fetch(`${apiBase}/appointments-settings`);
             if (!response.ok) {
-                throw new Error('Unable to load Charla settings.');
+                const payload = await response.json().catch(() => ({}));
+                throw new Error(payload.error || 'Unable to load Charla settings.');
             }
             const payload = await response.json();
             applySettings(
@@ -401,7 +451,7 @@
             setMessage('Settings loaded.', 'success');
         } catch (error) {
             console.error('Charla settings load failed', error);
-            setMessage(error.message || 'Unable to load Charla settings.', 'error');
+            setMessage(normalizeAdminError(error.message || 'Unable to load Charla settings.'), 'error');
         }
     }
 
@@ -445,7 +495,7 @@
         setMessage('Saving Charla settings...', null);
 
         try {
-            const response = await fetch(`${config.apiBase || '/api'}/appointments-settings`, {
+            const response = await fetch(`${apiBase}/appointments-settings`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -469,7 +519,7 @@
             setMessage('Charla settings updated.', 'success');
         } catch (error) {
             console.error('Charla settings save failed', error);
-            setMessage(error.message || 'Unable to save settings.', 'error');
+            setMessage(normalizeAdminError(error.message || 'Unable to save settings.'), 'error');
         }
     }
 
@@ -487,7 +537,7 @@
         setDiagnosticsMessage('Checking payment provider configuration...', null);
 
         try {
-            const response = await fetch(`${config.apiBase || '/api'}/appointments-payment-diagnostics`, {
+            const response = await fetch(`${apiBase}/appointments-payment-diagnostics`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -508,11 +558,11 @@
                     'success'
                 );
             } else {
-                setDiagnosticsMessage('Diagnostics complete. No payment provider is fully ready yet.', 'error');
+                setDiagnosticsMessage('Diagnostics complete. Configure at least one provider before opening bookings.', 'error');
             }
         } catch (error) {
             console.error('Payment diagnostics failed', error);
-            setDiagnosticsMessage(error.message || 'Unable to run payment diagnostics.', 'error');
+            setDiagnosticsMessage(normalizeAdminError(error.message || 'Unable to run payment diagnostics.'), 'error');
         } finally {
             if (elements.diagnosticsButton) {
                 elements.diagnosticsButton.disabled = false;

@@ -78,20 +78,20 @@
                     <div class="appointments-slot-list" data-appointments-slots></div>
                 </div>
 
-                <div class="appointments-card">
+                <div class="appointments-card appointments-card-sticky">
                     <h2>Confirm your Charla</h2>
-                    <p class="appointments-helper">Share the basics so we can prepare for your session.</p>
+                    <p class="appointments-helper">Three quick steps: choose date, choose time, enter your details.</p>
 
                     <div class="appointments-summary" data-appointments-summary>
                         Select a date and time to continue.
                     </div>
 
                     <form class="appointments-form" data-appointments-form>
-                        <div class="appointments-field">
+                        <div class="appointments-field appointments-field-compact">
                             <label for="appointmentName">Full name</label>
                             <input id="appointmentName" name="name" type="text" required placeholder="Your name">
                         </div>
-                        <div class="appointments-field">
+                        <div class="appointments-field appointments-field-compact">
                             <label for="appointmentEmail">Email address</label>
                             <input id="appointmentEmail" name="email" type="email" required placeholder="you@email.com">
                         </div>
@@ -105,6 +105,7 @@
                         </button>
                     </form>
 
+                    <p class="appointments-note">You can choose your payment method in the next step.</p>
                     <p class="appointments-message" data-appointments-message aria-live="polite"></p>
                 </div>
             </div>

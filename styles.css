@@ -3622,6 +3622,11 @@ a:hover {
     box-shadow: 0 24px 50px rgba(var(--color-black-rgb), 0.12);
 }
 
+.appointments-card-sticky {
+    position: sticky;
+    top: calc(84px + var(--space-md));
+}
+
 .appointments-card h2 {
     margin-bottom: var(--space-sm);
 }
@@ -3750,6 +3755,10 @@ a:hover {
     gap: var(--space-md);
 }
 
+.appointments-form .appointments-field-compact {
+    margin-bottom: 0;
+}
+
 .appointments-field label {
     display: block;
     font-weight: 600;
@@ -3785,6 +3794,13 @@ a:hover {
     border-radius: var(--radius-md);
     background: rgba(var(--color-black-rgb), 0.04);
     color: var(--color-gray-650);
+}
+
+.appointments-note {
+    margin-top: var(--space-sm);
+    margin-bottom: var(--space-sm);
+    font-size: var(--text-sm);
+    color: var(--color-gray-550);
 }
 
 .appointments-message.is-error {
@@ -3823,6 +3839,10 @@ a:hover {
 @media (max-width: 960px) {
     .appointments-shell {
         grid-template-columns: 1fr;
+    }
+
+    .appointments-card-sticky {
+        position: static;
     }
 }
 

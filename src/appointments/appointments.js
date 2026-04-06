@@ -305,6 +305,10 @@
             state.selectedTime = null;
         }
 
+        if (!state.selectedDate && availableDateKeys.length) {
+            state.selectedDate = availableDateKeys[0];
+        }
+
         if (!availableDateKeys.length) {
             const emptyState = document.createElement('div');
             emptyState.className = 'appointments-date-empty';
@@ -324,26 +328,24 @@
             return;
         }
 
-        const slots = getSlotsForDate(state.selectedDate);
-        if (!slots.length) {
+        const openSlots = getOpenSlots(state.selectedDate);
+        if (!openSlots.length) {
             elements.slots.textContent = 'No slots available for this day.';
             return;
         }
 
-        const booked = new Set(getBookedSlots(state.selectedDate));
+        if (!state.selectedTime || !openSlots.includes(state.selectedTime)) {
+            state.selectedTime = openSlots[0];
+        }
+
         const fragment = document.createDocumentFragment();
 
-        slots.forEach((slot) => {
+        openSlots.forEach((slot) => {
             const button = document.createElement('button');
             button.type = 'button';
             button.className = 'appointments-slot-button';
             button.dataset.time = slot;
             button.textContent = slot;
-
-            if (booked.has(slot) || !state.settings?.bookingEnabled) {
-                button.classList.add('is-disabled');
-                button.disabled = true;
-            }
 
             if (state.selectedTime === slot) {
                 button.classList.add('is-active');
@@ -369,13 +371,13 @@
             return;
         }
         if (!state.selectedDate || !state.selectedTime) {
-            elements.summary.textContent = 'Select a date and time to continue.';
+            elements.summary.textContent = 'Step 1: Pick a date. Step 2: Pick a time. Step 3: Enter details and continue to payment.';
             updateSubmitState();
             return;
         }
         const dateLabel = parseDateKey(state.selectedDate).toLocaleDateString(undefined, DATE_OPTIONS);
         const price = formatCurrency(state.settings.priceCents, state.settings.currency);
-        elements.summary.textContent = `Selected: ${dateLabel} at ${state.selectedTime}. Booking fee: ${price}.`;
+        elements.summary.textContent = `Selected: ${dateLabel} at ${state.selectedTime}. You will pay ${price} on the next page.`;
         updateSubmitState();
     }
 
@@ -464,8 +466,8 @@
         const email = String(formData.get('email') || '').trim();
         const purpose = String(formData.get('purpose') || '').trim();
 
-        if (!name || !email || !purpose) {
-            setMessage('Please complete all required fields.', 'error');
+        if (!name || !email) {
+            setMessage('Please enter your name and email.', 'error');
             return;
         }
 
@@ -479,7 +481,7 @@
                 body: JSON.stringify({
                     name,
                     email,
-                    purpose,
+                    purpose: purpose || 'Charla session',
                     date: state.selectedDate,
                     time: normalizeTimeSlot(state.selectedTime) || state.selectedTime
                 })
