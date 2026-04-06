@@ -1,92 +1,55 @@
 # Admin Panel Setup Guide
 
-This admin panel allows you to manage your blog posts using GitHub OAuth authentication.
+The classic admin at `/admin/` uses GitHub OAuth for repository access, then a **site admin password** (stored only in the browser session) for Supabase-backed actions (email to subscribers, Charla settings, publish-post sync).
 
 ## Step 1: Create GitHub OAuth App
 
-1. Go to GitHub → Settings → Developer settings → OAuth Apps
-   - Direct link: https://github.com/settings/developers
+1. Go to GitHub → Settings → Developer settings → OAuth Apps  
+   https://github.com/settings/developers
 
-2. Click "New OAuth App"
+2. Click **New OAuth App**
 
-3. Fill in the form:
-   - **Application name**: `Bloomly Admin` (or any name you prefer)
-   - **Homepage URL**: `https://bloomly.co.ke` (your domain)
-   - **Authorization callback URL**: `https://bloomly.co.ke/admin/callback.html`
-   - **Application description**: (optional) "Blog admin panel for Bloomly"
+3. Fill in:
+   - **Application name**: `Bloomly Admin` (or any name)
+   - **Homepage URL**: your site (e.g. `https://bloomly.co.ke`)
+   - **Authorization callback URL**: `https://yourdomain.com/admin/callback.html`
 
-4. Click "Register application"
+4. Register the app and copy the **Client ID**.
 
-5. **Important**: Copy these values:
-   - **Client ID** (you'll see this immediately)
-   - **Client Secret** (click "Generate a new client secret" and copy it)
+5. Generate a **Client Secret** — this value must **only** be configured on the server that exchanges the OAuth `code` for an access token (see `api/github-auth.js`, `render-api/`, or Cloudflare `functions/github-auth.js`). Do **not** put the client secret in `admin/config.js`.
 
-## Step 2: Configure Admin Panel
+## Step 2: Configure `admin/config.js`
 
-1. Open `admin/config.js` in your project
+Set only the **public** client ID and repo details:
 
-2. Replace the placeholder values:
-   ```javascript
-   clientId: 'YOUR_GITHUB_CLIENT_ID_HERE',  // Replace with your Client ID
-   clientSecret: 'YOUR_GITHUB_CLIENT_SECRET_HERE',  // Replace with your Client Secret
-   ```
+- `clientId` — your GitHub OAuth App Client ID
+- `repoOwner`, `repoName`, `repoBranch`
+- `vercelApiUrl` or your deployed `POST /api/github-auth` URL (e.g. Render)
 
-3. Verify other settings are correct:
-   - `repoOwner`: `'Emmanueld14'` (your GitHub username)
-   - `repoName`: `'bloomly-app'` (your repository name)
-   - `repoBranch`: `'main'` (your default branch)
+## Step 3: Token exchange host (OAuth callback)
 
-## Step 3: Deploy Changes
+Your callback (`admin/callback.html`) sends `code` and `redirect_uri` to the backend. The backend must have:
 
-1. Commit and push the admin files to GitHub:
-   ```bash
-   git add admin/
-   git commit -m "Add admin panel with GitHub OAuth"
-   git push origin main
-   ```
+- `GITHUB_CLIENT_ID`
+- `GITHUB_CLIENT_SECRET`
 
-2. Cloudflare Pages will automatically deploy the changes
+See [SUPABASE_SETUP.md](../SUPABASE_SETUP.md) and the repo’s `api/github-auth.js` for Vercel-style deployment.
 
-## Step 4: Access Admin Panel
+## Step 4: Site admin password (Supabase)
 
-1. Go to: `https://bloomly.co.ke/admin` (or `https://your-pages-url.pages.dev/admin`)
+In the Supabase project (Edge Function secrets), set **`ADMIN_PUBLISH_KEY` and `APPOINTMENTS_ADMIN_KEY` to the same strong secret**. After you sign in with GitHub on `/admin/`, enter that value once on the **Unlock** screen. It is kept in `sessionStorage` until you click **Lock admin** or log out.
 
-2. Click "Login with GitHub"
+No admin password should be committed in the repo.
 
-3. Authorize the application
+## Access
 
-4. You'll be redirected back to the admin panel
-
-## Features
-
-- **View all blog posts**: See a list of all markdown files in `content/blog/`
-- **Edit posts**: Click "Edit" to open the post in GitHub's web editor
-- **Add new posts**: Click "Add New Post" to create a new markdown file
-- **Delete posts**: Click "Delete" to remove a blog post (requires confirmation)
-
-## Security Notes
-
-⚠️ **Important**: The client secret is stored client-side in this implementation. For production use, consider:
-- Using environment variables
-- Implementing a backend proxy for OAuth token exchange
-- Using GitHub's server-to-server authentication
-
-For a personal blog, the current implementation is acceptable, but keep your client secret secure and don't commit it to public repositories.
+1. Open `/admin/`
+2. **Login with GitHub**
+3. **Unlock** with the admin password
+4. Use the sidebar: **Blog posts**, **Email subscribers**, **Charla**
 
 ## Troubleshooting
 
-### "Please configure GitHub OAuth credentials"
-- Make sure you've updated `admin/config.js` with your Client ID and Secret
-
-### "Authentication failed"
-- Check that your Authorization callback URL matches exactly: `https://bloomly.co.ke/admin/callback.html`
-- Verify your Client ID and Secret are correct
-
-### "Failed to load posts"
-- Make sure your GitHub token has `repo` scope
-- Verify your repository name and owner are correct in `config.js`
-
-### Posts don't appear after editing
-- Cloudflare Pages auto-deploys on GitHub commits (usually within 1-2 minutes)
-- Check Cloudflare Pages dashboard for deployment status
-
+- **OAuth fails after deploy** — Ensure the callback URL matches the OAuth app exactly and the token host has `GITHUB_CLIENT_ID` / `GITHUB_CLIENT_SECRET` set.
+- **Charla/email APIs return 401** — Unlock admin again; confirm both Supabase keys match what you entered.
+- **Posts fail to load** — Confirm GitHub token has `repo` scope and `repoOwner` / `repoName` in `config.js` are correct.

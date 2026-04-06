@@ -33,10 +33,12 @@ export default async function handler(req, res) {
         }
         
         const clientId = process.env.GITHUB_CLIENT_ID || req.body.client_id;
-        const clientSecret = process.env.GITHUB_CLIENT_SECRET || req.body.client_secret;
-        
+        const clientSecret = process.env.GITHUB_CLIENT_SECRET;
+
         if (!clientId || !clientSecret) {
-            return res.status(400).json({ error: 'Missing OAuth credentials' });
+            return res.status(500).json({
+                error: 'OAuth server misconfiguration: set GITHUB_CLIENT_ID and GITHUB_CLIENT_SECRET on the host'
+            });
         }
         
         // Exchange code for access token

@@ -1,16 +1,10 @@
 // GitHub OAuth Configuration
-// IMPORTANT: Replace these with your GitHub OAuth App credentials
-// Get them from: https://github.com/settings/developers
+// Client ID is public. Client secret must live only on the token-exchange server
+// (e.g. Vercel `GITHUB_CLIENT_SECRET` for api/github-auth.js).
 
 const GITHUB_CONFIG = {
-    // Your GitHub OAuth App Client ID
     clientId: 'Ov23ligFSm5nzRevPd41',
-    
-    // Your GitHub OAuth App Client Secret (keep this secure!)
-    // Note: In production, this should be stored server-side, but for simplicity
-    // we'll use it client-side. Consider using environment variables or a backend.
-    clientSecret: 'c0a23cbd55971a7270d4def0c3384c7d96e74404',
-    
+
     // Your repository details
     repoOwner: 'Emmanueld14',
     repoName: 'bloomly-app',
@@ -31,11 +25,11 @@ const SUPABASE_CONFIG = {
     url: 'https://xmhyjttyarskimsxcfhl.supabase.co',
     anonKey: 'sb_publishable_IOs-j6rgWuDnwrymIIUHxQ_wCTmcaMp',
     notifyFunctionUrl: 'https://xmhyjttyarskimsxcfhl.supabase.co/functions/v1/notify-subscribers',
-    publishPostFunctionUrl: 'https://xmhyjttyarskimsxcfhl.supabase.co/functions/v1/publish-post',
-    adminPublishKey: 'REPLACE_WITH_ADMIN_PUBLISH_KEY'
+    publishPostFunctionUrl: 'https://xmhyjttyarskimsxcfhl.supabase.co/functions/v1/publish-post'
 };
 
-// Appointments admin configuration
+// Appointments (Charla) configuration.
+// Admin password is primarily entered at unlock (sessionStorage), with this value as fallback.
 const APPOINTMENTS_CONFIG = {
     apiBase: 'https://xmhyjttyarskimsxcfhl.supabase.co/functions/v1',
     adminKey: 'Manu@4477'

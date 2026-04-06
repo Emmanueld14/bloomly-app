@@ -7,8 +7,6 @@ const DEFAULT_SETTINGS = {
     timezone: 'UTC'
 };
 
-// Fallback values keep Charla operational even when host env vars are missing.
-// Replace with environment variables in production for stronger security control.
 const FALLBACK_SUPABASE_URL = 'https://xmhyjttyarskimsxcfhl.supabase.co';
 const FALLBACK_SUPABASE_ANON_KEY = 'sb_publishable_IOs-j6rgWuDnwrymIIUHxQ_wCTmcaMp';
 const FALLBACK_APPOINTMENTS_ADMIN_KEY = 'Manu@4477';

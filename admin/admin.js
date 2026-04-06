@@ -5,12 +5,56 @@
 
 (function() {
     'use strict';
-    
+
+    const ADMIN_SESSION_KEY = 'bloomly_admin_password';
+
     let githubToken = null;
     let githubUser = null;
     const config = typeof GITHUB_CONFIG !== 'undefined' ? GITHUB_CONFIG : {};
     const supabaseConfig = typeof SUPABASE_CONFIG !== 'undefined' ? SUPABASE_CONFIG : {};
     let supabaseClient = null;
+
+    function getAdminPassword() {
+        return (sessionStorage.getItem(ADMIN_SESSION_KEY) || '').trim();
+    }
+
+    function setAdminPassword(value) {
+        if (value) {
+            sessionStorage.setItem(ADMIN_SESSION_KEY, value);
+        } else {
+            sessionStorage.removeItem(ADMIN_SESSION_KEY);
+        }
+    }
+
+    function toggleSectionVisibility(element, isVisible, visibleDisplay) {
+        if (!element) return;
+        element.hidden = !isVisible;
+        element.style.display = isVisible ? (visibleDisplay || 'block') : 'none';
+    }
+
+    function initAdminShellNav() {
+        const nav = document.getElementById('adminSidebarNav');
+        if (!nav) return;
+
+        nav.querySelectorAll('[data-admin-panel]').forEach((btn) => {
+            btn.addEventListener('click', () => {
+                const panel = btn.getAttribute('data-admin-panel');
+                nav.querySelectorAll('.sidebar-link').forEach((link) => {
+                    link.classList.toggle('is-active', link.getAttribute('data-admin-panel') === panel);
+                });
+                document.querySelectorAll('[data-admin-panel-target]').forEach((section) => {
+                    section.classList.toggle(
+                        'is-active',
+                        section.getAttribute('data-admin-panel-target') === panel
+                    );
+                });
+                const titleEl = document.getElementById('adminViewTitle');
+                const subEl = document.getElementById('adminViewSubtitle');
+                if (titleEl) titleEl.textContent = btn.getAttribute('data-title') || 'Admin';
+                if (subEl) subEl.textContent = btn.getAttribute('data-subtitle') || '';
+            });
+        });
+    }
     
     // Initialize
     function init() {
@@ -63,8 +107,27 @@
         const emailPostForm = document.getElementById('emailPostForm');
         if (emailPostForm) {
             emailPostForm.addEventListener('submit', handleEmailPostSubmit);
-            configureAdminPublishKey();
         }
+
+        const adminUnlockBtn = document.getElementById('adminUnlockBtn');
+        if (adminUnlockBtn) {
+            adminUnlockBtn.addEventListener('click', handleAdminUnlock);
+        }
+        const adminPasswordInput = document.getElementById('adminPasswordInput');
+        if (adminPasswordInput) {
+            adminPasswordInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleAdminUnlock();
+                }
+            });
+        }
+        const adminLockBtn = document.getElementById('adminLockBtn');
+        if (adminLockBtn) {
+            adminLockBtn.addEventListener('click', handleAdminLock);
+        }
+
+        initAdminShellNav();
         
         // Close modal on outside click
         const postModal = document.getElementById('postModal');
@@ -79,10 +142,56 @@
         console.log('Admin panel initialized');
     }
     
-    // Show auth section
     function showAuth() {
-        document.getElementById('authSection').style.display = 'block';
-        document.getElementById('adminContent').classList.remove('active');
+        const authSection = document.getElementById('authSection');
+        const unlockSection = document.getElementById('adminUnlockSection');
+        const shell = document.getElementById('adminAppShell');
+        toggleSectionVisibility(authSection, true, 'grid');
+        toggleSectionVisibility(unlockSection, false);
+        toggleSectionVisibility(shell, false);
+    }
+
+    function showAdminUnlock() {
+        const authSection = document.getElementById('authSection');
+        const unlockSection = document.getElementById('adminUnlockSection');
+        const shell = document.getElementById('adminAppShell');
+        toggleSectionVisibility(authSection, false);
+        toggleSectionVisibility(unlockSection, true, 'grid');
+        toggleSectionVisibility(shell, false);
+        const err = document.getElementById('adminUnlockError');
+        if (err) {
+            err.textContent = '';
+            err.style.display = 'none';
+        }
+        const input = document.getElementById('adminPasswordInput');
+        if (input) {
+            input.value = '';
+            input.focus();
+        }
+    }
+
+    function handleAdminUnlock() {
+        const input = document.getElementById('adminPasswordInput');
+        const err = document.getElementById('adminUnlockError');
+        const password = input ? input.value.trim() : '';
+        if (!password) {
+            if (err) {
+                err.textContent = 'Enter your admin password.';
+                err.style.display = 'block';
+            }
+            return;
+        }
+        setAdminPassword(password);
+        if (err) {
+            err.textContent = '';
+            err.style.display = 'none';
+        }
+        showAdminApp();
+    }
+
+    function handleAdminLock() {
+        setAdminPassword('');
+        showAdminUnlock();
     }
     
     // Verify token and load user info
@@ -103,8 +212,7 @@
             githubUser = await response.json();
             // Store user info
             sessionStorage.setItem('github_user', JSON.stringify(githubUser));
-            showAdminContent();
-            loadPosts();
+            afterGitHubSessionReady();
         } catch (error) {
             console.error('Token verification error:', error);
             alert('Authentication failed. Please try logging in again.\n\nError: ' + error.message);
@@ -117,17 +225,36 @@
         }
     }
     
-    // Show admin content
-    function showAdminContent() {
-        document.getElementById('authSection').style.display = 'none';
-        document.getElementById('adminContent').classList.add('active');
-        
-        // Update user info
-        if (githubUser) {
-            document.getElementById('userAvatar').src = githubUser.avatar_url;
-            document.getElementById('userName').textContent = githubUser.name || githubUser.login;
-            document.getElementById('userEmail').textContent = githubUser.email || 'No email';
+    function afterGitHubSessionReady() {
+        if (getAdminPassword()) {
+            showAdminApp();
+        } else {
+            showAdminUnlock();
         }
+    }
+
+    function showAdminApp() {
+        const authSection = document.getElementById('authSection');
+        const unlockSection = document.getElementById('adminUnlockSection');
+        const shell = document.getElementById('adminAppShell');
+        toggleSectionVisibility(authSection, false);
+        toggleSectionVisibility(unlockSection, false);
+        toggleSectionVisibility(shell, true, 'grid');
+
+        if (githubUser) {
+            const av = document.getElementById('userAvatar');
+            const avSide = document.getElementById('sidebarUserAvatar');
+            const name = document.getElementById('userName');
+            const nameSide = document.getElementById('sidebarUserName');
+            const email = document.getElementById('userEmail');
+            if (av) av.src = githubUser.avatar_url;
+            if (avSide) avSide.src = githubUser.avatar_url;
+            if (name) name.textContent = githubUser.name || githubUser.login;
+            if (nameSide) nameSide.textContent = githubUser.name || githubUser.login;
+            if (email) email.textContent = githubUser.email || 'No email';
+        }
+
+        loadPosts();
 
         if (window.AppointmentsAdmin && typeof window.AppointmentsAdmin.init === 'function') {
             window.AppointmentsAdmin.init();
@@ -156,16 +283,6 @@
         return Boolean(supabaseClient && supabaseConfig.url && supabaseConfig.anonKey);
     }
 
-    function configureAdminPublishKey() {
-        const adminKeyGroup = document.getElementById('adminPublishKeyGroup');
-        if (!adminKeyGroup) return;
-
-        const configuredKey = (supabaseConfig.adminPublishKey || '').trim();
-        const hasConfiguredKey = configuredKey && configuredKey !== 'REPLACE_WITH_ADMIN_PUBLISH_KEY';
-
-        adminKeyGroup.style.display = hasConfiguredKey ? 'none' : 'block';
-    }
-
     function setEmailPostMessage(message, type) {
         const messageEl = document.getElementById('emailPostMessage');
         if (!messageEl) return;
@@ -181,13 +298,7 @@
     }
 
     function getAdminPublishKey() {
-        const configuredKey = (supabaseConfig.adminPublishKey || '').trim();
-        if (configuredKey && configuredKey !== 'REPLACE_WITH_ADMIN_PUBLISH_KEY') {
-            return configuredKey;
-        }
-
-        const adminKeyInput = document.getElementById('adminPublishKey');
-        return adminKeyInput ? adminKeyInput.value.trim() : '';
+        return getAdminPassword();
     }
 
     async function handleEmailPostSubmit(event) {
@@ -213,7 +324,7 @@
 
         const adminKey = getAdminPublishKey();
         if (!adminKey) {
-            setEmailPostMessage('Admin publish key not configured. Email update skipped.', 'success');
+            setEmailPostMessage('Unlock admin with your password first (use Lock / unlock in the sidebar).', 'error');
             return;
         }
 
@@ -296,6 +407,7 @@
     function handleLogout() {
         sessionStorage.removeItem('github_token');
         sessionStorage.removeItem('github_user');
+        setAdminPassword('');
         githubToken = null;
         githubUser = null;
         showAuth();
@@ -409,7 +521,7 @@
 
         const adminKey = getAdminPublishKey();
         if (!adminKey) {
-            return { ok: false, message: 'Admin publish key is required to sync posts.' };
+            return { ok: false, message: 'Unlock admin with your password first to sync posts to Supabase.' };
         }
 
         const publishUrl = supabaseConfig.publishPostFunctionUrl ||
@@ -453,7 +565,7 @@
 
         const adminKey = getAdminPublishKey();
         if (!adminKey) {
-            return { ok: false, message: 'Admin publish key is required to notify subscribers.' };
+            return { ok: false, message: 'Unlock admin with your password first to notify subscribers.' };
         }
 
         const notifyUrl = supabaseConfig.notifyFunctionUrl ||

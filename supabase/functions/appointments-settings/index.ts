@@ -199,6 +199,13 @@ Deno.serve(async (req) => {
     return jsonResponse({ error: "Supabase service role key is missing." }, 500);
   }
 
+  if (req.method === "POST" && !APPOINTMENTS_ADMIN_KEY) {
+    return jsonResponse(
+      { error: "Server misconfiguration: set APPOINTMENTS_ADMIN_KEY." },
+      500,
+    );
+  }
+
   if (req.method === "GET") {
     try {
       const payload = await loadSettingsAndBlackouts();

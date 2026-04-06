@@ -46,6 +46,10 @@ or run SQL manually in Supabase SQL Editor.
 
 Use `.env.example` as reference.
 
+**Single password for operators:** You may set **`ADMIN_PUBLISH_KEY` and `APPOINTMENTS_ADMIN_KEY` to the same value** in Supabase Edge Function secrets. The classic admin at `/admin/` asks for that password once per browser session (after GitHub login) and sends it as `X-Admin-Key` to protected functions. It is not stored in the repository.
+
+**Automate from your machine:** Install the [Supabase CLI](https://supabase.com/docs/guides/cli), run `supabase login`, then from the repo root run **`npm run set-admin-secrets`**. That script generates a random password and sets both secrets for the `project_id` in `supabase/config.toml` (or override with `SUPABASE_PROJECT_REF`). It prints the password once — save it in a password manager.
+
 ### Required for Charla APIs (`/api/appointments-*` or `functions/api/appointments-*`)
 
 - `SUPABASE_URL`

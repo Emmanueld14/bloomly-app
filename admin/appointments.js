@@ -487,7 +487,7 @@
         event.preventDefault();
         const adminKey = getAdminKey();
         if (!adminKey) {
-            setMessage('Charla admin key is required.', 'error');
+            setMessage('Enter your admin password on the unlock screen first (sidebar).', 'error');
             return;
         }
 
@@ -506,6 +506,10 @@
 
             const result = await response.json().catch(() => ({}));
             if (!response.ok) {
+                if (response.status === 401) {
+                    sessionStorage.removeItem(ADMIN_SESSION_KEY);
+                    configureAdminKeyVisibility();
+                }
                 throw new Error(result.error || 'Unable to save settings.');
             }
 
@@ -526,7 +530,7 @@
     async function runPaymentDiagnostics() {
         const adminKey = getAdminKey();
         if (!adminKey) {
-            setDiagnosticsMessage('Charla admin key is required for diagnostics.', 'error');
+            setDiagnosticsMessage('Unlock admin with your password first.', 'error');
             return;
         }
 
@@ -548,6 +552,10 @@
 
             const result = await response.json().catch(() => ({}));
             if (!response.ok) {
+                if (response.status === 401) {
+                    sessionStorage.removeItem(ADMIN_SESSION_KEY);
+                    configureAdminKeyVisibility();
+                }
                 throw new Error(result.error || 'Unable to run payment diagnostics.');
             }
 

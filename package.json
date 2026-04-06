@@ -6,7 +6,8 @@
   "scripts": {
     "start": "npx serve . -p 3000",
     "dev": "npx serve . -p 3000",
-    "build": "echo Static site - no build required"
+    "build": "echo Static site - no build required",
+    "set-admin-secrets": "node scripts/set-supabase-admin-secrets.js"
   },
   "keywords": [
     "wellness",
