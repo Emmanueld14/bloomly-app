@@ -5,8 +5,10 @@
 (function() {
     'use strict';
 
-    const githubConfig = window.GITHUB_CONFIG || {};
-    const dashboardConfig = window.ADMIN_DASHBOARD_CONFIG || {};
+    const githubConfig =
+        typeof GITHUB_CONFIG !== 'undefined' ? GITHUB_CONFIG : (window.GITHUB_CONFIG || {});
+    const dashboardConfig =
+        typeof ADMIN_DASHBOARD_CONFIG !== 'undefined' ? ADMIN_DASHBOARD_CONFIG : (window.ADMIN_DASHBOARD_CONFIG || {});
     const apiBase = githubConfig.apiBase || 'https://api.github.com';
     const repoOwner = githubConfig.repoOwner || 'Emmanueld14';
     const repoName = githubConfig.repoName || 'bloomly-app';
