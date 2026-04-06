@@ -26,6 +26,135 @@
         }
     }
 
+    function setAuthInlineError(message) {
+        const authCard = document.querySelector('#authSection .admin-auth-card');
+        if (!authCard) return;
+
+        let errorEl = document.getElementById('authInlineError');
+        if (!message) {
+            if (errorEl) {
+                errorEl.remove();
+            }
+            return;
+        }
+
+        if (!errorEl) {
+            errorEl = document.createElement('p');
+            errorEl.id = 'authInlineError';
+            errorEl.className = 'inline-error';
+            authCard.appendChild(errorEl);
+        }
+        errorEl.textContent = message;
+        errorEl.style.display = 'block';
+    }
+
+    function clearOAuthParamsFromUrl() {
+        const url = new URL(window.location.href);
+        url.searchParams.delete('code');
+        url.searchParams.delete('state');
+        url.searchParams.delete('error');
+        url.searchParams.delete('error_description');
+        const query = url.searchParams.toString();
+        const nextUrl = `${url.pathname}${query ? `?${query}` : ''}${url.hash || ''}`;
+        window.history.replaceState({}, document.title, nextUrl);
+    }
+
+    async function exchangeGithubCodeForToken(code) {
+        const apiUrl = config.vercelApiUrl || 'https://bloomly-app.onrender.com/api/github-auth';
+        const redirectUri = config.redirectUri || `${window.location.origin}/admin/callback.html`;
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            mode: 'cors',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                client_id: config.clientId,
+                code,
+                redirect_uri: redirectUri
+            })
+        });
+
+        const text = await response.text().catch(() => '');
+        if (!text) {
+            throw new Error(`OAuth server returned an empty response (HTTP ${response.status}).`);
+        }
+
+        let data;
+        try {
+            data = JSON.parse(text);
+        } catch {
+            const params = new URLSearchParams(text);
+            const accessToken = params.get('access_token');
+            if (!accessToken) {
+                throw new Error(`OAuth response format was invalid (HTTP ${response.status}).`);
+            }
+            data = { access_token: accessToken };
+        }
+
+        if (!response.ok) {
+            throw new Error(data.error || `OAuth token exchange failed (HTTP ${response.status}).`);
+        }
+        if (!data.access_token) {
+            throw new Error('OAuth token exchange succeeded but no access token was returned.');
+        }
+
+        return data.access_token;
+    }
+
+    async function maybeHandleOAuthOnAdminRoot() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const code = urlParams.get('code');
+        const error = urlParams.get('error');
+        const errorDescription = urlParams.get('error_description');
+
+        if (!code && !error) {
+            return false;
+        }
+
+        // Always return to a clean /admin URL after processing.
+        clearOAuthParamsFromUrl();
+
+        if (error) {
+            showAuth();
+            setAuthInlineError(errorDescription || `Authentication failed: ${error}`);
+            return true;
+        }
+
+        try {
+            const accessToken = await exchangeGithubCodeForToken(code);
+            sessionStorage.setItem('github_token', accessToken);
+
+            const userResponse = await fetch('https://api.github.com/user', {
+                headers: {
+                    'Authorization': `token ${accessToken}`,
+                    'Accept': 'application/vnd.github.v3+json'
+                }
+            });
+            if (!userResponse.ok) {
+                throw new Error(`GitHub user lookup failed (HTTP ${userResponse.status}).`);
+            }
+
+            const user = await userResponse.json();
+            sessionStorage.setItem('github_user', JSON.stringify(user));
+            githubToken = accessToken;
+            githubUser = user;
+            setAuthInlineError('');
+            afterGitHubSessionReady();
+        } catch (oauthError) {
+            console.error('Admin root OAuth handling failed:', oauthError);
+            sessionStorage.removeItem('github_token');
+            sessionStorage.removeItem('github_user');
+            githubToken = null;
+            githubUser = null;
+            showAuth();
+            setAuthInlineError(oauthError.message || 'GitHub sign-in failed.');
+        }
+
+        return true;
+    }
+
     function toggleSectionVisibility(element, isVisible, visibleDisplay) {
         if (!element) return;
         element.hidden = !isVisible;
@@ -57,10 +186,16 @@
     }
     
     // Initialize
-    function init() {
+    async function init() {
         console.log('Admin panel initializing...');
 
         initSupabaseClient();
+
+        const handledOAuthOnRoot = await maybeHandleOAuthOnAdminRoot();
+        if (handledOAuthOnRoot) {
+            console.log('Admin OAuth callback processed on /admin root.');
+            return;
+        }
         
         // Check if user is logged in
         githubToken = sessionStorage.getItem('github_token');
