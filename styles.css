@@ -1678,6 +1678,148 @@ a:hover {
 }
 
 /* ========== Responsive Design ========== */
+/* ========== About/Profile Simplified Structure ========== */
+.bloomly-team-grid {
+    grid-template-columns: repeat(auto-fit, minmax(260px, 320px));
+    gap: var(--space-lg);
+}
+
+.bloomly-team-card {
+    min-height: auto;
+    padding: var(--space-md);
+    box-shadow: 0 10px 22px rgba(var(--color-black-rgb), 0.08);
+    transition: none;
+}
+
+.bloomly-team-card:hover {
+    transform: none;
+    box-shadow: 0 10px 22px rgba(var(--color-black-rgb), 0.08);
+}
+
+.bloomly-team-avatar {
+    width: 72px;
+    height: 72px;
+    padding: 3px;
+    box-shadow: none;
+}
+
+.bloomly-team-name {
+    font-size: var(--text-xl);
+}
+
+.bloomly-team-role {
+    font-size: var(--text-xs);
+}
+
+.bloomly-team-summary {
+    font-size: var(--text-sm);
+    line-height: 1.6;
+}
+
+.bloomly-team-link {
+    transition: none;
+}
+
+.bloomly-team-link:hover,
+.bloomly-team-link:focus-visible {
+    transform: none;
+    box-shadow: none;
+}
+
+.simple-profile-section {
+    padding-top: calc(var(--space-4xl) + 64px);
+    padding-bottom: var(--space-3xl);
+    background: var(--color-offwhite);
+}
+
+.simple-profile-card {
+    max-width: 1080px;
+    margin: 0 auto;
+    border: 1px solid rgba(var(--color-black-rgb), 0.1);
+    border-radius: var(--radius-lg);
+    background: rgba(var(--color-white-rgb), 0.98);
+    box-shadow: 0 16px 34px rgba(var(--color-black-rgb), 0.1);
+    padding: var(--space-lg);
+}
+
+.simple-profile-back {
+    display: inline-flex;
+    margin-bottom: var(--space-md);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--color-blue-strong);
+}
+
+.simple-profile-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 300px) minmax(0, 1fr);
+    gap: var(--space-xl);
+    align-items: start;
+}
+
+.simple-profile-aside {
+    margin: 0;
+}
+
+.simple-profile-image {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(var(--color-black-rgb), 0.1);
+    box-shadow: 0 10px 24px rgba(var(--color-black-rgb), 0.12);
+}
+
+.simple-profile-caption {
+    margin: var(--space-sm) 0 0 0;
+    font-size: var(--text-sm);
+    font-style: italic;
+    color: var(--color-gray-550);
+}
+
+.simple-profile-content {
+    max-width: 720px;
+}
+
+.simple-profile-meta {
+    margin: 0 0 var(--space-xs) 0;
+    font-size: var(--text-sm);
+    font-style: italic;
+    color: var(--color-gray-550);
+}
+
+.simple-profile-title {
+    margin-bottom: var(--space-lg);
+    font-family: 'Lora', var(--font-heading);
+    font-size: clamp(2rem, 4.5vw, 3rem);
+    color: var(--color-ink);
+}
+
+.simple-profile-role {
+    margin: 0 0 var(--space-md) 0;
+    font-size: var(--text-sm);
+    font-style: italic;
+    color: var(--color-gray-550);
+}
+
+.simple-profile-story p {
+    margin: 0;
+    font-size: var(--text-lg);
+    line-height: 1.9;
+    color: rgba(var(--color-black-rgb), 0.76);
+}
+
+.simple-profile-story p + p {
+    margin-top: var(--space-md);
+}
+
+@media (max-width: 900px) {
+    .simple-profile-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
 @media (max-width: 1024px) {
     :root {
         --text-6xl: 3rem;
@@ -2170,23 +2312,6 @@ a:hover {
     font-weight: 600;
 }
 
-.bloomly-team-link {
-    margin-top: var(--space-xs);
-    align-self: center;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: var(--radius-full);
-    border: 1px solid rgba(var(--bloomly-accent), 0.35);
-    background: rgba(var(--color-white-rgb), 1);
-    color: var(--color-heading);
-    font-size: var(--text-sm);
-    font-weight: 600;
-    padding: 0.35rem 1.05rem;
-    transition: transform 260ms var(--bloomly-team-ease, cubic-bezier(0.22, 1, 0.36, 1)),
-        box-shadow 260ms var(--bloomly-team-ease, cubic-bezier(0.22, 1, 0.36, 1)),
-        background 260ms var(--bloomly-team-ease, cubic-bezier(0.22, 1, 0.36, 1));
-}
 
 .about-story {
     position: relative;
@@ -2269,21 +2394,6 @@ a:hover {
     gap: var(--space-xl);
 }
 
-.bloomly-team-link:hover {
-    background: rgba(var(--color-white-rgb), 0.9);
-    box-shadow: 0 10px 22px rgba(var(--bloomly-accent), 0.25);
-    transform: translateY(-1px) scale(1.01);
-}
-
-.bloomly-team-link:active {
-    transform: translateY(0);
-    box-shadow: 0 6px 16px rgba(var(--bloomly-accent), 0.2);
-}
-
-.bloomly-team-link:focus-visible {
-    outline: 2px solid rgba(var(--bloomly-accent), 0.6);
-    outline-offset: 2px;
-}
 
 /* ========== Terms & Conditions Section ========== */
 .terms-conditions {
@@ -4050,4 +4160,54 @@ a:hover {
         height: 34px;
         font-size: 0.72rem;
     }
+}
+
+/* ========== Final Overrides: Simple About/Profile ========== */
+.bloomly-team-grid {
+    grid-template-columns: repeat(auto-fit, minmax(260px, 320px)) !important;
+    gap: var(--space-lg) !important;
+}
+
+.bloomly-team-card {
+    min-height: auto !important;
+    padding: var(--space-md) !important;
+    box-shadow: none !important;
+    border: 1px solid rgba(var(--color-black-rgb), 0.1) !important;
+    background: rgba(var(--color-white-rgb), 0.98) !important;
+    transition: none !important;
+}
+
+.bloomly-team-card:hover {
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+.bloomly-team-avatar {
+    width: 72px !important;
+    height: 72px !important;
+    padding: 3px !important;
+    box-shadow: none !important;
+}
+
+.bloomly-team-name {
+    font-size: var(--text-xl) !important;
+}
+
+.bloomly-team-role {
+    font-size: var(--text-xs) !important;
+    font-style: italic;
+}
+
+.bloomly-team-summary {
+    font-size: var(--text-sm) !important;
+    line-height: 1.6 !important;
+}
+
+.bloomly-team-link,
+.bloomly-team-link:hover,
+.bloomly-team-link:active,
+.bloomly-team-link:focus-visible {
+    transform: none !important;
+    box-shadow: none !important;
+    transition: none !important;
 }
