@@ -1231,7 +1231,7 @@
             slug: 'manuel-muhunami',
             name: 'Manuel Muhunami',
             role: 'Founder & Lead Builder',
-            image: '/logo.svg',
+            image: '/20251130_125513.jpg',
             accent: 'sage',
             details: [
                 'Vision & Strategy',
