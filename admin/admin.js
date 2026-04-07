@@ -7,6 +7,7 @@
     'use strict';
 
     const ADMIN_SESSION_KEY = 'bloomly_admin_password';
+    const POST_AUTH_REDIRECT_KEY = 'bloomly_admin_post_auth_redirect';
 
     let githubToken = null;
     let githubUser = null;
@@ -533,6 +534,9 @@
             return;
         }
         
+        // If OAuth is needed again, return to the classic admin page.
+        sessionStorage.setItem(POST_AUTH_REDIRECT_KEY, '/admin/');
+
         // Redirect to GitHub OAuth
         const authUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=repo`;
         window.location.href = authUrl;

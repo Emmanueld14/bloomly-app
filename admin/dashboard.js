@@ -798,6 +798,7 @@
             showAuthScreen('GitHub OAuth is not configured. Update admin/config.js.');
             return;
         }
+        sessionStorage.setItem('bloomly_admin_post_auth_redirect', '/admin/dashboard.html');
         const authUrl = `https://github.com/login/oauth/authorize?client_id=${encodeURIComponent(clientId)}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=repo`;
         window.location.href = authUrl;
     }

@@ -44,23 +44,55 @@
     <script>
         // Handle GitHub OAuth callback
         (function() {
+            function getPostAuthRedirect() {
+                try {
+                    const value = sessionStorage.getItem('bloomly_admin_post_auth_redirect') || '';
+                    if (!value) return '/admin/';
+                    const url = new URL(value, window.location.origin);
+                    // Only allow same-origin admin paths.
+                    if (url.origin !== window.location.origin || !url.pathname.startsWith('/admin')) {
+                        return '/admin/';
+                    }
+                    return `${url.pathname}${url.search}${url.hash}`;
+                } catch (e) {
+                    return '/admin/';
+                }
+            }
+
+            function clearPostAuthRedirect() {
+                try {
+                    sessionStorage.removeItem('bloomly_admin_post_auth_redirect');
+                } catch (e) {
+                    // no-op
+                }
+            }
+
+            function redirectToPostAuthTarget(delayMs) {
+                const target = getPostAuthRedirect();
+                const go = () => {
+                    clearPostAuthRedirect();
+                    window.location.href = target;
+                };
+                if (delayMs && delayMs > 0) {
+                    setTimeout(go, delayMs);
+                } else {
+                    go();
+                }
+            }
+
             const urlParams = new URLSearchParams(window.location.search);
             const code = urlParams.get('code');
             const error = urlParams.get('error');
             
             if (error) {
                 document.querySelector('.loading p').textContent = 'Authentication failed: ' + error;
-                setTimeout(() => {
-                    window.location.href = '/admin/';
-                }, 3000);
+                redirectToPostAuthTarget(3000);
                 return;
             }
             
             if (!code) {
                 document.querySelector('.loading p').textContent = 'No authorization code received';
-                setTimeout(() => {
-                    window.location.href = '/admin/';
-                }, 3000);
+                redirectToPostAuthTarget(3000);
                 return;
             }
             
@@ -144,8 +176,8 @@
                 // Store user info
                 sessionStorage.setItem('github_user', JSON.stringify(user));
                 
-                // Redirect to admin page
-                window.location.href = '/admin/';
+                // Redirect to whichever admin page initiated login
+                redirectToPostAuthTarget(0);
             })
             .catch(error => {
                 console.error('Auth error:', error);
@@ -154,9 +186,7 @@
                     '<strong style="color: var(--color-danger);">Authentication Error:</strong><br>' +
                     errorMsg + 
                     '<br><br><small>Check the browser console (F12) for more details.</small>';
-                setTimeout(() => {
-                    window.location.href = '/admin/';
-                }, 5000);
+                redirectToPostAuthTarget(5000);
             });
         })();
     </script>
