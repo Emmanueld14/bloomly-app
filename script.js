@@ -945,6 +945,324 @@
         }
     }
 
+    // ========== Blog Snippet Share ==========
+    function getSnippetThemeConfig(theme) {
+        const normalized = String(theme || 'gradient').toLowerCase();
+
+        if (normalized === 'dark') {
+            return {
+                textColor: '#f5f7ff',
+                metaColor: 'rgba(245, 247, 255, 0.88)',
+                accentColor: 'rgba(166, 190, 255, 0.85)',
+                backgroundPainter(ctx, width, height) {
+                    const gradient = ctx.createLinearGradient(0, 0, width, height);
+                    gradient.addColorStop(0, '#111827');
+                    gradient.addColorStop(0.5, '#1f2937');
+                    gradient.addColorStop(1, '#3b425a');
+                    ctx.fillStyle = gradient;
+                    ctx.fillRect(0, 0, width, height);
+                }
+            };
+        }
+
+        if (normalized === 'pastel') {
+            return {
+                textColor: '#1f3158',
+                metaColor: 'rgba(31, 49, 88, 0.82)',
+                accentColor: 'rgba(168, 123, 255, 0.72)',
+                backgroundPainter(ctx, width, height) {
+                    const gradient = ctx.createLinearGradient(0, 0, width, height);
+                    gradient.addColorStop(0, '#fdf2ff');
+                    gradient.addColorStop(0.45, '#e6f2ff');
+                    gradient.addColorStop(1, '#ffe4f2');
+                    ctx.fillStyle = gradient;
+                    ctx.fillRect(0, 0, width, height);
+                }
+            };
+        }
+
+        return {
+            textColor: '#ffffff',
+            metaColor: 'rgba(255, 255, 255, 0.9)',
+            accentColor: 'rgba(255, 255, 255, 0.62)',
+            backgroundPainter(ctx, width, height) {
+                const gradient = ctx.createLinearGradient(0, 0, width, height);
+                gradient.addColorStop(0, '#6d6af8');
+                gradient.addColorStop(0.55, '#5ea8ff');
+                gradient.addColorStop(1, '#ff7bb6');
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, width, height);
+            }
+        };
+    }
+
+    function wrapCanvasText(ctx, text, maxWidth) {
+        const words = String(text || '').split(/\s+/).filter(Boolean);
+        const lines = [];
+        let currentLine = '';
+
+        words.forEach((word) => {
+            const nextLine = currentLine ? `${currentLine} ${word}` : word;
+            if (ctx.measureText(nextLine).width <= maxWidth) {
+                currentLine = nextLine;
+            } else {
+                if (currentLine) {
+                    lines.push(currentLine);
+                }
+                currentLine = word;
+            }
+        });
+
+        if (currentLine) {
+            lines.push(currentLine);
+        }
+
+        return lines;
+    }
+
+    function sanitizeSnippetText(text, maxLength = 320) {
+        const normalized = String(text || '')
+            .replace(/\s+/g, ' ')
+            .trim();
+
+        if (!normalized) return '';
+        if (normalized.length <= maxLength) return normalized;
+
+        return `${normalized.slice(0, maxLength - 1).trimEnd()}...`;
+    }
+
+    function renderSnippetCanvas(canvas, snippet, theme, articleTitle) {
+        if (!canvas || typeof canvas.getContext !== 'function') return false;
+        const context = canvas.getContext('2d');
+        if (!context) return false;
+
+        const width = Number(canvas.width || 1080);
+        const height = Number(canvas.height || 1920);
+        const padding = 110;
+        const maxTextWidth = width - (padding * 2);
+        const safeTitle = sanitizeSnippetText(articleTitle || 'Bloomly Blog', 78);
+        const safeSnippet = sanitizeSnippetText(snippet, 360);
+        const themeConfig = getSnippetThemeConfig(theme);
+
+        themeConfig.backgroundPainter(context, width, height);
+
+        context.save();
+        context.globalAlpha = 0.22;
+        context.fillStyle = '#ffffff';
+        context.beginPath();
+        context.arc(width - 120, 150, 170, 0, Math.PI * 2);
+        context.fill();
+        context.beginPath();
+        context.arc(130, height - 130, 200, 0, Math.PI * 2);
+        context.fill();
+        context.restore();
+
+        context.save();
+        context.fillStyle = 'rgba(0, 0, 0, 0.13)';
+        context.fillRect(56, 56, width - 112, height - 112);
+        context.restore();
+
+        context.save();
+        context.fillStyle = themeConfig.textColor;
+        context.globalAlpha = 0.95;
+        context.font = '700 40px Poppins, Nunito, sans-serif';
+        context.fillText('BLOOMLY SNIPPET', padding, 170);
+        context.restore();
+
+        context.save();
+        context.fillStyle = themeConfig.accentColor;
+        context.font = '700 220px Poppins, Nunito, sans-serif';
+        context.fillText('“', padding - 18, 430);
+        context.restore();
+
+        let fontSize = 76;
+        let lineHeight = 1.32;
+        let lines = [];
+        const maxLines = 11;
+        while (fontSize >= 50) {
+            context.font = `700 ${fontSize}px Poppins, Nunito, sans-serif`;
+            lines = wrapCanvasText(context, safeSnippet, maxTextWidth);
+            if (lines.length <= maxLines) {
+                break;
+            }
+            fontSize -= 2;
+            lineHeight = 1.3;
+        }
+
+        context.save();
+        context.fillStyle = themeConfig.textColor;
+        context.font = `700 ${fontSize}px Poppins, Nunito, sans-serif`;
+        context.textBaseline = 'top';
+        let textY = 445;
+        const computedLineHeight = Math.round(fontSize * lineHeight);
+        lines.forEach((line, index) => {
+            if (index >= maxLines) return;
+            context.fillText(line, padding, textY);
+            textY += computedLineHeight;
+        });
+        context.restore();
+
+        context.save();
+        context.fillStyle = themeConfig.metaColor;
+        context.font = '600 38px Poppins, Nunito, sans-serif';
+        context.fillText(`Bloomly Blog • ${safeTitle}`, padding, height - 220);
+        context.font = '600 34px Poppins, Nunito, sans-serif';
+        context.fillText('@bloomly', padding, height - 168);
+        context.restore();
+
+        return true;
+    }
+
+    function initSnippetShareCards() {
+        const shareBlocks = Array.from(document.querySelectorAll('[data-snippet-share]'));
+        if (!shareBlocks.length) return;
+
+        const articleBody = document.getElementById('articleBody');
+        if (!articleBody) return;
+
+        const articleTitle = document.getElementById('articleTitle');
+
+        shareBlocks.forEach((block) => {
+            const previewCard = block.querySelector('[data-snippet-preview]');
+            const previewText = block.querySelector('[data-snippet-preview-text]');
+            const previewMeta = block.querySelector('[data-snippet-preview-meta]');
+            const message = block.querySelector('[data-snippet-message]');
+            const downloadButton = block.querySelector('[data-snippet-download]');
+            const canvas = block.querySelector('[data-snippet-canvas]');
+            const themeInputs = Array.from(block.querySelectorAll('input[name="snippetTheme"]'));
+
+            if (!previewCard || !previewText || !downloadButton || !canvas || !themeInputs.length) return;
+
+            const defaultText = previewText.textContent || 'Select text from the article to preview it here.';
+            let selectedSnippet = '';
+
+            function setMessage(text, tone = 'neutral') {
+                if (!message) return;
+                message.textContent = text || '';
+                message.classList.remove('is-error', 'is-success');
+                if (tone === 'error') message.classList.add('is-error');
+                if (tone === 'success') message.classList.add('is-success');
+            }
+
+            function getTheme() {
+                const checked = themeInputs.find((input) => input.checked);
+                return checked ? checked.value : 'gradient';
+            }
+
+            function updateThemeUI() {
+                const currentTheme = getTheme();
+                themeInputs.forEach((input) => {
+                    const option = input.closest('.snippet-theme-option');
+                    if (!option) return;
+                    option.classList.toggle('is-selected', input.checked);
+                });
+
+                previewCard.classList.remove('theme-gradient', 'theme-dark', 'theme-pastel');
+                previewCard.classList.add(`theme-${currentTheme}`);
+            }
+
+            function updatePreviewContent() {
+                previewText.textContent = selectedSnippet || defaultText;
+                const titleText = sanitizeSnippetText(articleTitle?.textContent || 'Bloomly Blog', 72);
+                if (previewMeta) {
+                    previewMeta.textContent = `Bloomly Blog · ${titleText}`;
+                }
+            }
+
+            function extractSelectionText() {
+                const selection = window.getSelection();
+                if (!selection || selection.isCollapsed || !selection.rangeCount) {
+                    return '';
+                }
+
+                const range = selection.getRangeAt(0);
+                const container = range.commonAncestorContainer;
+                const hostNode = container.nodeType === Node.TEXT_NODE ? container.parentNode : container;
+                if (!hostNode || !articleBody.contains(hostNode)) {
+                    return '';
+                }
+
+                return sanitizeSnippetText(selection.toString(), 320);
+            }
+
+            function handleSelectionCapture() {
+                const nextSnippet = extractSelectionText();
+                if (!nextSnippet) return;
+                selectedSnippet = nextSnippet;
+                updatePreviewContent();
+                setMessage('Snippet selected. Download your share card when ready.', 'success');
+            }
+
+            themeInputs.forEach((input) => {
+                input.addEventListener('change', () => {
+                    updateThemeUI();
+                    updatePreviewContent();
+                });
+            });
+
+            articleBody.addEventListener('mouseup', handleSelectionCapture);
+            articleBody.addEventListener('keyup', handleSelectionCapture);
+
+            downloadButton.addEventListener('click', () => {
+                const theme = getTheme();
+                if (!selectedSnippet) {
+                    setMessage('Select a sentence or paragraph from the article first.', 'error');
+                    return;
+                }
+
+                const rendered = renderSnippetCanvas(
+                    canvas,
+                    selectedSnippet,
+                    theme,
+                    articleTitle?.textContent || 'Bloomly Blog'
+                );
+
+                if (!rendered) {
+                    setMessage('Unable to generate share card on this browser.', 'error');
+                    return;
+                }
+
+                const filename = `bloomly-snippet-${theme}-${Date.now()}.png`;
+
+                if (typeof canvas.toBlob === 'function') {
+                    canvas.toBlob((blob) => {
+                        if (!blob) {
+                            setMessage('Unable to generate share image. Please try again.', 'error');
+                            return;
+                        }
+                        const blobUrl = URL.createObjectURL(blob);
+                        const link = document.createElement('a');
+                        link.href = blobUrl;
+                        link.download = filename;
+                        document.body.appendChild(link);
+                        link.click();
+                        link.remove();
+                        setTimeout(() => URL.revokeObjectURL(blobUrl), 1200);
+                        setMessage('Share card downloaded. Post it to Instagram Stories or anywhere.', 'success');
+                    }, 'image/png');
+                    return;
+                }
+
+                try {
+                    const fallbackUrl = canvas.toDataURL('image/png');
+                    const link = document.createElement('a');
+                    link.href = fallbackUrl;
+                    link.download = filename;
+                    document.body.appendChild(link);
+                    link.click();
+                    link.remove();
+                    setMessage('Share card downloaded. Post it to Instagram Stories or anywhere.', 'success');
+                } catch (error) {
+                    console.error('Snippet card export failed', error);
+                    setMessage('Unable to download right now. Please try again.', 'error');
+                }
+            });
+
+            updateThemeUI();
+            updatePreviewContent();
+        });
+    }
+
     // ========== Newsletter Signup ==========
     function isValidEmail(email) {
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -1754,6 +2072,7 @@ But I can start by being honest about my own story.`,
         initHomeParallax();
         initWhyBloomlyCards();
         void initPostInteractions();
+        initSnippetShareCards();
         initNewsletterForms();
         initBloomlyTeamCards();
         void initTeamProfilePage();

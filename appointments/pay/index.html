@@ -33,7 +33,7 @@
     </nav>
 
     <main>
-        <section class="appointments-hero">
+        <section class="appointments-hero appointments-pay-hero">
             <div class="container appointments-hero-content">
                 <h1>Complete payment</h1>
                 <p>Finish your Charla booking with your preferred payment method.</p>
@@ -49,29 +49,63 @@
                     <div class="appointments-summary" data-payment-summary>
                         Waiting for booking details.
                     </div>
+                    <div class="payment-trust-strip" aria-label="Secure payment indicators">
+                        <span class="payment-trust-pill">Secure Payment</span>
+                        <span class="payment-trust-pill">SSL Encrypted</span>
+                        <span class="payment-trust-pill">Protected Checkout</span>
+                    </div>
                     <div class="appointments-field" style="margin-top: var(--space-lg);">
                         <label>Booking ID</label>
                         <input type="text" data-payment-booking-id readonly>
                     </div>
                 </div>
 
-                <div class="appointments-card">
+                <div class="appointments-card payment-options-card">
                     <h2>Choose payment method</h2>
                     <p class="appointments-helper">Select one option below to continue.</p>
 
-                    <form data-payment-form>
-                        <div class="appointments-field">
-                            <label>
+                    <form data-payment-form class="payment-options-form">
+                        <div class="payment-method-grid" role="radiogroup" aria-label="Payment methods">
+                            <label class="payment-method-card payment-method-card--primary">
                                 <input type="radio" name="provider" value="mpesa" checked>
-                                M-Pesa
+                                <span class="payment-method-content">
+                                    <span class="payment-method-top">
+                                        <span class="payment-method-name">M-Pesa</span>
+                                        <span class="payment-method-badge">Recommended</span>
+                                    </span>
+                                    <span class="payment-method-sub">Fast mobile checkout in Kenya</span>
+                                    <span class="payment-logo-row">
+                                        <span class="payment-logo-pill">M-PESA</span>
+                                    </span>
+                                </span>
                             </label>
-                            <label style="margin-top: var(--space-sm);">
+
+                            <label class="payment-method-card">
                                 <input type="radio" name="provider" value="airtel">
-                                Airtel Money
+                                <span class="payment-method-content">
+                                    <span class="payment-method-top">
+                                        <span class="payment-method-name">Airtel Money</span>
+                                    </span>
+                                    <span class="payment-method-sub">Pay directly with Airtel wallet</span>
+                                    <span class="payment-logo-row">
+                                        <span class="payment-logo-pill">AIRTEL</span>
+                                    </span>
+                                </span>
                             </label>
-                            <label style="margin-top: var(--space-sm);">
+<<<<<<< HEAD
+                            <label class="payment-method-card">
                                 <input type="radio" name="provider" value="pesapal">
-                                Pesapal (M-Pesa, Airtel, Cards)
+                                <span class="payment-method-content">
+                                    <span class="payment-method-top">
+                                        <span class="payment-method-name">Cards / Bank</span>
+                                    </span>
+                                    <span class="payment-method-sub">Visa, Mastercard and more via Pesapal</span>
+                                    <span class="payment-logo-row">
+                                        <span class="payment-logo-pill">VISA</span>
+                                        <span class="payment-logo-pill">MASTERCARD</span>
+                                        <span class="payment-logo-pill">PESAPAL</span>
+                                    </span>
+                                </span>
                             </label>
                         </div>
 
