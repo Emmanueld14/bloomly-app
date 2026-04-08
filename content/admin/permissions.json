@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-04-08T14:25:42.290Z",
+  "updatedAt": "2026-04-08T14:26:03.840Z",
   "accounts": [
     {
       "id": "acct-11a3f9a4-5d03-40f1-802b-f2e2c6039dc8",
@@ -38,7 +38,7 @@
         "reportsReview": false,
         "userPermissions": false
       },
-      "updatedAt": "2026-04-08T14:25:42.290Z"
+      "updatedAt": "2026-04-08T14:26:03.840Z"
     }
   ]
 }
