@@ -12,6 +12,7 @@
         summary: document.querySelector('[data-payment-summary]'),
         bookingId: document.querySelector('[data-payment-booking-id]'),
         form: document.querySelector('[data-payment-form]'),
+        methodCards: Array.from(document.querySelectorAll('.payment-method-card')),
         phoneGroup: document.querySelector('[data-payment-phone-group]'),
         submit: document.querySelector('[data-payment-submit]'),
         message: document.querySelector('[data-payment-message]')
@@ -52,7 +53,7 @@
             const locked = state.booking?.status === 'confirmed' || state.booking?.status === 'expired';
             elements.submit.disabled = state.busy || locked;
             if (!state.busy) {
-                elements.submit.textContent = 'Continue to payment';
+                refreshPhoneVisibility();
             }
         }
     }
@@ -70,8 +71,20 @@
     function refreshPhoneVisibility() {
         const provider = getSelectedProvider();
         const showPhone = requiresPhone(provider);
+        elements.methodCards.forEach((card) => {
+            const input = card.querySelector('input[name="provider"]');
+            const isSelected = Boolean(input?.checked);
+            card.classList.toggle('is-selected', isSelected);
+        });
         if (elements.phoneGroup) {
             elements.phoneGroup.style.display = showPhone ? '' : 'none';
+        }
+        if (elements.submit) {
+            if (provider === 'pesapal') {
+                elements.submit.textContent = 'Continue to secure checkout';
+            } else {
+                elements.submit.textContent = 'Continue to payment';
+            }
         }
     }
 
