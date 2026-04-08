@@ -254,6 +254,7 @@
 
             // Update page title
             const postTitle = post.metadata?.title || slug.replace(/-/g, ' ');
+            const postAuthor = String(post.metadata?.author || '').trim();
             const titleEl = document.getElementById('articleTitle');
             if (titleEl) {
                 titleEl.textContent = postTitle;
@@ -268,6 +269,59 @@
                 document.head.appendChild(metaDesc);
             }
             metaDesc.content = post.metadata?.summary || '';
+
+            // Keep author available for UI and sharing modules.
+            document.body.dataset.postAuthor = postAuthor || 'Bloomly Team';
+
+            let authorMeta = document.querySelector('meta[name="author"]');
+            if (!authorMeta) {
+                authorMeta = document.createElement('meta');
+                authorMeta.name = 'author';
+                document.head.appendChild(authorMeta);
+            }
+            authorMeta.content = postAuthor || 'Bloomly Team';
+
+            let articleAuthorMeta = document.querySelector('meta[property="article:author"]');
+            if (!articleAuthorMeta) {
+                articleAuthorMeta = document.createElement('meta');
+                articleAuthorMeta.setAttribute('property', 'article:author');
+                document.head.appendChild(articleAuthorMeta);
+            }
+            articleAuthorMeta.setAttribute('content', postAuthor || 'Bloomly Team');
+
+            const canonicalUrl = `${window.location.origin}/blog-post?slug=${encodeURIComponent(slug)}`;
+
+            const ogFields = [
+                ['og:title', postTitle],
+                ['og:description', post.metadata?.summary || 'Read this post on Bloomly.'],
+                ['og:url', canonicalUrl],
+                ['og:type', 'article'],
+                ['og:site_name', 'Bloomly']
+            ];
+            ogFields.forEach(([property, value]) => {
+                let meta = document.querySelector(`meta[property="${property}"]`);
+                if (!meta) {
+                    meta = document.createElement('meta');
+                    meta.setAttribute('property', property);
+                    document.head.appendChild(meta);
+                }
+                meta.setAttribute('content', String(value || ''));
+            });
+
+            const twitterFields = [
+                ['twitter:card', 'summary_large_image'],
+                ['twitter:title', postTitle],
+                ['twitter:description', post.metadata?.summary || 'Read this post on Bloomly.']
+            ];
+            twitterFields.forEach(([name, value]) => {
+                let meta = document.querySelector(`meta[name="${name}"]`);
+                if (!meta) {
+                    meta = document.createElement('meta');
+                    meta.name = name;
+                    document.head.appendChild(meta);
+                }
+                meta.content = String(value || '');
+            });
 
             // Format date
             const dateStr = formatDate(post.metadata?.date);
@@ -298,12 +352,14 @@
             // Update meta info
             const metaEl = document.getElementById('articleMeta');
             if (metaEl) {
+                const authorSegment = postAuthor ? `<span>•</span><span>${postAuthor}</span>` : '';
                 metaEl.innerHTML = `
                     <span>${dateStr}</span>
                     <span>•</span>
                     <span>${category}</span>
                     <span>•</span>
                     <span>${readTime} min read</span>
+                    ${authorSegment}
                 `;
             }
 
@@ -321,15 +377,6 @@
                     bodyEl.insertBefore(img, bodyEl.firstChild);
                 }
 
-                // Add CTA at the end
-                const cta = document.createElement('div');
-                cta.style.cssText = 'margin-top: var(--space-3xl); padding: var(--space-xl); background: rgba(var(--color-white-rgb), 0.8); border-radius: var(--radius-xl); text-align: center; border: 1px solid rgba(var(--color-black-rgb), 0.08);';
-                cta.innerHTML = `
-                    <h3 style="margin-bottom: var(--space-md);">Stay close to new reflections</h3>
-                    <p style="margin-bottom: var(--space-lg);">Subscribe for calm updates and new stories as they land.</p>
-                    <a href="/subscribe" class="btn btn-primary">Subscribe</a>
-                `;
-                bodyEl.appendChild(cta);
             }
 
             logDebug(`Post loaded successfully: ${slug}`);

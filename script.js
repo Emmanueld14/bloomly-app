@@ -16,12 +16,14 @@
     function lockUiOverlay() {
         activeOverlayLocks += 1;
         document.body.classList.add('ui-overlay-open');
+        document.documentElement.classList.add('ui-overlay-open');
     }
 
     function unlockUiOverlay() {
         activeOverlayLocks = Math.max(0, activeOverlayLocks - 1);
         if (activeOverlayLocks === 0) {
             document.body.classList.remove('ui-overlay-open');
+            document.documentElement.classList.remove('ui-overlay-open');
         }
     }
 
@@ -1181,11 +1183,17 @@
         context.restore();
 
         context.save();
+        const authorSource = document.body?.dataset?.postAuthor || '';
+        const authorLine = authorSource
+            ? `By ${sanitizeSnippetText(authorSource, 60)}`
+            : 'By Bloomly Team';
         context.fillStyle = themeConfig.metaColor;
         context.font = '600 38px Poppins, Nunito, sans-serif';
-        context.fillText(`Bloomly Blog • ${safeTitle}`, padding, height - 220);
+        context.fillText(`Bloomly Blog • ${safeTitle}`, padding, height - 248);
+        context.font = '500 33px Poppins, Nunito, sans-serif';
+        context.fillText(authorLine, padding, height - 198);
         context.font = '600 34px Poppins, Nunito, sans-serif';
-        context.fillText('@bloomly', padding, height - 168);
+        context.fillText('@bloomly', padding, height - 148);
         context.restore();
 
         return true;
@@ -1194,6 +1202,7 @@
     function initSnippetShareCards() {
         const articleBody = document.getElementById('articleBody');
         const articleTitle = document.getElementById('articleTitle');
+        const articleAuthor = document.querySelector('[data-post-author]');
         const floatShare = document.querySelector('[data-snippet-float-share]');
         const modalOverlay = document.querySelector('[data-snippet-modal-overlay]');
         const modalClose = modalOverlay?.querySelector('[data-snippet-modal-close]');
@@ -1235,7 +1244,8 @@
             previewText.textContent = selectedSnippet || defaultText;
             const titleText = sanitizeSnippetText(articleTitle?.textContent || 'Bloomly Blog', 72);
             if (previewMeta) {
-                previewMeta.textContent = `Bloomly Blog · ${titleText}`;
+                const authorSource = document.body?.dataset?.postAuthor || 'Bloomly Team';
+                previewMeta.textContent = `Bloomly Blog · ${titleText} · By ${sanitizeSnippetText(authorSource, 48)}`;
             }
         }
 

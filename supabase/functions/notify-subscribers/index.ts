@@ -21,6 +21,7 @@ const BATCH_SIZE = 50;
 type PostRecord = {
   id: number;
   title: string;
+  author: string | null;
   slug: string;
   summary: string | null;
   url: string;
@@ -55,14 +56,16 @@ function escapeHtml(value: string) {
 }
 
 function buildEmailSubject(post: PostRecord) {
-  return `New blog post: ${post.title}`;
+  return `New post by ${post.author || "Bloomly Team"}: ${post.title}`;
 }
 
 function buildEmailHtml(post: PostRecord) {
   const summary = post.summary ? escapeHtml(post.summary) : "Read the latest post.";
+  const author = escapeHtml(post.author || "Bloomly Team");
   return `
     <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #1f1f1f;">
       <h2 style="margin: 0 0 12px;">${escapeHtml(post.title)}</h2>
+      <p style="margin: 0 0 8px; color: #5f6f8a; font-size: 13px;">By ${author}</p>
       <p style="margin: 0 0 16px;">${summary}</p>
       <a href="${post.url}" style="display: inline-block; padding: 10px 16px; background: #5fa8ff; color: #ffffff; text-decoration: none; border-radius: 6px;">
         Read the full post
@@ -76,7 +79,7 @@ function buildEmailHtml(post: PostRecord) {
 
 function buildEmailText(post: PostRecord) {
   const summary = post.summary || "Read the latest post.";
-  return `${post.title}\n\n${summary}\n\nRead here: ${post.url}`;
+  return `${post.title}\nBy ${post.author || "Bloomly Team"}\n\n${summary}\n\nRead here: ${post.url}`;
 }
 
 async function fetchAllSubscribers() {
@@ -144,27 +147,36 @@ function sleep(ms: number) {
 async function fetchOrCreatePost(payload: Record<string, string>) {
   const title = (payload.title || "").trim();
   const summary = (payload.summary || "").trim();
+  const author = (payload.author || "").trim();
   const url = (payload.url || "").trim();
   const slug = (payload.slug || slugify(title)).trim();
 
-  if (!title || !url) {
-    throw new Error("Post title and URL are required.");
+  if (!title || !author || !url) {
+    throw new Error("Post title, author, and URL are required.");
   }
 
   const { data: existing } = await supabase
     .from("posts")
-    .select("id, title, slug, summary, url")
+    .select("id, title, author, slug, summary, url")
     .eq("slug", slug)
     .maybeSingle();
 
   if (existing) {
+    const updates: Record<string, string | null> = {};
+    if (author && existing.author !== author) updates.author = author;
+    if (summary !== (existing.summary || "")) updates.summary = summary || null;
+    if (url && existing.url !== url) updates.url = url;
+    if (Object.keys(updates).length) {
+      await supabase.from("posts").update(updates).eq("id", existing.id);
+      return { ...existing, ...updates } as PostRecord;
+    }
     return existing as PostRecord;
   }
 
   const { data, error } = await supabase
     .from("posts")
-    .insert({ title, summary: summary || null, url, slug })
-    .select("id, title, slug, summary, url")
+    .insert({ title, author, summary: summary || null, url, slug })
+    .select("id, title, author, slug, summary, url")
     .single();
 
   if (error) {

@@ -298,6 +298,7 @@
                     title: String(draft.title || '').trim(),
                     date: draft.date || new Date().toISOString(),
                     category: String(draft.category || 'Mental Health').trim(),
+                    author: String(draft.author || draft.authorName || '').trim(),
                     summary: String(draft.summary || '').trim(),
                     emoji: String(draft.emoji || '💙').trim(),
                     content: String(draft.content || '').trim(),
@@ -682,6 +683,7 @@
         els.draftEditorTitle = byId('draftEditorTitle');
         els.draftEditorDate = byId('draftEditorDate');
         els.draftEditorCategory = byId('draftEditorCategory');
+        els.draftEditorAuthor = byId('draftEditorAuthor');
         els.draftEditorEmoji = byId('draftEditorEmoji');
         els.draftEditorSummary = byId('draftEditorSummary');
         els.draftEditorContent = byId('draftEditorContent');
@@ -1149,7 +1151,7 @@
     function renderPublishedPostsTable() {
         if (!els.publishedTableBody) return;
         if (!state.publishedPosts.length) {
-            els.publishedTableBody.innerHTML = '<tr><td colspan="4" class="inline-empty">No published posts available.</td></tr>';
+            els.publishedTableBody.innerHTML = '<tr><td colspan="5" class="inline-empty">No published posts available.</td></tr>';
             return;
         }
         const canCreateDraft = hasPermission('blogAccess');
@@ -1167,6 +1169,7 @@
                 <tr>
                     <td><strong>${escapeHtml(post.title || post.slug)}</strong></td>
                     <td>${escapeHtml(post.category || 'Uncategorized')}</td>
+                    <td>${escapeHtml(post.author || 'Unknown')}</td>
                     <td>${escapeHtml(formatDate(post.date))}</td>
                     <td><div class="table-actions">${actions.join('')}</div></td>
                 </tr>
@@ -1407,6 +1410,7 @@
         els.draftEditorTitle.value = editorDraft.title || '';
         els.draftEditorDate.value = toInputDateTime(editorDraft.date || new Date().toISOString());
         els.draftEditorCategory.value = editorDraft.category || 'Mental Health';
+        els.draftEditorAuthor.value = editorDraft.author || editorDraft.authorName || state.githubUser?.name || state.githubUser?.login || '';
         els.draftEditorEmoji.value = editorDraft.emoji || '💙';
         els.draftEditorSummary.value = editorDraft.summary || '';
         els.draftEditorContent.value = editorDraft.content || '';
@@ -1443,6 +1447,7 @@
             title: String(els.draftEditorTitle.value || '').trim(),
             date: new Date(els.draftEditorDate.value || new Date().toISOString()).toISOString(),
             category: String(els.draftEditorCategory.value || 'Mental Health').trim(),
+            author: String(els.draftEditorAuthor.value || existingDraft?.author || existingDraft?.authorName || '').trim(),
             summary: String(els.draftEditorSummary.value || '').trim(),
             emoji: String(els.draftEditorEmoji.value || '💙').trim(),
             content: String(els.draftEditorContent.value || '').trim(),
@@ -1464,8 +1469,8 @@
             return;
         }
         const draft = getDraftFromEditor(statusOverride);
-        if (!draft.title || !draft.summary || !draft.content) {
-            showMessage('Title, summary, and content are required.', 'error');
+        if (!draft.title || !draft.author || !draft.summary || !draft.content) {
+            showMessage('Title, author, summary, and content are required.', 'error');
             return;
         }
         upsertDraft(draft);
@@ -1500,8 +1505,8 @@
             return;
         }
         const draft = getDraftFromEditor('approved');
-        if (!draft.title || !draft.summary || !draft.content) {
-            showMessage('Title, summary, and content are required before publishing.', 'error');
+        if (!draft.title || !draft.author || !draft.summary || !draft.content) {
+            showMessage('Title, author, summary, and content are required before publishing.', 'error');
             return;
         }
         const slug = draft.publishedSlug || slugify(draft.title);
@@ -1514,6 +1519,7 @@
             title: draft.title,
             date: draft.date,
             category: draft.category,
+            author: draft.author,
             summary: draft.summary,
             emoji: draft.emoji,
             content: draft.content
@@ -1636,6 +1642,7 @@
                 title: post.title || '',
                 date: post.date || new Date().toISOString(),
                 category: post.category || 'Mental Health',
+                author: post.author || state.githubUser?.name || state.githubUser?.login || '',
                 summary: post.summary || '',
                 emoji: post.emoji || '💙',
                 content: post.content || '',

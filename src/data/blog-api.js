@@ -310,6 +310,7 @@ class BlogAPI {
         if (!metadata.title) {
             throw new Error(`Post "${slug}" missing required title in frontmatter`);
         }
+        metadata.author = String(metadata.author || '').trim();
 
         return {
             slug,

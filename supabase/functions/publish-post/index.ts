@@ -15,6 +15,7 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
 type PostRecord = {
   title: string;
+  author?: string | null;
   summary?: string | null;
   url: string;
   slug: string;
@@ -45,13 +46,14 @@ async function upsertPost(post: PostRecord) {
     .upsert(
       {
         title: post.title,
+        author: post.author || null,
         slug: post.slug,
         summary: post.summary || null,
         url: post.url,
       },
       { onConflict: "slug" },
     )
-    .select("id, title, slug, summary, url")
+    .select("id, title, author, slug, summary, url")
     .single();
 
   if (error) {
@@ -92,14 +94,15 @@ Deno.serve(async (req) => {
   const title = (post?.title || "").trim();
   const url = (post?.url || "").trim();
   const summary = (post?.summary || "").trim();
+  const author = (post?.author || "").trim();
   const slug = (post?.slug || slugify(title)).trim();
 
-  if (!title || !url) {
-    return jsonResponse({ error: "Post title and URL are required." }, 400);
+  if (!title || !author || !url) {
+    return jsonResponse({ error: "Post title, author, and URL are required." }, 400);
   }
 
   try {
-    const result = await upsertPost({ title, summary, url, slug });
+    const result = await upsertPost({ title, author, summary, url, slug });
     return jsonResponse({ status: "ok", post: result });
   } catch (error) {
     console.error("publish-post error", error);

@@ -665,7 +665,7 @@
 
         const publishUrl = supabaseConfig.publishPostFunctionUrl ||
             `${supabaseConfig.url}/functions/v1/publish-post`;
-        const postUrl = `${window.location.origin}/blog/${encodeURIComponent(post.slug)}`;
+        const postUrl = `${window.location.origin}/blog-post?slug=${encodeURIComponent(post.slug)}`;
 
         try {
             const response = await fetch(publishUrl, {
@@ -679,6 +679,7 @@
                     post: {
                         title: post.title,
                         summary: post.summary,
+                        author: post.author || '',
                         url: postUrl,
                         slug: post.slug
                     }
@@ -709,7 +710,7 @@
 
         const notifyUrl = supabaseConfig.notifyFunctionUrl ||
             `${supabaseConfig.url}/functions/v1/notify-subscribers`;
-        const postUrl = `${window.location.origin}/blog/${encodeURIComponent(post.slug)}`;
+        const postUrl = `${window.location.origin}/blog-post?slug=${encodeURIComponent(post.slug)}`;
 
         try {
             const response = await fetch(notifyUrl, {
@@ -723,6 +724,7 @@
                     post: {
                         title: post.title,
                         summary: post.summary,
+                        author: post.author || '',
                         url: postUrl,
                         slug: post.slug
                     }
@@ -750,6 +752,7 @@
         document.getElementById('postTitle').value = '';
         document.getElementById('postDate').value = new Date().toISOString().slice(0, 16);
         document.getElementById('postCategory').value = 'Mental Health';
+        document.getElementById('postAuthor').value = githubUser?.name || githubUser?.login || '';
         document.getElementById('postSummary').value = '';
         document.getElementById('postEmoji').value = '💙';
         document.getElementById('postContent').value = '';
@@ -772,6 +775,7 @@
             document.getElementById('postDate').value = postDate;
             
             document.getElementById('postCategory').value = post.category || 'Mental Health';
+            document.getElementById('postAuthor').value = post.author || githubUser?.name || githubUser?.login || '';
             document.getElementById('postSummary').value = post.summary || '';
             document.getElementById('postEmoji').value = post.emoji || '💙';
             document.getElementById('postContent').value = post.content || '';
@@ -804,9 +808,13 @@
             const title = formData.get('title');
             const date = formData.get('date');
             const category = formData.get('category');
+            const author = formData.get('author');
             const summary = formData.get('summary');
             const emoji = formData.get('emoji') || '💙';
             const content = formData.get('content');
+            if (!String(author || '').trim()) {
+                throw new Error('Author name is required.');
+            }
             
             // Use BlogAdmin API for save operation
             const result = await window.BlogAdmin.savePost({
@@ -814,6 +822,7 @@
                 title,
                 date,
                 category,
+                author,
                 summary,
                 emoji,
                 content
@@ -828,10 +837,10 @@
             // Reload posts to confirm
             await loadPosts();
 
-            const publishResult = await publishPostToSupabase({ title, summary, slug });
+            const publishResult = await publishPostToSupabase({ title, summary, author, slug });
             if (publishResult.ok) {
                 if (isNew) {
-                    const notifyResult = await notifySubscribersForPost({ title, summary, slug });
+                    const notifyResult = await notifySubscribersForPost({ title, summary, author, slug });
                     if (notifyResult.ok) {
                         showSuccess(`Post created successfully! Email update sent to subscribers.`);
                     } else {

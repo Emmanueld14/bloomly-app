@@ -80,6 +80,7 @@
         // Create markdown with frontmatter
         const markdown = `---
 title: "${postData.title}"
+author: "${(postData.author || '').replace(/"/g, '\\"')}"
 date: ${formattedDate}
 category: "${postData.category || 'Mental Health'}"
 summary: "${(postData.summary || '').replace(/"/g, '\\"')}"
