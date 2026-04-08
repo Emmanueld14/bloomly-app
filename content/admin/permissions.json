@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-04-08T14:30:00.990Z",
+  "updatedAt": "2026-04-08T14:31:23.417Z",
   "accounts": [
     {
       "id": "acct-11a3f9a4-5d03-40f1-802b-f2e2c6039dc8",
@@ -32,13 +32,13 @@
         "dashboard": true,
         "blogAccess": true,
         "blogReview": false,
-        "blogPublish": false,
+        "blogPublish": true,
         "sessionRecords": false,
         "reportsSubmit": false,
         "reportsReview": false,
         "userPermissions": false
       },
-      "updatedAt": "2026-04-08T14:30:00.990Z"
+      "updatedAt": "2026-04-08T14:31:23.417Z"
     }
   ]
 }
