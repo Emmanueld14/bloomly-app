@@ -1,7 +1,7 @@
 create table if not exists public.payment_attempts (
   id uuid primary key default gen_random_uuid(),
   booking_id uuid not null references public.appointment_bookings(id) on delete cascade,
-  provider text not null check (provider in ('mpesa', 'airtel', 'paypal')),
+  provider text not null check (provider in ('mpesa', 'airtel', 'paypal', 'pesapal')),
   amount_cents integer not null,
   currency text not null,
   status text not null default 'pending',

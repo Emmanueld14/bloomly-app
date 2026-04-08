@@ -60,6 +60,11 @@ Use `.env.example` as reference.
 
 ### Required for multi-method Charla payments
 
+- `PESAPAL_CONSUMER_KEY`
+- `PESAPAL_CONSUMER_SECRET`
+- `PESAPAL_ENV` (`sandbox` or `live`)
+- `PESAPAL_IPN_ID` (registered Pesapal IPN identifier)
+- `PESAPAL_CALLBACK_URL` (optional override)
 - `PAYPAL_CLIENT_ID`
 - `PAYPAL_CLIENT_SECRET`
 - `PAYPAL_BASE_URL` (`https://api-m.sandbox.paypal.com` for sandbox)
@@ -97,6 +102,7 @@ supabase functions deploy appointments-settings
 supabase functions deploy appointments-availability
 supabase functions deploy appointments-book
 supabase functions deploy payments-status
+supabase functions deploy payments-pesapal-webhook
 supabase functions deploy payments-initiate
 supabase functions deploy payments-paypal-capture
 supabase functions deploy appointments-webhook-mpesa

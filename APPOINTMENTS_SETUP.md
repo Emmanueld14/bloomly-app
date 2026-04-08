@@ -42,6 +42,9 @@ For payment providers, also set:
 - `MPESA_PASSKEY`
 - `AIRTEL_CLIENT_ID`
 - `AIRTEL_CLIENT_SECRET`
+- `PESAPAL_CONSUMER_KEY`
+- `PESAPAL_CONSUMER_SECRET`
+- `PESAPAL_ENV` (`sandbox` or `live`)
 
 Optional but recommended:
 
@@ -50,6 +53,7 @@ Optional but recommended:
 - `MPESA_CALLBACK_URL`
 - `AIRTEL_CALLBACK_URL`
 - `PAYPAL_BASE_URL` (sandbox vs live)
+- `PESAPAL_IPN_ID` (if already registered in Pesapal dashboard)
 
 ## Admin quality-of-life tools
 

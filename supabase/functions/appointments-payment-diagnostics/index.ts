@@ -269,6 +269,15 @@ Deno.serve(async (req) => {
     }
   }
 
+  const pesapalMissing: string[] = [];
+  if (!Deno.env.get("PESAPAL_CONSUMER_KEY")) {
+    pesapalMissing.push("PESAPAL_CONSUMER_KEY");
+  }
+  if (!Deno.env.get("PESAPAL_CONSUMER_SECRET")) {
+    pesapalMissing.push("PESAPAL_CONSUMER_SECRET");
+  }
+  const pesapalConfigured = pesapalMissing.length === 0;
+
   const providers = {
     stripe: buildProvider(
       stripeConfigured,
@@ -297,6 +306,19 @@ Deno.serve(async (req) => {
       airtelMissing,
       airtelLiveCheck,
       { baseUrl: AIRTEL_BASE_URL },
+    ),
+    pesapal: buildProvider(
+      pesapalConfigured,
+      pesapalMissing,
+      {
+        attempted: false,
+        ok: pesapalConfigured,
+        detail: pesapalConfigured ? "Configured." : "Missing Pesapal credentials.",
+      },
+      {
+        baseUrl:
+          Deno.env.get("PESAPAL_BASE_URL") || "https://cybqa.pesapal.com/pesapalv3",
+      },
     ),
   };
 

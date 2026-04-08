@@ -341,10 +341,11 @@
             return;
         }
 
-        const order = ['stripe', 'paypal', 'mpesa', 'airtel'];
+        const order = ['stripe', 'paypal', 'pesapal', 'mpesa', 'airtel'];
         const names = {
             stripe: 'Stripe',
             paypal: 'PayPal',
+            pesapal: 'Pesapal',
             mpesa: 'M-Pesa',
             airtel: 'Airtel Money'
         };

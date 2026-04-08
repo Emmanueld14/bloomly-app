@@ -82,14 +82,147 @@ Deno.serve(async (req) => {
   }
 
   const latestAttempt = attemptsRows?.[0] || null;
+
+  // For redirect-based providers (e.g. Pesapal), sync status lazily when users revisit.
+  if (
+    booking.status !== "confirmed" &&
+    latestAttempt &&
+    String(latestAttempt.provider || "").toLowerCase() === "pesapal"
+  ) {
+    const metadata = (latestAttempt.metadata as Record<string, unknown>) || {};
+    const orderTrackingId = String(
+      metadata.order_tracking_id || metadata.orderTrackingId || "",
+    ).trim();
+    const pesapalMerchantReference = String(
+      metadata.pesapal_merchant_reference || metadata.merchantReference || "",
+    ).trim();
+    const checkoutRequestId = String(
+      metadata.checkout_request_id || metadata.checkoutRequestId || "",
+    ).trim();
+    const shouldRefresh =
+      latestAttempt.status === "pending" &&
+      (orderTrackingId || pesapalMerchantReference || checkoutRequestId);
+
+    if (shouldRefresh) {
+      const PESAPAL_ENV = String(
+        Deno.env.get("PESAPAL_ENV") || "sandbox",
+      ).toLowerCase();
+      const PESAPAL_BASE_URL =
+        PESAPAL_ENV === "live"
+          ? "https://pay.pesapal.com/v3"
+          : "https://cybqa.pesapal.com/pesapalv3";
+      const PESAPAL_CONSUMER_KEY = Deno.env.get("PESAPAL_CONSUMER_KEY") || "";
+      const PESAPAL_CONSUMER_SECRET = Deno.env.get("PESAPAL_CONSUMER_SECRET") || "";
+      const PESAPAL_IPN_ID = Deno.env.get("PESAPAL_IPN_ID") || "";
+
+      if (PESAPAL_CONSUMER_KEY && PESAPAL_CONSUMER_SECRET && PESAPAL_IPN_ID) {
+        try {
+          const tokenResponse = await fetch(`${PESAPAL_BASE_URL}/api/Auth/RequestToken`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              consumer_key: PESAPAL_CONSUMER_KEY,
+              consumer_secret: PESAPAL_CONSUMER_SECRET,
+            }),
+          });
+          const tokenData = await tokenResponse.json().catch(() => ({}));
+          const token = String(tokenData?.token || "").trim();
+
+          if (token) {
+            const query = new URLSearchParams({
+              orderTrackingId: orderTrackingId || checkoutRequestId,
+              pesapal_merchant_reference: pesapalMerchantReference || bookingId,
+            });
+            const statusResponse = await fetch(
+              `${PESAPAL_BASE_URL}/api/Transactions/GetTransactionStatus?${query.toString()}`,
+              {
+                method: "GET",
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  Accept: "application/json",
+                  "Content-Type": "application/json",
+                },
+              },
+            );
+            const statusData = await statusResponse.json().catch(() => ({}));
+            const paymentStatusDescription = String(
+              statusData?.payment_status_description ||
+                statusData?.status ||
+                "",
+            ).toUpperCase();
+            const paymentStatusCode = Number(statusData?.payment_status_code ?? -1);
+            const isPaid =
+              paymentStatusCode === 1 ||
+              paymentStatusDescription === "COMPLETED" ||
+              paymentStatusDescription === "PAID";
+            const isFailed =
+              paymentStatusCode === 2 ||
+              paymentStatusDescription === "FAILED" ||
+              paymentStatusDescription === "INVALID";
+
+            if (isPaid) {
+              await supabase
+                .from("payment_attempts")
+                .update({
+                  status: "succeeded",
+                  metadata: {
+                    ...metadata,
+                    status_poll: statusData,
+                    synced_at: new Date().toISOString(),
+                  },
+                })
+                .eq("id", latestAttempt.id);
+
+              const { data: refreshedBookingRows } = await supabase
+                .from("appointment_bookings")
+                .update({
+                  status: "confirmed",
+                  paid_at: new Date().toISOString(),
+                  hold_expires_at: null,
+                })
+                .eq("id", bookingId)
+                .select("*")
+                .limit(1);
+
+              if (refreshedBookingRows?.length) {
+                Object.assign(booking, refreshedBookingRows[0]);
+              }
+            } else if (isFailed) {
+              await supabase
+                .from("payment_attempts")
+                .update({
+                  status: "failed",
+                  metadata: {
+                    ...metadata,
+                    status_poll: statusData,
+                    synced_at: new Date().toISOString(),
+                  },
+                })
+                .eq("id", latestAttempt.id);
+            }
+          }
+        } catch {
+          // Non-fatal: keep legacy status response even if provider sync fails.
+        }
+      }
+    }
+  }
+  const { data: refreshedAttemptsRows } = await supabase
+    .from("payment_attempts")
+    .select("*")
+    .eq("booking_id", bookingId)
+    .order("created_at", { ascending: false });
+
+  const attempts = refreshedAttemptsRows || attemptsRows || [];
+  const newestAttempt = attempts?.[0] || null;
   const paymentStatus =
     booking.status === "confirmed"
       ? "paid"
-      : latestAttempt?.status || "pending";
+      : newestAttempt?.status || "pending";
 
   return jsonResponse({
     booking,
-    paymentAttempts: attemptsRows || [],
+    paymentAttempts: attempts,
     paymentStatus,
   });
 });

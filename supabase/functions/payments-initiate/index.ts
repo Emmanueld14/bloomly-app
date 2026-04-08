@@ -16,6 +16,18 @@ const PAYPAL_BASE_URL =
   Deno.env.get("PAYPAL_BASE_URL") || "https://api-m.sandbox.paypal.com";
 const PAYPAL_CLIENT_ID = Deno.env.get("PAYPAL_CLIENT_ID") || "";
 const PAYPAL_CLIENT_SECRET = Deno.env.get("PAYPAL_CLIENT_SECRET") || "";
+const PESAPAL_ENV = (Deno.env.get("PESAPAL_ENV") || "sandbox").toLowerCase();
+const PESAPAL_BASE_URL = (
+  Deno.env.get("PESAPAL_BASE_URL") ||
+  (PESAPAL_ENV === "live"
+    ? "https://pay.pesapal.com/v3"
+    : "https://cybqa.pesapal.com/pesapalv3")
+).replace(/\/+$/, "");
+const PESAPAL_CONSUMER_KEY = Deno.env.get("PESAPAL_CONSUMER_KEY") || "";
+const PESAPAL_CONSUMER_SECRET = Deno.env.get("PESAPAL_CONSUMER_SECRET") || "";
+const PESAPAL_IPN_ID = Deno.env.get("PESAPAL_IPN_ID") || "";
+const PESAPAL_CALLBACK_URL =
+  Deno.env.get("PESAPAL_CALLBACK_URL") || `${SITE_URL}/appointments/pay`;
 
 const MPESA_BASE_URL =
   Deno.env.get("MPESA_BASE_URL") || "https://sandbox.safaricom.co.ke";
@@ -49,7 +61,7 @@ const AIRTEL_CALLBACK_URL =
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-type PaymentProvider = "paypal" | "mpesa" | "airtel";
+type PaymentProvider = "paypal" | "mpesa" | "airtel" | "pesapal";
 
 function jsonResponse(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -110,6 +122,26 @@ async function createPayPalAccessToken() {
   return String(data.access_token);
 }
 
+async function createPesapalAccessToken() {
+  const response = await fetch(`${PESAPAL_BASE_URL}/api/Auth/RequestToken`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify({
+      consumer_key: PESAPAL_CONSUMER_KEY,
+      consumer_secret: PESAPAL_CONSUMER_SECRET,
+    }),
+  });
+  const data = await response.json().catch(() => ({}));
+  const token = data?.token || data?.access_token;
+  if (!response.ok || !token) {
+    throw new Error(data?.message || "Unable to authenticate Pesapal.");
+  }
+  return String(token);
+}
+
 async function initiatePayPalPayment(params: {
   booking: Record<string, unknown>;
   attemptId: string;
@@ -168,6 +200,80 @@ async function initiatePayPalPayment(params: {
   return {
     externalReference: String(data.id || ""),
     redirectUrl: String(approveLink.href),
+    raw: data,
+  };
+}
+
+async function initiatePesapalPayment(params: {
+  booking: Record<string, unknown>;
+  attemptId: string;
+  amountCents: number;
+  currency: string;
+  phone?: string;
+}) {
+  if (!PESAPAL_CONSUMER_KEY || !PESAPAL_CONSUMER_SECRET) {
+    throw new Error("Pesapal credentials are missing.");
+  }
+  if (!PESAPAL_IPN_ID) {
+    throw new Error("Pesapal IPN ID is missing.");
+  }
+
+  const bookingId = String(params.booking.id || "");
+  const fullName = String(params.booking.name || "").trim();
+  const nameParts = fullName.split(/\s+/).filter(Boolean);
+  const firstName = nameParts[0] || "Bloomly";
+  const lastName = nameParts.slice(1).join(" ") || "Client";
+  const callbackUrl = new URL(PESAPAL_CALLBACK_URL);
+  callbackUrl.searchParams.set("booking_id", bookingId);
+  callbackUrl.searchParams.set("provider", "pesapal");
+
+  const accessToken = await createPesapalAccessToken();
+  const response = await fetch(
+    `${PESAPAL_BASE_URL}/api/Transactions/SubmitOrderRequest`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify({
+        id: params.attemptId,
+        currency: params.currency,
+        amount: Number(toMoney(params.amountCents)),
+        description: `Bloomly Charla ${bookingId.slice(0, 8)}`,
+        callback_url: callbackUrl.toString(),
+        notification_id: PESAPAL_IPN_ID,
+        billing_address: {
+          email_address: String(params.booking.email || ""),
+          phone_number: normalizePhone(
+            String(params.phone || params.booking.phone || ""),
+          ),
+          country_code: "KE",
+          first_name: firstName,
+          last_name: lastName,
+          line_1: "Nairobi",
+          city: "Nairobi",
+          state: "Nairobi",
+          postal_code: "00100",
+          zip_code: "00100",
+        },
+      }),
+    },
+  );
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(data?.message || "Unable to create Pesapal order.");
+  }
+
+  const redirectUrl = data?.redirect_url;
+  if (!redirectUrl) {
+    throw new Error("Pesapal redirect URL is missing.");
+  }
+
+  return {
+    externalReference: String(data?.order_tracking_id || ""),
+    redirectUrl: String(redirectUrl),
     raw: data,
   };
 }
@@ -359,7 +465,7 @@ Deno.serve(async (req) => {
   if (!bookingId || !provider) {
     return jsonResponse({ error: "bookingId and provider are required." }, 400);
   }
-  if (!["paypal", "mpesa", "airtel"].includes(provider)) {
+  if (!["paypal", "mpesa", "airtel", "pesapal"].includes(provider)) {
     return jsonResponse({ error: "Unsupported payment provider." }, 400);
   }
   if ((provider === "mpesa" || provider === "airtel") && !phone) {
@@ -424,6 +530,28 @@ Deno.serve(async (req) => {
         attemptId: attempt.id,
         amountCents,
         currency,
+      });
+
+      await updateAttempt(attempt.id, {
+        external_reference: result.externalReference,
+        metadata: result.raw,
+      });
+
+      return jsonResponse({
+        provider,
+        paymentAttemptId: attempt.id,
+        requiresRedirect: true,
+        redirectUrl: result.redirectUrl,
+      });
+    }
+
+    if (provider === "pesapal") {
+      const result = await initiatePesapalPayment({
+        booking,
+        attemptId: attempt.id,
+        amountCents,
+        currency,
+        phone,
       });
 
       await updateAttempt(attempt.id, {

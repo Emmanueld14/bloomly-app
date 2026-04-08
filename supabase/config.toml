@@ -30,6 +30,9 @@ verify_jwt = false
 [functions.payments-paypal-capture]
 verify_jwt = false
 
+[functions.payments-pesapal-webhook]
+verify_jwt = false
+
 [functions.appointments-webhook-mpesa]
 verify_jwt = false
 

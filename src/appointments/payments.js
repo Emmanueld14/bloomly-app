@@ -229,6 +229,16 @@
                 return;
             }
 
+            if (provider === 'pesapal') {
+                setMessage(
+                    result.message || 'Waiting for Pesapal confirmation. This page will update automatically.',
+                    null
+                );
+                startPolling();
+                await fetchStatus();
+                return;
+            }
+
             if (result.pending) {
                 setMessage(result.message || 'Payment request sent. Complete it on your phone.', null);
                 startPolling();
