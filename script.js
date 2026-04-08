@@ -11,6 +11,19 @@
     const mobileMenuToggle = document.getElementById('mobileMenuToggle');
     const navLinks = document.getElementById('navLinks');
     const currentPath = window.location.pathname.split('/').pop() || 'index.html';
+    let activeOverlayLocks = 0;
+
+    function lockUiOverlay() {
+        activeOverlayLocks += 1;
+        document.body.classList.add('ui-overlay-open');
+    }
+
+    function unlockUiOverlay() {
+        activeOverlayLocks = Math.max(0, activeOverlayLocks - 1);
+        if (activeOverlayLocks === 0) {
+            document.body.classList.remove('ui-overlay-open');
+        }
+    }
 
     // Set active nav link based on current page
     function setActiveNavLink() {
@@ -829,32 +842,81 @@
         const list = container.querySelector('[data-comment-list]');
         const messageEl = container.querySelector('[data-comment-message]');
         const commentPanel = container.querySelector('[data-comment-panel]');
-        const commentToggle = container.querySelector('[data-comment-toggle]');
         const commentPanelBody = container.querySelector('[data-comment-panel-body]');
+        const drawerToggle = document.querySelector('[data-comment-drawer-toggle]');
+        const drawerClose = container.querySelector('[data-comment-drawer-close]');
+        const drawerOverlay = document.querySelector('[data-comment-drawer-overlay]');
         if (!form || !list) return;
 
-        let isCommentsCollapsed = false;
-        const applyCommentPanelState = (collapsed) => {
-            isCommentsCollapsed = collapsed;
+        let isDrawerOpen = false;
+        let drawerLocked = false;
+
+        const setDrawerState = (open) => {
+            const nextOpen = Boolean(open);
+            if (nextOpen === isDrawerOpen) return;
+
+            isDrawerOpen = nextOpen;
+            document.body.classList.toggle('comment-drawer-open', nextOpen);
+
             if (commentPanel) {
-                commentPanel.classList.toggle('is-collapsed', collapsed);
+                commentPanel.setAttribute('aria-hidden', nextOpen ? 'false' : 'true');
             }
-            if (commentToggle) {
-                commentToggle.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
-                commentToggle.textContent = collapsed ? 'Show comments' : 'Hide comments';
+
+            if (drawerOverlay) {
+                if (nextOpen) {
+                    drawerOverlay.hidden = false;
+                } else {
+                    drawerOverlay.hidden = true;
+                }
+            }
+
+            if (drawerToggle) {
+                drawerToggle.setAttribute('aria-expanded', nextOpen ? 'true' : 'false');
+                drawerToggle.textContent = nextOpen ? 'Close comments' : 'Comments';
+            }
+
+            if (nextOpen && !drawerLocked) {
+                lockUiOverlay();
+                drawerLocked = true;
+            } else if (!nextOpen && drawerLocked) {
+                unlockUiOverlay();
+                drawerLocked = false;
             }
         };
 
-        if (commentToggle && commentPanelBody) {
+        if (drawerToggle && commentPanelBody) {
             if (!commentPanelBody.id) {
                 commentPanelBody.id = `post-comments-panel-${postId}`;
             }
-            commentToggle.setAttribute('aria-controls', commentPanelBody.id);
-            applyCommentPanelState(false);
-            commentToggle.addEventListener('click', () => {
-                applyCommentPanelState(!isCommentsCollapsed);
+            drawerToggle.setAttribute('aria-controls', commentPanelBody.id);
+            drawerToggle.addEventListener('click', (event) => {
+                event.preventDefault();
+                if (document.body.classList.contains('snippet-modal-open')) {
+                    return;
+                }
+                setDrawerState(!isDrawerOpen);
             });
         }
+
+        if (drawerClose) {
+            drawerClose.addEventListener('click', () => {
+                setDrawerState(false);
+            });
+        }
+
+        if (drawerOverlay) {
+            drawerOverlay.addEventListener('click', () => {
+                setDrawerState(false);
+            });
+        }
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key !== 'Escape') return;
+            if (document.body.classList.contains('snippet-modal-open')) return;
+            if (isDrawerOpen) {
+                setDrawerState(false);
+            }
+        });
 
         const commentsKey = `bloomly:comments:${postId}`;
         let comments = [];
@@ -910,8 +972,8 @@
                 setFormMessage(messageEl, 'Thanks! Your comment is saved on this device.', 'success');
             }
 
-            if (isCommentsCollapsed) {
-                applyCommentPanelState(false);
+            if (!isDrawerOpen) {
+                setDrawerState(true);
             }
 
             if (commentInput) {
@@ -975,6 +1037,22 @@
                     gradient.addColorStop(0, '#fdf2ff');
                     gradient.addColorStop(0.45, '#e6f2ff');
                     gradient.addColorStop(1, '#ffe4f2');
+                    ctx.fillStyle = gradient;
+                    ctx.fillRect(0, 0, width, height);
+                }
+            };
+        }
+
+        if (normalized === 'minimal') {
+            return {
+                textColor: '#1c2440',
+                metaColor: 'rgba(28, 36, 64, 0.75)',
+                accentColor: 'rgba(28, 36, 64, 0.3)',
+                backgroundPainter(ctx, width, height) {
+                    const gradient = ctx.createLinearGradient(0, 0, width, height);
+                    gradient.addColorStop(0, '#ffffff');
+                    gradient.addColorStop(0.55, '#f5f8ff');
+                    gradient.addColorStop(1, '#eef2fb');
                     ctx.fillStyle = gradient;
                     ctx.fillRect(0, 0, width, height);
                 }
@@ -1114,153 +1192,333 @@
     }
 
     function initSnippetShareCards() {
-        const shareBlocks = Array.from(document.querySelectorAll('[data-snippet-share]'));
-        if (!shareBlocks.length) return;
-
         const articleBody = document.getElementById('articleBody');
-        if (!articleBody) return;
-
         const articleTitle = document.getElementById('articleTitle');
+        const floatShare = document.querySelector('[data-snippet-float-share]');
+        const modalOverlay = document.querySelector('[data-snippet-modal-overlay]');
+        const modalClose = modalOverlay?.querySelector('[data-snippet-modal-close]');
+        const previewCard = modalOverlay?.querySelector('[data-snippet-preview]');
+        const previewText = modalOverlay?.querySelector('[data-snippet-preview-text]');
+        const previewMeta = modalOverlay?.querySelector('[data-snippet-preview-meta]');
+        const message = modalOverlay?.querySelector('[data-snippet-message]');
+        const downloadButton = modalOverlay?.querySelector('[data-snippet-download]');
+        const shareInstagram = modalOverlay?.querySelector('[data-snippet-share-instagram]');
+        const shareWhatsApp = modalOverlay?.querySelector('[data-snippet-share-whatsapp]');
+        const shareX = modalOverlay?.querySelector('[data-snippet-share-x]');
+        const canvas = modalOverlay?.querySelector('[data-snippet-canvas]');
+        const themeButtons = Array.from(modalOverlay?.querySelectorAll('[data-snippet-theme]') || []);
 
-        shareBlocks.forEach((block) => {
-            const previewCard = block.querySelector('[data-snippet-preview]');
-            const previewText = block.querySelector('[data-snippet-preview-text]');
-            const previewMeta = block.querySelector('[data-snippet-preview-meta]');
-            const message = block.querySelector('[data-snippet-message]');
-            const downloadButton = block.querySelector('[data-snippet-download]');
-            const canvas = block.querySelector('[data-snippet-canvas]');
-            const themeInputs = Array.from(block.querySelectorAll('input[name="snippetTheme"]'));
+        if (!articleBody || !floatShare || !modalOverlay || !previewCard || !previewText || !downloadButton || !canvas || !themeButtons.length) {
+            return;
+        }
 
-            if (!previewCard || !previewText || !downloadButton || !canvas || !themeInputs.length) return;
+        let selectedSnippet = '';
+        let activeTheme = 'gradient';
+        let modalLocked = false;
 
-            const defaultText = previewText.textContent || 'Select text from the article to preview it here.';
-            let selectedSnippet = '';
+        const defaultText = previewText.textContent || 'Select text from the article to preview it here.';
 
-            function setMessage(text, tone = 'neutral') {
-                if (!message) return;
-                message.textContent = text || '';
-                message.classList.remove('is-error', 'is-success');
-                if (tone === 'error') message.classList.add('is-error');
-                if (tone === 'success') message.classList.add('is-success');
+        function setMessage(text, tone = 'neutral') {
+            if (!message) return;
+            message.textContent = text || '';
+            message.classList.remove('is-error', 'is-success');
+            if (tone === 'error') message.classList.add('is-error');
+            if (tone === 'success') message.classList.add('is-success');
+        }
+
+        function getShareCaption() {
+            const titleText = sanitizeSnippetText(articleTitle?.textContent || 'Bloomly Blog', 88);
+            return `"${selectedSnippet}" — ${titleText} | Bloomly`;
+        }
+
+        function updatePreviewContent() {
+            previewText.textContent = selectedSnippet || defaultText;
+            const titleText = sanitizeSnippetText(articleTitle?.textContent || 'Bloomly Blog', 72);
+            if (previewMeta) {
+                previewMeta.textContent = `Bloomly Blog · ${titleText}`;
             }
+        }
 
-            function getTheme() {
-                const checked = themeInputs.find((input) => input.checked);
-                return checked ? checked.value : 'gradient';
-            }
+        function updateThemeUI() {
+            previewCard.classList.remove('theme-gradient', 'theme-dark', 'theme-pastel', 'theme-minimal');
+            previewCard.classList.add(`theme-${activeTheme}`);
 
-            function updateThemeUI() {
-                const currentTheme = getTheme();
-                themeInputs.forEach((input) => {
-                    const option = input.closest('.snippet-theme-option');
-                    if (!option) return;
-                    option.classList.toggle('is-selected', input.checked);
-                });
-
-                previewCard.classList.remove('theme-gradient', 'theme-dark', 'theme-pastel');
-                previewCard.classList.add(`theme-${currentTheme}`);
-            }
-
-            function updatePreviewContent() {
-                previewText.textContent = selectedSnippet || defaultText;
-                const titleText = sanitizeSnippetText(articleTitle?.textContent || 'Bloomly Blog', 72);
-                if (previewMeta) {
-                    previewMeta.textContent = `Bloomly Blog · ${titleText}`;
-                }
-            }
-
-            function extractSelectionText() {
-                const selection = window.getSelection();
-                if (!selection || selection.isCollapsed || !selection.rangeCount) {
-                    return '';
-                }
-
-                const range = selection.getRangeAt(0);
-                const container = range.commonAncestorContainer;
-                const hostNode = container.nodeType === Node.TEXT_NODE ? container.parentNode : container;
-                if (!hostNode || !articleBody.contains(hostNode)) {
-                    return '';
-                }
-
-                return sanitizeSnippetText(selection.toString(), 320);
-            }
-
-            function handleSelectionCapture() {
-                const nextSnippet = extractSelectionText();
-                if (!nextSnippet) return;
-                selectedSnippet = nextSnippet;
-                updatePreviewContent();
-                setMessage('Snippet selected. Download your share card when ready.', 'success');
-            }
-
-            themeInputs.forEach((input) => {
-                input.addEventListener('change', () => {
-                    updateThemeUI();
-                    updatePreviewContent();
-                });
+            themeButtons.forEach((button) => {
+                const theme = String(button.getAttribute('data-snippet-theme') || '');
+                button.classList.toggle('is-active', theme === activeTheme);
             });
+        }
 
-            articleBody.addEventListener('mouseup', handleSelectionCapture);
-            articleBody.addEventListener('keyup', handleSelectionCapture);
+        function hideFloatShare() {
+            floatShare.classList.remove('is-visible');
+            floatShare.hidden = true;
+        }
 
-            downloadButton.addEventListener('click', () => {
-                const theme = getTheme();
-                if (!selectedSnippet) {
-                    setMessage('Select a sentence or paragraph from the article first.', 'error');
-                    return;
+        function showFloatShareAt(rangeRect) {
+            if (!rangeRect) {
+                hideFloatShare();
+                return;
+            }
+            const horizontalPadding = 16;
+            const top = Math.max(84, rangeRect.top + window.scrollY - 44);
+            const preferredLeft = rangeRect.left + window.scrollX + (rangeRect.width / 2);
+            const clampedLeft = Math.min(
+                window.scrollX + window.innerWidth - horizontalPadding,
+                Math.max(window.scrollX + horizontalPadding, preferredLeft)
+            );
+
+            floatShare.style.top = `${top}px`;
+            floatShare.style.left = `${clampedLeft}px`;
+            floatShare.hidden = false;
+            window.requestAnimationFrame(() => {
+                floatShare.classList.add('is-visible');
+            });
+        }
+
+        function getSelectionFromArticle() {
+            const selection = window.getSelection();
+            if (!selection || selection.isCollapsed || !selection.rangeCount) {
+                return { text: '', rect: null };
+            }
+
+            const range = selection.getRangeAt(0);
+            const containerNode = range.commonAncestorContainer;
+            const hostNode = containerNode.nodeType === Node.TEXT_NODE ? containerNode.parentNode : containerNode;
+
+            if (!hostNode || !articleBody.contains(hostNode)) {
+                return { text: '', rect: null };
+            }
+
+            const text = sanitizeSnippetText(selection.toString(), 320);
+            if (!text) {
+                return { text: '', rect: null };
+            }
+
+            return { text, rect: range.getBoundingClientRect() };
+        }
+
+        function syncSelectionShareButton() {
+            if (document.body.classList.contains('snippet-modal-open')) return;
+            const next = getSelectionFromArticle();
+            if (!next.text) {
+                hideFloatShare();
+                return;
+            }
+
+            selectedSnippet = next.text;
+            updatePreviewContent();
+            showFloatShareAt(next.rect);
+        }
+
+        function openModal() {
+            if (!selectedSnippet) {
+                setMessage('Select text first to create a share card.', 'error');
+                return;
+            }
+            modalOverlay.hidden = false;
+            modalOverlay.setAttribute('aria-hidden', 'false');
+            document.body.classList.add('snippet-modal-open');
+            window.requestAnimationFrame(() => {
+                modalOverlay.classList.add('is-open');
+            });
+            if (!modalLocked) {
+                lockUiOverlay();
+                modalLocked = true;
+            }
+            hideFloatShare();
+        }
+
+        function closeModal() {
+            modalOverlay.classList.remove('is-open');
+            modalOverlay.setAttribute('aria-hidden', 'true');
+            document.body.classList.remove('snippet-modal-open');
+            window.setTimeout(() => {
+                if (!modalOverlay.classList.contains('is-open')) {
+                    modalOverlay.hidden = true;
                 }
+            }, 280);
+            if (modalLocked) {
+                unlockUiOverlay();
+                modalLocked = false;
+            }
+        }
 
-                const rendered = renderSnippetCanvas(
-                    canvas,
-                    selectedSnippet,
-                    theme,
-                    articleTitle?.textContent || 'Bloomly Blog'
-                );
+        function exportSnippetCard(onSuccess) {
+            if (!selectedSnippet) {
+                setMessage('Select a sentence or paragraph from the article first.', 'error');
+                return;
+            }
 
-                if (!rendered) {
-                    setMessage('Unable to generate share card on this browser.', 'error');
-                    return;
-                }
+            const rendered = renderSnippetCanvas(
+                canvas,
+                selectedSnippet,
+                activeTheme,
+                articleTitle?.textContent || 'Bloomly Blog'
+            );
 
-                const filename = `bloomly-snippet-${theme}-${Date.now()}.png`;
+            if (!rendered) {
+                setMessage('Unable to generate share card on this browser.', 'error');
+                return;
+            }
 
-                if (typeof canvas.toBlob === 'function') {
-                    canvas.toBlob((blob) => {
-                        if (!blob) {
-                            setMessage('Unable to generate share image. Please try again.', 'error');
-                            return;
-                        }
-                        const blobUrl = URL.createObjectURL(blob);
-                        const link = document.createElement('a');
-                        link.href = blobUrl;
-                        link.download = filename;
-                        document.body.appendChild(link);
-                        link.click();
-                        link.remove();
-                        setTimeout(() => URL.revokeObjectURL(blobUrl), 1200);
-                        setMessage('Share card downloaded. Post it to Instagram Stories or anywhere.', 'success');
-                    }, 'image/png');
-                    return;
-                }
+            const filename = `bloomly-snippet-${activeTheme}-${Date.now()}.png`;
 
-                try {
-                    const fallbackUrl = canvas.toDataURL('image/png');
+            if (typeof canvas.toBlob === 'function') {
+                canvas.toBlob((blob) => {
+                    if (!blob) {
+                        setMessage('Unable to generate share image. Please try again.', 'error');
+                        return;
+                    }
+
+                    if (typeof onSuccess === 'function') {
+                        onSuccess({ blob, filename });
+                        return;
+                    }
+
+                    const blobUrl = URL.createObjectURL(blob);
                     const link = document.createElement('a');
-                    link.href = fallbackUrl;
+                    link.href = blobUrl;
                     link.download = filename;
                     document.body.appendChild(link);
                     link.click();
                     link.remove();
+                    setTimeout(() => URL.revokeObjectURL(blobUrl), 1200);
                     setMessage('Share card downloaded. Post it to Instagram Stories or anywhere.', 'success');
-                } catch (error) {
-                    console.error('Snippet card export failed', error);
-                    setMessage('Unable to download right now. Please try again.', 'error');
+                }, 'image/png');
+                return;
+            }
+
+            try {
+                const fallbackUrl = canvas.toDataURL('image/png');
+                const link = document.createElement('a');
+                link.href = fallbackUrl;
+                link.download = filename;
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                setMessage('Share card downloaded. Post it to Instagram Stories or anywhere.', 'success');
+            } catch (error) {
+                console.error('Snippet card export failed', error);
+                setMessage('Unable to download right now. Please try again.', 'error');
+            }
+        }
+
+        async function copyCaptionToClipboard(caption) {
+            if (!navigator.clipboard || typeof navigator.clipboard.writeText !== 'function') {
+                return false;
+            }
+            try {
+                await navigator.clipboard.writeText(caption);
+                return true;
+            } catch (error) {
+                return false;
+            }
+        }
+
+        function openShareWindow(url) {
+            window.open(url, '_blank', 'noopener,noreferrer,width=680,height=760');
+        }
+
+        function shareToX() {
+            if (!selectedSnippet) {
+                setMessage('Select text first to share.', 'error');
+                return;
+            }
+            const caption = getShareCaption();
+            const shareUrl = new URL('https://twitter.com/intent/tweet');
+            shareUrl.searchParams.set('text', caption);
+            shareUrl.searchParams.set('url', window.location.href);
+            openShareWindow(shareUrl.toString());
+            setMessage('Opened X share window.', 'success');
+        }
+
+        function shareToWhatsApp() {
+            if (!selectedSnippet) {
+                setMessage('Select text first to share.', 'error');
+                return;
+            }
+            const caption = `${getShareCaption()} ${window.location.href}`;
+            const shareUrl = new URL('https://wa.me/');
+            shareUrl.searchParams.set('text', caption);
+            openShareWindow(shareUrl.toString());
+            setMessage('Opened WhatsApp share window.', 'success');
+        }
+
+        async function shareToInstagram() {
+            if (!selectedSnippet) {
+                setMessage('Select text first to share.', 'error');
+                return;
+            }
+            exportSnippetCard(async () => {
+                const copied = await copyCaptionToClipboard(getShareCaption());
+                openShareWindow('https://www.instagram.com/');
+                if (copied) {
+                    setMessage('Card downloaded. Caption copied — paste it in Instagram.', 'success');
+                } else {
+                    setMessage('Card downloaded. Open Instagram and add your caption.', 'success');
                 }
             });
+        }
 
-            updateThemeUI();
-            updatePreviewContent();
+        floatShare.addEventListener('click', (event) => {
+            event.preventDefault();
+            openModal();
         });
+
+        if (modalClose) {
+            modalClose.addEventListener('click', closeModal);
+        }
+
+        modalOverlay.addEventListener('click', (event) => {
+            if (event.target === modalOverlay) {
+                closeModal();
+            }
+        });
+
+        downloadButton.addEventListener('click', () => {
+            exportSnippetCard();
+        });
+
+        if (shareInstagram) {
+            shareInstagram.addEventListener('click', shareToInstagram);
+        }
+        if (shareWhatsApp) {
+            shareWhatsApp.addEventListener('click', shareToWhatsApp);
+        }
+        if (shareX) {
+            shareX.addEventListener('click', shareToX);
+        }
+
+        themeButtons.forEach((button) => {
+            button.addEventListener('click', () => {
+                const nextTheme = String(button.getAttribute('data-snippet-theme') || 'gradient');
+                activeTheme = nextTheme;
+                updateThemeUI();
+                updatePreviewContent();
+            });
+        });
+
+        document.addEventListener('selectionchange', () => {
+            if (document.activeElement && /input|textarea/i.test(document.activeElement.tagName)) {
+                return;
+            }
+            syncSelectionShareButton();
+        });
+        articleBody.addEventListener('mouseup', () => window.requestAnimationFrame(syncSelectionShareButton));
+        articleBody.addEventListener('keyup', () => window.requestAnimationFrame(syncSelectionShareButton));
+        articleBody.addEventListener('touchend', () => window.setTimeout(syncSelectionShareButton, 20));
+
+        window.addEventListener('scroll', hideFloatShare, { passive: true });
+        window.addEventListener('resize', hideFloatShare);
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && modalOverlay.classList.contains('is-open')) {
+                closeModal();
+            }
+        });
+
+        updateThemeUI();
+        updatePreviewContent();
     }
 
     // ========== Newsletter Signup ==========

@@ -115,55 +115,13 @@
                                     </button>
                                     <span class="like-count" data-like-count>0 likes</span>
                                 </div>
-                                <section class="snippet-share" data-snippet-share>
-                                    <div class="snippet-share-header">
-                                        <h3>Share Blog Snippet</h3>
-                                        <p>Select text in this post, choose a theme, and download a story-ready card.</p>
-                                    </div>
-                                    <div class="snippet-share-controls">
-                                        <div class="snippet-theme-row" role="radiogroup" aria-label="Snippet card theme">
-                                            <label class="snippet-theme-option">
-                                                <input type="radio" name="snippetTheme" value="gradient" checked>
-                                                <span>Gradient</span>
-                                            </label>
-                                            <label class="snippet-theme-option">
-                                                <input type="radio" name="snippetTheme" value="dark">
-                                                <span>Dark</span>
-                                            </label>
-                                            <label class="snippet-theme-option">
-                                                <input type="radio" name="snippetTheme" value="pastel">
-                                                <span>Pastel</span>
-                                            </label>
-                                        </div>
-                                        <button type="button" class="btn btn-neutral" data-snippet-download>
-                                            Download share card
-                                        </button>
-                                    </div>
-                                    <p class="snippet-share-message" data-snippet-message aria-live="polite"></p>
-                                    <div class="snippet-preview-wrap">
-                                        <div class="snippet-preview-card theme-gradient" data-snippet-preview>
-                                            <p class="snippet-preview-label">Bloomly Snippet</p>
-                                            <blockquote class="snippet-preview-text" data-snippet-preview-text>
-                                                Select text from the article to preview it here.
-                                            </blockquote>
-                                            <p class="snippet-preview-meta" data-snippet-preview-meta>Bloomly Blog · @bloomly</p>
-                                        </div>
-                                    </div>
-                                    <canvas data-snippet-canvas width="1080" height="1920" hidden></canvas>
-                                </section>
                             </div>
 
-                            <aside class="comment-section" data-comment-panel>
+                            <aside class="comment-section comment-drawer" data-comment-panel aria-hidden="true">
                                 <div class="comment-section-header">
-                                    <h3 class="comment-section-title">Comments</h3>
-                                    <button
-                                        type="button"
-                                        class="comment-toggle"
-                                        data-comment-toggle
-                                        aria-expanded="true"
-                                        aria-controls="post-comments-panel"
-                                    >
-                                        Hide comments
+                                    <h3 class="comment-section-title">Conversation</h3>
+                                    <button type="button" class="comment-drawer-close" data-comment-drawer-close aria-label="Close comments">
+                                        ✕
                                     </button>
                                 </div>
                                 <div class="comment-section-body" id="post-comments-panel" data-comment-panel-body>
@@ -191,6 +149,16 @@
                 </div>
             </section>
         </div>
+
+        <button
+            type="button"
+            class="comment-drawer-fab"
+            data-comment-drawer-toggle
+            aria-controls="post-comments-panel"
+            aria-expanded="false"
+        >
+            Comments
+        </button>
 
         <section class="section features" aria-labelledby="post-cta-title">
             <div class="container">
@@ -233,6 +201,50 @@
             </div>
         </div>
     </footer>
+
+    <button type="button" class="snippet-float-share" data-snippet-float-share hidden>Share</button>
+
+    <div class="comment-drawer-overlay" data-comment-drawer-overlay hidden></div>
+
+    <div class="snippet-share-overlay" data-snippet-modal-overlay hidden>
+        <section class="snippet-share-modal" role="dialog" aria-modal="true" aria-labelledby="snippetShareModalTitle">
+            <header class="snippet-share-modal-header">
+                <div>
+                    <h3 id="snippetShareModalTitle">Share highlighted text</h3>
+                    <p>Create a Bloomly snippet card inspired by Spotify lyric sharing.</p>
+                </div>
+                <button type="button" class="snippet-modal-close" data-snippet-modal-close aria-label="Close share modal">✕</button>
+            </header>
+
+            <div class="snippet-modal-controls">
+                <div class="snippet-theme-row" role="radiogroup" aria-label="Snippet card theme">
+                    <button type="button" class="snippet-theme-chip is-active" data-snippet-theme="gradient">Gradient</button>
+                    <button type="button" class="snippet-theme-chip" data-snippet-theme="dark">Dark</button>
+                    <button type="button" class="snippet-theme-chip" data-snippet-theme="pastel">Pastel</button>
+                    <button type="button" class="snippet-theme-chip" data-snippet-theme="minimal">Minimal</button>
+                </div>
+            </div>
+
+            <div class="snippet-modal-preview-wrap">
+                <div class="snippet-preview-card theme-gradient" data-snippet-preview>
+                    <p class="snippet-preview-label">Bloomly Snippet</p>
+                    <blockquote class="snippet-preview-text" data-snippet-preview-text>
+                        Select text from the article to preview it here.
+                    </blockquote>
+                    <p class="snippet-preview-meta" data-snippet-preview-meta>Bloomly Blog · @bloomly</p>
+                </div>
+            </div>
+
+            <div class="snippet-modal-actions">
+                <button type="button" class="btn btn-primary" data-snippet-download>Download PNG</button>
+                <button type="button" class="btn btn-neutral" data-snippet-share-instagram>Instagram</button>
+                <button type="button" class="btn btn-neutral" data-snippet-share-whatsapp>WhatsApp</button>
+                <button type="button" class="btn btn-neutral" data-snippet-share-x>X</button>
+            </div>
+            <p class="snippet-share-message" data-snippet-message aria-live="polite"></p>
+            <canvas data-snippet-canvas width="1080" height="1920" hidden></canvas>
+        </section>
+    </div>
 
     <script src="/src/data/blog-api.js"></script>
     <script src="/src/data/blog-loader.js"></script>
