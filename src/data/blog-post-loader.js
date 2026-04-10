@@ -321,15 +321,6 @@
                     bodyEl.insertBefore(img, bodyEl.firstChild);
                 }
 
-                // Add CTA at the end
-                const cta = document.createElement('div');
-                cta.style.cssText = 'margin-top: var(--space-3xl); padding: var(--space-xl); background: rgba(var(--color-white-rgb), 0.8); border-radius: var(--radius-xl); text-align: center; border: 1px solid rgba(var(--color-black-rgb), 0.08);';
-                cta.innerHTML = `
-                    <h3 style="margin-bottom: var(--space-md);">Stay close to new reflections</h3>
-                    <p style="margin-bottom: var(--space-lg);">Subscribe for calm updates and new stories as they land.</p>
-                    <a href="/subscribe" class="btn btn-primary">Subscribe</a>
-                `;
-                bodyEl.appendChild(cta);
             }
 
             logDebug(`Post loaded successfully: ${slug}`);
