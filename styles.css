@@ -575,59 +575,6 @@ a:hover {
     overflow: hidden;
 }
 
-.home-studio-topbar {
-    display: grid;
-    grid-template-columns: auto 1fr auto;
-    align-items: center;
-    gap: var(--space-lg);
-    border-bottom: 1px solid rgba(var(--color-black-rgb), 0.08);
-    padding: var(--space-md) var(--space-xl);
-    background: rgba(var(--color-white-rgb), 0.86);
-}
-
-.home-studio-brand-wrap {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.home-studio-brand-dot {
-    width: 0.9rem;
-    height: 0.9rem;
-    border-radius: 50%;
-    background: var(--gradient-primary);
-    box-shadow: 0 6px 16px rgba(var(--color-pink-rgb), 0.3);
-}
-
-.home-studio-brand-text {
-    font-weight: 700;
-    color: var(--color-ink);
-}
-
-.home-studio-links {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-lg);
-}
-
-.home-studio-links a {
-    color: var(--color-muted);
-    font-size: var(--text-sm);
-    font-weight: 600;
-    text-decoration: none;
-    transition: color var(--transition-base);
-}
-
-.home-studio-links a:hover {
-    color: var(--color-blue);
-}
-
-.home-studio-btn.btn {
-    min-width: 0;
-    padding: 0.6rem 1rem;
-}
-
 .home-studio-hero {
     position: relative;
     text-align: center;
@@ -2261,19 +2208,6 @@ a:hover {
 
     .home-hero-studio {
         padding: calc(var(--space-3xl) + 80px) var(--space-sm) var(--space-2xl);
-    }
-
-    .home-studio-topbar {
-        grid-template-columns: 1fr;
-        justify-items: center;
-        text-align: center;
-        gap: var(--space-sm);
-        padding: var(--space-md);
-    }
-
-    .home-studio-links {
-        flex-wrap: wrap;
-        gap: var(--space-sm) var(--space-md);
     }
 
     .home-studio-hero {
