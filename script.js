@@ -780,9 +780,9 @@
     }
 
     async function initLikeButton(container, postId) {
-        const likeButton = container.querySelector('[data-like-button]');
-        const likeCountEl = container.querySelector('[data-like-count]');
-        if (!likeButton || !likeCountEl) return;
+        const likeButtons = Array.from(container.querySelectorAll('[data-like-button]'));
+        const likeCountEls = Array.from(container.querySelectorAll('[data-like-count]'));
+        if (!likeButtons.length || !likeCountEls.length) return;
 
         const likedKey = `bloomly:liked:${postId}`;
         const countKey = `bloomly:like-count:${postId}`;
@@ -800,16 +800,26 @@
         }
 
         let liked = safeStorageGet(likedKey) === 'true';
-        const likeText = likeButton.querySelector('.like-text');
+        const setBusyState = (isBusy) => {
+            likeButtons.forEach((button) => {
+                button.disabled = isBusy;
+            });
+        };
 
         const updateLikeUI = () => {
-            likeCountEl.textContent = `${likeCount} like${likeCount === 1 ? '' : 's'}`;
-            likeButton.classList.toggle('liked', liked);
-            likeButton.setAttribute('aria-pressed', liked ? 'true' : 'false');
-            likeButton.disabled = liked;
-            if (likeText) {
-                likeText.textContent = liked ? 'Liked' : 'Like';
-            }
+            likeCountEls.forEach((countEl) => {
+                countEl.textContent = `${likeCount} like${likeCount === 1 ? '' : 's'}`;
+            });
+
+            likeButtons.forEach((button) => {
+                const likeText = button.querySelector('.like-text');
+                button.classList.toggle('liked', liked);
+                button.setAttribute('aria-pressed', liked ? 'true' : 'false');
+                button.disabled = liked;
+                if (likeText) {
+                    likeText.textContent = liked ? 'Liked' : 'Like';
+                }
+            });
         };
 
         updateLikeUI();
@@ -819,23 +829,29 @@
             updateLikeUI();
         });
 
-        likeButton.addEventListener('click', async () => {
-            // Prevent multiple likes per browser by storing a flag
-            if (liked) return;
-            liked = true;
-            likeCount += 1;
-            safeStorageSet(likedKey, 'true');
-            updateLikeUI();
+        likeButtons.forEach((button) => {
+            button.addEventListener('click', async () => {
+                // Prevent multiple likes per browser by storing a flag
+                if (liked) return;
+                liked = true;
+                likeCount += 1;
+                safeStorageSet(likedKey, 'true');
+                updateLikeUI();
+                setBusyState(true);
 
-            if (isSupabaseReady()) {
-                const saved = await upsertSupabaseLikeCount(postId, likeCount);
-                if (!saved) {
-                    // Fallback to local storage if Supabase write fails
+                if (isSupabaseReady()) {
+                    const saved = await upsertSupabaseLikeCount(postId, likeCount);
+                    if (!saved) {
+                        // Fallback to local storage if Supabase write fails
+                        safeStorageSet(countKey, String(likeCount));
+                    }
+                } else {
                     safeStorageSet(countKey, String(likeCount));
                 }
-            } else {
-                safeStorageSet(countKey, String(likeCount));
-            }
+
+                setBusyState(false);
+                updateLikeUI();
+            });
         });
     }
 
