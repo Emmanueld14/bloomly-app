@@ -124,6 +124,42 @@
                                     </button>
                                     <span class="like-count" data-like-count>0 likes</span>
                                 </div>
+                                <section class="snippet-share" data-snippet-share>
+                                    <div class="snippet-share-header">
+                                        <h3>Share Blog Snippet</h3>
+                                        <p>Select text in this post, choose a theme, and download a story-ready card.</p>
+                                    </div>
+                                    <div class="snippet-share-controls">
+                                        <div class="snippet-theme-row" role="radiogroup" aria-label="Snippet card theme">
+                                            <label class="snippet-theme-option">
+                                                <input type="radio" name="snippetTheme" value="gradient" checked>
+                                                <span>Gradient</span>
+                                            </label>
+                                            <label class="snippet-theme-option">
+                                                <input type="radio" name="snippetTheme" value="dark">
+                                                <span>Dark</span>
+                                            </label>
+                                            <label class="snippet-theme-option">
+                                                <input type="radio" name="snippetTheme" value="pastel">
+                                                <span>Pastel</span>
+                                            </label>
+                                        </div>
+                                        <button type="button" class="btn btn-neutral" data-snippet-download>
+                                            Download share card
+                                        </button>
+                                    </div>
+                                    <p class="snippet-share-message" data-snippet-message aria-live="polite"></p>
+                                    <div class="snippet-preview-wrap">
+                                        <div class="snippet-preview-card theme-gradient" data-snippet-preview>
+                                            <p class="snippet-preview-label">Bloomly Snippet</p>
+                                            <blockquote class="snippet-preview-text" data-snippet-preview-text>
+                                                Select text from the article to preview it here.
+                                            </blockquote>
+                                            <p class="snippet-preview-meta" data-snippet-preview-meta>Bloomly Blog · @bloomly</p>
+                                        </div>
+                                    </div>
+                                    <canvas data-snippet-canvas width="1080" height="1920" hidden></canvas>
+                                </section>
                             </div>
 
                             <aside class="comment-section comment-drawer" data-comment-panel aria-hidden="true">
@@ -175,7 +211,6 @@
         >
             Comments
         </button>
-
     </main>
 
     <!-- Footer -->

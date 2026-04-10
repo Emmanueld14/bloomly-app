@@ -1060,7 +1060,6 @@
                 }
             };
         }
-
         return {
             textColor: '#ffffff',
             metaColor: 'rgba(255, 255, 255, 0.9)',
