@@ -1,7 +1,17 @@
 {
   "version": 1,
-  "updatedAt": "2026-04-13T18:46:40.955Z",
+  "updatedAt": "2026-04-13T18:47:13.342Z",
   "entries": [
+    {
+      "id": "activity-e0c80108-308d-4d50-8ac7-5d24061171d3",
+      "timestamp": "2026-04-13T18:47:13.342Z",
+      "actorLogin": "emmanueld14",
+      "actorRole": "admin",
+      "module": "blog",
+      "action": "draft_published",
+      "target": "Not Lonely, Just Learning",
+      "details": "Slug: not-lonely-just-learning"
+    },
     {
       "id": "activity-edde8568-029b-410f-be3c-86788b9ea91a",
       "timestamp": "2026-04-13T18:46:40.955Z",
