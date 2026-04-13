@@ -1,5 +1,6 @@
 ---
 title: "Not Lonely, Just Learning"
+author: "Manuel. M"
 date: 2026-04-08T03:41:00.000Z
 category: "Mental Health"
 summary: "What if being alone isn’t loneliness—but the beginning of discovering who you really are?"
