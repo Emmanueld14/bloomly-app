@@ -1,5 +1,6 @@
 ---
 title: "New Year, New me"
+author: "Manuel. M"
 date: 2025-12-31T02:18:00.000Z
 category: "New Year Resolutions"
 summary: "What or how are new year, new me resolutions really supposed to look like? Immediate and direct? or slow but progressive? Let's find out more 😁"
