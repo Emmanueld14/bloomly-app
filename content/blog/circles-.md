@@ -1,7 +1,7 @@
 ---
 title: "Circles 😵‍💫"
 author: "Manuel. M"
-date: 2026-04-16T08:14:00.000Z
+date: 2026-04-16T05:14:00.000Z
 category: "Self-Awareness"
 summary: "Circles… same thing every day. No change, no wonder, no love for what you do—nothing new. You feel me?"
 emoji: "🤷"
