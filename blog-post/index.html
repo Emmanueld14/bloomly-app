@@ -98,110 +98,7 @@
                 </div>
             </article>
 
-            <!-- Post Engagement -->
-            <section class="post-engagement" aria-label="Post engagement">
-                <div class="container">
-                    <div class="engagement-card" data-post-interactions>
-                        <div class="engagement-header">
-                            <h2>Join the conversation</h2>
-                            <p>Like this post or leave a supportive comment for others to read.</p>
-                        </div>
-                        <div class="engagement-layout">
-                            <div class="engagement-main">
-                                <div class="post-actions">
-                                    <button class="like-button" type="button" data-like-button aria-pressed="false">
-                                        <span class="like-icon">💗</span>
-                                        <span class="like-text">Like</span>
-                                    </button>
-                                    <span class="like-count" data-like-count>0 likes</span>
-                                </div>
-                                <section class="snippet-share" data-snippet-share>
-                                    <div class="snippet-share-header">
-                                        <h3>Share Blog Snippet</h3>
-                                        <p>Select text in this post, choose a theme, and download a story-ready card.</p>
-                                    </div>
-                                    <div class="snippet-share-controls">
-                                        <div class="snippet-theme-row" role="radiogroup" aria-label="Snippet card theme">
-                                            <label class="snippet-theme-option">
-                                                <input type="radio" name="snippetTheme" value="gradient" checked>
-                                                <span>Gradient</span>
-                                            </label>
-                                            <label class="snippet-theme-option">
-                                                <input type="radio" name="snippetTheme" value="dark">
-                                                <span>Dark</span>
-                                            </label>
-                                            <label class="snippet-theme-option">
-                                                <input type="radio" name="snippetTheme" value="pastel">
-                                                <span>Pastel</span>
-                                            </label>
-                                        </div>
-                                        <button type="button" class="btn btn-neutral" data-snippet-download>
-                                            Download share card
-                                        </button>
-                                    </div>
-                                    <p class="snippet-share-message" data-snippet-message aria-live="polite"></p>
-                                    <div class="snippet-preview-wrap">
-                                        <div class="snippet-preview-card theme-gradient" data-snippet-preview>
-                                            <p class="snippet-preview-label">Bloomly Snippet</p>
-                                            <blockquote class="snippet-preview-text" data-snippet-preview-text>
-                                                Select text from the article to preview it here.
-                                            </blockquote>
-                                            <p class="snippet-preview-meta" data-snippet-preview-meta>Bloomly Blog · @bloomly</p>
-                                        </div>
-                                    </div>
-                                    <canvas data-snippet-canvas width="1080" height="1920" hidden></canvas>
-                                </section>
-                            </div>
-
-                            <aside class="comment-section comment-drawer" data-comment-panel aria-hidden="true">
-                                <div class="comment-section-header">
-                                    <h3 class="comment-section-title">Conversation</h3>
-                                    <div class="comment-drawer-head-actions">
-                                        <button class="like-button comment-like-button" type="button" data-like-button aria-pressed="false">
-                                            <span class="like-icon">💗</span>
-                                            <span class="like-text">Like</span>
-                                        </button>
-                                        <span class="like-count comment-like-count" data-like-count>0 likes</span>
-                                    </div>
-                                    <button type="button" class="comment-drawer-close" data-comment-drawer-close aria-label="Close comments">
-                                        ✕
-                                    </button>
-                                </div>
-                                <div class="comment-section-body" id="post-comments-panel" data-comment-panel-body>
-                                    <form class="comment-form" data-comment-form novalidate>
-                                        <label class="comment-label">
-                                            Nickname (optional)
-                                            <input type="text" name="nickname" maxlength="40" placeholder="Your nickname">
-                                        </label>
-                                        <label class="comment-label">
-                                            Comment
-                                            <textarea name="comment" rows="4" maxlength="500" placeholder="Share your thoughts..." required></textarea>
-                                        </label>
-                                        <div class="comment-actions">
-                                            <button type="submit" class="btn btn-primary">Post Comment</button>
-                                            <span class="form-message" data-comment-message aria-live="polite"></span>
-                                        </div>
-                                    </form>
-                                    <div class="comment-list" data-comment-list>
-                                        <p class="comment-empty">No comments yet. Be the first to share.</p>
-                                    </div>
-                                </div>
-                            </aside>
-                        </div>
-                    </div>
-                </div>
-            </section>
         </div>
-
-        <button
-            type="button"
-            class="comment-drawer-fab"
-            data-comment-drawer-toggle
-            aria-controls="post-comments-panel"
-            aria-expanded="false"
-        >
-            Comments
-        </button>
     </main>
 
     <!-- Footer -->
@@ -235,54 +132,9 @@
         </div>
     </footer>
 
-    <button type="button" class="snippet-float-share" data-snippet-float-share hidden>Share</button>
-
-    <div class="comment-drawer-overlay" data-comment-drawer-overlay hidden></div>
-
-    <div class="snippet-share-overlay" data-snippet-modal-overlay hidden>
-        <section class="snippet-share-modal" role="dialog" aria-modal="true" aria-labelledby="snippetShareModalTitle">
-            <header class="snippet-share-modal-header">
-                <div>
-                    <h3 id="snippetShareModalTitle">Share highlighted text</h3>
-                    <p>Create a Bloomly snippet card inspired by Spotify lyric sharing.</p>
-                </div>
-                <button type="button" class="snippet-modal-close" data-snippet-modal-close aria-label="Close share modal">✕</button>
-            </header>
-
-            <div class="snippet-modal-controls">
-                <div class="snippet-theme-row" role="radiogroup" aria-label="Snippet card theme">
-                    <button type="button" class="snippet-theme-chip is-active" data-snippet-theme="gradient">Gradient</button>
-                    <button type="button" class="snippet-theme-chip" data-snippet-theme="dark">Dark</button>
-                    <button type="button" class="snippet-theme-chip" data-snippet-theme="pastel">Pastel</button>
-                    <button type="button" class="snippet-theme-chip" data-snippet-theme="minimal">Minimal</button>
-                </div>
-            </div>
-
-            <div class="snippet-modal-preview-wrap">
-                <div class="snippet-preview-card theme-gradient" data-snippet-preview>
-                    <p class="snippet-preview-label">Bloomly Snippet</p>
-                    <blockquote class="snippet-preview-text" data-snippet-preview-text>
-                        Select text from the article to preview it here.
-                    </blockquote>
-                    <p class="snippet-preview-meta" data-snippet-preview-meta>Bloomly Blog · @bloomly</p>
-                </div>
-            </div>
-
-            <div class="snippet-modal-actions">
-                <button type="button" class="btn btn-primary" data-snippet-download>Download PNG</button>
-                <button type="button" class="btn btn-neutral" data-snippet-share-instagram>Instagram</button>
-                <button type="button" class="btn btn-neutral" data-snippet-share-whatsapp>WhatsApp</button>
-                <button type="button" class="btn btn-neutral" data-snippet-share-x>X</button>
-            </div>
-            <p class="snippet-share-message" data-snippet-message aria-live="polite"></p>
-            <canvas data-snippet-canvas width="1080" height="1920" hidden></canvas>
-        </section>
-    </div>
-
     <script src="/src/data/blog-api.js"></script>
     <script src="/src/data/blog-loader.js"></script>
     <script src="/src/data/blog-post-loader.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="/script.js"></script>
 </body>
 </html>
