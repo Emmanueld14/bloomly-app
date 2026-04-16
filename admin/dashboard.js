@@ -5,8 +5,13 @@
 (function() {
     'use strict';
 
+    const ADMIN_SESSION_KEY = 'bloomly_admin_password';
     const githubConfig =
         typeof GITHUB_CONFIG !== 'undefined' ? GITHUB_CONFIG : (window.GITHUB_CONFIG || {});
+    const supabaseConfig =
+        typeof SUPABASE_CONFIG !== 'undefined' ? SUPABASE_CONFIG : (window.SUPABASE_CONFIG || {});
+    const appointmentsConfig =
+        typeof APPOINTMENTS_CONFIG !== 'undefined' ? APPOINTMENTS_CONFIG : (window.APPOINTMENTS_CONFIG || {});
     const dashboardConfig =
         typeof ADMIN_DASHBOARD_CONFIG !== 'undefined' ? ADMIN_DASHBOARD_CONFIG : (window.ADMIN_DASHBOARD_CONFIG || {});
     const apiBase = githubConfig.apiBase || 'https://api.github.com';
@@ -226,6 +231,100 @@
             return `${prefix}-${crypto.randomUUID()}`;
         }
         return `${prefix}-${Date.now()}-${Math.floor(Math.random() * 100000)}`;
+    }
+
+    function isSupabaseReady() {
+        return Boolean(supabaseConfig.url && supabaseConfig.anonKey);
+    }
+
+    function getAdminPublishKey() {
+        const stored = sessionStorage.getItem(ADMIN_SESSION_KEY);
+        if (stored && String(stored).trim()) {
+            return String(stored).trim();
+        }
+        return String(appointmentsConfig.adminKey || '').trim();
+    }
+
+    async function publishPostToSupabase(post) {
+        if (!isSupabaseReady()) {
+            return { ok: false, message: 'Supabase is not configured.' };
+        }
+        const adminKey = getAdminPublishKey();
+        if (!adminKey) {
+            return { ok: false, message: 'Admin password not found. Unlock /admin before publishing to notify subscribers.' };
+        }
+        const publishUrl = supabaseConfig.publishPostFunctionUrl ||
+            `${supabaseConfig.url}/functions/v1/publish-post`;
+        const postUrl = `${window.location.origin}/blog-post?slug=${encodeURIComponent(post.slug)}`;
+
+        try {
+            const response = await fetch(publishUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${supabaseConfig.anonKey}`,
+                    'X-Admin-Key': adminKey
+                },
+                body: JSON.stringify({
+                    post: {
+                        title: post.title,
+                        summary: post.summary,
+                        author: post.author || '',
+                        url: postUrl,
+                        slug: post.slug
+                    }
+                })
+            });
+            const result = await response.json().catch(() => ({}));
+            if (!response.ok) {
+                return { ok: false, message: result.error || 'Failed to sync post.' };
+            }
+            return { ok: true, result };
+        } catch (error) {
+            console.error('Dashboard publish-post sync failed:', error);
+            return { ok: false, message: 'Failed to sync post.' };
+        }
+    }
+
+    async function notifySubscribersForPost(post) {
+        if (!isSupabaseReady()) {
+            return { ok: false, message: 'Supabase is not configured.' };
+        }
+        const adminKey = getAdminPublishKey();
+        if (!adminKey) {
+            return { ok: false, message: 'Admin password not found. Unlock /admin before publishing to notify subscribers.' };
+        }
+        const notifyUrl = supabaseConfig.notifyFunctionUrl ||
+            `${supabaseConfig.url}/functions/v1/notify-subscribers`;
+        const postUrl = `${window.location.origin}/blog-post?slug=${encodeURIComponent(post.slug)}`;
+
+        try {
+            const response = await fetch(notifyUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${supabaseConfig.anonKey}`,
+                    'X-Admin-Key': adminKey
+                },
+                body: JSON.stringify({
+                    post: {
+                        title: post.title,
+                        summary: post.summary,
+                        author: post.author || '',
+                        url: postUrl,
+                        slug: post.slug
+                    }
+                })
+            });
+            const result = await response.json().catch(() => ({}));
+            if (!response.ok) {
+                return { ok: false, message: result.error || 'Failed to notify subscribers.' };
+            }
+            return { ok: true, result };
+        } catch (error) {
+            console.error('Dashboard notify-subscribers failed:', error);
+            return { ok: false, message: 'Failed to notify subscribers.' };
+        }
     }
 
     function statusChip(status) {
@@ -1525,8 +1624,34 @@
             content: draft.content
         };
 
+        const isFirstPublish = !draft.publishedSlug;
+
         try {
-            await window.BlogAdmin.savePost(savePayload, !draft.publishedSlug);
+            await window.BlogAdmin.savePost(savePayload, isFirstPublish);
+            const publishSyncResult = await publishPostToSupabase({
+                title: draft.title,
+                summary: draft.summary,
+                author: draft.author,
+                slug
+            });
+
+            let publishMessage = `Published "${draft.title}" successfully.`;
+            if (!publishSyncResult.ok) {
+                publishMessage += ` ${publishSyncResult.message || 'Post published, but sync failed.'}`;
+            } else if (isFirstPublish) {
+                const notifyResult = await notifySubscribersForPost({
+                    title: draft.title,
+                    summary: draft.summary,
+                    author: draft.author,
+                    slug
+                });
+                if (notifyResult.ok) {
+                    publishMessage += ' Email update sent to subscribers.';
+                } else {
+                    publishMessage += ` ${notifyResult.message || 'Post published, but email notification failed.'}`;
+                }
+            }
+
             draft.status = 'published';
             draft.publishedSlug = slug;
             draft.publishedAt = new Date().toISOString();
@@ -1537,7 +1662,7 @@
             renderDraftsTable();
             renderDashboardMetrics();
             closeDraftModal();
-            showMessage(`Published "${draft.title}" successfully.`, 'success');
+            showMessage(publishMessage, publishSyncResult.ok ? 'success' : 'error');
             await logActivity('draft_published', 'blog', draft.title, `Slug: ${slug}`);
         } catch (error) {
             showMessage(error.message || 'Failed to publish draft.', 'error');
