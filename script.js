@@ -1215,6 +1215,8 @@
     }
 
     function initSnippetShareCards() {
+        // Spotify-style snippet sharing has been removed from the blog post experience.
+        return;
         const articleBody = document.getElementById('articleBody');
         const articleTitle = document.getElementById('articleTitle');
         const articleAuthor = document.querySelector('[data-post-author]');
@@ -1832,7 +1834,7 @@
             slug: 'manuel-muhunami',
             name: 'Manuel Muhunami',
             role: 'Founder & Lead Builder',
-            image: '/images/team/manuel-muhunami-lossless-20260407.png?v=1',
+            image: '/images/team/manuel-muhunami-display-smooth-20260407.webp?v=1',
             accent: 'sage',
             details: [
                 'Vision & Strategy',
@@ -1972,7 +1974,7 @@ But I can start by being honest about my own story.`,
         return `/members/?id=${encodeURIComponent(profileId)}`;
     }
 
-    function buildTeamCard(member) {
+    function buildTeamCard(member, index = 0) {
         const wrapper = document.createElement('article');
         wrapper.className = 'bloomly-team-item';
         wrapper.dataset.teamCard = '';
@@ -1992,6 +1994,11 @@ But I can start by being honest about my own story.`,
         image.className = 'bloomly-team-photo';
         image.src = member.image || '/logo.svg';
         image.alt = `${member.name} portrait`;
+        image.decoding = 'async';
+        image.loading = index === 0 ? 'eager' : 'lazy';
+        image.fetchPriority = index === 0 ? 'high' : 'auto';
+        image.width = 520;
+        image.height = 620;
 
         avatar.appendChild(image);
 
@@ -2033,8 +2040,8 @@ But I can start by being honest about my own story.`,
         if (!grid) return;
         grid.innerHTML = '';
         const fragment = document.createDocumentFragment();
-        BLOOMLY_TEAM_MEMBERS.forEach((member) => {
-            fragment.appendChild(buildTeamCard(member));
+        BLOOMLY_TEAM_MEMBERS.forEach((member, index) => {
+            fragment.appendChild(buildTeamCard(member, index));
         });
         grid.appendChild(fragment);
     }
@@ -2355,7 +2362,6 @@ But I can start by being honest about my own story.`,
         initHomeParallax();
         initWhyBloomlyCards();
         void initPostInteractions();
-        initSnippetShareCards();
         initNewsletterForms();
         initBloomlyTeamCards();
         void initTeamProfilePage();
