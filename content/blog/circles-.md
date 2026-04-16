@@ -1,5 +1,5 @@
 ---
-title: "Circles 😵‍💫 "
+title: "Circles 😵‍💫"
 author: "Manuel. M"
 date: 2026-04-16T08:14:00.000Z
 category: "Self-Awareness"
@@ -47,4 +47,4 @@ So computers became my thing. But even now, I’m still trying to figure out whi
 
 So try things out. Explore. Find yourself.
 
-And maybe—just maybe—in that process, you’ll finally break out of that cycle… that circle of repetition. 
+And maybe—just maybe—in that process, you’ll finally break out of that cycle… that circle of repetition.
