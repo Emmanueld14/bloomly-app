@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Complete your Bloomly Charla payment with Pesapal checkout (M-Pesa, Airtel Money, cards).">
+    <meta name="description" content="Complete your Bloomly Charla payment with M-Pesa STK Push or Stripe Checkout.">
     <title>Charla Payment - Bloomly</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -81,35 +81,23 @@
                             </label>
 
                             <label class="payment-method-card">
-                                <input type="radio" name="provider" value="airtel">
-                                <span class="payment-method-content">
-                                    <span class="payment-method-top">
-                                        <span class="payment-method-name">Airtel Money</span>
-                                    </span>
-                                    <span class="payment-method-sub">Pay directly with Airtel wallet</span>
-                                    <span class="payment-logo-row">
-                                        <span class="payment-logo-pill">AIRTEL</span>
-                                    </span>
-                                </span>
-                            </label>
-                            <label class="payment-method-card">
-                                <input type="radio" name="provider" value="pesapal">
+                                <input type="radio" name="provider" value="stripe">
                                 <span class="payment-method-content">
                                     <span class="payment-method-top">
                                         <span class="payment-method-name">Cards / Bank</span>
                                     </span>
-                                    <span class="payment-method-sub">Visa, Mastercard and more via Pesapal</span>
+                                    <span class="payment-method-sub">Visa, Mastercard and more via Stripe Checkout</span>
                                     <span class="payment-logo-row">
                                         <span class="payment-logo-pill">VISA</span>
                                         <span class="payment-logo-pill">MASTERCARD</span>
-                                        <span class="payment-logo-pill">PESAPAL</span>
+                                        <span class="payment-logo-pill">STRIPE</span>
                                     </span>
                                 </span>
                             </label>
                         </div>
 
                         <div class="appointments-field" data-payment-phone-group>
-                            <label for="paymentPhone">Phone number (for M-Pesa/Airtel)</label>
+                            <label for="paymentPhone">Phone number (for M-Pesa)</label>
                             <input id="paymentPhone" name="phone" type="tel" placeholder="e.g. 2547XXXXXXXX">
                         </div>
 

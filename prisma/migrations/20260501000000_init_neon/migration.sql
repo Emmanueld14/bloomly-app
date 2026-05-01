@@ -1,0 +1,126 @@
+-- Initial Neon/Prisma schema for Bloomly.
+CREATE TABLE IF NOT EXISTS "User" (
+  "id" TEXT PRIMARY KEY,
+  "name" TEXT NOT NULL,
+  "email" TEXT NOT NULL UNIQUE,
+  "avatar" TEXT,
+  "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS "PersistedJson" (
+  "key" TEXT PRIMARY KEY,
+  "value" JSONB NOT NULL,
+  "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS "Subscriber" (
+  "id" TEXT PRIMARY KEY,
+  "email" TEXT NOT NULL UNIQUE,
+  "name" TEXT,
+  "status" TEXT NOT NULL DEFAULT 'subscribed',
+  "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS "BlogPost" (
+  "id" TEXT PRIMARY KEY,
+  "title" TEXT NOT NULL,
+  "content" TEXT NOT NULL,
+  "slug" TEXT NOT NULL UNIQUE,
+  "authorId" TEXT REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE,
+  "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS "Comment" (
+  "id" TEXT PRIMARY KEY,
+  "postId" TEXT NOT NULL REFERENCES "BlogPost"("id") ON DELETE CASCADE ON UPDATE CASCADE,
+  "userId" TEXT REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE,
+  "parentId" TEXT REFERENCES "Comment"("id") ON DELETE CASCADE ON UPDATE CASCADE,
+  "body" TEXT NOT NULL,
+  "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS "Like" (
+  "id" TEXT PRIMARY KEY,
+  "postId" TEXT REFERENCES "BlogPost"("id") ON DELETE CASCADE ON UPDATE CASCADE,
+  "commentId" TEXT REFERENCES "Comment"("id") ON DELETE CASCADE ON UPDATE CASCADE,
+  "userId" TEXT NOT NULL REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE,
+  "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS "Booking" (
+  "id" TEXT PRIMARY KEY,
+  "userId" TEXT REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE,
+  "calendlyEventId" TEXT UNIQUE,
+  "name" TEXT,
+  "email" TEXT,
+  "purpose" TEXT,
+  "date" TEXT,
+  "time" TEXT,
+  "status" TEXT NOT NULL DEFAULT 'pending',
+  "amountCents" INTEGER NOT NULL DEFAULT 0,
+  "currency" TEXT NOT NULL DEFAULT 'KES',
+  "holdExpiresAt" TIMESTAMP(3),
+  "paidAt" TIMESTAMP(3),
+  "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS "Payment" (
+  "id" TEXT PRIMARY KEY,
+  "bookingId" TEXT NOT NULL REFERENCES "Booking"("id") ON DELETE CASCADE ON UPDATE CASCADE,
+  "method" TEXT NOT NULL,
+  "amount" INTEGER NOT NULL,
+  "currency" TEXT NOT NULL DEFAULT 'KES',
+  "status" TEXT NOT NULL DEFAULT 'pending',
+  "mpesaRef" TEXT,
+  "stripeRef" TEXT,
+  "checkoutRequestId" TEXT,
+  "rawPayload" JSONB,
+  "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS "AppointmentSetting" (
+  "id" INTEGER PRIMARY KEY DEFAULT 1,
+  "bookingEnabled" BOOLEAN NOT NULL DEFAULT false,
+  "priceCents" INTEGER NOT NULL DEFAULT 0,
+  "currency" TEXT NOT NULL DEFAULT 'KES',
+  "availableDays" JSONB NOT NULL,
+  "timeSlots" JSONB NOT NULL,
+  "timezone" TEXT NOT NULL DEFAULT 'UTC',
+  "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS "AppointmentBlackout" (
+  "id" TEXT PRIMARY KEY,
+  "date" TEXT NOT NULL UNIQUE,
+  "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS "AppointmentDateOverride" (
+  "id" TEXT PRIMARY KEY,
+  "date" TEXT NOT NULL UNIQUE,
+  "timeSlots" JSONB NOT NULL,
+  "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS "BlogPost_createdAt_idx" ON "BlogPost"("createdAt");
+CREATE INDEX IF NOT EXISTS "Comment_postId_createdAt_idx" ON "Comment"("postId", "createdAt");
+CREATE INDEX IF NOT EXISTS "Comment_parentId_idx" ON "Comment"("parentId");
+CREATE UNIQUE INDEX IF NOT EXISTS "Like_postId_userId_key" ON "Like"("postId", "userId");
+CREATE UNIQUE INDEX IF NOT EXISTS "Like_commentId_userId_key" ON "Like"("commentId", "userId");
+CREATE INDEX IF NOT EXISTS "Like_userId_idx" ON "Like"("userId");
+CREATE INDEX IF NOT EXISTS "Booking_date_time_idx" ON "Booking"("date", "time");
+CREATE INDEX IF NOT EXISTS "Booking_status_idx" ON "Booking"("status");
+CREATE INDEX IF NOT EXISTS "Booking_holdExpiresAt_idx" ON "Booking"("holdExpiresAt");
+CREATE INDEX IF NOT EXISTS "Booking_email_idx" ON "Booking"("email");
+CREATE INDEX IF NOT EXISTS "Payment_bookingId_idx" ON "Payment"("bookingId");
+CREATE INDEX IF NOT EXISTS "Payment_status_idx" ON "Payment"("status");
+CREATE INDEX IF NOT EXISTS "Payment_mpesaRef_idx" ON "Payment"("mpesaRef");
+CREATE INDEX IF NOT EXISTS "Payment_stripeRef_idx" ON "Payment"("stripeRef");

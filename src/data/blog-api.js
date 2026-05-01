@@ -353,8 +353,3 @@ if (typeof window !== 'undefined') {
     window.BlogAPI = BlogAPI;
     window.blogAPI = blogAPI;
 }
-
-// Export for Node.js (if needed)
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { BlogAPI, blogAPI };
-}

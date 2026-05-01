@@ -12,8 +12,6 @@
     let githubToken = null;
     let githubUser = null;
     const config = typeof GITHUB_CONFIG !== 'undefined' ? GITHUB_CONFIG : {};
-    const supabaseConfig = typeof SUPABASE_CONFIG !== 'undefined' ? SUPABASE_CONFIG : {};
-    let supabaseClient = null;
 
     function getAdminPassword() {
         return (sessionStorage.getItem(ADMIN_SESSION_KEY) || '').trim();
@@ -189,8 +187,6 @@
     // Initialize
     async function init() {
         console.log('Admin panel initializing...');
-
-        initSupabaseClient();
 
         const handledOAuthOnRoot = await maybeHandleOAuthOnAdminRoot();
         if (handledOAuthOnRoot) {
@@ -397,26 +393,8 @@
         }
     }
 
-    // Initialize Supabase client for notifications
-    function initSupabaseClient() {
-        if (!window.supabase || typeof window.supabase.createClient !== 'function') {
-            console.warn('Supabase JS library not loaded.');
-            return;
-        }
-
-        if (!supabaseConfig.url || !supabaseConfig.anonKey) {
-            console.warn('Supabase config is missing. Check admin/config.js.');
-            return;
-        }
-
-        supabaseClient = window.supabase.createClient(
-            supabaseConfig.url,
-            supabaseConfig.anonKey
-        );
-    }
-
-    function isSupabaseReady() {
-        return Boolean(supabaseClient && supabaseConfig.url && supabaseConfig.anonKey);
+    function isContentApiReady() {
+        return true;
     }
 
     function setEmailPostMessage(message, type) {
@@ -440,11 +418,6 @@
     async function handleEmailPostSubmit(event) {
         event.preventDefault();
 
-        if (!isSupabaseReady()) {
-            setEmailPostMessage('Supabase is not configured. Check admin/config.js.', 'error');
-            return;
-        }
-
         const titleInput = document.getElementById('emailPostTitle');
         const summaryInput = document.getElementById('emailPostSummary');
         const urlInput = document.getElementById('emailPostUrl');
@@ -464,9 +437,6 @@
             return;
         }
 
-        const notifyUrl = supabaseConfig.notifyFunctionUrl ||
-            `${supabaseConfig.url}/functions/v1/notify-subscribers`;
-
         const submitBtn = document.getElementById('emailPostSubmit');
         const originalText = submitBtn ? submitBtn.textContent : 'Send email update';
         if (submitBtn) {
@@ -484,11 +454,10 @@
                 }
             };
 
-            const response = await fetch(notifyUrl, {
+            const response = await fetch('/api/notify-subscribers', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${supabaseConfig.anonKey}`,
                     'X-Admin-Key': adminKey
                 },
                 body: JSON.stringify(payload)
@@ -653,27 +622,14 @@
         }, 5000);
     }
 
-    async function publishPostToSupabase(post) {
-        if (!isSupabaseReady()) {
-            return { ok: false, message: 'Supabase is not configured.' };
-        }
-
-        const adminKey = getAdminPublishKey();
-        if (!adminKey) {
-            return { ok: false, message: 'Unlock admin with your password first to sync posts to Supabase.' };
-        }
-
-        const publishUrl = supabaseConfig.publishPostFunctionUrl ||
-            `${supabaseConfig.url}/functions/v1/publish-post`;
+    async function publishPostToContentApi(post) {
         const postUrl = `${window.location.origin}/blog-post?slug=${encodeURIComponent(post.slug)}`;
 
         try {
-            const response = await fetch(publishUrl, {
+            const response = await fetch('/api/publish-post', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${supabaseConfig.anonKey}`,
-                    'X-Admin-Key': adminKey
+                    'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
                     post: {
@@ -699,25 +655,18 @@
     }
 
     async function notifySubscribersForPost(post) {
-        if (!isSupabaseReady()) {
-            return { ok: false, message: 'Supabase is not configured.' };
-        }
-
         const adminKey = getAdminPublishKey();
         if (!adminKey) {
             return { ok: false, message: 'Unlock admin with your password first to notify subscribers.' };
         }
 
-        const notifyUrl = supabaseConfig.notifyFunctionUrl ||
-            `${supabaseConfig.url}/functions/v1/notify-subscribers`;
         const postUrl = `${window.location.origin}/blog-post?slug=${encodeURIComponent(post.slug)}`;
 
         try {
-            const response = await fetch(notifyUrl, {
+            const response = await fetch('/api/notify-subscribers', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${supabaseConfig.anonKey}`,
                     'X-Admin-Key': adminKey
                 },
                 body: JSON.stringify({
@@ -837,7 +786,7 @@
             // Reload posts to confirm
             await loadPosts();
 
-            const publishResult = await publishPostToSupabase({ title, summary, author, slug });
+            const publishResult = await publishPostToContentApi({ title, summary, author, slug });
             if (publishResult.ok) {
                 if (isNew) {
                     const notifyResult = await notifySubscribersForPost({ title, summary, author, slug });

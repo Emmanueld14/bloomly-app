@@ -795,7 +795,7 @@
         <div class="admin-auth-card admin-unlock-wrap">
             <div class="admin-auth-header">
                 <h1>Admin password</h1>
-                <p>Enter the site admin password. In Supabase, use the <strong>same</strong> value for <code>ADMIN_PUBLISH_KEY</code> and <code>APPOINTMENTS_ADMIN_KEY</code>. It is kept only in this browser tab until you log out or lock.</p>
+                <p>Enter the site admin password configured as <code>APPOINTMENTS_ADMIN_KEY</code>. It is kept only in this browser tab until you log out or lock.</p>
             </div>
             <label for="adminPasswordInput">Password</label>
             <input type="password" id="adminPasswordInput" class="token-input" autocomplete="current-password" placeholder="Admin password">
@@ -1066,7 +1066,6 @@
     </div>
     
     <script src="/admin/config.js?v=20260407h"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="/src/data/blog-api.js?v=20260325a"></script>
     <script src="/src/admin/blog-admin.js?v=20260325a"></script>
     <script src="/admin/appointments.js?v=20260325a"></script>

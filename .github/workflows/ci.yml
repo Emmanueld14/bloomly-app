@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [ main, supabase/integration ]
+    branches: [ main ]
   pull_request:
     branches: [ main ]
 
@@ -28,8 +28,7 @@ jobs:
     
     - name: Run smoke tests
       env:
-        SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-        SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        DATABASE_URL: ${{ secrets.DATABASE_URL }}
       run: npm test
       continue-on-error: true
     
@@ -53,9 +52,8 @@ jobs:
     
     - name: Run migrations
       env:
-        SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-        SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        DATABASE_URL: ${{ secrets.DATABASE_URL }}
       run: npm run migrate
       continue-on-error: true
-      # Note: Migrations should be run manually in Supabase SQL Editor for safety
+      # Note: Production migrations should be run with deploy-safe Prisma migration commands.
 

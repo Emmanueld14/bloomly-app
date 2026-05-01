@@ -2,7 +2,6 @@ import {
     setCors,
     getEnvConfig,
     ensureConfig,
-    supabaseRequest,
     loadSettings,
     loadBlackouts,
     loadDateOverrides,
@@ -11,6 +10,8 @@ import {
     isValidTime,
     getDayKey
 } from './appointments-helpers.js';
+import { prisma } from './db.js';
+import { getOrigin } from './payment-utils.js';
 
 const HOLD_MINUTES = 15;
 
@@ -25,7 +26,7 @@ export default async function handler(req, res) {
     }
 
     const config = getEnvConfig();
-    const configError = ensureConfig(config, ['supabaseUrl', 'supabaseServiceKey', 'stripeSecretKey']);
+    const configError = ensureConfig(config, ['databaseUrl']);
     if (configError) {
         return res.status(500).json({ error: configError });
     }
@@ -39,9 +40,9 @@ export default async function handler(req, res) {
     }
 
     try {
-        const settings = await loadSettings(config);
-        const blackouts = await loadBlackouts(config);
-        const dateOverrides = await loadDateOverrides(config);
+        const settings = await loadSettings(config, prisma);
+        const blackouts = await loadBlackouts(config, prisma);
+        const dateOverrides = await loadDateOverrides(config, prisma);
 
         if (!settings.bookingEnabled) {
             return res.status(400).json({ error: 'Charla sessions are currently closed.' });
@@ -74,122 +75,52 @@ export default async function handler(req, res) {
             return res.status(400).json({ error: 'Selected time has already passed.' });
         }
 
-        const availabilityQuery = new URLSearchParams();
-        availabilityQuery.set('select', 'id,status,hold_expires_at');
-        availabilityQuery.set('date', `eq.${booking.date}`);
-        availabilityQuery.set('time', `eq.${booking.time}`);
         const nowIso = new Date().toISOString();
-        availabilityQuery.set('or', `(status.eq.confirmed,and(status.eq.pending,hold_expires_at.gt.${nowIso}))`);
-
-        const availabilityResponse = await supabaseRequest(
-            config,
-            `/rest/v1/appointment_bookings?${availabilityQuery.toString()}`,
-            { method: 'GET' }
-        );
-
-        if (!availabilityResponse.ok) {
-            const errorText = await availabilityResponse.text();
-            throw new Error(errorText || 'Unable to verify availability.');
-        }
-
-        const existing = await availabilityResponse.json();
-        if (Array.isArray(existing) && existing.length) {
+        const existing = await prisma.booking.findFirst({
+            where: {
+                date: booking.date,
+                time: booking.time,
+                OR: [
+                    { status: 'confirmed' },
+                    {
+                        status: 'pending',
+                        holdExpiresAt: { gt: new Date(nowIso) }
+                    }
+                ]
+            },
+            select: { id: true }
+        });
+        if (existing) {
             return res.status(409).json({ error: 'That slot has just been booked. Please choose another.' });
         }
 
-        const holdExpiresAt = new Date(Date.now() + HOLD_MINUTES * 60 * 1000).toISOString();
-        const bookingPayload = {
-            name: booking.name,
-            email: booking.email,
-            purpose: booking.purpose,
-            date: booking.date,
-            time: booking.time,
-            status: 'pending',
-            amount_cents: settings.priceCents,
-            currency: settings.currency,
-            hold_expires_at: holdExpiresAt,
-            created_at: new Date().toISOString()
-        };
-
-        const insertResponse = await supabaseRequest(
-            config,
-            '/rest/v1/appointment_bookings',
-            {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Prefer: 'return=representation'
-                },
-                body: JSON.stringify([bookingPayload])
+        const holdExpiresAt = new Date(Date.now() + HOLD_MINUTES * 60 * 1000);
+        const bookingRow = await prisma.booking.create({
+            data: {
+                name: booking.name,
+                email: booking.email,
+                purpose: booking.purpose,
+                date: booking.date,
+                time: booking.time,
+                status: 'pending',
+                amountCents: settings.priceCents,
+                currency: settings.currency,
+                holdExpiresAt
             }
-        );
-
-        if (!insertResponse.ok) {
-            const errorText = await insertResponse.text();
-            throw new Error(errorText || 'Unable to reserve booking.');
-        }
-
-        const inserted = await insertResponse.json();
-        const bookingRow = Array.isArray(inserted) ? inserted[0] : null;
-        if (!bookingRow || !bookingRow.id) {
-            throw new Error('Unable to reserve booking.');
-        }
-
-        const origin = `${req.headers['x-forwarded-proto'] || 'https'}://${req.headers.host}`;
-        const successUrl = `${origin}/appointments?success=1&session_id={CHECKOUT_SESSION_ID}`;
-        const cancelUrl = `${origin}/appointments?canceled=1`;
-
-        const stripePayload = new URLSearchParams();
-        stripePayload.set('mode', 'payment');
-        stripePayload.set('success_url', successUrl);
-        stripePayload.set('cancel_url', cancelUrl);
-        stripePayload.set('client_reference_id', bookingRow.id);
-        stripePayload.set('payment_method_types[]', 'card');
-        stripePayload.set('metadata[booking_id]', bookingRow.id);
-        stripePayload.set('metadata[date]', booking.date);
-        stripePayload.set('metadata[time]', booking.time);
-        stripePayload.set('line_items[0][quantity]', '1');
-        stripePayload.set('line_items[0][price_data][currency]', settings.currency);
-        stripePayload.set('line_items[0][price_data][unit_amount]', String(settings.priceCents));
-        stripePayload.set('line_items[0][price_data][product_data][name]', 'Bloomly Charla');
-
-        const stripeResponse = await fetch('https://api.stripe.com/v1/checkout/sessions', {
-            method: 'POST',
-            headers: {
-                Authorization: `Bearer ${config.stripeSecretKey}`,
-                'Content-Type': 'application/x-www-form-urlencoded'
-            },
-            body: stripePayload.toString()
         });
 
-        const stripeData = await stripeResponse.json().catch(() => ({}));
-        if (!stripeResponse.ok) {
-            await supabaseRequest(
-                config,
-                `/rest/v1/appointment_bookings?id=eq.${bookingRow.id}`,
-                {
-                    method: 'PATCH',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ status: 'failed' })
-                }
-            );
-            throw new Error(stripeData.error?.message || 'Unable to create payment session.');
-        }
-
-        await supabaseRequest(
-            config,
-            `/rest/v1/appointment_bookings?id=eq.${bookingRow.id}`,
-            {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    stripe_session_id: stripeData.id,
-                    stripe_payment_intent_id: stripeData.payment_intent || null
-                })
-            }
-        );
-
-        return res.status(200).json({ checkoutUrl: stripeData.url, sessionId: stripeData.id });
+        const origin = getOrigin(req);
+        return res.status(200).json({
+            booking: {
+                id: bookingRow.id,
+                date: bookingRow.date,
+                time: bookingRow.time,
+                status: bookingRow.status,
+                amount_cents: bookingRow.amountCents,
+                currency: bookingRow.currency
+            },
+            paymentUrl: `${origin}/appointments/pay?booking_id=${encodeURIComponent(bookingRow.id)}`
+        });
     } catch (error) {
         return res.status(500).json({ error: error.message || 'Unable to start booking.' });
     }

@@ -110,6 +110,24 @@
                 </div>
             </div>
         </section>
+
+        <section class="section appointments-section calendly-section">
+            <div class="container">
+                <div class="appointments-card calendly-card">
+                    <div class="section-header">
+                        <h2>Schedule with Calendly</h2>
+                        <p>Prefer Calendly? Pick a consultation time below, then complete payment to finalize your booking.</p>
+                    </div>
+                    <div
+                        class="calendly-inline-widget"
+                        data-calendly-widget
+                        data-url=""
+                        style="min-width: 320px; height: 720px;">
+                    </div>
+                    <p class="appointments-message" data-calendly-message aria-live="polite"></p>
+                </div>
+            </div>
+        </section>
     </main>
 
     <!-- Footer -->
@@ -142,7 +160,9 @@
     </footer>
 
     <script src="/script.js"></script>
+    <script src="https://assets.calendly.com/assets/external/widget.js" async></script>
     <script src="/appointments/config.js"></script>
     <script src="/src/appointments/appointments.js"></script>
+    <script src="/src/appointments/calendly.js"></script>
 </body>
 </html>

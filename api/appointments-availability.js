@@ -1,12 +1,11 @@
 import {
     setCors,
     getEnvConfig,
-    ensureConfig,
-    supabaseRequest,
     loadSettings,
     loadBlackouts,
     loadDateOverrides
 } from './appointments-helpers.js';
+import { prisma } from './db.js';
 
 function toDateKey(date) {
     const year = date.getFullYear();
@@ -26,10 +25,6 @@ export default async function handler(req, res) {
     }
 
     const config = getEnvConfig();
-    const configError = ensureConfig(config, ['supabaseUrl', 'supabaseServiceKey']);
-    if (configError) {
-        return res.status(500).json({ error: configError });
-    }
 
     try {
         const start = req.query.start || toDateKey(new Date());
@@ -37,36 +32,29 @@ export default async function handler(req, res) {
         endDate.setDate(endDate.getDate() + 30);
         const end = req.query.end || toDateKey(endDate);
 
-        const settings = await loadSettings(config);
-        const blackouts = await loadBlackouts(config);
-        const dateOverrides = await loadDateOverrides(config);
+        const settings = await loadSettings(config, prisma);
+        const blackouts = await loadBlackouts(config, prisma);
+        const dateOverrides = await loadDateOverrides(config, prisma);
 
-        const query = new URLSearchParams();
-        query.set('select', 'id,date,time,status,hold_expires_at');
-        query.append('date', `gte.${start}`);
-        query.append('date', `lte.${end}`);
-        const nowIso = new Date().toISOString();
-        query.set('or', `(status.eq.confirmed,and(status.eq.pending,hold_expires_at.gt.${nowIso}))`);
+        const bookingsData = await prisma.booking.findMany({
+            where: {
+                date: { gte: start, lte: end },
+                OR: [
+                    { status: 'confirmed' },
+                    {
+                        status: 'pending',
+                        holdExpiresAt: { gt: new Date() }
+                    }
+                ]
+            },
+            select: { date: true, time: true, status: true }
+        });
 
-        const bookingsResponse = await supabaseRequest(
-            config,
-            `/rest/v1/appointment_bookings?${query.toString()}`,
-            { method: 'GET' }
-        );
-
-        if (!bookingsResponse.ok) {
-            const errorText = await bookingsResponse.text();
-            throw new Error(errorText || 'Unable to load bookings.');
-        }
-
-        const bookingsData = await bookingsResponse.json();
-        const bookings = Array.isArray(bookingsData)
-            ? bookingsData.map((booking) => ({
-                date: booking.date,
-                time: booking.time,
-                status: booking.status
-            }))
-            : [];
+        const bookings = bookingsData.map((booking) => ({
+            date: booking.date,
+            time: booking.time,
+            status: booking.status
+        }));
 
         return res.status(200).json({ settings, blackouts, dateOverrides, bookings });
     } catch (error) {

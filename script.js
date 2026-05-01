@@ -526,28 +526,6 @@
         }
     }
 
-    // ========== Supabase Setup ==========
-    // Replace these placeholders with your Supabase project credentials.
-    const SUPABASE_URL = 'https://xmhyjttyarskimsxcfhl.supabase.co';
-    const SUPABASE_ANON_KEY = 'sb_publishable_IOs-j6rgWuDnwrymIIUHxQ_wCTmcaMp';
-
-    function createSupabaseClient() {
-        // Supabase library is loaded via CDN in blog pages
-        if (!window.supabase || typeof window.supabase.createClient !== 'function') {
-            return null;
-        }
-
-        // Prevent accidental use before credentials are set
-        if (SUPABASE_URL === 'SUPABASE_URL' || SUPABASE_ANON_KEY === 'SUPABASE_ANON_KEY') {
-            console.warn('Supabase not configured. Replace SUPABASE_URL and SUPABASE_ANON_KEY.');
-            return null;
-        }
-
-        return window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    }
-
-    const supabaseClient = createSupabaseClient();
-
     // ========== Post Interactions (Likes + Comments) ==========
     function resolvePostId(container) {
         // Use explicit data-post-id if provided, otherwise derive from the URL
@@ -596,103 +574,28 @@
         }
     }
 
-    function isSupabaseReady() {
-        return Boolean(supabaseClient);
+    function isLegacyEngagementApiReady() {
+        return false;
     }
 
-    function subscribeToLikeUpdates(postId, onUpdate) {
-        if (!isSupabaseReady() || typeof supabaseClient.channel !== 'function') {
-            return null;
-        }
-
-        return supabaseClient
-            .channel(`likes-${postId}`)
-            .on(
-                'postgres_changes',
-                {
-                    event: '*',
-                    schema: 'public',
-                    table: 'likes',
-                    filter: `post_id=eq.${postId}`
-                },
-                (payload) => {
-                    const newCount = payload?.new?.count;
-                    if (typeof newCount === 'number') {
-                        onUpdate(newCount);
-                    }
-                }
-            )
-            .subscribe();
+    function subscribeToLikeUpdates() {
+        return null;
     }
 
-    async function fetchSupabaseLikeCount(postId) {
-        if (!isSupabaseReady()) return null;
-
-        const { data, error } = await supabaseClient
-            .from('likes')
-            .select('count')
-            .eq('post_id', postId)
-            .maybeSingle();
-
-        if (error) {
-            console.warn('Unable to load like count from Supabase.', error);
-            return null;
-        }
-
-        if (data && typeof data.count === 'number') {
-            return data.count;
-        }
-
-        return 0;
+    async function fetchLegacyLikeCount() {
+        return null;
     }
 
-    async function upsertSupabaseLikeCount(postId, count) {
-        if (!isSupabaseReady()) return false;
-
-        const { error } = await supabaseClient
-            .from('likes')
-            .upsert({ post_id: postId, count }, { onConflict: 'post_id' });
-
-        if (error) {
-            console.warn('Unable to save like count to Supabase.', error);
-            return false;
-        }
-
-        return true;
+    async function upsertLegacyLikeCount() {
+        return false;
     }
 
-    async function fetchSupabaseComments(postId) {
-        if (!isSupabaseReady()) return null;
-
-        const { data, error } = await supabaseClient
-            .from('comments')
-            .select('*')
-            .eq('post_id', postId)
-            .order('timestamp', { ascending: false });
-
-        if (error) {
-            console.warn('Unable to load comments from Supabase.', error);
-            return null;
-        }
-
-        return data || [];
+    async function fetchLegacyComments() {
+        return null;
     }
 
-    async function insertSupabaseComment(postId, nickname, text) {
-        if (!isSupabaseReady()) return null;
-
-        const { data, error } = await supabaseClient
-            .from('comments')
-            .insert({ post_id: postId, nick: nickname || null, text })
-            .select('*')
-            .single();
-
-        if (error) {
-            console.warn('Unable to save comment to Supabase.', error);
-            return null;
-        }
-
-        return data;
+    async function insertLegacyComment() {
+        return null;
     }
 
     function getCommentAuthorName(comment) {
@@ -787,16 +690,9 @@
         const likedKey = `bloomly:liked:${postId}`;
         const countKey = `bloomly:like-count:${postId}`;
 
-        let likeCount = 0;
-        const supabaseCount = await fetchSupabaseLikeCount(postId);
-
-        if (typeof supabaseCount === 'number') {
-            likeCount = supabaseCount;
-        } else {
-            likeCount = parseInt(safeStorageGet(countKey) || '0', 10);
-            if (Number.isNaN(likeCount) || likeCount < 0) {
-                likeCount = 0;
-            }
+        let likeCount = parseInt(safeStorageGet(countKey) || '0', 10);
+        if (Number.isNaN(likeCount) || likeCount < 0) {
+            likeCount = 0;
         }
 
         let liked = safeStorageGet(likedKey) === 'true';
@@ -824,11 +720,6 @@
 
         updateLikeUI();
 
-        subscribeToLikeUpdates(postId, (newCount) => {
-            likeCount = newCount;
-            updateLikeUI();
-        });
-
         likeButtons.forEach((button) => {
             button.addEventListener('click', async () => {
                 // Prevent multiple likes per browser by storing a flag
@@ -839,15 +730,7 @@
                 updateLikeUI();
                 setBusyState(true);
 
-                if (isSupabaseReady()) {
-                    const saved = await upsertSupabaseLikeCount(postId, likeCount);
-                    if (!saved) {
-                        // Fallback to local storage if Supabase write fails
-                        safeStorageSet(countKey, String(likeCount));
-                    }
-                } else {
-                    safeStorageSet(countKey, String(likeCount));
-                }
+                safeStorageSet(countKey, String(likeCount));
 
                 setBusyState(false);
                 updateLikeUI();
@@ -937,16 +820,9 @@
         });
 
         const commentsKey = `bloomly:comments:${postId}`;
-        let comments = [];
-        const supabaseComments = await fetchSupabaseComments(postId);
-
-        if (Array.isArray(supabaseComments)) {
-            comments = supabaseComments;
-        } else {
-            comments = safeJSONParse(safeStorageGet(commentsKey), []);
-            if (!Array.isArray(comments)) {
-                comments = [];
-            }
+        let comments = safeJSONParse(safeStorageGet(commentsKey), []);
+        if (!Array.isArray(comments)) {
+            comments = [];
         }
 
         renderComments(list, comments);
@@ -967,28 +843,16 @@
                 return;
             }
 
-            if (isSupabaseReady()) {
-                const savedComment = await insertSupabaseComment(postId, nickname, text);
-                if (!savedComment) {
-                    setFormMessage(messageEl, 'Unable to save comment. Please try again.', 'error');
-                    return;
-                }
+            const newComment = {
+                nick: nickname || 'Anonymous',
+                text,
+                timestamp: new Date().toISOString()
+            };
 
-                comments.unshift(savedComment);
-                renderComments(list, comments);
-                setFormMessage(messageEl, 'Thanks! Your comment is now public.', 'success');
-            } else {
-                const newComment = {
-                    nick: nickname || 'Anonymous',
-                    text,
-                    timestamp: new Date().toISOString()
-                };
-
-                comments.unshift(newComment);
-                safeStorageSet(commentsKey, JSON.stringify(comments));
-                renderComments(list, comments);
-                setFormMessage(messageEl, 'Thanks! Your comment is saved on this device.', 'success');
-            }
+            comments.unshift(newComment);
+            safeStorageSet(commentsKey, JSON.stringify(comments));
+            renderComments(list, comments);
+            setFormMessage(messageEl, 'Thanks! Your comment is saved on this device.', 'success');
 
             if (!isDrawerOpen) {
                 setDrawerState(true);
@@ -1553,39 +1417,6 @@
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
     }
 
-    function isSupabaseFunctionsReady() {
-        return Boolean(
-            supabaseClient &&
-            supabaseClient.functions &&
-            typeof supabaseClient.functions.invoke === 'function'
-        );
-    }
-
-    function parseFunctionError(error) {
-        if (!error) return null;
-
-        const context = error.context || {};
-        let payload = context.body;
-        let payloadObject = null;
-
-        if (payload && typeof payload === 'string') {
-            try {
-                payloadObject = JSON.parse(payload);
-            } catch (parseError) {
-                payloadObject = null;
-            }
-        } else if (payload && typeof payload === 'object') {
-            payloadObject = payload;
-        }
-
-        return {
-            status: context.status,
-            message: payloadObject?.error || payloadObject?.message || error.message,
-            payload: payloadObject,
-            original: error
-        };
-    }
-
     function resolveNewsletterErrorMessage(errorInfo) {
         if (!errorInfo) {
             return 'Subscription failed. Please try again.';
@@ -1610,51 +1441,6 @@
         }
 
         return 'Subscription failed. Please try again.';
-    }
-
-    function isDuplicateDatabaseError(error) {
-        const message = String(error?.message || '').toLowerCase();
-        return error?.code === '23505' || message.includes('duplicate') || message.includes('unique');
-    }
-
-    function resolveDirectInsertErrorMessage(error) {
-        if (!error) {
-            return 'Subscription failed. Please try again.';
-        }
-
-        if (isDuplicateDatabaseError(error)) {
-            return 'You are already subscribed.';
-        }
-
-        const message = String(error.message || '').toLowerCase();
-        if (message.includes('row-level security') || message.includes('permission')) {
-            return 'Subscription service is unavailable right now.';
-        }
-
-        if (message.includes('does not exist')) {
-            return 'Subscription service is unavailable right now.';
-        }
-
-        return 'Subscription failed. Please try again.';
-    }
-
-    async function insertSubscriberDirect(email) {
-        if (!isSupabaseReady()) {
-            return { status: 'error', error: new Error('Supabase client unavailable') };
-        }
-
-        const { error } = await supabaseClient
-            .from('subscribers')
-            .insert({ email });
-
-        if (error) {
-            if (isDuplicateDatabaseError(error)) {
-                return { status: 'already_subscribed' };
-            }
-            return { status: 'error', error };
-        }
-
-        return { status: 'subscribed' };
     }
 
     function setNewsletterLoading(form, button, isLoading) {
@@ -1703,115 +1489,32 @@
                 setNewsletterLoading(form, submitButton, true);
 
                 try {
-                    if (isSupabaseFunctionsReady()) {
-                        const { data, error } = await supabaseClient.functions.invoke(
-                            'subscribe-newsletter',
-                            { body: { email, name: name || null } }
-                        );
-
-                        if (error) {
-                            const errorInfo = parseFunctionError(error);
-                            console.error('Newsletter subscription failed', errorInfo);
-                            if (isSupabaseReady()) {
-                                const fallbackResult = await insertSubscriberDirect(email);
-                                if (fallbackResult.status === 'subscribed') {
-                                    setFormMessage(
-                                        messageEl,
-                                        'Thanks for subscribing! You are on the list.',
-                                        'success'
-                                    );
-                                    return;
-                                }
-
-                                if (fallbackResult.status === 'already_subscribed') {
-                                    setFormMessage(messageEl, 'You are already subscribed.', 'success');
-                                    return;
-                                }
-
-                                if (fallbackResult.status === 'error') {
-                                    console.error('Newsletter direct insert failed', fallbackResult.error);
-                                    setFormMessage(
-                                        messageEl,
-                                        resolveDirectInsertErrorMessage(fallbackResult.error),
-                                        'error'
-                                    );
-                                    return;
-                                }
-                            }
-
-                            setFormMessage(messageEl, resolveNewsletterErrorMessage(errorInfo), 'error');
-                            return;
-                        }
-
-                        if (!data || !data.status) {
-                            console.error('Newsletter subscription returned no status', data);
-                            setFormMessage(messageEl, 'Subscription failed. Please try again.', 'error');
-                            return;
-                        }
-
-                        if (data.status === 'already_subscribed') {
-                            setFormMessage(messageEl, 'You are already subscribed.', 'success');
-                            return;
-                        }
-
-                        if (data.status !== 'subscribed') {
-                            console.error('Unexpected newsletter response', data);
-                            setFormMessage(messageEl, 'Subscription failed. Please try again.', 'error');
-                            return;
-                        }
-
-                        const emailStatus = data.email_status || null;
-                        if (emailStatus === 'failed') {
-                            setFormMessage(
-                                messageEl,
-                                'You are subscribed, but we could not send a welcome email.',
-                                'success'
-                            );
-                            return;
-                        }
-
-                        if (emailStatus === 'skipped') {
-                            setFormMessage(messageEl, 'Thanks for subscribing! You are on the list.', 'success');
-                            return;
-                        }
-
-                        setFormMessage(messageEl, 'Thanks for subscribing! Check your inbox.', 'success');
-                    } else if (isSupabaseReady()) {
-                        const fallbackResult = await insertSubscriberDirect(email);
-                        if (fallbackResult.status === 'subscribed') {
-                            setFormMessage(messageEl, 'Thanks for subscribing! You are on the list.', 'success');
-                        } else if (fallbackResult.status === 'already_subscribed') {
-                            setFormMessage(messageEl, 'You are already subscribed.', 'success');
-                        } else if (fallbackResult.status === 'error') {
-                            console.error('Newsletter direct insert failed', fallbackResult.error);
-                            setFormMessage(
-                                messageEl,
-                                resolveDirectInsertErrorMessage(fallbackResult.error),
-                                'error'
-                            );
-                        } else {
-                            setFormMessage(messageEl, 'Subscription failed. Please try again.', 'error');
-                        }
-                    } else {
-                        console.warn('Supabase not configured; saving locally.');
-                        const storageKey = 'bloomly:newsletter-emails';
-                        const stored = safeJSONParse(safeStorageGet(storageKey), []);
-                        const emails = Array.isArray(stored) ? stored : [];
-                        const alreadySubscribed = emails.includes(email);
-
-                        if (!alreadySubscribed) {
-                            emails.push(email);
-                            safeStorageSet(storageKey, JSON.stringify(emails));
-                        }
-
+                    const response = await fetch('/api/newsletter-subscribe', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email, name: name || null })
+                    });
+                    const data = await response.json().catch(() => ({}));
+                    if (!response.ok) {
                         setFormMessage(
                             messageEl,
-                            alreadySubscribed
-                                ? 'We could not reach the signup service. Your email is saved on this device.'
-                                : 'We could not reach the signup service. Your email is saved on this device.',
+                            resolveNewsletterErrorMessage({ status: response.status, message: data.error || data.message }),
                             'error'
                         );
+                        return;
                     }
+
+                    if (data.status === 'already_subscribed') {
+                        setFormMessage(messageEl, 'You are already subscribed.', 'success');
+                        return;
+                    }
+
+                    if (data.status !== 'subscribed') {
+                        setFormMessage(messageEl, 'Subscription failed. Please try again.', 'error');
+                        return;
+                    }
+
+                    setFormMessage(messageEl, 'Thanks for subscribing! You are on the list.', 'success');
 
                     emailInput.value = '';
                     if (nameInput) {
@@ -2361,7 +2064,9 @@ But I can start by being honest about my own story.`,
         initFloatingShapes();
         initHomeParallax();
         initWhyBloomlyCards();
-        void initPostInteractions();
+        if (!document.querySelector('[data-blog-engagement]')) {
+            void initPostInteractions();
+        }
         initNewsletterForms();
         initBloomlyTeamCards();
         void initTeamProfilePage();

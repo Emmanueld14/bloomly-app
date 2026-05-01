@@ -6,6 +6,9 @@
     },
     "api/test.js": {
       "maxDuration": 10
+    },
+    "api/*.js": {
+      "maxDuration": 30
     }
   },
   "redirects": [
@@ -30,7 +33,9 @@
     { "source": "/subscribe", "destination": "/subscribe/index.html" },
     { "source": "/subscribe/", "destination": "/subscribe/index.html" },
     { "source": "/appointments", "destination": "/appointments/index.html" },
-    { "source": "/appointments/", "destination": "/appointments/index.html" }
+    { "source": "/appointments/", "destination": "/appointments/index.html" },
+    { "source": "/appointments/pay", "destination": "/appointments/pay/index.html" },
+    { "source": "/appointments/pay/", "destination": "/appointments/pay/index.html" }
   ]
 }
 

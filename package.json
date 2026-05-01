@@ -2,12 +2,16 @@
   "name": "bloomly",
   "version": "2.0.0",
   "description": "Bloomly - Teen mental health awareness and support platform",
+  "type": "module",
   "main": "index.html",
   "scripts": {
     "start": "npx serve . -p 3000",
     "dev": "npx serve . -p 3000",
-    "build": "echo Static site - no build required",
-    "set-admin-secrets": "node scripts/set-supabase-admin-secrets.js"
+    "postinstall": "prisma generate",
+    "build": "prisma generate && echo Static site - no build required",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "migrate": "prisma migrate deploy"
   },
   "keywords": [
     "wellness",
@@ -17,7 +21,13 @@
   ],
   "author": "Bloomly",
   "license": "MIT",
+  "dependencies": {
+    "@neondatabase/serverless": "latest",
+    "@prisma/client": "latest",
+    "ws": "latest"
+  },
   "devDependencies": {
+    "prisma": "latest",
     "serve": "^14.2.1"
   }
 }

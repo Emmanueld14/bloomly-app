@@ -1,9 +1,9 @@
 import {
     setCors,
     getEnvConfig,
-    ensureConfig,
-    supabaseRequest
+    ensureConfig
 } from './appointments-helpers.js';
+import { prisma } from './db.js';
 
 function isValidDate(value) {
     return /^\d{4}-\d{2}-\d{2}$/.test(String(value || ''));
@@ -103,7 +103,7 @@ export default async function handler(req, res) {
     }
 
     const config = getEnvConfig();
-    const configError = ensureConfig(config, ['supabaseUrl', 'supabaseServiceKey']);
+    const configError = ensureConfig(config, ['databaseUrl']);
     if (configError) {
         return res.status(500).json({ error: configError });
     }
@@ -115,58 +115,22 @@ export default async function handler(req, res) {
     const end = isValidDate(req.query.end) ? req.query.end : now.toISOString().slice(0, 10);
 
     try {
-        const bookingQuery = new URLSearchParams();
-        bookingQuery.set('select', 'id,name,email,purpose,date,time,status,amount_cents,currency,paid_at,created_at,updated_at');
-        bookingQuery.append('date', `gte.${start}`);
-        bookingQuery.append('date', `lte.${end}`);
-        bookingQuery.set('order', 'date.desc,time.desc');
-
-        const bookingsResponse = await supabaseRequest(
-            config,
-            `/rest/v1/appointment_bookings?${bookingQuery.toString()}`,
-            { method: 'GET' }
-        );
-
-        if (!bookingsResponse.ok) {
-            const errorText = await bookingsResponse.text();
-            throw new Error(errorText || 'Unable to load appointment bookings.');
-        }
-
-        const bookings = await bookingsResponse.json();
-        const bookingList = Array.isArray(bookings) ? bookings : [];
-        const bookingIds = bookingList.map((row) => row.id).filter(Boolean);
-
-        let paymentAttempts = [];
-        if (bookingIds.length) {
-            const paymentQuery = new URLSearchParams();
-            paymentQuery.set('select', 'id,booking_id,provider,status,amount_cents,currency,external_reference,created_at,updated_at,metadata');
-            paymentQuery.set('order', 'created_at.desc');
-            paymentQuery.set('booking_id', `in.(${bookingIds.map((id) => `"${String(id).replace(/"/g, '""')}"`).join(',')})`);
-
-            const paymentsResponse = await supabaseRequest(
-                config,
-                `/rest/v1/payment_attempts?${paymentQuery.toString()}`,
-                { method: 'GET' }
-            );
-
-            if (!paymentsResponse.ok) {
-                const errorText = await paymentsResponse.text();
-                throw new Error(errorText || 'Unable to load payment attempts.');
-            }
-
-            const paymentRows = await paymentsResponse.json();
-            paymentAttempts = Array.isArray(paymentRows) ? paymentRows : [];
-        }
-
-        const latestAttemptByBooking = new Map();
-        paymentAttempts.forEach((attempt) => {
-            const bookingId = attempt.booking_id;
-            if (!bookingId || latestAttemptByBooking.has(bookingId)) return;
-            latestAttemptByBooking.set(bookingId, attempt);
+        const bookingList = await prisma.booking.findMany({
+            where: {
+                date: {
+                    gte: start,
+                    lte: end
+                }
+            },
+            include: {
+                payments: { orderBy: { createdAt: 'desc' } }
+            },
+            orderBy: [{ date: 'desc' }, { time: 'desc' }]
         });
 
         const records = bookingList.map((booking) => {
-            const latestAttempt = latestAttemptByBooking.get(booking.id) || null;
+            const latestAttempt = booking.payments?.[0] || null;
+            const payment = latestAttempt ? toPaymentResponse(latestAttempt) : null;
             return {
                 id: booking.id,
                 name: booking.name || '',
@@ -175,21 +139,21 @@ export default async function handler(req, res) {
                 date: booking.date || '',
                 time: booking.time || '',
                 status: booking.status || 'pending',
-                amountCents: Number(booking.amount_cents || 0),
+                amountCents: Number(booking.amountCents || 0),
                 currency: booking.currency || 'KES',
-                paidAt: booking.paid_at || null,
-                createdAt: booking.created_at || null,
-                updatedAt: booking.updated_at || null,
-                payment: latestAttempt
+                paidAt: booking.paidAt ? booking.paidAt.toISOString() : null,
+                createdAt: booking.createdAt ? booking.createdAt.toISOString() : null,
+                updatedAt: booking.updatedAt ? booking.updatedAt.toISOString() : null,
+                payment: payment
                     ? {
-                        id: latestAttempt.id,
-                        provider: latestAttempt.provider || '',
-                        status: latestAttempt.status || '',
-                        amountCents: Number(latestAttempt.amount_cents || 0),
-                        currency: latestAttempt.currency || booking.currency || 'KES',
-                        externalReference: latestAttempt.external_reference || '',
-                        createdAt: latestAttempt.created_at || null,
-                        updatedAt: latestAttempt.updated_at || null
+                        id: payment.id,
+                        provider: payment.method || '',
+                        status: payment.status || '',
+                        amountCents: Number(payment.amountCents || 0),
+                        currency: payment.currency || booking.currency || 'KES',
+                        externalReference: payment.external_reference || '',
+                        createdAt: payment.createdAt || null,
+                        updatedAt: payment.updatedAt || null
                     }
                     : null
             };

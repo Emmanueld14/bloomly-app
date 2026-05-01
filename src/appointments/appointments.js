@@ -5,7 +5,8 @@
     'use strict';
 
     const container = document.querySelector('[data-appointments-dates]');
-    if (!container) return;
+    const calendlyContainer = document.querySelector('[data-calendly-inline-widget]');
+    if (!container && !calendlyContainer) return;
 
     const appointmentsConfig = window.APPOINTMENTS_PUBLIC_CONFIG || window.APPOINTMENTS_CONFIG || {};
     const apiBase = String(appointmentsConfig.apiBase || '/api').replace(/\/$/, '');
@@ -34,6 +35,37 @@
         message: document.querySelector('[data-appointments-message]'),
         submit: document.querySelector('[data-appointments-submit]')
     };
+
+    function initCalendlyWidget() {
+        if (!calendlyContainer) return;
+        const url = String(
+            calendlyContainer.dataset.calendlyUrl ||
+            appointmentsConfig.calendlyEventUrl ||
+            ''
+        ).trim();
+        if (!url) {
+            calendlyContainer.innerHTML = '<p class="appointments-helper">Calendly scheduling is not configured yet.</p>';
+            return;
+        }
+        if (window.Calendly && typeof window.Calendly.initInlineWidget === 'function') {
+            window.Calendly.initInlineWidget({
+                url,
+                parentElement: calendlyContainer,
+                prefill: {},
+                utm: {}
+            });
+        }
+    }
+
+    window.addEventListener('message', (event) => {
+        if (!String(event.origin || '').includes('calendly.com')) return;
+        if (event.data?.event !== 'calendly.event_scheduled') return;
+        setMessage('Calendly time selected. Complete payment to finalize your booking.', null);
+        const inviteeUri = event.data?.payload?.invitee?.uri || '';
+        if (inviteeUri) {
+            window.location.href = `/appointments/pay?calendly_invitee=${encodeURIComponent(inviteeUri)}`;
+        }
+    });
 
     const MAX_WEEKS_AHEAD = 8;
     const MAX_LOOKAHEAD_DAYS = (MAX_WEEKS_AHEAD + 1) * 7;

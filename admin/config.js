@@ -20,18 +20,10 @@ const GITHUB_CONFIG = {
     vercelApiUrl: 'https://bloomly-app.onrender.com/api/github-auth'
 };
 
-// Supabase configuration for email notifications
-const SUPABASE_CONFIG = {
-    url: 'https://xmhyjttyarskimsxcfhl.supabase.co',
-    anonKey: 'sb_publishable_IOs-j6rgWuDnwrymIIUHxQ_wCTmcaMp',
-    notifyFunctionUrl: 'https://xmhyjttyarskimsxcfhl.supabase.co/functions/v1/notify-subscribers',
-    publishPostFunctionUrl: 'https://xmhyjttyarskimsxcfhl.supabase.co/functions/v1/publish-post'
-};
-
 // Appointments (Charla) configuration.
 // Admin password is primarily entered at unlock (sessionStorage), with this value as fallback.
 const APPOINTMENTS_CONFIG = {
-    apiBase: 'https://xmhyjttyarskimsxcfhl.supabase.co/functions/v1',
+    apiBase: '/api',
     adminKey: 'Manu@4477'
 };
 
@@ -45,7 +37,5 @@ const ADMIN_DASHBOARD_CONFIG = {
 };
 
 // Export for use in other files
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { GITHUB_CONFIG, SUPABASE_CONFIG, APPOINTMENTS_CONFIG, ADMIN_DASHBOARD_CONFIG };
-}
+export { GITHUB_CONFIG, APPOINTMENTS_CONFIG, ADMIN_DASHBOARD_CONFIG };
 

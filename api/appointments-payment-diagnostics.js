@@ -48,31 +48,6 @@ function buildProvider(configured, missing, liveCheck = null, details = {}) {
     };
 }
 
-async function runPaypalCheck(config) {
-    const auth = encodeBasicAuth(`${config.paypalClientId}:${config.paypalClientSecret}`);
-    const response = await fetchWithTimeout(
-        `${config.paypalBaseUrl}/v1/oauth2/token`,
-        {
-            method: 'POST',
-            headers: {
-                Authorization: `Basic ${auth}`,
-                'Content-Type': 'application/x-www-form-urlencoded'
-            },
-            body: 'grant_type=client_credentials'
-        }
-    );
-
-    if (!response.ok) {
-        return { ok: false, detail: await parseResponseError(response), attempted: true };
-    }
-
-    const data = await response.json().catch(() => ({}));
-    if (!data.access_token) {
-        return { ok: false, detail: 'No access token returned.', attempted: true };
-    }
-    return { ok: true, detail: 'OAuth token request succeeded.', attempted: true };
-}
-
 async function runMpesaCheck(config) {
     const auth = encodeBasicAuth(`${config.mpesaConsumerKey}:${config.mpesaConsumerSecret}`);
     const response = await fetchWithTimeout(
@@ -91,35 +66,6 @@ async function runMpesaCheck(config) {
 
     const data = await response.json().catch(() => ({}));
     if (!data.access_token) {
-        return { ok: false, detail: 'No access token returned.', attempted: true };
-    }
-    return { ok: true, detail: 'OAuth token request succeeded.', attempted: true };
-}
-
-async function runAirtelCheck(config) {
-    const response = await fetchWithTimeout(
-        `${config.airtelBaseUrl}/auth/oauth2/token`,
-        {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                Accept: '*/*'
-            },
-            body: JSON.stringify({
-                client_id: config.airtelClientId,
-                client_secret: config.airtelClientSecret,
-                grant_type: 'client_credentials'
-            })
-        }
-    );
-
-    if (!response.ok) {
-        return { ok: false, detail: await parseResponseError(response), attempted: true };
-    }
-
-    const data = await response.json().catch(() => ({}));
-    const token = data.access_token || data?.data?.access_token;
-    if (!token) {
         return { ok: false, detail: 'No access token returned.', attempted: true };
     }
     return { ok: true, detail: 'OAuth token request succeeded.', attempted: true };
@@ -163,12 +109,6 @@ export default async function handler(req, res) {
     const stripeConfigured = stripeMissing.length === 0;
     const stripeMode = config.stripeSecretKey.startsWith('sk_live') ? 'live' : 'test';
 
-    const paypalMissing = [];
-    if (!config.paypalClientId) paypalMissing.push('PAYPAL_CLIENT_ID');
-    if (!config.paypalClientSecret) paypalMissing.push('PAYPAL_CLIENT_SECRET');
-    if (!config.paypalBaseUrl) paypalMissing.push('PAYPAL_BASE_URL');
-    const paypalConfigured = paypalMissing.length === 0;
-
     const mpesaMissing = [];
     if (!config.mpesaConsumerKey) mpesaMissing.push('MPESA_CONSUMER_KEY');
     if (!config.mpesaConsumerSecret) mpesaMissing.push('MPESA_CONSUMER_SECRET');
@@ -177,35 +117,13 @@ export default async function handler(req, res) {
     if (!config.mpesaBaseUrl) mpesaMissing.push('MPESA_BASE_URL');
     const mpesaConfigured = mpesaMissing.length === 0;
 
-    const airtelMissing = [];
-    if (!config.airtelClientId) airtelMissing.push('AIRTEL_CLIENT_ID');
-    if (!config.airtelClientSecret) airtelMissing.push('AIRTEL_CLIENT_SECRET');
-    if (!config.airtelBaseUrl) airtelMissing.push('AIRTEL_BASE_URL');
-    const airtelConfigured = airtelMissing.length === 0;
-
-    let paypalLiveCheck = { attempted: false, ok: false, detail: 'Skipped.' };
     let mpesaLiveCheck = { attempted: false, ok: false, detail: 'Skipped.' };
-    let airtelLiveCheck = { attempted: false, ok: false, detail: 'Skipped.' };
 
-    if (runLiveChecks && paypalConfigured) {
-        try {
-            paypalLiveCheck = await runPaypalCheck(config);
-        } catch (error) {
-            paypalLiveCheck = { attempted: true, ok: false, detail: error.message || 'PayPal check failed.' };
-        }
-    }
     if (runLiveChecks && mpesaConfigured) {
         try {
             mpesaLiveCheck = await runMpesaCheck(config);
         } catch (error) {
             mpesaLiveCheck = { attempted: true, ok: false, detail: error.message || 'M-Pesa check failed.' };
-        }
-    }
-    if (runLiveChecks && airtelConfigured) {
-        try {
-            airtelLiveCheck = await runAirtelCheck(config);
-        } catch (error) {
-            airtelLiveCheck = { attempted: true, ok: false, detail: error.message || 'Airtel check failed.' };
         }
     }
 
@@ -216,9 +134,7 @@ export default async function handler(req, res) {
             { attempted: false, ok: stripeConfigured, detail: stripeConfigured ? 'Configured.' : 'Missing secret key.' },
             { mode: stripeConfigured ? stripeMode : null }
         ),
-        paypal: buildProvider(paypalConfigured, paypalMissing, paypalLiveCheck, { baseUrl: config.paypalBaseUrl }),
-        mpesa: buildProvider(mpesaConfigured, mpesaMissing, mpesaLiveCheck, { baseUrl: config.mpesaBaseUrl }),
-        airtel: buildProvider(airtelConfigured, airtelMissing, airtelLiveCheck, { baseUrl: config.airtelBaseUrl })
+        mpesa: buildProvider(mpesaConfigured, mpesaMissing, mpesaLiveCheck, { baseUrl: config.mpesaBaseUrl })
     };
 
     return res.status(200).json({

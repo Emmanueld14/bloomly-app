@@ -23,11 +23,6 @@
             return publicBase.replace(/\/$/, '');
         }
 
-        const supabaseUrl = String((window.SUPABASE_CONFIG || {}).url || '').trim();
-        if (supabaseUrl) {
-            return `${supabaseUrl.replace(/\/$/, '')}/functions/v1`;
-        }
-
         return '/api';
     }
 
@@ -134,11 +129,11 @@
         }
 
         if (/missing required configuration:\s*adminkey/i.test(text)) {
-            return 'Payment diagnostics is using a legacy API route without APPOINTMENTS_ADMIN_KEY. Set APPOINTMENTS_CONFIG.apiBase to your Supabase functions URL.';
+            return 'Payment diagnostics is using a legacy API route without APPOINTMENTS_ADMIN_KEY. Set APPOINTMENTS_CONFIG.apiBase to your API route base.';
         }
 
         if (/unauthorized/i.test(text)) {
-            return 'Admin key/password was rejected. Use the same value as APPOINTMENTS_ADMIN_KEY in Supabase.';
+            return 'Admin key/password was rejected. Use the configured APPOINTMENTS_ADMIN_KEY value.';
         }
 
         return text;
@@ -341,13 +336,10 @@
             return;
         }
 
-        const order = ['stripe', 'paypal', 'pesapal', 'mpesa', 'airtel'];
+        const order = ['stripe', 'mpesa'];
         const names = {
             stripe: 'Stripe',
-            paypal: 'PayPal',
-            pesapal: 'Pesapal',
-            mpesa: 'M-Pesa',
-            airtel: 'Airtel Money'
+            mpesa: 'M-Pesa'
         };
         const fragment = document.createDocumentFragment();
 

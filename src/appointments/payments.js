@@ -3,9 +3,6 @@
     const apiBase = String(config.apiBase || '/api').replace(/\/?$/, '');
     const url = new URL(window.location.href);
     const bookingId = String(url.searchParams.get('booking_id') || '').trim();
-    const paypalOrderToken = String(url.searchParams.get('token') || '').trim();
-    const paypalCancelled = String(url.searchParams.get('cancelled') || '') === '1';
-
     const elements = {
         amount: document.querySelector('[data-payment-amount]'),
         status: document.querySelector('[data-payment-status]'),
@@ -65,7 +62,7 @@
     }
 
     function requiresPhone(provider) {
-        return provider === 'mpesa' || provider === 'airtel';
+        return provider === 'mpesa';
     }
 
     function refreshPhoneVisibility() {
@@ -80,7 +77,7 @@
             elements.phoneGroup.style.display = showPhone ? '' : 'none';
         }
         if (elements.submit) {
-            if (provider === 'pesapal') {
+            if (provider === 'stripe' || provider === 'card') {
                 elements.submit.textContent = 'Continue to secure checkout';
             } else {
                 elements.submit.textContent = 'Continue to payment';
@@ -165,36 +162,6 @@
         }, 5000);
     }
 
-    async function capturePayPal(orderId) {
-        if (!bookingId || !orderId) return;
-        setBusy(true);
-        if (elements.submit) elements.submit.textContent = 'Confirming PayPal payment...';
-        setMessage('Confirming PayPal payment...', null);
-        try {
-            const response = await fetch(buildApiUrl('payments-paypal-capture'), {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    bookingId,
-                    orderId
-                })
-            });
-            const result = await response.json().catch(() => ({}));
-            if (!response.ok) {
-                throw new Error(result.error || 'Unable to confirm PayPal payment.');
-            }
-
-            state.booking = result.booking || state.booking;
-            renderSummary();
-            setMessage(result.message || 'PayPal payment confirmed.', 'success');
-            stopPolling();
-        } catch (error) {
-            setMessage(error.message || 'PayPal payment confirmation failed.', 'error');
-        } finally {
-            setBusy(false);
-        }
-    }
-
     async function handleSubmit(event) {
         event.preventDefault();
         if (!bookingId) {
@@ -239,16 +206,6 @@
 
             if (result.redirectUrl) {
                 window.location.href = result.redirectUrl;
-                return;
-            }
-
-            if (provider === 'pesapal') {
-                setMessage(
-                    result.message || 'Waiting for Pesapal confirmation. This page will update automatically.',
-                    null
-                );
-                startPolling();
-                await fetchStatus();
                 return;
             }
 
@@ -297,10 +254,8 @@
             return;
         }
 
-        if (paypalCancelled) {
-            setMessage('PayPal payment was cancelled. Choose a method to try again.', 'error');
-        } else if (paypalOrderToken) {
-            await capturePayPal(paypalOrderToken);
+        if (url.searchParams.get('stripe_canceled') === '1') {
+            setMessage('Stripe payment was canceled. Choose a method to try again.', 'error');
         } else if (state.booking?.status !== 'confirmed') {
             startPolling();
         }

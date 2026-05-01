@@ -7,9 +7,6 @@ const DEFAULT_SETTINGS = {
     timezone: 'UTC'
 };
 
-// Optional fallbacks for URL/anon key when env is not set (local dev only).
-const FALLBACK_SUPABASE_URL = 'https://xmhyjttyarskimsxcfhl.supabase.co';
-const FALLBACK_SUPABASE_ANON_KEY = 'sb_publishable_IOs-j6rgWuDnwrymIIUHxQ_wCTmcaMp';
 const FALLBACK_APPOINTMENTS_ADMIN_KEY = 'Manu@4477';
 
 export function setCors(res) {
@@ -19,32 +16,21 @@ export function setCors(res) {
 }
 
 export function getEnvConfig() {
-    const supabaseUrl = process.env.SUPABASE_URL || process.env.SUPABASE_PROJECT_URL || FALLBACK_SUPABASE_URL;
-    const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || FALLBACK_SUPABASE_ANON_KEY;
-    const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY || supabaseAnonKey;
     const adminKey = process.env.APPOINTMENTS_ADMIN_KEY || FALLBACK_APPOINTMENTS_ADMIN_KEY;
     return {
-        supabaseUrl,
-        supabaseServiceKey,
-        supabaseAnonKey,
+        databaseUrl: process.env.DATABASE_URL || '',
         adminKey,
         stripeSecretKey: process.env.STRIPE_SECRET_KEY || '',
+        stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET || '',
         siteUrl: process.env.SITE_URL || '',
-        paypalBaseUrl: process.env.PAYPAL_BASE_URL || 'https://api-m.sandbox.paypal.com',
-        paypalClientId: process.env.PAYPAL_CLIENT_ID || '',
-        paypalClientSecret: process.env.PAYPAL_CLIENT_SECRET || '',
+        calendlyEventUrl: process.env.CALENDLY_EVENT_URL || '',
+        calendlyWebhookSigningKey: process.env.CALENDLY_WEBHOOK_SIGNING_KEY || '',
         mpesaBaseUrl: process.env.MPESA_BASE_URL || 'https://sandbox.safaricom.co.ke',
         mpesaConsumerKey: process.env.MPESA_CONSUMER_KEY || '',
         mpesaConsumerSecret: process.env.MPESA_CONSUMER_SECRET || '',
         mpesaShortcode: process.env.MPESA_SHORTCODE || '',
         mpesaPasskey: process.env.MPESA_PASSKEY || '',
-        mpesaCallbackUrl: process.env.MPESA_CALLBACK_URL || '',
-        airtelBaseUrl: process.env.AIRTEL_BASE_URL || 'https://openapiuat.airtel.africa',
-        airtelClientId: process.env.AIRTEL_CLIENT_ID || '',
-        airtelClientSecret: process.env.AIRTEL_CLIENT_SECRET || '',
-        airtelCountry: process.env.AIRTEL_COUNTRY || 'KE',
-        airtelCurrency: process.env.AIRTEL_CURRENCY || 'KES',
-        airtelCallbackUrl: process.env.AIRTEL_CALLBACK_URL || ''
+        mpesaCallbackUrl: process.env.MPESA_CALLBACK_URL || ''
     };
 }
 
@@ -53,77 +39,41 @@ export function ensureConfig(config, required = []) {
     return missing.length ? `Missing required configuration: ${missing.join(', ')}` : null;
 }
 
-export async function supabaseRequest(config, path, options = {}, useServiceKey = true) {
-    const key = useServiceKey ? config.supabaseServiceKey : config.supabaseAnonKey;
-    const response = await fetch(`${config.supabaseUrl}${path}`, {
-        ...options,
-        headers: {
-            apikey: key,
-            Authorization: `Bearer ${key}`,
-            ...options.headers
-        }
-    });
-    return response;
-}
-
-export async function loadSettings(config) {
-    const response = await supabaseRequest(
-        config,
-        '/rest/v1/appointment_settings?select=*',
-        { method: 'GET' }
-    );
-    if (!response.ok) {
-        throw new Error('Unable to load Charla settings.');
-    }
-    const data = await response.json();
-    const row = Array.isArray(data) ? data[0] : null;
+export async function loadSettings(_config, prisma) {
+    const row = await prisma.appointmentSetting.findFirst({ orderBy: { id: 'asc' } }).catch(() => null);
     return normalizeSettings(row);
 }
 
-export async function loadBlackouts(config) {
-    const response = await supabaseRequest(
-        config,
-        '/rest/v1/appointment_blackouts?select=date',
-        { method: 'GET' }
-    );
-    if (!response.ok) {
-        throw new Error('Unable to load blackout dates.');
-    }
-    const data = await response.json();
-    return Array.isArray(data) ? data.map((row) => row.date).filter(Boolean) : [];
+export async function loadBlackouts(_config, prisma) {
+    const rows = await prisma.appointmentBlackout.findMany({
+        select: { date: true },
+        orderBy: { date: 'asc' }
+    }).catch(() => []);
+    return rows.map((row) => row.date).filter(Boolean);
 }
 
-export async function loadDateOverrides(config) {
-    const response = await supabaseRequest(
-        config,
-        '/rest/v1/appointment_date_overrides?select=date,time_slots&order=date.asc',
-        { method: 'GET' }
-    );
-    if (!response.ok) {
-        throw new Error('Unable to load date overrides.');
-    }
-    const data = await response.json();
-    if (!Array.isArray(data)) return [];
-    return data
+export async function loadDateOverrides(_config, prisma) {
+    const rows = await prisma.appointmentDateOverride.findMany({ orderBy: { date: 'asc' } }).catch(() => []);
+    return rows
         .map((row) => ({
             date: String(row.date || ''),
-            timeSlots: normalizeSlots(row.time_slots || [])
+            timeSlots: normalizeSlots(row.timeSlots || [])
         }))
         .filter((row) => isValidDate(row.date));
 }
 
 export function normalizeSettings(row) {
     if (!row) return { ...DEFAULT_SETTINGS };
-    const rawTimeSlots = row.time_slots || row.timeSlots || {};
+    const rawTimeSlots = row.timeSlots || row.time_slots || {};
     const normalizedTimeSlots = Object.entries(rawTimeSlots || {}).reduce((acc, [day, slots]) => {
         acc[day] = normalizeSlots(slots);
         return acc;
     }, {});
     return {
-        bookingEnabled: Boolean(row.booking_enabled ?? row.bookingEnabled),
-        priceCents: Number(row.price_cents ?? row.priceCents ?? 0),
+        bookingEnabled: Boolean(row.bookingEnabled ?? row.booking_enabled),
+        priceCents: Number(row.priceCents ?? row.price_cents ?? 0),
         currency: row.currency || DEFAULT_SETTINGS.currency,
-        availableDays: row.available_days || row.availableDays || [],
+        availableDays: row.availableDays || row.available_days || [],
         timeSlots: normalizedTimeSlots,
         timezone: row.timezone || DEFAULT_SETTINGS.timezone
     };
