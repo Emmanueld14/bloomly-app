@@ -197,6 +197,8 @@
     let cachedPosts = [];
     let activeCategorySlug = 'all';
     let categoryOptions = [];
+    let activeSearchQuery = '';
+    let visiblePostCount = 6;
 
     function getCategorySlug(value) {
         if (window.BloomlyBlog && typeof window.BloomlyBlog.normalizeCategory === 'function') {
@@ -242,30 +244,51 @@
         } else {
             url.searchParams.delete('category');
         }
+        if (activeSearchQuery) {
+            url.searchParams.set('search', activeSearchQuery);
+        }
         window.history.pushState({ category: activeSlug }, '', url.toString());
     }
 
+    function postMatchesSearch(post, query) {
+        if (!query) return true;
+        const haystack = [
+            post.metadata?.title,
+            post.metadata?.summary,
+            post.metadata?.category
+        ].join(' ').toLowerCase();
+        return haystack.includes(query);
+    }
+
     function renderPostsForCategory(blogGrid, activeSlug) {
-        const filteredPosts = activeSlug === 'all'
+        const loadMoreWrap = document.querySelector('[data-blog-load-more-wrap]');
+        const loadMoreButton = document.querySelector('[data-blog-load-more]');
+        const categoryFilteredPosts = activeSlug === 'all'
             ? cachedPosts
             : cachedPosts.filter((post) => getCategorySlug(post.metadata.category || '') === activeSlug);
+        const filteredPosts = categoryFilteredPosts.filter((post) => postMatchesSearch(post, activeSearchQuery));
 
         if (!filteredPosts.length) {
             const activeLabel = categoryOptions.find((option) => option.slug === activeSlug)?.label || 'this category';
+            const emptyTitle = activeSearchQuery
+                ? `No posts found for "${activeSearchQuery}".`
+                : `No posts found in ${activeLabel}.`;
             blogGrid.innerHTML = `
                 <div style="text-align: center; padding: var(--space-2xl);">
                     <p style="font-size: var(--text-lg); margin-bottom: var(--space-md); color: var(--color-gray-600);">
-                        No posts found in ${activeLabel}.
+                        ${emptyTitle}
                     </p>
                     <p style="font-size: var(--text-sm); color: var(--color-gray-500);">
-                        Try another category or check back soon.
+                        Try another search, another category, or check back soon.
                     </p>
                 </div>
             `;
+            if (loadMoreWrap) loadMoreWrap.hidden = true;
             return;
         }
 
-        blogGrid.innerHTML = filteredPosts.map(post => {
+        const visiblePosts = filteredPosts.slice(0, visiblePostCount);
+        blogGrid.innerHTML = visiblePosts.map(post => {
             const emoji = post.metadata?.emoji || '💙';
             const date = formatDate(post.metadata?.date);
             const category = post.metadata?.category || 'Mental Health';
@@ -286,7 +309,7 @@
                     <div class="blog-card-content">
                         <div class="blog-card-date">${date} • ${category}</div>
                         <h3>${post.metadata?.title || 'Untitled Post'}</h3>
-                        <p>${post.metadata?.summary || ''}</p>
+                        <p class="blog-card-excerpt">${post.metadata?.summary || ''}</p>
                         <a href="${permalink}" class="blog-card-link">Read More →</a>
                     </div>
                 </article>
@@ -302,6 +325,18 @@
                 }, index * 100);
             });
         }, 100);
+
+        const hasMore = filteredPosts.length > visiblePostCount;
+        if (loadMoreWrap) {
+            loadMoreWrap.hidden = !hasMore;
+        }
+        if (loadMoreButton) {
+            loadMoreButton.textContent = 'Load more';
+            loadMoreButton.onclick = () => {
+                visiblePostCount += 6;
+                renderPostsForCategory(blogGrid, activeCategorySlug);
+            };
+        }
     }
 
     function setActiveCategory(blogGrid, activeSlug, shouldUpdateUrl) {
@@ -311,6 +346,7 @@
         if (shouldUpdateUrl) {
             updateCategoryUrl(activeCategorySlug);
         }
+        visiblePostCount = 6;
         renderPostsForCategory(blogGrid, activeCategorySlug);
     }
 
@@ -436,6 +472,16 @@
                     event.preventDefault();
                     const slug = link.dataset.categorySlug || 'all';
                     setActiveCategory(blogGrid, slug, true);
+                });
+            }
+
+            const searchInput = document.querySelector('[data-blog-search]');
+            if (searchInput && searchInput.dataset.blogSearchReady !== 'true') {
+                searchInput.dataset.blogSearchReady = 'true';
+                searchInput.addEventListener('input', () => {
+                    activeSearchQuery = searchInput.value.trim().toLowerCase();
+                    visiblePostCount = 6;
+                    renderPostsForCategory(blogGrid, activeCategorySlug);
                 });
             }
 

@@ -1,598 +1,267 @@
 /**
- * Bloomly Appointments - Booking Experience
+ * Bloomly Charla - Static Booking Experience
+ *
+ * Replace these placeholders before launch:
+ * - EMAILJS_SERVICE_ID: your EmailJS service ID.
+ * - EMAILJS_TEMPLATE_ID: your EmailJS template ID.
+ * - EMAILJS_PUBLIC_KEY: your EmailJS public key.
+ * - GOOGLE_SHEET_WEBHOOK: your Google Apps Script web app URL.
+ * - MPESA_PAYBILL_NUMBER: your M-Pesa paybill number.
+ * - BLOOMLY_WHATSAPP_NUMBER: your WhatsApp booking/support number.
  */
 (function() {
     'use strict';
 
-    const container = document.querySelector('[data-appointments-dates]');
-    if (!container) return;
+    const EMAILJS_SERVICE_ID = 'YOUR_SERVICE_ID';
+    const EMAILJS_TEMPLATE_ID = 'YOUR_TEMPLATE_ID';
+    const EMAILJS_PUBLIC_KEY = 'YOUR_PUBLIC_KEY';
+    const GOOGLE_SHEET_WEBHOOK = 'YOUR_APPS_SCRIPT_URL_HERE';
+    const MPESA_PAYBILL_NUMBER = 'PAYBILL NUMBER — add placeholder';
+    const BLOOMLY_WHATSAPP_NUMBER = '254XXXXXXXXX';
 
-    const appointmentsConfig = window.APPOINTMENTS_PUBLIC_CONFIG || window.APPOINTMENTS_CONFIG || {};
-    const apiBase = String(appointmentsConfig.apiBase || '/api').replace(/\/$/, '');
-
-    const state = {
-        settings: null,
-        blackouts: [],
-        dateOverrides: {},
-        bookings: [],
-        selectedDate: null,
-        selectedTime: null,
-        loading: false,
-        weekOffset: 0
+    const SESSION_TYPES = {
+        'Peer Chat': { label: 'Peer Chat', price: 200, duration: '45 min' },
+        'Standard Charla': { label: 'Standard Charla', price: 500, duration: '60 min' },
+        'Premium Charla': { label: 'Premium Charla', price: 900, duration: '60 min' }
     };
+
+    const form = document.querySelector('[data-appointments-form]');
+    if (!form) return;
 
     const elements = {
-        dates: container,
-        slots: document.querySelector('[data-appointments-slots]'),
-        status: document.querySelector('[data-appointments-status]'),
-        weekLabel: document.querySelector('[data-appointments-week-label]'),
-        weekPrev: document.querySelector('[data-appointments-week-prev]'),
-        weekNext: document.querySelector('[data-appointments-week-next]'),
+        sessionCards: Array.from(document.querySelectorAll('[data-session-type]')),
         price: document.querySelector('[data-appointments-price]'),
         summary: document.querySelector('[data-appointments-summary]'),
-        form: document.querySelector('[data-appointments-form]'),
+        submit: document.querySelector('[data-appointments-submit]'),
         message: document.querySelector('[data-appointments-message]'),
-        submit: document.querySelector('[data-appointments-submit]')
+        date: form.querySelector('input[name="date"]'),
+        counsellor: form.querySelector('select[name="counsellor"]')
     };
 
-    const MAX_WEEKS_AHEAD = 8;
-    const MAX_LOOKAHEAD_DAYS = (MAX_WEEKS_AHEAD + 1) * 7;
-    const DATE_OPTIONS = { weekday: 'short', month: 'short', day: 'numeric' };
-    const DAY_KEYS = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+    let selectedSession = SESSION_TYPES['Standard Charla'];
 
-    function buildApiUrl(path) {
-        const normalizedPath = String(path || '').replace(/^\/+/, '');
-        return `${apiBase}/${normalizedPath}`;
-    }
-
-    function toDateKey(date) {
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
+    function todayKey() {
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
         return `${year}-${month}-${day}`;
     }
 
-    function parseDateKey(key) {
-        const [year, month, day] = key.split('-').map(Number);
-        return new Date(year, month - 1, day);
+    function isPlaceholder(value) {
+        const normalized = String(value || '').trim().toUpperCase();
+        return !normalized ||
+            normalized.includes('YOUR_') ||
+            normalized.includes('_HERE') ||
+            normalized.includes('PLACEHOLDER') ||
+            normalized.includes('XXXXXXXXX') ||
+            normalized.includes('PAYBILL NUMBER');
     }
 
-    function startOfDay(date) {
-        const copy = new Date(date);
-        copy.setHours(0, 0, 0, 0);
-        return copy;
-    }
-
-    function addDays(date, days) {
-        const copy = new Date(date);
-        copy.setDate(copy.getDate() + days);
-        return copy;
-    }
-
-    function startOfWeek(date) {
-        const day = date.getDay();
-        const offset = (day + 6) % 7; // Monday-first week
-        return startOfDay(addDays(date, -offset));
-    }
-
-    function isPastDate(dateKey) {
-        const today = startOfDay(new Date());
-        return startOfDay(parseDateKey(dateKey)) < today;
-    }
-
-    function getVisibleWeekStart() {
-        const today = startOfDay(new Date());
-        const firstWeek = startOfWeek(today);
-        return addDays(firstWeek, state.weekOffset * 7);
-    }
-
-    function getVisibleWeekDates() {
-        const weekStart = getVisibleWeekStart();
-        return Array.from({ length: 7 }, (_, index) => addDays(weekStart, index));
-    }
-
-    function formatWeekRangeLabel(weekStart) {
-        const weekEnd = addDays(weekStart, 6);
-        const sameMonth = weekStart.getMonth() === weekEnd.getMonth();
-        const sameYear = weekStart.getFullYear() === weekEnd.getFullYear();
-
-        if (sameMonth && sameYear) {
-            const monthLabel = weekStart.toLocaleDateString(undefined, { month: 'short', year: 'numeric' });
-            return `${monthLabel} ${weekStart.getDate()} - ${weekEnd.getDate()}`;
+    function setFieldError(name, message) {
+        const error = form.querySelector(`[data-error-for="${name}"]`);
+        const field = form.elements[name];
+        if (error) {
+            error.textContent = message || '';
         }
-
-        const startLabel = weekStart.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-        const endLabel = weekEnd.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
-        return `${startLabel} - ${endLabel}`;
-    }
-
-    function formatCurrency(amountCents, currency) {
-        const amount = Number(amountCents || 0) / 100;
-        const code = currency || 'USD';
-        try {
-            return new Intl.NumberFormat(undefined, { style: 'currency', currency: code }).format(amount);
-        } catch (error) {
-            return `${amount.toFixed(2)} ${code}`;
+        if (field) {
+            field.classList.toggle('has-error', Boolean(message));
         }
     }
 
-    function normalizeTimeSlot(value) {
-        const raw = String(value || '').trim();
-        if (!raw) return '';
-
-        const compact = raw.replace(/\s+/g, '');
-        const noColonDigits = compact.replace(/[^\d]/g, '');
-        if (!compact.includes(':') && /^\d{3,4}$/.test(noColonDigits)) {
-            const padded = noColonDigits.padStart(4, '0');
-            const hours = Number(padded.slice(0, 2));
-            const minutes = Number(padded.slice(2));
-            if (hours <= 23 && minutes <= 59) {
-                return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
-            }
-        }
-
-        const parts = compact.split(':');
-        if (parts.length !== 2) return '';
-        const hours = Number(parts[0]);
-        const minutes = Number(parts[1]);
-        if (!Number.isFinite(hours) || !Number.isFinite(minutes)) return '';
-        if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59) return '';
-        return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
-    }
-
-    function normalizeSlotsList(value) {
-        const source = Array.isArray(value)
-            ? value
-            : String(value || '')
-                .split(',')
-                .map((entry) => String(entry || '').trim());
-        const normalized = source
-            .map((slot) => normalizeTimeSlot(slot))
-            .filter(Boolean);
-        return [...new Set(normalized)].sort();
-    }
-
-    function setMessage(text, type) {
-        if (!elements.message) return;
-        elements.message.textContent = text || '';
-        elements.message.classList.remove('is-error', 'is-success');
-        if (type === 'error') {
-            elements.message.classList.add('is-error');
-        }
-        if (type === 'success') {
-            elements.message.classList.add('is-success');
+    function clearErrors() {
+        form.querySelectorAll('[data-error-for]').forEach((error) => {
+            error.textContent = '';
+        });
+        form.querySelectorAll('.has-error').forEach((field) => {
+            field.classList.remove('has-error');
+        });
+        if (elements.message) {
+            elements.message.textContent = '';
+            elements.message.classList.remove('is-error', 'is-success');
         }
     }
 
-    function setStatus(text) {
-        if (!elements.status) return;
-        elements.status.textContent = text || '';
+    function formatSession(session) {
+        return `${session.label} — KSh ${session.price} / ${session.duration}`;
     }
 
-    function setLoading(isLoading) {
-        state.loading = isLoading;
+    function updateSessionUi() {
+        elements.sessionCards.forEach((card) => {
+            const isActive = card.dataset.sessionType === selectedSession.label;
+            card.classList.toggle('is-active', isActive);
+            card.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+        });
+
+        if (elements.price) {
+            elements.price.textContent = `${selectedSession.label}: KSh ${selectedSession.price}`;
+        }
+        if (elements.summary) {
+            elements.summary.textContent = `Selected: ${formatSession(selectedSession)}`;
+        }
         if (elements.submit) {
-            elements.submit.textContent = isLoading ? 'Processing...' : 'Pay booking fee';
+            elements.submit.textContent = `Confirm My Session — KSh ${selectedSession.price}`;
         }
-        if (elements.message && isLoading) {
-            setMessage('Preparing your booking...', null);
-        }
-        updateSubmitState();
     }
 
-    function updateSubmitState() {
-        if (!elements.submit) return;
-        const ready = Boolean(
-            !state.loading &&
-            state.settings?.bookingEnabled &&
-            state.selectedDate &&
-            state.selectedTime
-        );
-        elements.submit.disabled = !ready;
+    function validateForm(data) {
+        const errors = {};
+        if (!data.name) errors.name = 'Please enter your full name.';
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+            errors.email = 'Please enter a valid email address.';
+        }
+        if (!/^\+?254\d{9}$/.test(data.phone.replace(/\s+/g, ''))) {
+            errors.phone = 'Please enter a valid Kenyan M-Pesa number starting with +254.';
+        }
+        if (!data.counsellor) errors.counsellor = 'Please choose a counsellor or mentor.';
+        if (!data.date) {
+            errors.date = 'Please choose your preferred date.';
+        } else if (data.date < todayKey()) {
+            errors.date = 'Please choose today or a future date.';
+        }
+        if (!data.time) errors.time = 'Please choose your preferred time.';
+        if (!data.purpose) errors.purpose = 'Please share the purpose of your Charla.';
+        return errors;
     }
 
-    function updatePriceLabel() {
-        if (!elements.price) return;
-        if (!state.settings) {
-            elements.price.textContent = 'Loading price...';
+    function getFormData() {
+        const formData = new FormData(form);
+        return {
+            timestamp: new Date().toISOString(),
+            name: String(formData.get('name') || '').trim(),
+            email: String(formData.get('email') || '').trim(),
+            phone: String(formData.get('phone') || '').trim(),
+            counsellor: String(formData.get('counsellor') || '').trim(),
+            sessionType: selectedSession.label,
+            price: selectedSession.price,
+            preferredDate: String(formData.get('date') || '').trim(),
+            preferredTime: String(formData.get('time') || '').trim(),
+            purpose: String(formData.get('purpose') || '').trim()
+        };
+    }
+
+    async function sendEmail(data) {
+        if (!window.emailjs || isPlaceholder(EMAILJS_SERVICE_ID) || isPlaceholder(EMAILJS_TEMPLATE_ID) || isPlaceholder(EMAILJS_PUBLIC_KEY)) {
+            console.info('EmailJS placeholders are not configured yet.');
             return;
         }
-        const formatted = formatCurrency(state.settings.priceCents, state.settings.currency);
-        elements.price.textContent = `Booking fee: ${formatted}`;
-    }
 
-    function getDayKey(dateKey) {
-        const date = parseDateKey(dateKey);
-        return DAY_KEYS[date.getDay()];
-    }
-
-    function isBlackout(dateKey) {
-        return state.blackouts.includes(dateKey);
-    }
-
-    function getDateOverride(dateKey) {
-        return state.dateOverrides?.[dateKey] || null;
-    }
-
-    function getSlotsForDate(dateKey) {
-        const override = getDateOverride(dateKey);
-        if (override) {
-            return normalizeSlotsList(override.timeSlots || []);
-        }
-        const dayKey = getDayKey(dateKey);
-        const slots = state.settings?.timeSlots?.[dayKey] || [];
-        return normalizeSlotsList(slots);
-    }
-
-    function getBookedSlots(dateKey) {
-        return state.bookings
-            .filter((booking) => booking.date === dateKey)
-            .map((booking) => normalizeTimeSlot(booking.time))
-            .filter(Boolean);
-    }
-
-    function getOpenSlots(dateKey) {
-        const slots = getSlotsForDate(dateKey);
-        if (!slots.length) return [];
-        const booked = new Set(getBookedSlots(dateKey));
-        return slots.filter((slot) => !booked.has(slot));
-    }
-
-    function hasAvailableSlots(dateKey) {
-        if (!state.settings?.bookingEnabled) return false;
-        if (isPastDate(dateKey)) return false;
-        if (isBlackout(dateKey)) return false;
-
-        const override = getDateOverride(dateKey);
-        if (!override && !state.settings?.availableDays?.includes(getDayKey(dateKey))) {
-            return false;
-        }
-
-        return getOpenSlots(dateKey).length > 0;
-    }
-
-    function renderDates() {
-        if (!elements.dates) return;
-        elements.dates.innerHTML = '';
-        const fragment = document.createDocumentFragment();
-        const weekStart = getVisibleWeekStart();
-        const weekDates = getVisibleWeekDates();
-
-        if (elements.weekLabel) {
-            elements.weekLabel.textContent = formatWeekRangeLabel(weekStart);
-        }
-        if (elements.weekPrev) {
-            elements.weekPrev.disabled = state.weekOffset <= 0;
-        }
-        if (elements.weekNext) {
-            elements.weekNext.disabled = state.weekOffset >= MAX_WEEKS_AHEAD;
-        }
-
-        const availableDateKeys = [];
-        weekDates.forEach((date) => {
-            const dateKey = toDateKey(date);
-            if (!hasAvailableSlots(dateKey)) return;
-            const openSlots = getOpenSlots(dateKey);
-            availableDateKeys.push(dateKey);
-
-            const button = document.createElement('button');
-            button.type = 'button';
-            button.className = 'appointments-date-button';
-            button.dataset.date = dateKey;
-            button.innerHTML = `
-                <span class="appointments-date-day">${date.toLocaleDateString(undefined, { weekday: 'short' })}</span>
-                <span class="appointments-date-number">${date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span>
-                <span class="appointments-date-meta">${openSlots.length} slot${openSlots.length === 1 ? '' : 's'} available</span>
-            `;
-
-            if (state.selectedDate === dateKey) {
-                button.classList.add('is-active');
-            }
-
-            button.addEventListener('click', () => {
-                state.selectedDate = dateKey;
-                state.selectedTime = null;
-                renderDates();
-                renderSlots();
-                updateSummary();
-            });
-
-            fragment.appendChild(button);
+        window.emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
+        await window.emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+            to_name: data.name,
+            to_email: data.email,
+            name: data.name,
+            email: data.email,
+            phone: data.phone,
+            counsellor: data.counsellor,
+            session_type: data.sessionType,
+            price: `KSh ${data.price}`,
+            preferred_date: data.preferredDate,
+            preferred_time: data.preferredTime,
+            purpose: data.purpose,
+            mpesa_instructions: `Send KSh ${data.price} to M-Pesa Paybill ${MPESA_PAYBILL_NUMBER}. Account number: ${data.name}.`
         });
-
-        if (state.selectedDate && !availableDateKeys.includes(state.selectedDate)) {
-            state.selectedDate = null;
-            state.selectedTime = null;
-        }
-
-        if (!state.selectedDate && availableDateKeys.length) {
-            state.selectedDate = availableDateKeys[0];
-        }
-
-        if (!availableDateKeys.length) {
-            const emptyState = document.createElement('div');
-            emptyState.className = 'appointments-date-empty';
-            emptyState.textContent = 'No available dates this week. Try next week.';
-            fragment.appendChild(emptyState);
-        }
-
-        elements.dates.appendChild(fragment);
     }
 
-    function renderSlots() {
-        if (!elements.slots) return;
-        elements.slots.innerHTML = '';
-
-        if (!state.selectedDate) {
-            elements.slots.textContent = 'Select a date to see time slots.';
+    async function logToSheet(data) {
+        if (isPlaceholder(GOOGLE_SHEET_WEBHOOK)) {
+            console.info('Google Sheets webhook placeholder is not configured yet.');
             return;
         }
 
-        const openSlots = getOpenSlots(state.selectedDate);
-        if (!openSlots.length) {
-            elements.slots.textContent = 'No slots available for this day.';
-            return;
-        }
-
-        if (!state.selectedTime || !openSlots.includes(state.selectedTime)) {
-            state.selectedTime = openSlots[0];
-        }
-
-        const fragment = document.createDocumentFragment();
-
-        openSlots.forEach((slot) => {
-            const button = document.createElement('button');
-            button.type = 'button';
-            button.className = 'appointments-slot-button';
-            button.dataset.time = slot;
-            button.textContent = slot;
-
-            if (state.selectedTime === slot) {
-                button.classList.add('is-active');
-            }
-
-            button.addEventListener('click', () => {
-                state.selectedTime = normalizeTimeSlot(slot) || slot;
-                renderSlots();
-                updateSummary();
-            });
-
-            fragment.appendChild(button);
+        await fetch(GOOGLE_SHEET_WEBHOOK, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
         });
-
-        elements.slots.appendChild(fragment);
     }
 
-    function updateSummary() {
-        if (!elements.summary) return;
-        if (!state.settings?.bookingEnabled) {
-            elements.summary.textContent = 'Charla sessions are currently closed. Please check back soon.';
-            updateSubmitState();
-            return;
-        }
-        if (!state.selectedDate || !state.selectedTime) {
-            elements.summary.textContent = 'Step 1: Pick a date. Step 2: Pick a time. Step 3: Enter details and continue to payment.';
-            updateSubmitState();
-            return;
-        }
-        const dateLabel = parseDateKey(state.selectedDate).toLocaleDateString(undefined, DATE_OPTIONS);
-        const price = formatCurrency(state.settings.priceCents, state.settings.currency);
-        elements.summary.textContent = `Selected: ${dateLabel} at ${state.selectedTime}. You will pay ${price} on the next page.`;
-        updateSubmitState();
-    }
-
-    function clearSelections() {
-        state.selectedDate = null;
-        state.selectedTime = null;
-    }
-
-    async function fetchAvailability(options = {}) {
-        setStatus('Loading availability...');
-        try {
-            const start = toDateKey(new Date());
-            const endDate = new Date();
-            endDate.setDate(endDate.getDate() + MAX_LOOKAHEAD_DAYS);
-            const end = toDateKey(endDate);
-
-            const response = await fetch(
-                `${buildApiUrl('appointments-availability')}?start=${encodeURIComponent(start)}&end=${encodeURIComponent(end)}`
-            );
-            if (!response.ok) {
-                throw new Error('Unable to load Charla availability.');
-            }
-            const payload = await response.json();
-            const rawSettings = payload.settings || {};
-            const rawTimeSlots = rawSettings.timeSlots || rawSettings.time_slots || {};
-            const normalizedTimeSlots = Object.entries(rawTimeSlots).reduce((acc, [day, slots]) => {
-                acc[day] = normalizeSlotsList(slots);
-                return acc;
-            }, {});
-
-            state.settings = {
-                ...rawSettings,
-                timeSlots: normalizedTimeSlots
-            };
-            state.blackouts = payload.blackouts || [];
-            state.dateOverrides = Array.isArray(payload.dateOverrides)
-                ? payload.dateOverrides.reduce((map, entry) => {
-                    const date = String(entry?.date || '').trim();
-                    if (!date) return map;
-                    const rawSlots = entry?.timeSlots ?? entry?.time_slots ?? [];
-                    const slots = normalizeSlotsList(rawSlots);
-                    map[date] = { date, timeSlots: slots };
-                    return map;
-                }, {})
-                : {};
-            state.bookings = Array.isArray(payload.bookings)
-                ? payload.bookings.map((booking) => ({
-                    ...booking,
-                    time: normalizeTimeSlot(booking?.time || '')
-                }))
-                : [];
-            updatePriceLabel();
-
-            if (!state.settings?.bookingEnabled) {
-                setStatus('Charla sessions are currently closed.');
-            } else {
-                setStatus('Choose a date that works for you.');
-            }
-
-            if (!options.preserveSelection) {
-                clearSelections();
-            }
-            renderDates();
-            renderSlots();
-            updateSummary();
-        } catch (error) {
-            console.error('Charla availability error', error);
-            setStatus('Charla sessions are currently unavailable. Please try again soon.');
-            updateSubmitState();
+    function renderSuccess(data) {
+        const success = document.createElement('div');
+        success.className = 'appointments-success-card';
+        success.innerHTML = `
+            <h2>✅ You're booked in!</h2>
+            <p>Your Charla session request has been received.</p>
+            <p>To confirm your spot, please send KSh ${data.price} to:</p>
+            <p><strong>M-Pesa Paybill:</strong> ${MPESA_PAYBILL_NUMBER}<br>
+            <strong>Account number:</strong> Your full name</p>
+            <p>Once payment is confirmed, we'll send your counsellor's details and session link to your email and WhatsApp within 2 hours.</p>
+            <p>Questions? WhatsApp us: ${BLOOMLY_WHATSAPP_NUMBER}</p>
+        `;
+        form.replaceWith(success);
+        if (elements.message) {
+            elements.message.remove();
         }
     }
 
-    async function handleBooking(event) {
+    async function handleSubmit(event) {
         event.preventDefault();
-        if (!state.settings?.bookingEnabled) {
-            setMessage('Charla sessions are currently closed.', 'error');
-            return;
-        }
-        if (!state.selectedDate || !state.selectedTime) {
-            setMessage('Please select a date and time.', 'error');
+        clearErrors();
+
+        const data = getFormData();
+        const errors = validateForm({
+            name: data.name,
+            email: data.email,
+            phone: data.phone,
+            counsellor: data.counsellor,
+            date: data.preferredDate,
+            time: data.preferredTime,
+            purpose: data.purpose
+        });
+
+        Object.entries(errors).forEach(([name, message]) => setFieldError(name, message));
+        if (Object.keys(errors).length) {
+            if (elements.message) {
+                elements.message.textContent = 'Please fix the highlighted fields.';
+                elements.message.classList.add('is-error');
+            }
             return;
         }
 
-        const formData = new FormData(event.target);
-        const name = String(formData.get('name') || '').trim();
-        const email = String(formData.get('email') || '').trim();
-        const purpose = String(formData.get('purpose') || '').trim();
-
-        if (!name || !email) {
-            setMessage('Please enter your name and email.', 'error');
-            return;
+        if (elements.submit) {
+            elements.submit.disabled = true;
+            elements.submit.textContent = 'Confirming...';
         }
-
-        setLoading(true);
-        setMessage('Preparing your Charla booking...', null);
 
         try {
-            const response = await fetch(buildApiUrl('appointments-book'), {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    name,
-                    email,
-                    purpose: purpose || 'Charla session',
-                    date: state.selectedDate,
-                    time: normalizeTimeSlot(state.selectedTime) || state.selectedTime
-                })
-            });
-
-            const result = await response.json().catch(() => ({}));
-            if (!response.ok) {
-                throw new Error(result.error || 'Unable to start booking.');
-            }
-
-            if (result.paymentUrl) {
-                window.location.href = result.paymentUrl;
-                return;
-            }
-
-            if (result.checkoutUrl) {
-                window.location.href = result.checkoutUrl;
-                return;
-            }
-            if (result.booking) {
-                const dateLabel = parseDateKey(result.booking.date).toLocaleDateString(undefined, DATE_OPTIONS);
-                setMessage(
-                    result.message || `Charla session confirmed for ${dateLabel} at ${result.booking.time}.`,
-                    'success'
-                );
-                state.selectedDate = result.booking.date;
-                state.selectedTime = normalizeTimeSlot(result.booking.time) || result.booking.time;
-                updateSummary();
-                await fetchAvailability({ preserveSelection: true });
-                setLoading(false);
-                if (elements.form && typeof elements.form.reset === 'function') {
-                    elements.form.reset();
+            const tasks = await Promise.allSettled([sendEmail(data), logToSheet(data)]);
+            tasks.forEach((task) => {
+                if (task.status === 'rejected') {
+                    console.warn('Optional Charla integration failed.', task.reason);
                 }
-                return;
-            }
-
-            throw new Error('Booking response was incomplete.');
-        } catch (error) {
-            console.error('Booking error', error);
-            setMessage(error.message || 'Unable to start booking. Please try again.', 'error');
-            setLoading(false);
-        }
-    }
-
-    async function confirmBooking(sessionId) {
-        if (!sessionId) return;
-        setLoading(true);
-        setMessage('Confirming your payment...', null);
-        try {
-            const response = await fetch(buildApiUrl('appointments-confirm'), {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ sessionId })
             });
-
-            const result = await response.json().catch(() => ({}));
-            if (!response.ok) {
-                throw new Error(result.error || 'Unable to confirm Charla.');
-            }
-
-            if (result.booking) {
-                const dateLabel = parseDateKey(result.booking.date).toLocaleDateString(undefined, DATE_OPTIONS);
-                setMessage(`Charla session confirmed for ${dateLabel} at ${result.booking.time}.`, 'success');
-                state.selectedDate = result.booking.date;
-                state.selectedTime = normalizeTimeSlot(result.booking.time) || result.booking.time;
-                updateSummary();
-                await fetchAvailability({ preserveSelection: true });
-            } else {
-                setMessage('Payment confirmed. We will email your Charla details shortly.', 'success');
-            }
-        } catch (error) {
-            console.error('Payment confirmation error', error);
-            setMessage(error.message || 'Payment confirmation failed. Please contact support.', 'error');
+            renderSuccess(data);
         } finally {
-            setLoading(false);
+            if (elements.submit && document.body.contains(elements.submit)) {
+                elements.submit.disabled = false;
+                updateSessionUi();
+            }
         }
     }
 
-    function handleReturnParams() {
-        const params = new URLSearchParams(window.location.search);
-        if (params.get('canceled') === '1') {
-            setMessage('Payment was canceled. Your slot was not booked.', 'error');
-        }
-        const success = params.get('success') === '1';
-        const sessionId = params.get('session_id');
-        if (success && sessionId) {
-            confirmBooking(sessionId);
-        }
+    elements.sessionCards.forEach((card) => {
+        card.addEventListener('click', () => {
+            const next = SESSION_TYPES[card.dataset.sessionType];
+            if (!next) return;
+            selectedSession = next;
+            updateSessionUi();
+        });
+    });
+
+    document.querySelectorAll('[data-book-counsellor]').forEach((link) => {
+        link.addEventListener('click', () => {
+            const counsellor = link.dataset.bookCounsellor;
+            if (elements.counsellor && counsellor) {
+                elements.counsellor.value = counsellor;
+            }
+        });
+    });
+
+    if (elements.date) {
+        elements.date.min = todayKey();
     }
 
-    function changeWeek(delta) {
-        const next = state.weekOffset + delta;
-        if (next < 0 || next > MAX_WEEKS_AHEAD) return;
-        state.weekOffset = next;
-        renderDates();
-        renderSlots();
-        updateSummary();
-    }
-
-    if (elements.weekPrev) {
-        elements.weekPrev.addEventListener('click', () => changeWeek(-1));
-    }
-    if (elements.weekNext) {
-        elements.weekNext.addEventListener('click', () => changeWeek(1));
-    }
-
-    if (elements.form) {
-        elements.form.addEventListener('submit', handleBooking);
-    }
-
-    updatePriceLabel();
-    fetchAvailability();
-    handleReturnParams();
+    form.addEventListener('submit', handleSubmit);
+    updateSessionUi();
 })();

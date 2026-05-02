@@ -499,6 +499,128 @@
         });
     }
 
+    // ========== Global Bloomly Additions ==========
+    const BLOOMLY_WHATSAPP_NUMBER = '254XXXXXXXXX'; // Replace with the real Bloomly WhatsApp number.
+    const GOOGLE_SHEET_WEBHOOK = 'YOUR_APPS_SCRIPT_URL_HERE'; // Replace with the Google Apps Script URL for bookings/applications.
+
+    function initWhatsAppButton() {
+        if (document.querySelector('.whatsapp-float')) return;
+        const link = document.createElement('a');
+        link.className = 'whatsapp-float';
+        link.href = `https://wa.me/${BLOOMLY_WHATSAPP_NUMBER}?text=Hi%2C%20I%27d%20like%20to%20book%20a%20Charla%20session`;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        link.setAttribute('aria-label', 'Chat with Bloomly on WhatsApp');
+        link.innerHTML = `
+            <svg viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+                <path fill="currentColor" d="M16.03 4C9.39 4 4 9.34 4 15.91c0 2.1.56 4.15 1.61 5.95L4 28l6.33-1.58A12.2 12.2 0 0 0 16.03 28C22.66 28 28 22.66 28 16.09 28 9.45 22.66 4 16.03 4Zm0 21.96c-1.78 0-3.52-.48-5.04-1.39l-.36-.21-3.75.94.99-3.63-.24-.38a9.83 9.83 0 0 1-1.53-5.38c0-5.43 4.45-9.85 9.93-9.85 5.46 0 9.91 4.5 9.91 10.03 0 5.43-4.45 9.87-9.91 9.87Zm5.44-7.39c-.3-.15-1.76-.86-2.03-.96-.27-.1-.47-.15-.67.15-.2.3-.77.96-.95 1.16-.17.2-.35.22-.65.07-.3-.15-1.27-.46-2.42-1.49-.9-.8-1.5-1.78-1.67-2.08-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.07-.15-.67-1.6-.92-2.2-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.79.37-.27.3-1.04 1.01-1.04 2.47s1.07 2.87 1.22 3.07c.15.2 2.11 3.2 5.1 4.49.71.31 1.27.49 1.7.63.71.23 1.36.2 1.88.12.57-.09 1.76-.72 2-1.41.25-.7.25-1.29.17-1.41-.07-.13-.27-.2-.57-.35Z"/>
+            </svg>
+        `;
+        document.body.appendChild(link);
+    }
+
+    function enhanceFooter() {
+        document.querySelectorAll('.footer-section').forEach((section) => {
+            const heading = section.querySelector('h4');
+            if (!heading) return;
+            const headingText = heading.textContent.trim().toLowerCase();
+
+            if (headingText === 'bloomly' && !section.querySelector('.footer-socials')) {
+                const socials = document.createElement('div');
+                socials.className = 'footer-socials';
+                socials.innerHTML = `
+                    <a href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer" aria-label="Bloomly on Instagram">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5Zm0 2a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H7Zm5 3.5A4.5 4.5 0 1 1 12 16.5 4.5 4.5 0 0 1 12 7.5Zm0 2A2.5 2.5 0 1 0 12 14.5 2.5 2.5 0 0 0 12 9.5ZM17.8 6.7a1.1 1.1 0 1 1-1.1 1.1 1.1 1.1 0 0 1 1.1-1.1Z"/></svg>
+                    </a>
+                    <a href="https://www.tiktok.com/" target="_blank" rel="noopener noreferrer" aria-label="Bloomly on TikTok">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 3c.35 2.25 1.6 3.7 4 4.05V10c-1.45-.04-2.76-.48-4-1.34v6.45A5.88 5.88 0 1 1 10.12 9.2c.3 0 .59.02.88.07v3.15a2.82 2.82 0 1 0 1.95 2.69V3H16Z"/></svg>
+                    </a>
+                    <a href="https://twitter.com/" target="_blank" rel="noopener noreferrer" aria-label="Bloomly on X">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.2 3h3.1l-6.8 7.75L21.5 21h-6.27l-4.9-6.4L4.72 21H1.6l7.26-8.3L1.2 3h6.43l4.43 5.86L17.2 3Zm-1.1 16.2h1.72L6.68 4.7H4.84L16.1 19.2Z"/></svg>
+                    </a>
+                `;
+                section.appendChild(socials);
+            }
+
+            if (headingText === 'quick links' && !Array.from(section.querySelectorAll('a')).some((link) => link.textContent.trim() === 'Charla')) {
+                const charlaLink = document.createElement('a');
+                charlaLink.href = '/appointments';
+                charlaLink.textContent = 'Charla';
+                const subscribeLink = Array.from(section.querySelectorAll('a')).find((link) => link.textContent.trim() === 'Subscribe');
+                section.insertBefore(charlaLink, subscribeLink || null);
+            }
+        });
+    }
+
+    function setFieldErrors(form, errors) {
+        form.querySelectorAll('.field-error').forEach((errorEl) => {
+            errorEl.textContent = '';
+        });
+        Object.entries(errors).forEach(([name, message]) => {
+            const errorEl = form.querySelector(`[data-error-for="${name}"]`);
+            if (errorEl) {
+                errorEl.textContent = message;
+            }
+        });
+    }
+
+    async function postToGoogleSheet(payload) {
+        if (!GOOGLE_SHEET_WEBHOOK || GOOGLE_SHEET_WEBHOOK === 'YOUR_APPS_SCRIPT_URL_HERE') {
+            console.info('Google Sheets webhook placeholder. Replace GOOGLE_SHEET_WEBHOOK to enable logging.', payload);
+            return;
+        }
+        await fetch(GOOGLE_SHEET_WEBHOOK, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+    }
+
+    function initJoinTeamForm() {
+        const form = document.querySelector('[data-join-team-form]');
+        if (!form) return;
+        const messageEl = form.querySelector('[data-join-team-message]');
+
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const data = Object.fromEntries(new FormData(form).entries());
+            const errors = {};
+
+            ['name', 'email', 'phone', 'role', 'about'].forEach((field) => {
+                if (!String(data[field] || '').trim()) {
+                    errors[field] = 'Please fill this in.';
+                }
+            });
+
+            if (data.email && !isValidEmail(String(data.email).trim())) {
+                errors.email = 'Please enter a valid email address.';
+            }
+
+            setFieldErrors(form, errors);
+            if (Object.keys(errors).length) {
+                setFormMessage(messageEl, 'Please check the highlighted fields.', 'error');
+                return;
+            }
+
+            try {
+                await postToGoogleSheet({
+                    sheet: 'Charla counsellor applications',
+                    timestamp: new Date().toISOString(),
+                    name: String(data.name).trim(),
+                    email: String(data.email).trim(),
+                    phone: String(data.phone).trim(),
+                    role: String(data.role).trim(),
+                    about: String(data.about).trim()
+                });
+                form.reset();
+                setFormMessage(messageEl, 'Thanks for applying. We will review your details and reach out soon.', 'success');
+            } catch (error) {
+                console.error('Join team submission failed', error);
+                setFormMessage(messageEl, 'Unable to send right now. Please try again.', 'error');
+            }
+        });
+    }
+
     // ========== Local Storage Helpers ==========
     function safeStorageGet(key) {
         try {
@@ -2365,6 +2487,9 @@ But I can start by being honest about my own story.`,
         initNewsletterForms();
         initBloomlyTeamCards();
         void initTeamProfilePage();
+        initWhatsAppButton();
+        enhanceFooter();
+        initJoinTeamForm();
         
         // Trigger initial scroll check
         handleNavbarScroll();

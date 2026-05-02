@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Learn about Bloomly's mission to support teen mental health through awareness, resources, and emotional support.">
+    <meta name="description" content="Learn Bloomly's story, mission, values, team, and how Kenyan counsellors or peer mentors can join Charla.">
     <meta name="keywords" content="Bloomly team, teen mental health platform, about Bloomly, mental health support">
     <meta name="author" content="Bloomly Team">
     <meta name="date" content="2026-01-01">
@@ -14,7 +14,7 @@
     <meta property="og:image:height" content="630">
     <meta property="og:image:alt" content="Bloomly Logo - Butterfly with golden glow and elegant text">
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-    <title>About Us - Bloomly</title>
+    <title>About Bloomly | Our Story & Mission</title>
     
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -54,17 +54,98 @@
         </div>
     </nav>
 
+    <main>
+        <section class="about-mission-hero" aria-labelledby="about-mission-title">
+            <div class="floating-shape about-hero-orb about-hero-orb-one" aria-hidden="true"></div>
+            <div class="floating-shape about-hero-orb about-hero-orb-two" aria-hidden="true"></div>
+            <div class="container">
+                <div class="section-header about-mission-content">
+                    <h1 id="about-mission-title">We built Bloomly because we needed it too.</h1>
+                    <p>Bloomly exists because too many Kenyan teens are going through hard things in silence. We're here to change that — one gentle conversation at a time.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="section about-values-section" aria-labelledby="about-values-title">
+            <div class="container">
+                <div class="section-header">
+                    <h2 id="about-values-title">What Bloomly stands for</h2>
+                </div>
+                <div class="value-card-grid">
+                    <article class="value-card fade-in">
+                        <div class="value-icon">💜</div>
+                        <h3>Honesty</h3>
+                        <p>We don't pretend things are fine when they're not. We meet you where you are.</p>
+                    </article>
+                    <article class="value-card fade-in">
+                        <div class="value-icon">🌍</div>
+                        <h3>Accessibility</h3>
+                        <p>Mental wellness shouldn't cost KSh 3,000 a session. We're building something everyone can reach.</p>
+                    </article>
+                    <article class="value-card fade-in">
+                        <div class="value-icon">🤝</div>
+                        <h3>Community</h3>
+                        <p>You're not a patient. You're a person. And you deserve to feel seen by people who get it.</p>
+                    </article>
+                </div>
+            </div>
+        </section>
+
     <!-- Meet the Team Hero -->
     <section class="about-team-hero bloomly-team-section" aria-labelledby="about-team-title">
         <div class="container">
             <div class="section-header about-team-header">
-                <h1 id="about-team-title">Meet the Bloomly Team</h1>
-                <p>The people building Bloomly’s vision.</p>
+                <h2 id="about-team-title">The people behind Bloomly</h2>
+                <p>A small team building something meaningful.</p>
             </div>
             <div class="bloomly-team-grid" data-team-grid></div>
         </div>
     </section>
-    <main>
+
+        <section class="section join-team-section" aria-labelledby="join-team-title">
+            <div class="container">
+                <div class="join-team-panel fade-in">
+                    <div class="join-team-copy">
+                        <h2 id="join-team-title">Want to be a Charla counsellor or mentor?</h2>
+                        <p>We're looking for trained counsellors and peer mentors who care about Kenyan youth. You set your own hours. We handle the bookings.</p>
+                    </div>
+                    <form class="join-team-form" data-join-team-form novalidate>
+                        <label>
+                            Full name
+                            <input type="text" name="name" required placeholder="Your full name">
+                            <span class="field-error" data-error-for="name"></span>
+                        </label>
+                        <label>
+                            Email
+                            <input type="email" name="email" required placeholder="you@email.com">
+                            <span class="field-error" data-error-for="email"></span>
+                        </label>
+                        <label>
+                            Phone number
+                            <input type="tel" name="phone" required placeholder="+254712345678">
+                            <span class="field-error" data-error-for="phone"></span>
+                        </label>
+                        <label>
+                            Role applying for
+                            <select name="role" required>
+                                <option value="">Choose a role</option>
+                                <option value="Peer Mentor">Peer Mentor</option>
+                                <option value="Qualified Counsellor">Qualified Counsellor</option>
+                            </select>
+                            <span class="field-error" data-error-for="role"></span>
+                        </label>
+                        <label>
+                            Tell us about yourself
+                            <textarea name="about" required placeholder="Share your background and why this matters to you."></textarea>
+                            <span class="field-error" data-error-for="about"></span>
+                        </label>
+                        <button type="submit" class="btn btn-primary">Apply to Join</button>
+                        <p class="form-message" data-join-team-message aria-live="polite"></p>
+                    </form>
+                </div>
+            </div>
+        </section>
+
         <section class="section about-story-simple" aria-labelledby="about-story-title">
             <div class="container">
                 <article class="about-story-article">
@@ -92,7 +173,7 @@
         </section>
 
         <!-- Terms and Conditions -->
-        <section class="section terms-conditions" aria-labelledby="terms-conditions-title">
+        <section class="section terms-conditions terms-with-separator" aria-labelledby="terms-conditions-title">
             <div class="container">
                 <div class="section-header">
                     <h2 id="terms-conditions-title">Terms and Conditions</h2>

@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Read helpful articles about teen mental health, self-care, coping strategies, and wellness tips from Bloomly.">
+    <meta name="description" content="Mental health stories, reflections, and gentle guides for Kenyan teens and youth from Bloomly.">
     <meta name="keywords" content="teen mental health blog, self-care tips, mental health articles, wellness advice">
     <meta name="author" content="Bloomly Team">
     <meta name="date" content="2026-01-01">
     <meta property="article:author" content="Bloomly Team">
     <meta property="article:published_time" content="2026-01-01T00:00:00+00:00">
-    <meta property="og:title" content="Bloomly Blog - Mental Health Articles for Teens">
+    <meta property="og:title" content="Bloomly Blog | Mental Health Stories & Guides for Kenyan Youth">
     <meta property="og:description" content="Read helpful articles about teen mental health, self-care, and wellness tips.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://bloomly.co.ke/blog">
@@ -18,7 +18,7 @@
     <meta property="og:image:height" content="630">
     <meta property="og:image:alt" content="Bloomly Logo - Butterfly with golden glow and elegant text">
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-    <title>Blog - Bloomly</title>
+    <title>Bloomly Blog | Mental Health Stories & Guides for Kenyan Youth</title>
     
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -73,6 +73,12 @@
         <!-- Blog Category Navigation -->
         <section class="blog-category-panel" aria-label="Blog categories">
             <div class="container">
+                <div class="blog-search-wrap">
+                    <label class="blog-search-label" for="blogSearch">
+                        <span aria-hidden="true">⌕</span>
+                        <input id="blogSearch" type="search" placeholder="Search stories and guides..." data-blog-search>
+                    </label>
+                </div>
                 <nav class="blog-category-nav" data-blog-category-panel>
                     <!-- Categories injected by script -->
                 </nav>
@@ -87,6 +93,9 @@
                     <div style="text-align: center; padding: var(--space-2xl); color: var(--color-gray-600);">
                         <p>Loading blog posts...</p>
                     </div>
+                </div>
+                <div class="blog-load-more-wrap" data-blog-load-more-wrap hidden>
+                    <button type="button" class="btn btn-primary" data-blog-load-more>Load more</button>
                 </div>
             </div>
         </section>
