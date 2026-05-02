@@ -303,28 +303,25 @@
                 return '';
             }
             
+            const readTime = post.metadata?.readTime
+                || post.metadata?.read_time
+                || post.metadata?.readingTime
+                || post.metadata?.reading_time
+                || '';
+            const metaParts = [date, readTime].filter(Boolean).join(' • ');
+
             return `
-                <article class="blog-card fade-in" data-post-id="${slug}" data-category="${categorySlug}">
+                <article class="blog-card" data-post-id="${slug}" data-category="${categorySlug}">
                     <div class="blog-card-image" style="font-size: var(--text-5xl);">${emoji}</div>
                     <div class="blog-card-content">
-                        <div class="blog-card-date">${date} • ${category}</div>
+                        <div class="blog-card-date">${metaParts} • ${category}</div>
                         <h3>${post.metadata?.title || 'Untitled Post'}</h3>
-                        <p class="blog-card-excerpt">${post.metadata?.summary || ''}</p>
+                        <p class="excerpt blog-card-excerpt">${post.metadata?.summary || ''}</p>
                         <a href="${permalink}" class="blog-card-link">Read More →</a>
                     </div>
                 </article>
             `;
         }).join('');
-
-        // Trigger fade-in animations
-        setTimeout(() => {
-            const cards = blogGrid.querySelectorAll('.blog-card');
-            cards.forEach((card, index) => {
-                setTimeout(() => {
-                    card.classList.add('visible');
-                }, index * 100);
-            });
-        }, 100);
 
         const hasMore = filteredPosts.length > visiblePostCount;
         if (loadMoreWrap) {

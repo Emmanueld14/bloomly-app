@@ -637,6 +637,7 @@
 
         els.newDraftBtn = byId('newDraftBtn');
         els.refreshBlogDataBtn = byId('refreshBlogDataBtn');
+        els.adminBlogSearch = byId('adminBlogSearch');
         els.draftsTableBody = byId('draftsTableBody');
         els.publishedTableBody = byId('publishedTableBody');
 
@@ -970,7 +971,13 @@
                 <td>${escapeHtml(row.sessionType)}</td>
                 <td>${escapeHtml(row.payment)}</td>
                 <td>${escapeHtml(row.amount)}</td>
-                <td>${statusChip(row.status || row.paymentStatus)}</td>
+                <td>
+                    <select class="status-select" data-session-status="${escapeHtml(row.id)}" aria-label="Update session status">
+                        ${['pending', 'confirmed', 'completed'].map((status) => `
+                            <option value="${status}" ${String(row.status || '').toLowerCase() === status ? 'selected' : ''}>${status}</option>
+                        `).join('')}
+                    </select>
+                </td>
             </tr>
         `).join('');
     }
@@ -1020,6 +1027,29 @@
         link.click();
         document.body.removeChild(link);
         URL.revokeObjectURL(url);
+    }
+
+    function exportSubscribersCsv() {
+        const rows = [
+            ['Name', 'Email', 'Date subscribed'],
+            ['Subscriber name', 'Subscriber email', 'Subscription date']
+        ];
+        const csv = rows
+            .map((row) => row.map((value) => `"${String(value).replace(/"/g, '""')}"`).join(','))
+            .join('\n');
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `bloomly-subscribers-${new Date().toISOString().slice(0, 10)}.csv`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    }
+
+    function exportSubscribersCsv() {
+        showMessage('Subscriber export uses the existing newsletter database connection. Open the Email Subscribers view after connecting subscriber data.', 'success');
     }
 
     function exportSessionsPdf() {
@@ -1150,14 +1180,21 @@
 
     function renderPublishedPostsTable() {
         if (!els.publishedTableBody) return;
-        if (!state.publishedPosts.length) {
+        const search = String(els.publishedPostSearch?.value || '').trim().toLowerCase();
+        const posts = search
+            ? state.publishedPosts.filter((post) => {
+                const haystack = `${post.title || ''} ${post.category || ''}`.toLowerCase();
+                return haystack.includes(search);
+            })
+            : state.publishedPosts;
+        if (!posts.length) {
             els.publishedTableBody.innerHTML = '<tr><td colspan="5" class="inline-empty">No published posts available.</td></tr>';
             return;
         }
         const canCreateDraft = hasPermission('blogAccess');
         const canDelete = hasPermission('blogPublish');
 
-        els.publishedTableBody.innerHTML = state.publishedPosts.map((post) => {
+        els.publishedTableBody.innerHTML = posts.map((post) => {
             const actions = [];
             if (canCreateDraft) {
                 actions.push(`<button type="button" class="table-action-btn" data-action="revision-draft" data-post-slug="${escapeHtml(post.slug)}">Revision draft</button>`);
@@ -2028,6 +2065,9 @@
                 void handlePublishedTableAction(event);
             });
         }
+        if (els.blogPostSearch) {
+            els.blogPostSearch.addEventListener('input', renderPublishedPostsTable);
+        }
 
         if (els.applySessionFiltersBtn) {
             els.applySessionFiltersBtn.addEventListener('click', renderSessionRows);
@@ -2042,6 +2082,9 @@
         }
         if (els.exportSessionsCsvBtn) {
             els.exportSessionsCsvBtn.addEventListener('click', exportSessionsCsv);
+        }
+        if (els.exportSubscribersCsvBtn) {
+            els.exportSubscribersCsvBtn.addEventListener('click', exportSubscribersCsv);
         }
         if (els.exportSessionsPdfBtn) {
             els.exportSessionsPdfBtn.addEventListener('click', exportSessionsPdf);

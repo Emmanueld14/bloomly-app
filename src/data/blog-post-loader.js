@@ -187,6 +187,123 @@
         }
     }
 
+    function getPostTitle(post, fallbackSlug) {
+        return post?.metadata?.title || String(fallbackSlug || '').replace(/-/g, ' ') || 'Untitled Post';
+    }
+
+    function getPostPermalink(post) {
+        const slug = post.slug || post.metadata?.slug || (post.name ? post.name.replace(/\.md$/, '') : '');
+        return post.permalink || post.metadata?.permalink || `/blog-post?slug=${encodeURIComponent(slug)}`;
+    }
+
+    function escapeHtml(value) {
+        return String(value ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    function createPostCard(post) {
+        const title = escapeHtml(getPostTitle(post, post.slug));
+        const category = escapeHtml(post.metadata?.category || 'Mental Health');
+        const date = escapeHtml(formatDate(post.metadata?.date));
+        const summary = escapeHtml(post.metadata?.summary || '');
+        const emoji = escapeHtml(post.metadata?.emoji || '💙');
+        const body = post.body || summary;
+        const readTime = Math.max(1, Math.ceil(String(body || '').split(/\s+/).filter(Boolean).length / 200));
+        return `
+            <article class="blog-card related-post-card">
+                <div class="blog-card-image" style="font-size: var(--text-5xl);">${emoji}</div>
+                <div class="blog-card-content">
+                    <div class="blog-card-date">${date} • ${readTime} min read • ${category}</div>
+                    <h3>${title}</h3>
+                    <p class="blog-card-excerpt excerpt">${summary}</p>
+                    <a href="${getPostPermalink(post)}" class="blog-card-link">Read More →</a>
+                </div>
+            </article>
+        `;
+    }
+
+    function updateReadingProgress() {
+        const bar = document.querySelector('[data-reading-progress]');
+        const article = document.getElementById('articleBody');
+        if (!bar || !article) return;
+        const rect = article.getBoundingClientRect();
+        const scrollable = Math.max(1, rect.height - window.innerHeight + 160);
+        const progress = Math.min(1, Math.max(0, (0 - rect.top + 120) / scrollable));
+        bar.style.transform = `scaleX(${progress})`;
+    }
+
+    function initReadingProgress() {
+        updateReadingProgress();
+        window.addEventListener('scroll', updateReadingProgress, { passive: true });
+        window.addEventListener('resize', updateReadingProgress);
+    }
+
+    function renderShareSection(postTitle) {
+        const share = document.querySelector('[data-post-share]');
+        if (!share) return;
+        const pageUrl = window.location.href;
+        const encodedTitle = encodeURIComponent(postTitle);
+        const encodedUrl = encodeURIComponent(pageUrl);
+        share.innerHTML = `
+            <span>Share this:</span>
+            <a class="share-pill" href="https://wa.me/?text=${encodedTitle}%20${encodedUrl}" target="_blank" rel="noopener noreferrer">Share on WhatsApp</a>
+            <a class="share-pill" href="https://twitter.com/intent/tweet?text=${encodedTitle}&url=${encodedUrl}" target="_blank" rel="noopener noreferrer">Share on X</a>
+            <button type="button" class="share-pill" data-copy-link>Copy link</button>
+        `;
+        const copyButton = share.querySelector('[data-copy-link]');
+        if (copyButton) {
+            copyButton.addEventListener('click', async () => {
+                try {
+                    await navigator.clipboard.writeText(pageUrl);
+                    copyButton.textContent = 'Copied!';
+                    window.setTimeout(() => {
+                        copyButton.textContent = 'Copy link';
+                    }, 2000);
+                } catch (error) {
+                    copyButton.textContent = 'Copy failed';
+                    window.setTimeout(() => {
+                        copyButton.textContent = 'Copy link';
+                    }, 2000);
+                }
+            });
+        }
+    }
+
+    async function renderRelatedPosts(currentSlug, category) {
+        const section = document.querySelector('[data-related-posts-section]');
+        const grid = document.querySelector('[data-related-posts]');
+        if (!section || !grid) return;
+        try {
+            const posts = await blogAPI.listPosts();
+            const enriched = await Promise.all(posts.map(async (post) => {
+                try {
+                    const content = await blogAPI.getPost(post.slug);
+                    return { ...post, ...content };
+                } catch (error) {
+                    return post;
+                }
+            }));
+            const sameCategory = enriched.filter((post) =>
+                post.slug !== currentSlug &&
+                String(post.metadata?.category || '').toLowerCase() === String(category || '').toLowerCase()
+            );
+            const fallback = enriched.filter((post) => post.slug !== currentSlug);
+            const related = (sameCategory.length ? sameCategory : fallback).slice(0, 3);
+            if (!related.length) {
+                section.hidden = true;
+                return;
+            }
+            grid.innerHTML = related.map(createPostCard).join('');
+            section.hidden = false;
+        } catch (error) {
+            section.hidden = true;
+        }
+    }
+
     function isBlogPostRoot() {
         const path = window.location.pathname.replace(/\/+$/, '');
         return path === '/blog-post' || path.endsWith('/blog-post/index.html') || path.endsWith('/blog-post.html');
@@ -378,6 +495,11 @@
                 }
 
             }
+
+            renderShareSection(postTitle);
+            renderAuthorCard(postAuthor);
+            void renderRelatedPosts(slug, category);
+            initReadingProgress();
 
             logDebug(`Post loaded successfully: ${slug}`);
 

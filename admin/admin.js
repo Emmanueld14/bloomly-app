@@ -14,6 +14,7 @@
     const config = typeof GITHUB_CONFIG !== 'undefined' ? GITHUB_CONFIG : {};
     const supabaseConfig = typeof SUPABASE_CONFIG !== 'undefined' ? SUPABASE_CONFIG : {};
     let supabaseClient = null;
+    let cachedAdminPosts = [];
 
     function getAdminPassword() {
         return (sessionStorage.getItem(ADMIN_SESSION_KEY) || '').trim();
@@ -185,7 +186,9 @@
             });
         });
     }
-    
+
+    let cachedAdminPosts = [];
+
     // Initialize
     async function init() {
         console.log('Admin panel initializing...');
@@ -197,44 +200,44 @@
             console.log('Admin OAuth callback processed on /admin root.');
             return;
         }
-        
+
         // Check if user is logged in
         githubToken = sessionStorage.getItem('github_token');
         const userStr = sessionStorage.getItem('github_user');
-        
+
         if (githubToken && userStr) {
             githubUser = JSON.parse(userStr);
             verifyToken();
         } else {
             showAuth();
         }
-        
+
         // Event listeners
         const githubLoginBtn = document.getElementById('githubLoginBtn');
         if (githubLoginBtn) {
             githubLoginBtn.addEventListener('click', handleGitHubLogin);
         }
-        
+
         const logoutBtn = document.getElementById('logoutBtn');
         if (logoutBtn) {
             logoutBtn.addEventListener('click', handleLogout);
         }
-        
+
         const addPostBtn = document.getElementById('addPostBtn');
         if (addPostBtn) {
             addPostBtn.addEventListener('click', handleAddPost);
         }
-        
+
         const closeModalBtn = document.getElementById('closeModalBtn');
         if (closeModalBtn) {
             closeModalBtn.addEventListener('click', closeModal);
         }
-        
+
         const cancelBtn = document.getElementById('cancelBtn');
         if (cancelBtn) {
             cancelBtn.addEventListener('click', closeModal);
         }
-        
+
         const postForm = document.getElementById('postForm');
         if (postForm) {
             postForm.addEventListener('submit', handleSavePost);
@@ -264,7 +267,7 @@
         }
 
         initAdminShellNav();
-        
+
         // Close modal on outside click
         const postModal = document.getElementById('postModal');
         if (postModal) {
@@ -274,10 +277,10 @@
                 }
             });
         }
-        
+
         console.log('Admin panel initialized');
     }
-    
+
     function showAuth() {
         const authSection = document.getElementById('authSection');
         const unlockSection = document.getElementById('adminUnlockSection');
@@ -329,7 +332,7 @@
         setAdminPassword('');
         showAdminUnlock();
     }
-    
+
     // Verify token and load user info
     async function verifyToken() {
         try {
@@ -339,12 +342,12 @@
                     'Accept': 'application/vnd.github.v3+json'
                 }
             });
-            
+
             if (!response.ok) {
                 const errorText = await response.text();
                 throw new Error('Invalid token: ' + response.status + ' ' + errorText);
             }
-            
+
             githubUser = await response.json();
             // Store user info
             sessionStorage.setItem('github_user', JSON.stringify(githubUser));
@@ -360,7 +363,7 @@
             throw error;
         }
     }
-    
+
     function afterGitHubSessionReady() {
         if (getAdminPassword()) {
             showAdminApp();
@@ -417,6 +420,21 @@
 
     function isSupabaseReady() {
         return Boolean(supabaseClient && supabaseConfig.url && supabaseConfig.anonKey);
+    }
+
+    async function loadSubscriberSummary() {
+        const countEl = document.getElementById('classicSubscriberCount');
+        if (!countEl || !isSupabaseReady()) return;
+        try {
+            const { count, error } = await supabaseClient
+                .from('subscribers')
+                .select('*', { count: 'exact', head: true });
+            if (error) throw error;
+            countEl.textContent = String(count || 0);
+        } catch (error) {
+            console.warn('Unable to load subscriber count.', error);
+            countEl.textContent = '0';
+        }
     }
 
     function setEmailPostMessage(message, type) {
@@ -523,17 +541,17 @@
             }
         }
     }
-    
+
     // Handle GitHub login
     function handleGitHubLogin() {
         const clientId = config.clientId;
         const redirectUri = config.redirectUri || window.location.origin + '/admin/callback.html';
-        
+
         if (!clientId || clientId === 'YOUR_GITHUB_CLIENT_ID_HERE') {
             alert('GitHub OAuth is not configured. Please check admin/config.js');
             return;
         }
-        
+
         // If OAuth is needed again, return to the classic admin page.
         sessionStorage.setItem(POST_AUTH_REDIRECT_KEY, '/admin/');
 
@@ -541,7 +559,7 @@
         const authUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=repo`;
         window.location.href = authUrl;
     }
-    
+
     // Handle logout
     function handleLogout() {
         sessionStorage.removeItem('github_token');
@@ -551,83 +569,131 @@
         githubUser = null;
         showAuth();
     }
-    
+
     // Load blog posts using BlogAdmin API
     async function loadPosts() {
         const postsList = document.getElementById('postsList');
         postsList.innerHTML = '<div class="loading">Loading posts...</div>';
-        
+
         try {
             // Use BlogAdmin API for consistent data source
             const posts = await window.BlogAdmin.listPosts();
-            
-            // Render posts
-            if (posts.length === 0) {
-                postsList.innerHTML = '<p style="text-align: center; color: var(--color-gray-550);">No blog posts found.</p>';
-            } else {
-                postsList.innerHTML = posts.map(post => `
-                    <div class="post-item">
-                        <div class="post-info">
-                            <h3>${post.title || post.slug}</h3>
-                            <p>${formatDate(post.date)} • ${post.category || 'Uncategorized'}</p>
-                        </div>
-                        <div class="post-actions">
-                            <button class="btn-edit" onclick="editPost('${post.slug}', '${post.name}', ${JSON.stringify(post).replace(/"/g, '&quot;')})">Edit</button>
-                            <button class="btn-delete" onclick="deletePost('${post.slug}', '${post.name}')">Delete</button>
-                        </div>
-                    </div>
-                `).join('');
-            }
+
+            cachedAdminPosts = posts;
+            renderPostsTable(posts);
         } catch (error) {
             console.error('Error loading posts:', error);
             showError('Failed to load posts: ' + error.message);
             postsList.innerHTML = '<p style="text-align: center; color: var(--color-danger);">Error loading posts. Please try again.</p>';
         }
     }
-    
+
+    function renderPostsTable(posts) {
+        const postsList = document.getElementById('postsList');
+        if (!postsList) return;
+            if (posts.length === 0) {
+                postsList.innerHTML = '<p style="text-align: center; color: var(--color-gray-550);">No blog posts found.</p>';
+            } else {
+                postsList.innerHTML = `
+                    <div class="table-wrap">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Category</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${posts.map(post => {
+                                    const safePost = JSON.stringify(post)
+                                        .replace(/&/g, '&amp;')
+                                        .replace(/"/g, '&quot;')
+                                        .replace(/'/g, '&#39;');
+                                    const safeSlug = escapeAdminAttr(post.slug);
+                                    const safeName = escapeAdminAttr(post.name);
+                                    return `
+                                    <tr>
+                                        <td><button type="button" class="admin-title-button" onclick="editPost('${safeSlug}', '${safeName}', ${safePost})">${escapeAdminHtml(post.title || post.slug)}</button></td>
+                                        <td>${escapeAdminHtml(post.category || 'Uncategorized')}</td>
+                                        <td>${formatDate(post.date)}</td>
+                                        <td><span class="status-pill confirmed">Published</span></td>
+                                        <td>
+                                            <div class="post-actions">
+                                                <button class="btn-edit" onclick="editPost('${safeSlug}', '${safeName}', ${safePost})">Edit</button>
+                                                <button class="btn-delete" onclick="deletePost('${safeSlug}', '${safeName}')">Delete</button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                `;
+                                }).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            }
+    }
+
+    async function refreshSubscriberCount() {
+        const countEl = document.getElementById('classicSubscriberCount');
+        if (!countEl || !isSupabaseReady()) return;
+        try {
+            const { count, error } = await supabaseClient
+                .from('subscribers')
+                .select('*', { count: 'exact', head: true });
+            if (!error && typeof count === 'number') {
+                countEl.textContent = String(count);
+            }
+        } catch (error) {
+            console.warn('Unable to load subscriber count.', error);
+        }
+    }
+
     // Parse frontmatter from markdown
     function parseFrontmatter(content) {
         const frontmatterRegex = /^---\s*\n([\s\S]*?)\n---\s*\n([\s\S]*)$/;
         const match = content.match(frontmatterRegex);
-        
+
         if (!match) {
             return { title: '', date: new Date().toISOString(), category: '', summary: '', emoji: '', content: content };
         }
-        
+
         const frontmatter = match[1];
         const body = match[2];
         const metadata = {};
-        
+
         frontmatter.split('\n').forEach(line => {
             const colonIndex = line.indexOf(':');
             if (colonIndex > 0) {
                 const key = line.substring(0, colonIndex).trim();
                 let value = line.substring(colonIndex + 1).trim();
-                if ((value.startsWith('"') && value.endsWith('"')) || 
+                if ((value.startsWith('"') && value.endsWith('"')) ||
                     (value.startsWith("'") && value.endsWith("'"))) {
                     value = value.slice(1, -1);
                 }
                 metadata[key] = value;
             }
         });
-        
+
         return {
             ...metadata,
             content: body
         };
     }
-    
+
     // Format date
     function formatDate(dateString) {
         if (!dateString) return 'No date';
         const date = new Date(dateString);
-        return date.toLocaleDateString('en-US', { 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric' 
+        return date.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
         });
     }
-    
+
     // Show error message
     function showError(message) {
         const errorDiv = document.getElementById('errorMessage');
@@ -642,7 +708,7 @@
             alert(message);
         }
     }
-    
+
     // Show success message
     function showSuccess(message) {
         const successDiv = document.getElementById('successMessage');
@@ -742,7 +808,7 @@
             return { ok: false, message: 'Failed to notify subscribers.' };
         }
     }
-    
+
     // Handle add post
     function handleAddPost() {
         document.getElementById('modalTitle').textContent = 'Add New Post';
@@ -758,49 +824,49 @@
         document.getElementById('postContent').value = '';
         document.getElementById('postModal').classList.add('active');
     }
-    
+
     // Edit post
     window.editPost = function(slug, fileName, postData) {
         try {
             const post = typeof postData === 'string' ? JSON.parse(postData.replace(/&quot;/g, '"')) : postData;
-            
+
             document.getElementById('modalTitle').textContent = 'Edit Post';
             document.getElementById('isNewPost').value = 'false';
             document.getElementById('postSlug').value = slug;
             document.getElementById('postFileName').value = fileName;
             document.getElementById('postTitle').value = post.title || '';
-            
+
             // Format date for datetime-local input
             const postDate = post.date ? new Date(post.date).toISOString().slice(0, 16) : new Date().toISOString().slice(0, 16);
             document.getElementById('postDate').value = postDate;
-            
+
             document.getElementById('postCategory').value = post.category || 'Mental Health';
             document.getElementById('postAuthor').value = post.author || githubUser?.name || githubUser?.login || '';
             document.getElementById('postSummary').value = post.summary || '';
             document.getElementById('postEmoji').value = post.emoji || '💙';
             document.getElementById('postContent').value = post.content || '';
-            
+
             document.getElementById('postModal').classList.add('active');
         } catch (error) {
             console.error('Error editing post:', error);
             showError('Failed to load post data');
         }
     };
-    
+
     // Close modal
     function closeModal() {
         document.getElementById('postModal').classList.remove('active');
     }
-    
+
     // Handle save post with verification
     async function handleSavePost(e) {
         e.preventDefault();
-        
+
         const saveBtn = document.getElementById('savePostBtn');
         const originalText = saveBtn.textContent;
         saveBtn.textContent = 'Saving...';
         saveBtn.disabled = true;
-        
+
         try {
             const formData = new FormData(e.target);
             const isNew = formData.get('isNew') === 'true';
@@ -815,7 +881,7 @@
             if (!String(author || '').trim()) {
                 throw new Error('Author name is required.');
             }
-            
+
             // Use BlogAdmin API for save operation
             const result = await window.BlogAdmin.savePost({
                 slug,
@@ -827,13 +893,13 @@
                 emoji,
                 content
             }, isNew);
-            
+
             // Verify operation succeeded
             saveBtn.textContent = 'Verifying...';
-            
+
             // Wait a moment for GitHub to propagate
             await new Promise(resolve => setTimeout(resolve, 1000));
-            
+
             // Reload posts to confirm
             await loadPosts();
 
@@ -855,7 +921,7 @@
                 showError(publishResult.message || 'Post saved, but failed to sync.');
             }
             closeModal();
-            
+
         } catch (error) {
             console.error('Error saving post:', error);
             showError('Failed to save post: ' + error.message);
@@ -864,13 +930,13 @@
             saveBtn.disabled = false;
         }
     }
-    
+
     // Delete post with verification
     window.deletePost = async function(slug, fileName) {
         if (!confirm(`Are you sure you want to delete "${slug}"? This action cannot be undone.`)) {
             return;
         }
-        
+
         // Find and disable the delete button
         const deleteButtons = document.querySelectorAll('.btn-delete');
         deleteButtons.forEach(btn => {
@@ -879,11 +945,11 @@
                 btn.disabled = true;
             }
         });
-        
+
         try {
             // Use BlogAdmin API for delete operation
             const result = await window.BlogAdmin.deletePost(slug, fileName);
-            
+
             // Optimistically remove from UI immediately
             const postsList = document.getElementById('postsList');
             const postItems = postsList.querySelectorAll('.post-item');
@@ -897,19 +963,19 @@
                     }, 300);
                 }
             });
-            
+
             // Wait for GitHub to propagate
             await new Promise(resolve => setTimeout(resolve, 1000));
-            
+
             // Reload to verify deletion
             await loadPosts();
-            
+
             showSuccess('Post deleted successfully! Verified and removed from all sources.');
-            
+
         } catch (error) {
             console.error('Error deleting post:', error);
             showError('Failed to delete post: ' + error.message);
-            
+
             // Re-enable buttons
             deleteButtons.forEach(btn => {
                 if (btn.disabled) {
@@ -917,12 +983,12 @@
                     btn.disabled = false;
                 }
             });
-            
+
             // Reload to show current state
             loadPosts();
         }
     };
-    
+
     // Slugify function
     function slugify(text) {
         return text
@@ -932,7 +998,7 @@
             .replace(/-+/g, '-')
             .trim();
     }
-    
+
     // Initialize when DOM is ready
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', init);

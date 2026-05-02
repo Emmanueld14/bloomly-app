@@ -811,9 +811,10 @@
                 <p>Classic admin</p>
             </div>
             <nav id="adminSidebarNav" class="sidebar-nav" aria-label="Admin sections">
-                <button type="button" class="sidebar-link is-active" data-admin-panel="blog" data-title="Blog posts" data-subtitle="Create and edit posts via GitHub">Blog posts</button>
-                <button type="button" class="sidebar-link" data-admin-panel="email" data-title="Email subscribers" data-subtitle="Notify subscribers about a post">Email subscribers</button>
-                <button type="button" class="sidebar-link" data-admin-panel="charla" data-title="Charla bookings" data-subtitle="Availability, pricing, and blackout days">Charla</button>
+                <button type="button" class="sidebar-link is-active" data-admin-panel="overview" data-title="Dashboard overview" data-subtitle="Real counts from the admin workspace">📊 Dashboard</button>
+                <button type="button" class="sidebar-link" data-admin-panel="blog" data-title="Blog posts" data-subtitle="Create and edit posts via GitHub">📝 Blog Posts</button>
+                <button type="button" class="sidebar-link" data-admin-panel="email" data-title="Email subscribers" data-subtitle="Notify subscribers about a post">📧 Email Subscribers</button>
+                <button type="button" class="sidebar-link" data-admin-panel="charla" data-title="Charla bookings" data-subtitle="Calendly booking reference and legacy settings">📅 Charla Bookings</button>
             </nav>
             <div class="sidebar-user">
                 <img id="sidebarUserAvatar" class="sidebar-user-avatar" alt="" src="" width="44" height="44">
@@ -848,7 +849,13 @@
             <div id="successMessage" class="success" style="display: none;"></div>
 
             <div id="panel-blog" class="admin-panel is-active" data-admin-panel-target="blog">
-                <button class="add-post-btn" id="addPostBtn">+ Add New Post</button>
+                <div class="classic-admin-toolbar">
+                    <label class="admin-search-field">
+                        <span>Search posts</span>
+                        <input type="search" id="classicPostSearch" placeholder="Filter by title or category">
+                    </label>
+                    <button class="add-post-btn" id="addPostBtn">+ Add New Post</button>
+                </div>
                 <div id="postsList" class="posts-list">
                     <div class="loading">Loading posts...</div>
                 </div>
@@ -857,6 +864,11 @@
             <div id="panel-email" class="admin-panel" data-admin-panel-target="email">
                 <div class="email-update-section">
                     <h3>Email subscribers about a new post</h3>
+                    <div class="subscriber-count-card">
+                        <span>Total subscribers</span>
+                        <strong id="classicSubscriberCount">0</strong>
+                    </div>
+                    <button type="button" class="btn btn-neutral btn-sm" id="classicExportSubscribersBtn">Export CSV</button>
                     <p>Send an email update when a new blog post is published. Uses the admin password you entered at unlock.</p>
                     <form id="emailPostForm">
                         <div class="form-group">
@@ -883,6 +895,10 @@
             </div>
 
             <div id="panel-charla" class="admin-panel" data-admin-panel-target="charla">
+                <div class="calendly-admin-note">
+                    New bookings are managed in Calendly. This table shows manually logged sessions.
+                    <a href="https://calendly.com/" target="_blank" rel="noopener noreferrer">Open Calendly dashboard</a>
+                </div>
                 <div class="appointments-admin-section" id="appointmentsAdminSection" style="margin-top: 0; padding-top: 0; border-top: none;">
                     <h2>Charla</h2>
                     <p>Control booking availability, pricing, and blackout days.</p>

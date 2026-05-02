@@ -10,7 +10,7 @@
 
 body {
     margin: 0;
-    background: linear-gradient(180deg, var(--color-white) 0%, var(--color-page-bg) 100%);
+    background: #f8f8f8;
 }
 
 [hidden] {
@@ -88,8 +88,8 @@ body {
 }
 
 .admin-sidebar {
-    border-right: 1px solid var(--admin-border);
-    background: rgba(var(--color-white-rgb), 0.96);
+    border-right: 1px solid rgba(var(--color-white-rgb), 0.08);
+    background: #1a1a2e;
     padding: var(--space-lg);
     position: sticky;
     top: 0;
@@ -102,15 +102,12 @@ body {
 .sidebar-brand h2 {
     margin: 0;
     font-size: var(--text-2xl);
-    background: var(--gradient-primary);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: var(--color-white);
 }
 
 .sidebar-brand p {
     margin: 0;
-    color: var(--admin-muted);
+    color: rgba(var(--color-white-rgb), 0.62);
     font-size: var(--text-sm);
 }
 
@@ -125,23 +122,24 @@ body {
     border-radius: var(--radius-md);
     text-align: left;
     padding: 0.65rem 0.7rem;
-    color: var(--color-text);
+    color: rgba(var(--color-white-rgb), 0.78);
     cursor: pointer;
     font-weight: 600;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    transition: transform var(--transition-fast), background var(--transition-fast), border-color var(--transition-fast);
+    transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
 }
 
 .sidebar-link:hover {
-    transform: translateX(2px);
-    background: rgba(var(--color-blue-rgb), 0.08);
+    background: rgba(var(--color-white-rgb), 0.1);
+    color: var(--color-white);
 }
 
 .sidebar-link.is-active {
-    background: rgba(var(--color-blue-rgb), 0.13);
-    border-color: rgba(var(--color-blue-rgb), 0.28);
+    background: linear-gradient(135deg, var(--color-pink), var(--color-lilac));
+    border-color: transparent;
+    color: var(--color-white);
 }
 
 .nav-badge {
@@ -159,7 +157,7 @@ body {
     grid-template-columns: 44px minmax(0, 1fr);
     gap: var(--space-sm);
     align-items: center;
-    border-top: 1px solid var(--admin-border);
+    border-top: 1px solid rgba(var(--color-white-rgb), 0.12);
     padding-top: var(--space-md);
 }
 
@@ -182,8 +180,12 @@ body {
 }
 
 .sidebar-user-copy span {
-    color: var(--admin-muted);
+    color: rgba(var(--color-white-rgb), 0.62);
     font-size: var(--text-sm);
+}
+
+.sidebar-user-copy strong {
+    color: var(--color-white);
 }
 
 .admin-main {
@@ -287,6 +289,18 @@ body {
     box-shadow: 0 10px 22px rgba(var(--color-black-rgb), 0.06);
 }
 
+.metric-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: var(--radius-md);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--gradient-primary);
+    color: var(--color-white);
+    margin-bottom: var(--space-sm);
+}
+
 .metric-card p {
     margin: 0 0 0.2rem 0;
     color: var(--admin-muted);
@@ -356,6 +370,27 @@ body {
     flex-wrap: wrap;
 }
 
+.admin-filter-input {
+    width: min(360px, 100%);
+    border: 1px solid rgba(var(--color-black-rgb), 0.1);
+    border-radius: var(--radius-full);
+    padding: 0.65rem 1rem;
+    font: inherit;
+    background: var(--color-white);
+}
+
+.admin-note-card {
+    border-radius: var(--radius-lg);
+    background: linear-gradient(135deg, rgba(var(--color-pink-rgb), 0.08), rgba(var(--color-lilac-rgb), 0.12));
+    border: 1px solid rgba(var(--color-pink-rgb), 0.16);
+    padding: var(--space-md);
+}
+
+.admin-note-card p {
+    margin: 0;
+    color: var(--color-gray-600);
+}
+
 .panel-headline h3 {
     margin: 0 0 0.2rem 0;
 }
@@ -393,6 +428,10 @@ body {
     letter-spacing: 0.03em;
 }
 
+.admin-table tbody tr:nth-child(even) {
+    background: rgba(var(--color-black-rgb), 0.018);
+}
+
 .status-chip {
     display: inline-flex;
     align-items: center;
@@ -412,6 +451,16 @@ body {
 .status-chip.in_review {
     background: rgba(var(--color-pink-rgb), 0.15);
     color: var(--color-pink-strong);
+}
+
+.status-chip.pending {
+    background: rgba(245, 158, 11, 0.16);
+    color: #9a5b00;
+}
+
+.status-chip.completed {
+    background: rgba(var(--color-black-rgb), 0.08);
+    color: var(--color-gray-600);
 }
 
 .status-chip.approved,
@@ -478,6 +527,33 @@ body {
     font-family: var(--font-primary);
     font-size: var(--text-sm);
     background: rgba(var(--color-white-rgb), 0.99);
+}
+
+.admin-search-field {
+    grid-column: 1 / -1;
+}
+
+.subscriber-count-card,
+.calendly-admin-note {
+    margin-bottom: var(--space-md);
+    border-radius: var(--radius-lg);
+    border: 1px solid rgba(var(--color-black-rgb), 0.08);
+    background: rgba(var(--color-white-rgb), 0.98);
+    box-shadow: 0 10px 22px rgba(var(--color-black-rgb), 0.06);
+    padding: var(--space-md);
+}
+
+.subscriber-count-card h3 {
+    margin: 0;
+    font-size: clamp(1.8rem, 3vw, 2.6rem);
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.calendly-admin-note {
+    background: linear-gradient(135deg, rgba(var(--color-pink-rgb), 0.08), rgba(var(--color-lilac-rgb), 0.14));
 }
 
 .full-width {

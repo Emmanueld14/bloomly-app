@@ -44,8 +44,16 @@
             </button>
         </div>
     </nav>
+    <div class="reading-progress" aria-hidden="true">
+        <div class="reading-progress-bar" data-reading-progress></div>
+    </div>
 
     <main class="post-page">
+        <div class="post-breadcrumb">
+            <div class="container">
+                <a href="/blog">← Back to Blog</a>
+            </div>
+        </div>
         <section class="section" data-blog-list-fallback hidden>
             <div class="container">
                 <div class="section-header">
@@ -81,7 +89,7 @@
             <!-- Article Header -->
             <section class="article-header">
                 <div class="container">
-                    <a href="/blog" class="back-button">← Back to Blog</a>
+                    <a href="/blog" class="back-button ghost-pill">← Back to Blog</a>
                     <h1 id="articleTitle">Loading...</h1>
                     <div class="article-meta" id="articleMeta">
                         <span>Loading...</span>
@@ -92,11 +100,44 @@
             <!-- Article Content -->
             <article class="article-content">
                 <div class="container">
-                    <div id="articleBody" style="max-width: 800px; margin: 0 auto;">
+                    <div id="articleBody" class="article-body">
                         <p>Loading article...</p>
                     </div>
                 </div>
             </article>
+
+            <section class="post-share-section">
+                <div class="container">
+                    <div class="post-share-row" data-post-share>
+                        <span>Share this:</span>
+                        <a class="share-pill" data-share-whatsapp target="_blank" rel="noopener noreferrer">Share on WhatsApp</a>
+                        <a class="share-pill" data-share-x target="_blank" rel="noopener noreferrer">Share on X</a>
+                        <button type="button" class="share-pill" data-share-copy>Copy link</button>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section related-posts-section" data-related-posts-section hidden>
+                <div class="container">
+                    <div class="section-header">
+                        <h2>More like this</h2>
+                    </div>
+                    <div class="blog-grid" data-related-posts></div>
+                </div>
+            </section>
+
+            <section class="author-card-section">
+                <div class="container">
+                    <article class="author-card">
+                        <img src="/images/team/manuel-muhunami-display-smooth-20260407.webp?v=1" alt="Manuel Muhunami portrait" loading="lazy" decoding="async">
+                        <div>
+                            <h2>Manuel Muhunami</h2>
+                            <p class="author-title">Founder &amp; Lead Builder</p>
+                            <p><mark>[PLACEHOLDER: write your author bio here]</mark></p>
+                        </div>
+                    </article>
+                </div>
+            </section>
 
         </div>
     </main>
@@ -127,7 +168,7 @@
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>&copy; 2025 Bloomly. All rights reserved. Your privacy and safety are our top priorities.</p>
+                <p>&copy; 2026 Bloomly. All rights reserved. Your privacy and safety are our top priorities.</p>
             </div>
         </div>
     </footer>

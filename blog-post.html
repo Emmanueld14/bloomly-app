@@ -54,7 +54,12 @@
         </div>
     </nav>
 
+    <div class="reading-progress" data-reading-progress aria-hidden="true"></div>
+
     <main class="post-page">
+        <div class="post-breadcrumb container">
+            <a href="/blog">← Back to Blog</a>
+        </div>
         <section class="section" data-blog-list-fallback hidden>
             <div class="container">
                 <div class="section-header">
@@ -101,11 +106,39 @@
             <!-- Article Content -->
             <article class="article-content">
                 <div class="container">
-                    <div id="articleBody" style="max-width: 800px; margin: 0 auto;">
+                    <div id="articleBody" class="article-body">
                         <p>Loading article...</p>
                     </div>
                 </div>
             </article>
+
+            <section class="post-share-section">
+                <div class="container">
+                    <div class="post-share-row" data-post-share hidden></div>
+                </div>
+            </section>
+
+            <section class="section related-posts-section" aria-labelledby="related-posts-title">
+                <div class="container">
+                    <div class="section-header">
+                        <h2 id="related-posts-title">More like this</h2>
+                    </div>
+                    <div class="blog-grid related-posts-grid" data-related-posts></div>
+                </div>
+            </section>
+
+            <section class="author-card-section">
+                <div class="container">
+                    <article class="author-card">
+                        <img src="/images/team/manuel-muhunami-display-smooth-20260407.webp?v=1" alt="Manuel Muhunami" loading="lazy" width="96" height="96">
+                        <div>
+                            <h2>Manuel Muhunami</h2>
+                            <p class="author-title">Founder &amp; Lead Builder</p>
+                            <p><mark>[PLACEHOLDER: write your author bio here]</mark></p>
+                        </div>
+                    </article>
+                </div>
+            </section>
 
         </div>
     </main>
@@ -132,7 +165,7 @@
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>&copy; 2025 Bloomly. All rights reserved. Your privacy and safety are our top priorities.</p>
+                <p>&copy; 2026 Bloomly. All rights reserved. Your privacy and safety are our top priorities.</p>
             </div>
         </div>
     </footer>

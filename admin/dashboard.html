@@ -31,25 +31,26 @@
     <main class="admin-app-shell" id="adminShell" hidden>
         <aside class="admin-sidebar">
             <div class="sidebar-brand">
+                <img src="/logo.svg" alt="Bloomly logo" class="sidebar-brand-logo">
                 <h2>Bloomly</h2>
                 <p>Admin workspace</p>
             </div>
             <nav class="sidebar-nav" id="sidebarNav" aria-label="Admin sections">
                 <button type="button" class="sidebar-link is-active" data-view="dashboard">
-                    <span>Dashboard</span>
+                    <span>📊 Dashboard</span>
                 </button>
                 <button type="button" class="sidebar-link" data-view="blogs">
-                    <span>Blog Management</span>
+                    <span>📝 Blog Posts</span>
                     <span class="nav-badge" id="blogReviewBadge" hidden>0</span>
                 </button>
                 <button type="button" class="sidebar-link" data-view="sessions">
-                    <span>Charla Records</span>
+                    <span>📅 Charla Bookings</span>
                 </button>
                 <button type="button" class="sidebar-link" data-view="reports">
-                    <span>Employee Reports</span>
+                    <span>📋 Employee Reports</span>
                 </button>
                 <button type="button" class="sidebar-link" data-view="permissions">
-                    <span>User Permissions</span>
+                    <span>🔐 User Permissions</span>
                 </button>
             </nav>
             <div class="sidebar-user">
@@ -83,18 +84,22 @@
             <section class="admin-view is-active" id="view-dashboard" data-view-panel="dashboard">
                 <div class="metric-grid">
                     <article class="metric-card">
+                        <span class="metric-icon">📝</span>
                         <p>Published blog posts</p>
                         <h2 id="metricPublishedPosts">0</h2>
                     </article>
                     <article class="metric-card">
+                        <span class="metric-icon">📄</span>
                         <p>Drafts pending review</p>
                         <h2 id="metricPendingDrafts">0</h2>
                     </article>
                     <article class="metric-card">
+                        <span class="metric-icon">📅</span>
                         <p>Confirmed Charla sessions</p>
                         <h2 id="metricConfirmedSessions">0</h2>
                     </article>
                     <article class="metric-card">
+                        <span class="metric-icon">📋</span>
                         <p>Reports submitted</p>
                         <h2 id="metricReportsTotal">0</h2>
                     </article>
@@ -124,10 +129,14 @@
                 <div class="toolbar-row">
                     <h2>Blog workflow</h2>
                     <div class="toolbar-actions">
-                        <button type="button" class="btn btn-primary btn-sm" id="newDraftBtn">New draft</button>
+                        <button type="button" class="btn btn-primary btn-sm" id="newDraftBtn">+ Add New Post</button>
                         <button type="button" class="btn btn-neutral btn-sm" id="refreshBlogDataBtn">Refresh blog data</button>
                     </div>
                 </div>
+                <label class="admin-search-bar">
+                    <span>Search posts</span>
+                    <input type="search" id="adminBlogSearch" placeholder="Filter by title or category">
+                </label>
 
                 <article class="admin-panel">
                     <div class="panel-headline">
@@ -163,10 +172,10 @@
                         <table class="admin-table" aria-label="Published blog posts table">
                             <thead>
                                 <tr>
-                                    <th>Post</th>
+                                    <th>Title</th>
                                     <th>Category</th>
-                                    <th>Author</th>
                                     <th>Date</th>
+                                    <th>Status</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -182,12 +191,13 @@
 
             <section class="admin-view" id="view-sessions" data-view-panel="sessions">
                 <div class="toolbar-row">
-                    <h2>Charla session records & payment tracking</h2>
+                    <h2>Charla Bookings</h2>
                     <div class="toolbar-actions">
                         <button type="button" class="btn btn-neutral btn-sm" id="exportSessionsCsvBtn">Export CSV</button>
                         <button type="button" class="btn btn-secondary btn-sm" id="exportSessionsPdfBtn">Export PDF</button>
                     </div>
                 </div>
+                <p class="admin-calendly-note">New bookings are managed in Calendly. This table shows manually logged sessions. <a href="https://calendly.com/" target="_blank" rel="noopener noreferrer">Open Calendly dashboard</a>.</p>
 
                 <article class="admin-panel">
                     <div class="filters-grid">
@@ -229,6 +239,7 @@
                 </article>
 
                 <article class="admin-panel">
+                    <p class="admin-note">New bookings are managed in Calendly. This table shows manually logged sessions. <a href="https://calendly.com/" target="_blank" rel="noopener noreferrer">Open Calendly dashboard</a>.</p>
                     <div class="table-wrap">
                         <table class="admin-table" aria-label="Charla session and payment records table">
                             <thead>
