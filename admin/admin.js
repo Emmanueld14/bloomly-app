@@ -187,8 +187,6 @@
         });
     }
 
-    let cachedAdminPosts = [];
-
     // Initialize
     async function init() {
         console.log('Admin panel initializing...');

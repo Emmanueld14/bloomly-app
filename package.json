@@ -16,8 +16,5 @@
     "bloomly"
   ],
   "author": "Bloomly",
-  "license": "MIT",
-  "devDependencies": {
-    "serve": "^14.2.1"
-  }
+  "license": "MIT"
 }

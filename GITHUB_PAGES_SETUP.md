@@ -93,7 +93,7 @@ Use both apex domain and www subdomain:
 ### Blog Post Routing
 - Blog posts are accessed via: `/blog-post.html?slug=post-name`
 - The `blog-loader.js` automatically converts `/blog/[slug]` links to use query parameters
-- This works seamlessly with GitHub Pages
+- This works with GitHub Pages
 
 ### Admin CMS
 - Access at: `/admin/index.html` or `/admin/`
