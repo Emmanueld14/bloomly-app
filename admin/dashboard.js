@@ -797,7 +797,7 @@
     async function handleGitHubLogin() {
         const clientId = githubConfig.clientId;
         const redirectUri = githubConfig.redirectUri || `${window.location.origin}/admin/callback.html`;
-        if (!clientId || clientId === 'YOUR_GITHUB_CLIENT_ID_HERE') {
+        if (!clientId) {
             showAuthScreen('GitHub OAuth is not configured. Update admin/config.js.');
             return;
         }

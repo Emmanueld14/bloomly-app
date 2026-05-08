@@ -303,7 +303,13 @@ class BlogAPI {
                     (value.startsWith("'") && value.endsWith("'"))) {
                     value = value.slice(1, -1);
                 }
-                metadata[key] = value;
+                if (value === 'true') {
+                    metadata[key] = true;
+                } else if (value === 'false') {
+                    metadata[key] = false;
+                } else {
+                    metadata[key] = value;
+                }
             }
         });
 

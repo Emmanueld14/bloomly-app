@@ -530,6 +530,13 @@
                 const subscribeLink = Array.from(section.querySelectorAll('a')).find((link) => link.textContent.trim() === 'Subscribe');
                 section.insertBefore(charlaLink, subscribeLink || null);
             }
+
+            if (headingText === 'quick links' && !Array.from(section.querySelectorAll('a')).some((link) => link.textContent.trim() === 'Terms & Conditions')) {
+                const termsLink = document.createElement('a');
+                termsLink.href = '/terms';
+                termsLink.textContent = 'Terms & Conditions';
+                section.appendChild(termsLink);
+            }
         });
     }
 
@@ -561,7 +568,7 @@
     }
 
     // ========== Supabase Setup ==========
-    // Replace these placeholders with your Supabase project credentials.
+    // Public Supabase credentials for browser features.
     const SUPABASE_URL = 'https://xmhyjttyarskimsxcfhl.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_IOs-j6rgWuDnwrymIIUHxQ_wCTmcaMp';
 
@@ -1714,6 +1721,7 @@
         forms.forEach(form => {
             const emailInput = form.querySelector('input[name="email"]');
             const nameInput = form.querySelector('input[name="name"]');
+            const termsInput = form.querySelector('input[name="terms"]');
             const messageEl = form.querySelector('[data-newsletter-message]');
             const submitButton = form.querySelector('button[type="submit"]');
             if (!emailInput) return;
@@ -1730,6 +1738,12 @@
                 if (!isValidEmail(email)) {
                     setFormMessage(messageEl, 'Please enter a valid email address.', 'error');
                     emailInput.focus();
+                    return;
+                }
+
+                if (termsInput && !termsInput.checked) {
+                    setFormMessage(messageEl, 'Please agree to the Terms & Conditions before subscribing.', 'error');
+                    termsInput.focus();
                     return;
                 }
 
@@ -1871,13 +1885,13 @@
             image: '/images/team/manuel-muhunami-display-smooth-20260407.webp?v=1',
             accent: 'sage',
             details: [
-                'Vision & Strategy',
-                'Product Leadership',
-                'Partnerships & Growth',
-                'Innovation & Debate'
+                'Product building',
+                'Writing',
+                'Youth listening',
+                'Debate'
             ],
-            panelSummary: 'Guides Bloomly\'s direction with care, clarity, and bold ideas.',
-            summary: 'Builds Bloomly\'s vision and the systems that help teens feel seen.',
+            panelSummary: 'Keeps Bloomly focused on honest writing, safer support, and careful product work.',
+            summary: 'Builds Bloomly and writes for young people who need a calmer place to think.',
             story: `I used to think growing up would feel like becoming more certain.
 
 Instead, it felt like losing pieces of myself I didn't even realize I needed.
@@ -1940,46 +1954,47 @@ And maybe I can't change the whole world.
 But I can start by being honest about my own story.`,
             bio: 'Manuel builds Bloomly at the intersection of technology, writing, and debate.',
             work: {
-                summary: 'Manuel shapes Bloomly\'s long-term vision and the partnerships that keep the community thriving.',
+                summary: 'Manuel shapes Bloomly\'s product, writing, and support standards.',
                 highlights: [
-                    'Sets the product roadmap and community values.',
-                    'Builds partnerships with schools and youth advocates.',
-                    'Keeps Bloomly rooted in empathy, safety, and belonging.'
+                    'Plans the product roadmap.',
+                    'Reviews the tone and safety of public content.',
+                    'Keeps user trust at the center of the work.'
                 ]
             },
             values: [
-                'Build systems that outlast hype.',
-                'Curiosity before certainty.',
-                'Teen voices should lead.',
-                'Conversation creates empathy.',
-                'Think long-term and ship responsibly.'
+                'Build what helps people feel less alone.',
+                'Listen before deciding.',
+                'Let teen voices shape the work.',
+                'Protect trust in small details.',
+                'Ship carefully.'
             ],
             links: [
                 { label: 'LinkedIn', url: 'https://www.linkedin.com/in/manuel-muhunami' },
                 { label: 'Portfolio', url: 'https://www.behance.net/manuel-muhunami' }
             ],
+            // TODO: Add Manuel's preferred public email link when the owner confirms it.
             skills: [
-                'Leadership',
-                'Vision Strategy',
-                'Product Direction',
-                'Community Building',
-                'Partnership Growth'
+                'Product building',
+                'Writing',
+                'Community listening',
+                'Youth mental wellness',
+                'Debate'
             ],
             projects: [
                 {
-                    title: 'Bloomly Platform Blueprint',
-                    description: 'A long-term roadmap that anchors Bloomly around teen-centered care.',
+                    title: 'Bloomly product plan',
+                    description: 'A practical roadmap for the blog, Charla booking, and safety features.',
                     icon: '🗺️',
                     link: 'https://bloomly.co.ke'
                 },
                 {
-                    title: 'Builder Notes',
+                    title: 'Builder notes',
                     description: 'Essays and reflections that connect technology, culture, and youth voice.',
                     icon: '📓'
                 },
                 {
-                    title: 'Community Partnerships',
-                    description: 'Collaborations with schools and youth groups to expand care and access.',
+                    title: 'Youth listening',
+                    description: 'Conversations that help Bloomly understand what young people actually need.',
                     icon: '🤝'
                 }
             ],
@@ -2055,12 +2070,26 @@ But I can start by being honest about my own story.`,
         summary.className = 'bloomly-team-summary';
         summary.textContent = member.summary || member.panelSummary || '';
 
+        const socialLinks = document.createElement('div');
+        socialLinks.className = 'bloomly-team-social-links';
+        if (Array.isArray(member.links) && member.links.length) {
+            member.links.forEach((linkData) => {
+                const social = document.createElement('a');
+                social.href = linkData.url;
+                social.target = '_blank';
+                social.rel = 'noopener noreferrer';
+                social.textContent = linkData.label;
+                socialLinks.appendChild(social);
+            });
+        }
+
         const link = document.createElement('a');
         link.className = 'bloomly-team-link';
         link.href = buildTeamProfileHref(member);
         link.textContent = 'View Profile';
 
         info.append(eyebrow, name, role, summary);
+        info.appendChild(socialLinks);
         info.appendChild(link);
         core.append(avatar, info);
         card.appendChild(core);
@@ -2204,12 +2233,12 @@ But I can start by being honest about my own story.`,
         card.className = 'glass-card team-profile-card team-profile-notice';
 
         const message = document.createElement('p');
-        message.textContent = 'We could not find this profile. Please return to the team page to meet the team.';
+        message.textContent = 'We could not find this profile. Please return to the About page.';
 
         const link = document.createElement('a');
         link.className = 'btn btn-primary';
         link.href = '/about.html';
-        link.textContent = 'Back to Team Page';
+        link.textContent = 'Back to About';
 
         card.append(message, link);
         wrapper.appendChild(card);
@@ -2239,10 +2268,10 @@ But I can start by being honest about my own story.`,
         card.className = 'team-profile-contact-card profile-contact-card';
 
         const title = document.createElement('h2');
-        title.textContent = 'Return to Bloomly';
+        title.textContent = 'Contact and links';
 
         const copy = document.createElement('p');
-        copy.textContent = 'Explore the rest of the team or head back to the main site.';
+        copy.textContent = 'Use Manuel\'s verified public links below.';
 
         const actions = document.createElement('div');
         actions.className = 'team-profile-contact-actions';
@@ -2250,7 +2279,7 @@ But I can start by being honest about my own story.`,
         const returnLink = document.createElement('a');
         returnLink.className = 'btn btn-primary';
         returnLink.href = '/about.html';
-        returnLink.textContent = 'Back to Team Page';
+        returnLink.textContent = 'Back to About';
         actions.appendChild(returnLink);
 
         const homeLink = document.createElement('a');
@@ -2280,7 +2309,7 @@ But I can start by being honest about my own story.`,
 
     function renderSimpleProfileSection(member) {
         const section = document.createElement('section');
-        section.className = 'section simple-profile-section';
+        section.className = 'simple-profile-section';
 
         const container = document.createElement('div');
         container.className = 'container';
@@ -2291,39 +2320,39 @@ But I can start by being honest about my own story.`,
         const backLink = document.createElement('a');
         backLink.className = 'simple-profile-back';
         backLink.href = '/about.html';
-        backLink.textContent = 'Return to Team';
+        backLink.textContent = 'Back to About';
 
-        const layout = document.createElement('div');
-        layout.className = 'simple-profile-layout';
-
-        const aside = document.createElement('figure');
-        aside.className = 'simple-profile-aside';
+        const header = document.createElement('header');
+        header.className = 'simple-profile-header';
 
         const image = document.createElement('img');
-        image.className = 'simple-profile-image';
+        image.className = 'simple-profile-avatar';
         image.src = member.image || '/logo.svg';
         image.alt = `${member.name} portrait`;
         image.decoding = 'async';
         image.fetchPriority = 'high';
-        image.width = 520;
-        image.height = 620;
-
-        const caption = document.createElement('figcaption');
-        caption.className = 'simple-profile-caption';
-        caption.textContent = `${member.name} — ${member.role || 'Bloomly Team'}`;
-
-        aside.append(image, caption);
+        image.width = 220;
+        image.height = 220;
 
         const content = document.createElement('div');
         content.className = 'simple-profile-content';
 
-        const meta = document.createElement('p');
-        meta.className = 'simple-profile-meta';
-        meta.textContent = `${member.name} | ${member.role || 'Bloomly Team'}`;
-
         const title = document.createElement('h1');
         title.className = 'simple-profile-title';
         title.textContent = member.name;
+
+        const role = document.createElement('p');
+        role.className = 'simple-profile-role';
+        role.textContent = member.role || 'Bloomly Team';
+
+        const bio = document.createElement('p');
+        bio.className = 'simple-profile-bio';
+        bio.textContent = member.bio || member.summary || '';
+
+        const headerCopy = document.createElement('div');
+        headerCopy.className = 'simple-profile-header-copy';
+        headerCopy.append(title, role, bio);
+        header.append(image, headerCopy);
 
         const story = document.createElement('div');
         story.className = 'simple-profile-story';
@@ -2340,9 +2369,38 @@ But I can start by being honest about my own story.`,
             story.appendChild(paragraph);
         }
 
-        content.append(meta, title, story);
-        layout.append(aside, content);
-        card.append(backLink, layout);
+        const skillsWrap = document.createElement('div');
+        skillsWrap.className = 'simple-profile-skills';
+        const skillsTitle = document.createElement('h2');
+        skillsTitle.textContent = 'Expertise';
+        const skillsList = document.createElement('div');
+        skillsList.className = 'simple-profile-skill-list';
+        (member.skills || []).forEach((skill) => {
+            const tag = document.createElement('span');
+            tag.className = 'simple-profile-skill';
+            tag.textContent = skill;
+            skillsList.appendChild(tag);
+        });
+        skillsWrap.append(skillsTitle, skillsList);
+
+        const contact = document.createElement('div');
+        contact.className = 'simple-profile-contact';
+        const contactTitle = document.createElement('h2');
+        contactTitle.textContent = 'Contact and social links';
+        const contactLinks = document.createElement('div');
+        contactLinks.className = 'simple-profile-contact-links';
+        (member.links || []).forEach((linkData) => {
+            const profileLink = document.createElement('a');
+            profileLink.href = linkData.url;
+            profileLink.target = '_blank';
+            profileLink.rel = 'noopener noreferrer';
+            profileLink.textContent = linkData.label;
+            contactLinks.appendChild(profileLink);
+        });
+        contact.append(contactTitle, contactLinks);
+
+        content.append(story, skillsWrap, contact);
+        card.append(backLink, header, content);
         container.appendChild(card);
         section.appendChild(container);
         return section;

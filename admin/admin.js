@@ -547,7 +547,7 @@
         const clientId = config.clientId;
         const redirectUri = config.redirectUri || window.location.origin + '/admin/callback.html';
 
-        if (!clientId || clientId === 'YOUR_GITHUB_CLIENT_ID_HERE') {
+        if (!clientId) {
             alert('GitHub OAuth is not configured. Please check admin/config.js');
             return;
         }
@@ -619,7 +619,7 @@
                                         <td><button type="button" class="admin-title-button" onclick="editPost('${safeSlug}', '${safeName}', ${safePost})">${escapeAdminHtml(post.title || post.slug)}</button></td>
                                         <td>${escapeAdminHtml(post.category || 'Uncategorized')}</td>
                                         <td>${formatDate(post.date)}</td>
-                                        <td><span class="status-pill confirmed">Published</span></td>
+                                        <td><span class="status-pill ${post.published === false ? 'pending' : 'confirmed'}">${post.published === false ? 'Draft' : 'Published'}</span></td>
                                         <td>
                                             <div class="post-actions">
                                                 <button class="btn-edit" onclick="editPost('${safeSlug}', '${safeName}', ${safePost})">Edit</button>
@@ -821,6 +821,7 @@
         document.getElementById('postAuthor').value = githubUser?.name || githubUser?.login || '';
         document.getElementById('postSummary').value = '';
         document.getElementById('postEmoji').value = '💙';
+        document.getElementById('postPublished').checked = true;
         document.getElementById('postContent').value = '';
         document.getElementById('postModal').classList.add('active');
     }
@@ -844,6 +845,7 @@
             document.getElementById('postAuthor').value = post.author || githubUser?.name || githubUser?.login || '';
             document.getElementById('postSummary').value = post.summary || '';
             document.getElementById('postEmoji').value = post.emoji || '💙';
+            document.getElementById('postPublished').checked = post.published !== false;
             document.getElementById('postContent').value = post.content || '';
 
             document.getElementById('postModal').classList.add('active');
@@ -877,6 +879,7 @@
             const author = formData.get('author');
             const summary = formData.get('summary');
             const emoji = formData.get('emoji') || '💙';
+            const published = formData.get('published') === 'on';
             const content = formData.get('content');
             if (!String(author || '').trim()) {
                 throw new Error('Author name is required.');
@@ -891,6 +894,7 @@
                 author,
                 summary,
                 emoji,
+                published,
                 content
             }, isNew);
 
@@ -903,10 +907,14 @@
             // Reload posts to confirm
             await loadPosts();
 
-            const publishResult = await publishPostToSupabase({ title, summary, author, slug });
+            const publishResult = published
+                ? await publishPostToSupabase({ title, summary, author, slug })
+                : { ok: true };
             if (publishResult.ok) {
                 if (isNew) {
-                    const notifyResult = await notifySubscribersForPost({ title, summary, author, slug });
+                    const notifyResult = published
+                        ? await notifySubscribersForPost({ title, summary, author, slug })
+                        : { ok: true };
                     if (notifyResult.ok) {
                         showSuccess(`Post created successfully! Email update sent to subscribers.`);
                     } else {

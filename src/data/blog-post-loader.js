@@ -273,6 +273,15 @@
         }
     }
 
+    function renderAuthorCard(postAuthor) {
+        const card = document.querySelector('.author-card');
+        if (!card) return;
+        const heading = card.querySelector('h2');
+        if (heading && postAuthor) {
+            heading.textContent = postAuthor;
+        }
+    }
+
     async function renderRelatedPosts(currentSlug, category) {
         const section = document.querySelector('[data-related-posts-section]');
         const grid = document.querySelector('[data-related-posts]');
@@ -367,6 +376,9 @@
             
             // Load from GitHub API (single source of truth)
             const post = await blogAPI.getPost(slug);
+            if (String(post.metadata?.published ?? 'true').toLowerCase() === 'false') {
+                throw new Error('Post is not published.');
+            }
             const html = blogAPI.markdownToHTML(post.body);
 
             // Update page title
@@ -490,6 +502,10 @@
                     const img = document.createElement('img');
                     img.src = post.metadata.featuredImage;
                     img.alt = postTitle;
+                    img.loading = 'lazy';
+                    img.decoding = 'async';
+                    img.width = 960;
+                    img.height = 540;
                     img.style.cssText = 'width: 100%; border-radius: var(--radius-xl); margin-bottom: var(--space-xl);';
                     bodyEl.insertBefore(img, bodyEl.firstChild);
                 }

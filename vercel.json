@@ -4,6 +4,21 @@
     "api/github-auth.js": {
       "maxDuration": 10
     },
+    "api/mpesa/stkpush.js": {
+      "maxDuration": 10
+    },
+    "api/mpesa/status.js": {
+      "maxDuration": 10
+    },
+    "api/stripe/checkout.js": {
+      "maxDuration": 10
+    },
+    "api/stripe/confirm.js": {
+      "maxDuration": 10
+    },
+    "api/auth/callback/github.js": {
+      "maxDuration": 10
+    },
     "api/test.js": {
       "maxDuration": 10
     }
@@ -29,6 +44,8 @@
     { "source": "/blog-post/", "destination": "/blog-post/index.html" },
     { "source": "/subscribe", "destination": "/subscribe/index.html" },
     { "source": "/subscribe/", "destination": "/subscribe/index.html" },
+    { "source": "/terms", "destination": "/terms/index.html" },
+    { "source": "/terms/", "destination": "/terms/index.html" },
     { "source": "/appointments", "destination": "/appointments/index.html" },
     { "source": "/appointments/", "destination": "/appointments/index.html" }
   ]

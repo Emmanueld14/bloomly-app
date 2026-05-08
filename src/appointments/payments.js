@@ -213,6 +213,11 @@
         const provider = getSelectedProvider();
         const formData = new FormData(elements.form);
         const phone = String(formData.get('phone') || '').trim();
+        const acceptedTerms = formData.get('terms') === 'on';
+        if (!acceptedTerms) {
+            setMessage('Please agree to the Terms & Conditions before paying.', 'error');
+            return;
+        }
         if (requiresPhone(provider) && !phone) {
             setMessage('Enter phone number for mobile money payments.', 'error');
             return;

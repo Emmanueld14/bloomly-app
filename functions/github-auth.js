@@ -22,14 +22,14 @@ export async function onRequestPost({ request, env }) {
             );
         }
         
-        const clientId = env.GITHUB_CLIENT_ID || body.client_id;
-        const clientSecret = env.GITHUB_CLIENT_SECRET;
+        const clientId = env.GITHUB_ID || env.GITHUB_CLIENT_ID || body.client_id;
+        const clientSecret = env.GITHUB_SECRET || env.GITHUB_CLIENT_SECRET;
 
         if (!clientId || !clientSecret) {
             return new Response(
                 JSON.stringify({
                     error: 'Missing OAuth credentials',
-                    hint: 'Set GITHUB_CLIENT_ID and GITHUB_CLIENT_SECRET in Cloudflare Pages Environment Variables'
+                    hint: 'Set GITHUB_ID/GITHUB_CLIENT_ID and GITHUB_SECRET/GITHUB_CLIENT_SECRET in Cloudflare Pages Environment Variables'
                 }),
                 { 
                     status: 400, 
