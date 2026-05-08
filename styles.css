@@ -5861,12 +5861,14 @@ body {
 }
 
 .pricing-section,
+.testimonials-section,
 .about-values-section,
 .support-team-section {
     background: var(--color-offwhite);
 }
 
 .pricing-grid,
+.testimonial-grid,
 .value-card-grid,
 .support-team-grid {
     display: grid;
@@ -5875,6 +5877,7 @@ body {
 }
 
 .pricing-card,
+.testimonial-card,
 .value-card,
 .support-team-card {
     position: relative;
@@ -5934,6 +5937,52 @@ body {
     text-align: center;
 }
 
+.testimonial-quote-mark {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: var(--space-md);
+    background: linear-gradient(135deg, rgba(var(--color-pink-rgb), 0.18), rgba(var(--color-lilac-rgb), 0.22));
+    color: var(--color-pink);
+    font-size: 2.5rem;
+    font-family: Georgia, serif;
+    line-height: 1;
+}
+
+.testimonial-card h3 {
+    font-size: var(--text-base);
+}
+
+.whatsapp-float {
+    position: fixed;
+    right: 1.4rem;
+    bottom: 1.4rem;
+    z-index: 1200;
+    width: 62px;
+    height: 62px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #25D366;
+    color: var(--color-white);
+    box-shadow: 0 14px 30px rgba(37, 211, 102, 0.36);
+    animation: whatsappPulse 2.3s ease-in-out infinite;
+}
+
+.whatsapp-float svg {
+    width: 34px;
+    height: 34px;
+}
+
+@keyframes whatsappPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.32), 0 14px 30px rgba(37, 211, 102, 0.36); }
+    50% { box-shadow: 0 0 0 13px rgba(37, 211, 102, 0), 0 14px 30px rgba(37, 211, 102, 0.36); }
+}
+
 .footer-socials {
     display: flex;
     gap: var(--space-sm);
@@ -5987,7 +6036,7 @@ body {
 
 .blog-card-excerpt {
     display: -webkit-box;
-    -webkit-line-clamp: 2;
+    -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
@@ -6060,22 +6109,27 @@ body {
     border: 1px solid rgba(var(--color-black-rgb), 0.08);
 }
 
-.tally-embed-card {
-    overflow: hidden;
-    border-radius: 20px;
-    background: var(--color-white);
-    box-shadow: var(--shadow-card);
-    border: 1px solid rgba(var(--color-black-rgb), 0.08);
-}
-
-.tally-embed-card iframe {
-    display: block;
-    border: 0;
-}
-
+.join-team-form,
 .appointments-form {
     gap: var(--space-md);
 }
+
+.join-team-form label {
+    display: grid;
+    gap: 0.35rem;
+    font-weight: 600;
+}
+
+.join-team-form .form-message {
+    display: block;
+    padding: 0.75rem 0.9rem;
+    border-radius: var(--radius-md);
+    margin: 0;
+}
+
+.join-team-form input,
+.join-team-form select,
+.join-team-form textarea,
 .appointments-field select {
     width: 100%;
     padding: 0.75rem 0.9rem;
@@ -6084,6 +6138,11 @@ body {
     font-family: var(--font-primary);
     font-size: var(--text-base);
     background: var(--color-white);
+}
+
+.join-team-form textarea {
+    min-height: 130px;
+    resize: vertical;
 }
 
 .field-error {
@@ -6201,10 +6260,11 @@ body {
 
 @media (max-width: 900px) {
     .pricing-grid,
+    .testimonial-grid,
     .value-card-grid,
     .support-team-grid,
     .session-type-grid,
-    .charla-calendly-shell,
+    .appointments-shell,
     .join-team-panel {
         grid-template-columns: 1fr;
     }
@@ -6227,16 +6287,25 @@ body {
     }
 
     .pricing-card,
+    .testimonial-card,
     .value-card,
     .support-team-card,
     .appointments-card,
     .join-team-panel {
         padding: var(--space-lg);
     }
+
+    .whatsapp-float {
+        right: 0.9rem;
+        bottom: 0.9rem;
+        width: 56px;
+        height: 56px;
+    }
 }
 
 @media (prefers-reduced-motion: reduce) {
-    body {
+    body,
+    .whatsapp-float {
         animation: none !important;
     }
 }

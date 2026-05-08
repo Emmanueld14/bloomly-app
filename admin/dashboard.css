@@ -534,7 +534,8 @@ body {
 }
 
 .subscriber-count-card,
-.calendly-admin-note {
+.booking-admin-note,
+.admin-booking-note {
     margin-bottom: var(--space-md);
     border-radius: var(--radius-lg);
     border: 1px solid rgba(var(--color-black-rgb), 0.08);
@@ -552,7 +553,8 @@ body {
     background-clip: text;
 }
 
-.calendly-admin-note {
+.booking-admin-note,
+.admin-booking-note {
     background: linear-gradient(135deg, rgba(var(--color-pink-rgb), 0.08), rgba(var(--color-lilac-rgb), 0.14));
 }
 
