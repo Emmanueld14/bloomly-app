@@ -51,53 +51,98 @@
         <section class="appointments-hero">
             <div class="container appointments-hero-content">
                 <h1>Book a Charla</h1>
-                <p><mark>[PLACEHOLDER: write your Charla page subtext here]</mark></p>
+                <p>Choose a calm, focused time to connect. Secure your slot with a booking fee.</p>
+                <div class="appointments-price" data-appointments-price>Standard Charla: KSh 500</div>
             </div>
         </section>
 
         <section class="section appointments-section">
-            <div class="container charla-calendly-shell" id="charla-booking">
+            <div class="container appointments-shell" id="charla-booking">
                 <div class="appointments-card">
                     <p class="appointments-step-label">Step 1</p>
                     <h2>Choose your session</h2>
                     <p class="appointments-helper">Pick the support level that feels right for today.</p>
                     <div class="session-type-grid" data-session-types>
-                        <button type="button" class="session-type-card" data-calendly-type="peer">
+                        <button type="button" class="session-type-card" data-session-type="Peer Chat">
                             <span>Peer Chat</span>
                             <strong>KSh 200</strong>
                             <small>45 min</small>
                         </button>
-                        <button type="button" class="session-type-card is-active" data-calendly-type="standard">
+                        <button type="button" class="session-type-card is-active" data-session-type="Standard Charla">
                             <span>Standard Charla</span>
                             <strong>KSh 500</strong>
                             <small>60 min</small>
                         </button>
-                        <button type="button" class="session-type-card" data-calendly-type="premium">
+                        <button type="button" class="session-type-card" data-session-type="Premium Charla">
                             <span>Premium Charla</span>
                             <strong>KSh 900</strong>
                             <small>60 min</small>
                         </button>
                     </div>
-                </div>
-
-                <div class="calendly-card">
-                    <div class="calendly-inline-widget"
-                         data-calendly-widget
-                         data-url="https://calendly.com/YOUR_USERNAME/standard-charla"
-                         style="min-width:320px;height:700px;">
+                    <div class="appointments-summary" data-appointments-summary>
+                        Selected: Standard Charla — KSh 500 / 60 min
                     </div>
                 </div>
-            </div>
 
-            <div class="container">
-                <section class="payment-info-card" aria-labelledby="payment-info-title">
-                    <h2 id="payment-info-title">How payment works:</h2>
-                    <p>After booking your session, you'll receive a confirmation email.</p>
-                    <p>To secure your slot, send your session fee via M-Pesa to:</p>
-                    <p><mark>[PLACEHOLDER: Paybill / Till number]</mark></p>
-                    <p>Account name: <mark>[PLACEHOLDER: account name]</mark></p>
-                    <p>Your session link will be sent once payment is confirmed.</p>
-                </section>
+                <div class="appointments-card appointments-card-sticky">
+                    <h2>Confirm your Charla</h2>
+                    <p class="appointments-helper">Share your details and preferred time. We will confirm the exact link after payment.</p>
+
+                    <form class="appointments-form" data-appointments-form>
+                        <div class="appointments-field appointments-field-compact">
+                            <label for="appointmentName">Full name</label>
+                            <input id="appointmentName" name="name" type="text" required placeholder="Your name">
+                            <span class="field-error" data-error-for="name"></span>
+                        </div>
+                        <div class="appointments-field appointments-field-compact">
+                            <label for="appointmentEmail">Email address</label>
+                            <input id="appointmentEmail" name="email" type="email" required placeholder="you@email.com">
+                            <span class="field-error" data-error-for="email"></span>
+                        </div>
+                        <div class="appointments-field appointments-field-compact">
+                            <label for="appointmentPhone">Your M-Pesa number (+254...)</label>
+                            <input id="appointmentPhone" name="phone" type="tel" required placeholder="+254712345678">
+                            <span class="field-error" data-error-for="phone"></span>
+                        </div>
+                        <div class="appointments-field appointments-field-compact">
+                            <label for="appointmentCounsellor">Preferred counsellor or mentor</label>
+                            <select id="appointmentCounsellor" name="counsellor" required>
+                                <option value="">Choose someone</option>
+                                <option value="Aisha M.">Aisha M.</option>
+                                <option value="Dr. James K.">Dr. James K.</option>
+                                <option value="Wanjiku N.">Wanjiku N.</option>
+                            </select>
+                            <span class="field-error" data-error-for="counsellor"></span>
+                        </div>
+                        <div class="appointments-field appointments-field-compact">
+                            <label for="appointmentDate">Preferred date</label>
+                            <input id="appointmentDate" name="date" type="date" required>
+                            <span class="field-error" data-error-for="date"></span>
+                        </div>
+                        <div class="appointments-field appointments-field-compact">
+                            <label for="appointmentTime">Preferred time</label>
+                            <select id="appointmentTime" name="time" required>
+                                <option value="">Choose a time window</option>
+                                <option value="Morning (8am–11am)">Morning (8am–11am)</option>
+                                <option value="Afternoon (12pm–4pm)">Afternoon (12pm–4pm)</option>
+                                <option value="Evening (5pm–8pm)">Evening (5pm–8pm)</option>
+                            </select>
+                            <span class="field-error" data-error-for="time"></span>
+                        </div>
+                        <div class="appointments-field">
+                            <label for="appointmentPurpose">Purpose of your Charla</label>
+                            <textarea id="appointmentPurpose" name="purpose" required placeholder="What would you like to focus on?"></textarea>
+                            <span class="field-error" data-error-for="purpose"></span>
+                        </div>
+
+                        <button class="btn btn-primary" type="submit" data-appointments-submit>
+                            Confirm My Session — KSh 500
+                        </button>
+                    </form>
+
+                    <p class="appointments-note">All sessions paid via M-Pesa. Payment instructions appear after booking.</p>
+                    <p class="appointments-message" data-appointments-message aria-live="polite"></p>
+                </div>
             </div>
         </section>
 
@@ -162,8 +207,8 @@
         </div>
     </footer>
 
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     <script src="/script.js"></script>
-    <script src="https://assets.calendly.com/assets/external/widget.js" async></script>
     <script src="/src/appointments/appointments.js"></script>
 </body>
 </html>
