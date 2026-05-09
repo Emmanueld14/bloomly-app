@@ -10,7 +10,7 @@
       "module": "blog",
       "action": "draft_published",
       "target": "Circles 😵‍💫",
-      "details": "Slug: circles-"
+      "details": "Slug: circles"
     },
     {
       "id": "activity-40e1dcbd-02d2-438e-aa50-968da2e906e9",
@@ -20,7 +20,7 @@
       "module": "blog",
       "action": "draft_published",
       "target": "Circles 😵‍💫",
-      "details": "Slug: circles-"
+      "details": "Slug: circles"
     },
     {
       "id": "activity-a1b88e43-fcc8-40a6-bb84-1926fe643a2b",
@@ -50,7 +50,7 @@
       "module": "blog",
       "action": "draft_published",
       "target": "Circles 😵‍💫",
-      "details": "Slug: circles-"
+      "details": "Slug: circles"
     },
     {
       "id": "activity-00050218-ce59-440a-99a5-f8d7ab1b449d",
@@ -60,7 +60,7 @@
       "module": "blog",
       "action": "draft_published",
       "target": "Circles 😵‍💫",
-      "details": "Slug: circles-"
+      "details": "Slug: circles"
     },
     {
       "id": "activity-11382427-35c8-42fc-98c7-657bd1316861",
@@ -70,7 +70,7 @@
       "module": "blog",
       "action": "revision_draft_created",
       "target": "Circles 😵‍💫",
-      "details": "Source slug: circles-"
+      "details": "Source slug: circles"
     },
     {
       "id": "activity-833dd62a-91a8-4a66-a0f7-1b75cfdb0038",

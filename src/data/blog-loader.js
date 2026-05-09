@@ -49,91 +49,6 @@
         }
     }
 
-    const FALLBACK_POSTS = [
-        {
-            slug: 'built-different-and-proud-of-it',
-            title: 'Built Different (And Proud of It)',
-            date: '2026-01-24T10:22:00.000Z',
-            category: 'Mental Health',
-            summary: 'Have you ever felt like you don’t fit in no matter how hard you try? Honestly, it ain’t easy choosing to be different, choosing to be kind, choosing to be honest when everyone else is doing the opposite. This piece is me talking about what it’s like to go through hate, isolation, and being misunderstood at school just because I stayed true to myself. It’s about the pain, the growth, and learning to stand alone without losing who I am. And in the end, it’s really just a message to anyone out there who feels different: don’t give up on yourself — your light matters.',
-            emoji: '🔥'
-        },
-        {
-            slug: 'when-effort-turned-into-exhaustion',
-            title: 'When Effort Turned Into Exhaustion',
-            date: '2026-01-10T13:51:00.000Z',
-            category: 'Mental Health',
-            summary: 'This piece explores the quiet fear of feeling like you’ve lost your intelligence and the frustration that follows when effort doesn’t bring results.',
-            emoji: '👓'
-        },
-        {
-            slug: 'its-okay-to-reflect',
-            title: 'It’s Okay to Reflect',
-            date: '2026-01-05T07:33:00.000Z',
-            category: 'Mental Health & Awareness',
-            summary: 'At times, do you ever feel like isolating yourself from the world? Just taking a break and being you. When circumstances finally slap sense back into you, and all you want is to be alone.',
-            emoji: '💫'
-        },
-        {
-            slug: 'i-dont-know-anymore',
-            title: 'I Don’t Know Anymore',
-            date: '2026-01-04T01:51:00.000Z',
-            category: 'Poetry',
-            summary: 'Have you ever been in that position where things feel so heavy? Where everything you\'ve been working for seems to be crumbling down and it\'s all you by yourself, no one else? That feeling like your heart is about to pop off because it\'s too much to contain? That feeling of isolating yourself from the world? The feeling that you just wanna leave where you are and start a completely new chapter elsewhere? That feeling that as much you have someone around you you still feel so empty? You fee like it\'s just how it was before? No new changes?',
-            emoji: '☹️'
-        },
-        {
-            slug: 'is-it-really-the-phone-or-is-it-something-deeper',
-            title: 'Is It Really That Phone? Or Is It Something Deeper',
-            date: '2026-01-04T10:33:00.000Z',
-            category: 'Self-Care',
-            summary: 'Maybe you feel the same way I do. You’re the type who wants to make a change—you plan to make a change—but somehow you fall back into the same cycle again. Scroll, scroll, scroll… and scroll. Afterwards, guilt eats you up, and you hate yourself for it. But honestly, is it really the phone—or is it something you’ve never fully understood?',
-            emoji: '🫶'
-        },
-        {
-            slug: 'feel-like-giving-up-you-arent-alone',
-            title: 'Feel Like Giving Up? You Aren’t Alone',
-            date: '2026-01-02T04:07:00.000Z',
-            category: 'Tips',
-            summary: 'Does it feel like life is getting harder by the day, and the burden is too heavy to handle? You aren\'t alone. Let\'s talk more about it.',
-            emoji: '💡'
-        },
-        {
-            slug: 'do-you-still-feel-too-attached',
-            title: 'Do You Still Feel Too Attached?',
-            date: '2026-01-02T12:24:00.000Z',
-            category: 'Mental Health',
-            summary: 'Have you ever felt attached to someone so bad, and it seems you cant leave, let\'s talk more on that, shall we? ☺️',
-            emoji: '🪴'
-        },
-        {
-            slug: 'new-year-new-me',
-            title: 'New Year, New me',
-            date: '2025-12-31T02:18:00.000Z',
-            category: 'New Year Resolutions',
-            summary: 'What or how are new year, new me resolutions really supposed to look like? Immediate and direct? or slow but progressive? Let\'s find out more 😁',
-            emoji: '❤️'
-        },
-        
-    ];
-
-    function buildFallbackPosts() {
-        return FALLBACK_POSTS.map((post) => ({
-            slug: post.slug,
-            name: `${post.slug}.md`,
-            permalink: `/blog/${post.slug}`,
-            metadata: {
-                title: post.title,
-                date: post.date,
-                category: post.category,
-                summary: post.summary,
-                emoji: post.emoji
-            },
-            body: '',
-            html: ''
-        }));
-    }
-
     function cacheBustUrl(url) {
         const separator = url.includes('?') ? '&' : '?';
         return `${url}${separator}_t=${Date.now()}`;
@@ -180,18 +95,23 @@
         const merged = new Map();
 
         primaryPosts.forEach((post) => {
-            const slug = post.slug || post.metadata?.slug || (post.name ? post.name.replace('.md', '') : '');
+            const slug = normalizePostSlug(post.slug || post.metadata?.slug || (post.name ? post.name.replace('.md', '') : ''));
             if (!slug) return;
             merged.set(slug, { ...post, slug });
         });
 
         legacyPosts.forEach((post) => {
-            const slug = post.slug || post.metadata?.slug || (post.name ? post.name.replace('.md', '') : '');
+            const slug = normalizePostSlug(post.slug || post.metadata?.slug || (post.name ? post.name.replace('.md', '') : ''));
             if (!slug || merged.has(slug)) return;
             merged.set(slug, { ...post, slug });
         });
 
         return Array.from(merged.values());
+    }
+
+    function isPublishedPost(post) {
+        const value = String(post?.metadata?.published ?? post?.published ?? 'true').trim().toLowerCase();
+        return value !== 'false' && value !== 'draft' && value !== '0';
     }
 
     let cachedPosts = [];
@@ -211,6 +131,20 @@
             .replace(/[^a-z0-9\s-]/g, '')
             .replace(/\s+/g, '-')
             .replace(/-+/g, '-');
+    }
+
+    function normalizePostSlug(value) {
+        if (window.BloomlyBlog && typeof window.BloomlyBlog.normalizeBlogSlug === 'function') {
+            return window.BloomlyBlog.normalizeBlogSlug(value);
+        }
+        return String(value || '')
+            .trim()
+            .toLowerCase()
+            .replace(/\.md$/, '')
+            .replace(/[^a-z0-9\s-]/g, '')
+            .replace(/\s+/g, '-')
+            .replace(/-+/g, '-')
+            .replace(/^-+|-+$/g, '');
     }
 
     function buildCategoryOptionsFromPosts(posts) {
@@ -293,10 +227,10 @@
             const date = formatDate(post.metadata?.date);
             const category = post.metadata?.category || 'Mental Health';
             const categorySlug = getCategorySlug(category);
-            const slug = post.slug || post.metadata?.slug || (post.name ? post.name.replace('.md', '') : '');
+            const slug = normalizePostSlug(post.slug || post.metadata?.slug || (post.name ? post.name.replace('.md', '') : ''));
             const permalink = post.permalink
                 || post.metadata?.permalink
-                || `/blog-post?slug=${encodeURIComponent(slug)}`;
+                || `/blog/${encodeURIComponent(slug)}`;
 
             if (!slug) {
                 warnDebug('Skipped blog post without slug.', post);
@@ -355,18 +289,23 @@
             return;
         }
 
-        // Show loading state
-        blogGrid.innerHTML = '<div style="text-align: center; padding: var(--space-2xl); color: var(--color-gray-600);">Loading blog posts...</div>';
+        blogGrid.innerHTML = `
+            <article class="blog-card blog-card-skeleton" aria-hidden="true"></article>
+            <article class="blog-card blog-card-skeleton" aria-hidden="true"></article>
+            <article class="blog-card blog-card-skeleton" aria-hidden="true"></article>
+        `;
 
         try {
-            logDebug('Fetching blog posts...');
+            console.info('[Bloomly Blog] Fetching published posts.');
             
             // Get list of markdown posts and legacy HTML posts
             const posts = await blogAPI.listPosts();
             const legacyPosts = await loadLegacyPosts();
             
-            logDebug(`Received ${posts.length} markdown post(s)`);
-            logDebug(`Received ${legacyPosts.length} legacy post(s)`);
+            console.info('[Bloomly Blog] Source counts', {
+                markdown: posts.length,
+                legacy: legacyPosts.length
+            });
             
             if (posts.length === 0 && legacyPosts.length === 0) {
                 blogGrid.innerHTML = `
@@ -414,8 +353,8 @@
             logDebug(`Successfully loaded ${validPosts.length} post(s)`);
 
             const mergedPosts = mergePosts(validPosts, legacyPosts);
-            const fallbackPosts = buildFallbackPosts();
-            const finalPosts = mergePosts(mergedPosts, fallbackPosts);
+            const finalPosts = mergedPosts.filter(isPublishedPost);
+            console.info('[Bloomly Blog] Published posts ready', finalPosts.length);
 
             if (finalPosts.length === 0) {
                 blogGrid.innerHTML = `

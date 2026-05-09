@@ -10,14 +10,14 @@ const GITHUB_CONFIG = {
     repoName: 'bloomly-app',
     repoBranch: 'main',
     
-    // OAuth redirect URI (must match your GitHub OAuth App settings)
-    redirectUri: window.location.origin + '/admin/callback.html',
+    // OAuth redirect URI (must match the GitHub OAuth App callback URL)
+    redirectUri: window.location.origin + '/api/auth/callback/github',
     
     // GitHub API base URL
     apiBase: 'https://api.github.com',
     
     // Backend API URL for OAuth token exchange
-    vercelApiUrl: 'https://bloomly-app.onrender.com/api/github-auth'
+    vercelApiUrl: window.location.origin + '/api/github-auth'
 };
 
 // Supabase configuration for email notifications

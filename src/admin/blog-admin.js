@@ -85,6 +85,7 @@ date: ${formattedDate}
 category: "${postData.category || 'Mental Health'}"
 summary: "${(postData.summary || '').replace(/"/g, '\\"')}"
 emoji: "${postData.emoji || '💙'}"
+published: ${postData.published === false ? 'false' : 'true'}
 featuredImage: "${postData.featuredImage || ''}"
 ---
 
@@ -324,7 +325,13 @@ ${postData.content}`;
                     (value.startsWith("'") && value.endsWith("'"))) {
                     value = value.slice(1, -1);
                 }
-                metadata[key] = value;
+                if (value === 'true') {
+                    metadata[key] = true;
+                } else if (value === 'false') {
+                    metadata[key] = false;
+                } else {
+                    metadata[key] = value;
+                }
             }
         });
 
@@ -343,7 +350,7 @@ ${postData.content}`;
             .replace(/[^\w\s-]/g, '')
             .replace(/\s+/g, '-')
             .replace(/-+/g, '-')
-            .trim();
+            .replace(/^-+|-+$/g, '');
     }
 
     // Export functions

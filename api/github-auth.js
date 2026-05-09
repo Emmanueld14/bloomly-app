@@ -6,7 +6,7 @@
  * 1. Create account at vercel.com
  * 2. Import your GitHub repository
  * 3. Vercel will automatically detect this api/ folder
- * 4. Add environment variables: GITHUB_CLIENT_ID and GITHUB_CLIENT_SECRET
+ * 4. Add environment variables: GITHUB_ID/GITHUB_CLIENT_ID and GITHUB_SECRET/GITHUB_CLIENT_SECRET
  */
 
 export default async function handler(req, res) {
@@ -32,12 +32,12 @@ export default async function handler(req, res) {
             return res.status(400).json({ error: 'Missing authorization code' });
         }
         
-        const clientId = process.env.GITHUB_CLIENT_ID || req.body.client_id;
-        const clientSecret = process.env.GITHUB_CLIENT_SECRET;
+        const clientId = process.env.GITHUB_ID || process.env.GITHUB_CLIENT_ID || req.body.client_id;
+        const clientSecret = process.env.GITHUB_SECRET || process.env.GITHUB_CLIENT_SECRET;
 
         if (!clientId || !clientSecret) {
             return res.status(500).json({
-                error: 'OAuth server misconfiguration: set GITHUB_CLIENT_ID and GITHUB_CLIENT_SECRET on the host'
+                error: 'OAuth server misconfiguration: set GITHUB_ID/GITHUB_CLIENT_ID and GITHUB_SECRET/GITHUB_CLIENT_SECRET on the host'
             });
         }
         

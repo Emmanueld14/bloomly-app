@@ -33,7 +33,7 @@
     <nav class="navbar" id="navbar">
         <div class="navbar-content">
             <a href="/index.html" class="logo-container">
-                <img src="/logo.svg" alt="Bloomly Logo" class="logo-icon">
+                <img src="/logo.svg" alt="Bloomly Logo" class="logo-icon" width="60" height="60" decoding="async">
                 <span class="logo-text">Bloomly</span>
             </a>
             <ul class="nav-links" id="navLinks">
@@ -102,6 +102,10 @@
                                 <input type="email" name="email" placeholder="you@example.com" required>
                                 <button type="submit" class="btn btn-primary">Subscribe</button>
                             </div>
+                        </label>
+                        <label class="terms-checkbox">
+                            <input type="checkbox" name="terms" required>
+                            <span>I agree to the <a href="/terms" target="_blank" rel="noopener noreferrer">Terms &amp; Conditions</a>.</span>
                         </label>
                         <span class="form-message" data-newsletter-message aria-live="polite"></span>
                         <p class="subscribe-note">You can unsubscribe anytime. We only send calm updates.</p>

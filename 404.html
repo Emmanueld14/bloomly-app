@@ -78,7 +78,7 @@
                     window.location.replace(`/blog/${slug}.html`);
                     return;
                 }
-                window.location.replace(`/blog-post?slug=${slug}`);
+                window.location.replace(`/blog/${slug.replace(/-+$/, '')}`);
                 return;
             }
             

@@ -48,7 +48,16 @@
         } catch (error) {
             decoded = String(value);
         }
-        const cleaned = decoded.trim().replace(/^\/+/, '').replace(/\/+$/, '').replace(/\.html$/, '');
+        const cleaned = decoded
+            .trim()
+            .toLowerCase()
+            .replace(/^\/+/, '')
+            .replace(/\/+$/, '')
+            .replace(/\.html$/, '')
+            .replace(/[^a-z0-9\s-]/g, '')
+            .replace(/\s+/g, '-')
+            .replace(/-+/g, '-')
+            .replace(/^-+|-+$/g, '');
         return cleaned || null;
     };
 
@@ -192,8 +201,8 @@
     }
 
     function getPostPermalink(post) {
-        const slug = post.slug || post.metadata?.slug || (post.name ? post.name.replace(/\.md$/, '') : '');
-        return post.permalink || post.metadata?.permalink || `/blog-post?slug=${encodeURIComponent(slug)}`;
+        const slug = normalizeBlogSlug(post.slug || post.metadata?.slug || (post.name ? post.name.replace(/\.md$/, '') : ''));
+        return post.permalink || post.metadata?.permalink || `/blog/${encodeURIComponent(slug)}`;
     }
 
     function escapeHtml(value) {
@@ -270,6 +279,15 @@
                     }, 2000);
                 }
             });
+        }
+    }
+
+    function renderAuthorCard(postAuthor) {
+        const card = document.querySelector('.author-card');
+        if (!card) return;
+        const heading = card.querySelector('h2');
+        if (heading && postAuthor) {
+            heading.textContent = postAuthor;
         }
     }
 
@@ -367,6 +385,9 @@
             
             // Load from GitHub API (single source of truth)
             const post = await blogAPI.getPost(slug);
+            if (String(post.metadata?.published ?? 'true').toLowerCase() === 'false') {
+                throw new Error('Post is not published.');
+            }
             const html = blogAPI.markdownToHTML(post.body);
 
             // Update page title
@@ -406,7 +427,7 @@
             }
             articleAuthorMeta.setAttribute('content', postAuthor || 'Bloomly Team');
 
-            const canonicalUrl = `${window.location.origin}/blog-post?slug=${encodeURIComponent(slug)}`;
+            const canonicalUrl = `${window.location.origin}/blog/${encodeURIComponent(slug)}`;
 
             const ogFields = [
                 ['og:title', postTitle],
@@ -490,6 +511,10 @@
                     const img = document.createElement('img');
                     img.src = post.metadata.featuredImage;
                     img.alt = postTitle;
+                    img.loading = 'lazy';
+                    img.decoding = 'async';
+                    img.width = 960;
+                    img.height = 540;
                     img.style.cssText = 'width: 100%; border-radius: var(--radius-xl); margin-bottom: var(--space-xl);';
                     bodyEl.insertBefore(img, bodyEl.firstChild);
                 }
