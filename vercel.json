@@ -33,15 +33,17 @@
     { "source": "/profile/:slug", "destination": "/members/?id=:slug", "permanent": true },
     { "source": "/profile/:slug/", "destination": "/members/?id=:slug", "permanent": true },
     { "source": "/people/:slug", "destination": "/members/?id=:slug", "permanent": true },
-    { "source": "/people/:slug/", "destination": "/members/?id=:slug", "permanent": true }
+    { "source": "/people/:slug/", "destination": "/members/?id=:slug", "permanent": true },
+    { "source": "/blog-post", "destination": "/blog", "permanent": true },
+    { "source": "/blog-post/", "destination": "/blog", "permanent": true },
+    { "source": "/blog-post/:slug", "destination": "/blog/:slug", "permanent": true },
+    { "source": "/blog-post/:slug/", "destination": "/blog/:slug", "permanent": true }
   ],
   "rewrites": [
     { "source": "/blog", "destination": "/blog/index.html" },
     { "source": "/blog/", "destination": "/blog/index.html" },
     { "source": "/blog/:slug", "destination": "/blog-post.html?slug=:slug" },
     { "source": "/blog/:slug/", "destination": "/blog-post.html?slug=:slug" },
-    { "source": "/blog-post", "destination": "/blog-post/index.html" },
-    { "source": "/blog-post/", "destination": "/blog-post/index.html" },
     { "source": "/subscribe", "destination": "/subscribe/index.html" },
     { "source": "/subscribe/", "destination": "/subscribe/index.html" },
     { "source": "/terms", "destination": "/terms/index.html" },

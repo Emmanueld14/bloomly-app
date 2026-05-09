@@ -354,8 +354,8 @@
             document.body.dataset.postUnavailable = 'true';
             setCanonicalUrl(null);
             setPostUnavailableState(true);
-            if (isBlogPostRoot() && showBlogListFallback()) {
-                document.title = 'Blog - Bloomly';
+            if (isBlogPostRoot()) {
+                window.location.replace('/blog');
                 return;
             }
             renderFallback({

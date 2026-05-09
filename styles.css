@@ -5026,16 +5026,23 @@ a:hover {
 }
 
 .about-team-hero .bloomly-team-core {
-    grid-template-columns: minmax(220px, 320px) 1fr;
+    grid-template-columns: minmax(0, 280px) minmax(0, 1fr);
     align-items: center;
+    justify-content: center;
 }
 
 .about-team-hero .bloomly-team-avatar {
-    width: 100% !important;
-    height: auto !important;
-    aspect-ratio: 4 / 5;
-    border-radius: var(--radius-xl);
+    width: min(100%, 280px) !important;
+    max-width: 280px !important;
+    height: 280px !important;
+    aspect-ratio: 1 / 1;
+    border-radius: 50% !important;
     overflow: hidden;
+    margin: 0 auto;
+}
+
+.about-team-hero .bloomly-team-photo {
+    border-radius: 50% !important;
 }
 
 .simple-profile-header {
@@ -5083,8 +5090,17 @@ a:hover {
 .charla-booking-shell {
     display: grid;
     grid-template-columns: minmax(320px, 0.85fr) minmax(0, 1.15fr);
-    gap: var(--space-2xl);
+    gap: max(32px, var(--space-2xl));
     align-items: start;
+}
+
+.charla-booking-shell > * {
+    min-width: 0;
+}
+
+.charla-payment-card,
+.booking-time-card {
+    overflow: auto;
 }
 
 .charla-payment-form {
@@ -5117,49 +5133,24 @@ a:hover {
     color: var(--color-blue-strong);
 }
 
-.calendly-card {
-    position: relative;
-    min-height: 760px;
-    background: rgba(var(--color-white-rgb), 0.98);
-    border-radius: var(--radius-2xl);
-    border: 1px solid rgba(var(--color-black-rgb), 0.08);
-    box-shadow: 0 24px 50px rgba(var(--color-black-rgb), 0.12);
-    overflow: hidden;
+.booking-time-card {
+    align-self: stretch;
 }
 
-.calendly-card.is-locked .calendly-inline-widget {
-    opacity: 0.12;
-    pointer-events: none;
+.booking-time-card p {
+    margin-bottom: 0;
+    color: var(--color-gray-600);
+    font-size: var(--text-lg);
+    line-height: 1.8;
 }
 
-.calendly-card.is-fallback {
-    min-height: 420px;
-}
-
-.calendly-card.is-fallback .calendly-inline-widget {
-    display: none;
-}
-
-.calendly-lock,
-.calendly-fallback {
-    position: absolute;
-    inset: var(--space-lg);
-    z-index: 2;
-    display: grid;
-    place-content: center;
-    text-align: center;
+.tally-embed-card--pending {
     padding: var(--space-xl);
-    border-radius: var(--radius-xl);
-    background: rgba(var(--color-white-rgb), 0.9);
-    border: 1px solid rgba(var(--color-black-rgb), 0.08);
 }
 
-.calendly-fallback {
-    position: relative;
-    inset: auto;
-    min-height: 360px;
-    margin: var(--space-lg);
-    background: var(--gradient-soft);
+.tally-embed-card--pending p {
+    margin: 0;
+    color: var(--color-gray-600);
 }
 
 .support-team-grid {
@@ -5210,6 +5201,18 @@ a:hover {
     height: 72px !important;
     padding: 3px !important;
     box-shadow: none !important;
+}
+
+.about-team-hero .bloomly-team-avatar {
+    width: min(100%, 280px) !important;
+    max-width: 280px !important;
+    height: 280px !important;
+    border-radius: 50% !important;
+    margin: 0 auto;
+}
+
+.about-team-hero .bloomly-team-photo {
+    border-radius: 50% !important;
 }
 
 .bloomly-team-name {
@@ -6485,7 +6488,6 @@ body {
     .value-card-grid,
     .support-team-grid,
     .session-type-grid,
-    .charla-calendly-shell,
     .join-team-panel {
         grid-template-columns: 1fr;
     }

@@ -60,7 +60,7 @@
                 <div class="appointments-card charla-payment-card">
                     <p class="appointments-step-label">Step 1</p>
                     <h2>Choose and pay</h2>
-                    <p class="appointments-helper">Payment opens the Calendly booking step. Your card details are handled by Stripe; M-Pesa runs through Daraja.</p>
+                    <p class="appointments-helper">Payment starts your booking request. Your card details are handled by Stripe; M-Pesa runs through Daraja.</p>
                     <div class="session-type-grid" data-session-types>
                         <button type="button" class="session-type-card" data-session-type="peer" data-amount="200">
                             <span>Peer Chat</span>
@@ -127,21 +127,10 @@
                     </form>
                 </div>
 
-                <div class="calendly-card is-locked" data-calendly-card>
-                    <div class="calendly-lock" data-calendly-lock>
-                        <h2>Step 2: Choose your time</h2>
-                        <p>Complete payment first. The calendar opens here after the payment is confirmed.</p>
-                    </div>
-                    <!-- TODO: Replace [YOUR WHATSAPP NUMBER] with Bloomly's real WhatsApp booking number. -->
-                    <!-- TODO: Replace [YOUR EMAIL] with Bloomly's real booking email. -->
-                    <div class="calendly-fallback" data-calendly-fallback hidden>
-                        <h2>Booking is opening very soon.</h2>
-                        <p>To reserve your spot now, send us a WhatsApp message or email Bloomly. We'll confirm your session within 24 hours.</p>
-                    </div>
-                    <div class="calendly-inline-widget"
-                         data-calendly-widget
-                         style="min-width:320px;height:700px;">
-                    </div>
+                <div class="appointments-card booking-time-card" data-booking-time-card>
+                    <p class="appointments-step-label">Step 2</p>
+                    <h2>Choose your time</h2>
+                    <p>Your booking time will be confirmed within 24 hours of payment. Once your payment is received, we will reach out via WhatsApp or email to schedule your session at a time that works for you.</p>
                 </div>
             </div>
         </section>
@@ -195,7 +184,6 @@
 
     <script src="/appointments/config.js"></script>
     <script src="/script.js"></script>
-    <script src="https://assets.calendly.com/assets/external/widget.js" async></script>
     <script src="/src/appointments/appointments.js"></script>
 </body>
 </html>
