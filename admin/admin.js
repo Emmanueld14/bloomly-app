@@ -729,7 +729,7 @@
 
         const publishUrl = supabaseConfig.publishPostFunctionUrl ||
             `${supabaseConfig.url}/functions/v1/publish-post`;
-        const postUrl = `${window.location.origin}/blog-post?slug=${encodeURIComponent(post.slug)}`;
+        const postUrl = `${window.location.origin}/blog/${encodeURIComponent(post.slug)}`;
 
         try {
             const response = await fetch(publishUrl, {
@@ -774,7 +774,7 @@
 
         const notifyUrl = supabaseConfig.notifyFunctionUrl ||
             `${supabaseConfig.url}/functions/v1/notify-subscribers`;
-        const postUrl = `${window.location.origin}/blog-post?slug=${encodeURIComponent(post.slug)}`;
+        const postUrl = `${window.location.origin}/blog/${encodeURIComponent(post.slug)}`;
 
         try {
             const response = await fetch(notifyUrl, {
@@ -1002,7 +1002,7 @@
             .replace(/[^\w\s-]/g, '')
             .replace(/\s+/g, '-')
             .replace(/-+/g, '-')
-            .trim();
+            .replace(/^-+|-+$/g, '');
     }
 
     // Initialize when DOM is ready

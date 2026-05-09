@@ -93,7 +93,7 @@ class BlogAPI {
         const addPosts = (posts) => {
             posts.forEach((post) => {
                 if (!post) return;
-                const slug = post.slug || (post.name ? post.name.replace('.md', '') : '');
+                const slug = this._normalizeSlug(post.slug || (post.name ? post.name.replace('.md', '') : ''));
                 if (!slug) return;
                 const current = bySlug.get(slug) || {};
                 bySlug.set(slug, { ...current, ...post, slug });
@@ -104,6 +104,17 @@ class BlogAPI {
         addPosts(remotePosts);
 
         return Array.from(bySlug.values());
+    }
+
+    _normalizeSlug(value) {
+        return String(value || '')
+            .trim()
+            .toLowerCase()
+            .replace(/\.md$/, '')
+            .replace(/[^a-z0-9\s-]/g, '')
+            .replace(/\s+/g, '-')
+            .replace(/-+/g, '-')
+            .replace(/^-+|-+$/g, '');
     }
 
     async _tryListRemotePosts() {
@@ -151,7 +162,7 @@ class BlogAPI {
             })
             .map(file => ({
                 name: file.name,
-                slug: file.name.replace('.md', ''),
+                slug: this._normalizeSlug(file.name),
                 sha: file.sha,
                 size: file.size,
                 url: file.download_url || file.url
@@ -170,6 +181,7 @@ class BlogAPI {
      * Returns parsed markdown with metadata
      */
     async getPost(slug) {
+        slug = this._normalizeSlug(slug);
         const localPost = await this._tryGetLocalPost(slug);
         if (localPost) {
             return localPost;
@@ -244,7 +256,7 @@ class BlogAPI {
                 .filter(name => typeof name === 'string' && name.endsWith('.md'))
                 .map(name => ({
                     name,
-                    slug: name.replace('.md', ''),
+                    slug: this._normalizeSlug(name),
                     url: `${this.localBase}/${name}`
                 }));
 

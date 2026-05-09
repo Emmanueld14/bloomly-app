@@ -95,13 +95,13 @@
         const merged = new Map();
 
         primaryPosts.forEach((post) => {
-            const slug = post.slug || post.metadata?.slug || (post.name ? post.name.replace('.md', '') : '');
+            const slug = normalizePostSlug(post.slug || post.metadata?.slug || (post.name ? post.name.replace('.md', '') : ''));
             if (!slug) return;
             merged.set(slug, { ...post, slug });
         });
 
         legacyPosts.forEach((post) => {
-            const slug = post.slug || post.metadata?.slug || (post.name ? post.name.replace('.md', '') : '');
+            const slug = normalizePostSlug(post.slug || post.metadata?.slug || (post.name ? post.name.replace('.md', '') : ''));
             if (!slug || merged.has(slug)) return;
             merged.set(slug, { ...post, slug });
         });
@@ -131,6 +131,20 @@
             .replace(/[^a-z0-9\s-]/g, '')
             .replace(/\s+/g, '-')
             .replace(/-+/g, '-');
+    }
+
+    function normalizePostSlug(value) {
+        if (window.BloomlyBlog && typeof window.BloomlyBlog.normalizeBlogSlug === 'function') {
+            return window.BloomlyBlog.normalizeBlogSlug(value);
+        }
+        return String(value || '')
+            .trim()
+            .toLowerCase()
+            .replace(/\.md$/, '')
+            .replace(/[^a-z0-9\s-]/g, '')
+            .replace(/\s+/g, '-')
+            .replace(/-+/g, '-')
+            .replace(/^-+|-+$/g, '');
     }
 
     function buildCategoryOptionsFromPosts(posts) {
@@ -213,10 +227,10 @@
             const date = formatDate(post.metadata?.date);
             const category = post.metadata?.category || 'Mental Health';
             const categorySlug = getCategorySlug(category);
-            const slug = post.slug || post.metadata?.slug || (post.name ? post.name.replace('.md', '') : '');
+            const slug = normalizePostSlug(post.slug || post.metadata?.slug || (post.name ? post.name.replace('.md', '') : ''));
             const permalink = post.permalink
                 || post.metadata?.permalink
-                || `/blog-post?slug=${encodeURIComponent(slug)}`;
+                || `/blog/${encodeURIComponent(slug)}`;
 
             if (!slug) {
                 warnDebug('Skipped blog post without slug.', post);

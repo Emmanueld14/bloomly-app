@@ -22,7 +22,14 @@ console.log('✅ public/config.json generated successfully');
 const appointmentsConfigPath = path.join(__dirname, '..', 'appointments', 'config.js');
 const appointmentsConfig = `window.APPOINTMENTS_PUBLIC_CONFIG = {
   apiBase: ${JSON.stringify(process.env.NEXT_PUBLIC_APPOINTMENTS_API_BASE || 'https://xmhyjttyarskimsxcfhl.supabase.co/functions/v1')},
-  calendlyUrl: ${JSON.stringify(process.env.NEXT_PUBLIC_CALENDLY_URL || '')},
+  calendlyUrls: {
+    // TODO: Replace with real Calendly event URL — Peer Chat.
+    peer: ${JSON.stringify(process.env.NEXT_PUBLIC_CALENDLY_PEER_URL || '')},
+    // TODO: Replace with real Calendly event URL — Standard Charla.
+    standard: ${JSON.stringify(process.env.NEXT_PUBLIC_CALENDLY_STANDARD_URL || process.env.NEXT_PUBLIC_CALENDLY_URL || '')},
+    // TODO: Replace with real Calendly event URL — Premium Charla.
+    premium: ${JSON.stringify(process.env.NEXT_PUBLIC_CALENDLY_PREMIUM_URL || '')},
+  },
 };
 `;
 fs.writeFileSync(appointmentsConfigPath, appointmentsConfig);

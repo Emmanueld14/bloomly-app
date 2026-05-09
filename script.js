@@ -273,7 +273,16 @@
         } catch (error) {
             decoded = String(value);
         }
-        const cleaned = decoded.trim().replace(/^\/+/, '').replace(/\/+$/, '').replace(/\.html$/, '');
+        const cleaned = decoded
+            .trim()
+            .toLowerCase()
+            .replace(/^\/+/, '')
+            .replace(/\/+$/, '')
+            .replace(/\.html$/, '')
+            .replace(/[^a-z0-9\s-]/g, '')
+            .replace(/\s+/g, '-')
+            .replace(/-+/g, '-')
+            .replace(/^-+|-+$/g, '');
         return cleaned || null;
     };
 

@@ -2,7 +2,14 @@
     'use strict';
 
     const config = window.APPOINTMENTS_PUBLIC_CONFIG || {};
-    const calendlyUrl = String(config.calendlyUrl || '').trim();
+    const calendlyUrls = {
+        // TODO: Replace with real Calendly event URL — Peer Chat.
+        peer: String(config.calendlyUrls?.peer || '').trim(),
+        // TODO: Replace with real Calendly event URL — Standard Charla.
+        standard: String(config.calendlyUrls?.standard || config.calendlyUrl || '').trim(),
+        // TODO: Replace with real Calendly event URL — Premium Charla.
+        premium: String(config.calendlyUrls?.premium || '').trim()
+    };
     const currency = 'KES';
     const pollIntervalMs = 5000;
 
@@ -15,6 +22,7 @@
     const calendlyWidget = document.querySelector('[data-calendly-widget]');
     const calendlyCard = document.querySelector('[data-calendly-card]');
     const calendlyLock = document.querySelector('[data-calendly-lock]');
+    const calendlyFallback = document.querySelector('[data-calendly-fallback]');
     const sessionCards = Array.from(document.querySelectorAll('[data-session-type]'));
     const form = document.querySelector('[data-charla-payment-form]');
     const amountInput = document.querySelector('[data-charla-amount]');
@@ -85,15 +93,63 @@
         if (amountInput) {
             amountInput.value = String(state.amount);
         }
+        refreshCalendlyDisplay();
+    }
+
+    function getCalendlyUrlForCurrentSession() {
+        return calendlyUrls[state.sessionType] || '';
+    }
+
+    function hasAnyCalendlyUrl() {
+        return Object.values(calendlyUrls).some(Boolean);
+    }
+
+    function showCalendlyFallback() {
+        if (calendlyWidget) {
+            calendlyWidget.hidden = true;
+            calendlyWidget.innerHTML = '';
+        }
+        if (calendlyLock) {
+            calendlyLock.hidden = true;
+        }
+        if (calendlyFallback) {
+            calendlyFallback.hidden = false;
+        }
+        if (calendlyCard) {
+            calendlyCard.classList.add('is-fallback');
+            calendlyCard.classList.remove('is-locked');
+        }
+    }
+
+    function refreshCalendlyDisplay() {
+        if (!hasAnyCalendlyUrl()) {
+            showCalendlyFallback();
+            return;
+        }
+        if (calendlyFallback) {
+            calendlyFallback.hidden = true;
+        }
+        if (!state.paid) {
+            if (calendlyWidget) calendlyWidget.hidden = false;
+            if (calendlyLock) calendlyLock.hidden = false;
+            if (calendlyCard) {
+                calendlyCard.classList.add('is-locked');
+                calendlyCard.classList.remove('is-fallback');
+            }
+        }
     }
 
     function initCalendly() {
         if (!calendlyWidget) return;
+        const calendlyUrl = getCalendlyUrlForCurrentSession();
         if (!calendlyUrl) {
-            setMessage('Calendly is not configured yet. Payment is recorded, but booking cannot open until the owner sets NEXT_PUBLIC_CALENDLY_URL.', 'error');
+            showCalendlyFallback();
+            setMessage('Payment confirmed. Use the booking contact instructions to reserve your time.', 'success');
             return;
         }
 
+        if (calendlyFallback) calendlyFallback.hidden = true;
+        calendlyWidget.hidden = false;
         calendlyWidget.innerHTML = '';
         calendlyWidget.dataset.url = calendlyUrl;
         if (window.Calendly && typeof window.Calendly.initInlineWidget === 'function') {
@@ -110,7 +166,9 @@
         if (calendlyCard) calendlyCard.classList.remove('is-locked');
         if (calendlyLock) calendlyLock.hidden = true;
         initCalendly();
-        setMessage('Payment confirmed. Choose your time in the calendar.', 'success');
+        if (getCalendlyUrlForCurrentSession()) {
+            setMessage('Payment confirmed. Choose your time in the calendar.', 'success');
+        }
     }
 
     function stopPolling() {
@@ -281,6 +339,7 @@
 
     selectSession('standard');
     refreshPaymentMethod();
+    refreshCalendlyDisplay();
     initCalendlyEventListener();
 
     const params = new URLSearchParams(window.location.search);
