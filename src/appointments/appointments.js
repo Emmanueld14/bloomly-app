@@ -1,15 +1,6 @@
 (function() {
     'use strict';
 
-    const config = window.APPOINTMENTS_PUBLIC_CONFIG || {};
-    const calendlyUrls = {
-        // TODO: Replace with real Calendly event URL — Peer Chat.
-        peer: String(config.calendlyUrls?.peer || '').trim(),
-        // TODO: Replace with real Calendly event URL — Standard Charla.
-        standard: String(config.calendlyUrls?.standard || config.calendlyUrl || '').trim(),
-        // TODO: Replace with real Calendly event URL — Premium Charla.
-        premium: String(config.calendlyUrls?.premium || '').trim()
-    };
     const currency = 'KES';
     const pollIntervalMs = 5000;
 
@@ -19,16 +10,13 @@
         premium: 'Premium Charla'
     };
 
-    const calendlyWidget = document.querySelector('[data-calendly-widget]');
-    const calendlyCard = document.querySelector('[data-calendly-card]');
-    const calendlyLock = document.querySelector('[data-calendly-lock]');
-    const calendlyFallback = document.querySelector('[data-calendly-fallback]');
     const sessionCards = Array.from(document.querySelectorAll('[data-session-type]'));
     const form = document.querySelector('[data-charla-payment-form]');
     const amountInput = document.querySelector('[data-charla-amount]');
     const messageEl = document.querySelector('[data-charla-payment-message]');
     const submitButton = document.querySelector('[data-charla-book-button]');
     const phoneField = document.querySelector('[data-phone-field]');
+    const termsInput = form ? form.querySelector('input[name="terms"]') : null;
     const methodCards = Array.from(document.querySelectorAll('.payment-method-card'));
     const statusSteps = Array.from(document.querySelectorAll('[data-status-step]'));
 
@@ -36,7 +24,8 @@
         sessionType: 'standard',
         amount: 500,
         pollingId: null,
-        paid: false
+        paid: false,
+        busy: false
     };
 
     function setMessage(message, type) {
@@ -48,9 +37,8 @@
     }
 
     function setBusy(isBusy) {
-        if (!submitButton) return;
-        submitButton.disabled = Boolean(isBusy);
-        submitButton.textContent = isBusy ? 'Processing...' : 'Book';
+        state.busy = Boolean(isBusy);
+        refreshSubmitState();
     }
 
     function setStatus(status) {
@@ -78,6 +66,19 @@
         }
     }
 
+    function refreshSubmitState() {
+        if (!submitButton) return;
+        const acceptedTerms = termsInput ? termsInput.checked : true;
+        submitButton.disabled = state.busy || state.paid || !acceptedTerms;
+        if (state.busy) {
+            submitButton.textContent = 'Processing...';
+        } else if (state.paid) {
+            submitButton.textContent = 'Payment received';
+        } else {
+            submitButton.textContent = 'Book';
+        }
+    }
+
     function selectSession(type) {
         const nextCard = sessionCards.find((card) => card.dataset.sessionType === type) || sessionCards[0];
         if (!nextCard) return;
@@ -93,82 +94,13 @@
         if (amountInput) {
             amountInput.value = String(state.amount);
         }
-        refreshCalendlyDisplay();
     }
 
-    function getCalendlyUrlForCurrentSession() {
-        return calendlyUrls[state.sessionType] || '';
-    }
-
-    function hasAnyCalendlyUrl() {
-        return Object.values(calendlyUrls).some(Boolean);
-    }
-
-    function showCalendlyFallback() {
-        if (calendlyWidget) {
-            calendlyWidget.hidden = true;
-            calendlyWidget.innerHTML = '';
-        }
-        if (calendlyLock) {
-            calendlyLock.hidden = true;
-        }
-        if (calendlyFallback) {
-            calendlyFallback.hidden = false;
-        }
-        if (calendlyCard) {
-            calendlyCard.classList.add('is-fallback');
-            calendlyCard.classList.remove('is-locked');
-        }
-    }
-
-    function refreshCalendlyDisplay() {
-        if (!hasAnyCalendlyUrl()) {
-            showCalendlyFallback();
-            return;
-        }
-        if (calendlyFallback) {
-            calendlyFallback.hidden = true;
-        }
-        if (!state.paid) {
-            if (calendlyWidget) calendlyWidget.hidden = false;
-            if (calendlyLock) calendlyLock.hidden = false;
-            if (calendlyCard) {
-                calendlyCard.classList.add('is-locked');
-                calendlyCard.classList.remove('is-fallback');
-            }
-        }
-    }
-
-    function initCalendly() {
-        if (!calendlyWidget) return;
-        const calendlyUrl = getCalendlyUrlForCurrentSession();
-        if (!calendlyUrl) {
-            showCalendlyFallback();
-            setMessage('Payment confirmed. Use the booking contact instructions to reserve your time.', 'success');
-            return;
-        }
-
-        if (calendlyFallback) calendlyFallback.hidden = true;
-        calendlyWidget.hidden = false;
-        calendlyWidget.innerHTML = '';
-        calendlyWidget.dataset.url = calendlyUrl;
-        if (window.Calendly && typeof window.Calendly.initInlineWidget === 'function') {
-            window.Calendly.initInlineWidget({
-                url: calendlyUrl,
-                parentElement: calendlyWidget
-            });
-        }
-    }
-
-    function unlockCalendly() {
+    function completePayment() {
         state.paid = true;
         setStatus('paid');
-        if (calendlyCard) calendlyCard.classList.remove('is-locked');
-        if (calendlyLock) calendlyLock.hidden = true;
-        initCalendly();
-        if (getCalendlyUrlForCurrentSession()) {
-            setMessage('Payment confirmed. Choose your time in the calendar.', 'success');
-        }
+        setMessage('Payment received. We will be in touch within 24 hours to confirm your session time.', 'success');
+        refreshSubmitState();
     }
 
     function stopPolling() {
@@ -188,7 +120,7 @@
         }
         if (result.paid) {
             stopPolling();
-            unlockCalendly();
+            completePayment();
         } else if (result.failed) {
             stopPolling();
             setStatus('pending');
@@ -255,6 +187,15 @@
         window.location.href = result.checkoutUrl;
     }
 
+    function showManualPaymentInstructions(error) {
+        const sessionLabel = sessionLabels[state.sessionType] || 'Charla';
+        console.warn('Online payment unavailable; showing manual payment instructions.', error);
+        setMessage(
+            `Online payment is not available right now. To reserve ${sessionLabel}, send KSh ${state.amount} via M-Pesa to Bloomly Kenya using your name as the reference. We will be in touch within 24 hours to confirm your session time.`,
+            'error'
+        );
+    }
+
     async function confirmStripeReturn(sessionId) {
         setBusy(true);
         setMessage('Confirming card payment...', null);
@@ -268,10 +209,10 @@
             if (!response.ok || !result.paid) {
                 throw new Error(result.error || 'Card payment was not confirmed.');
             }
-            unlockCalendly();
+            completePayment();
             window.history.replaceState({}, document.title, window.location.pathname);
         } catch (error) {
-            setMessage(error.message || 'Unable to confirm card payment.', 'error');
+            showManualPaymentInstructions(error);
         } finally {
             setBusy(false);
         }
@@ -304,20 +245,10 @@
                 await startMpesaPayment(phone);
             }
         } catch (error) {
-            setMessage(error.message || 'Payment could not start.', 'error');
+            showManualPaymentInstructions(error);
         } finally {
             setBusy(false);
         }
-    }
-
-    function initCalendlyEventListener() {
-        window.addEventListener('message', (event) => {
-            if (typeof event.data?.event !== 'string') return;
-            if (event.data.event === 'calendly.event_scheduled') {
-                setStatus('confirmed');
-                setMessage('Booking confirmed. Check your email for the Calendly confirmation.', 'success');
-            }
-        });
     }
 
     sessionCards.forEach((card) => {
@@ -334,13 +265,15 @@
 
     if (form) {
         form.addEventListener('submit', handlePaymentSubmit);
-        form.addEventListener('change', refreshPaymentMethod);
+        form.addEventListener('change', () => {
+            refreshPaymentMethod();
+            refreshSubmitState();
+        });
     }
 
     selectSession('standard');
     refreshPaymentMethod();
-    refreshCalendlyDisplay();
-    initCalendlyEventListener();
+    refreshSubmitState();
 
     const params = new URLSearchParams(window.location.search);
     const stripeSessionId = params.get('stripe_session_id');

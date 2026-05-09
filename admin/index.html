@@ -814,10 +814,10 @@
                 <button type="button" class="sidebar-link is-active" data-admin-panel="overview" data-title="Dashboard overview" data-subtitle="Real counts from the admin workspace">📊 Dashboard</button>
                 <button type="button" class="sidebar-link" data-admin-panel="blog" data-title="Blog posts" data-subtitle="Create and edit posts via GitHub">📝 Blog Posts</button>
                 <button type="button" class="sidebar-link" data-admin-panel="email" data-title="Email subscribers" data-subtitle="Notify subscribers about a post">📧 Email Subscribers</button>
-                <button type="button" class="sidebar-link" data-admin-panel="charla" data-title="Charla bookings" data-subtitle="Calendly booking reference and legacy settings">📅 Charla Bookings</button>
+                <button type="button" class="sidebar-link" data-admin-panel="charla" data-title="Charla bookings" data-subtitle="Booking references and legacy settings">📅 Charla Bookings</button>
             </nav>
             <div class="sidebar-user">
-                <img id="sidebarUserAvatar" class="sidebar-user-avatar" alt="" src="" width="44" height="44" decoding="async">
+                <img id="sidebarUserAvatar" class="sidebar-user-avatar" alt="" src="/logo.svg" width="44" height="44" decoding="async">
                 <div class="sidebar-user-copy">
                     <strong id="sidebarUserName"></strong>
                     <span id="sidebarUserRole">Signed in</span>
@@ -840,7 +840,7 @@
             </header>
 
             <div class="admin-js-user-stub" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0);" aria-hidden="true">
-                <img id="userAvatar" src="" alt="" width="48" height="48" decoding="async">
+                <img id="userAvatar" src="/logo.svg" alt="" width="48" height="48" decoding="async">
                 <span id="userName"></span>
                 <span id="userEmail"></span>
             </div>
@@ -895,9 +895,8 @@
             </div>
 
             <div id="panel-charla" class="admin-panel" data-admin-panel-target="charla">
-                <div class="calendly-admin-note">
-                    New bookings are managed in Calendly. This table shows manually logged sessions.
-                    <a href="https://calendly.com/" target="_blank" rel="noopener noreferrer">Open Calendly dashboard</a>
+                <div class="booking-admin-note">
+                    New bookings are confirmed manually after payment. This table shows manually logged sessions.
                 </div>
                 <div class="appointments-admin-section" id="appointmentsAdminSection" style="margin-top: 0; padding-top: 0; border-top: none;">
                     <h2>Charla</h2>
