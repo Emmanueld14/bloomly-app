@@ -100,7 +100,7 @@ export default async function handler(req, res) {
                 PartyB: config.shortcode,
                 PhoneNumber: phone,
                 CallBackURL: config.callbackUrl,
-                AccountReference: 'BloomlyCharla',
+                AccountReference: String(req.body?.accountReference || 'Bloomly-Charla').slice(0, 12),
                 TransactionDesc: description
             })
         });

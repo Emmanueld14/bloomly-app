@@ -6391,6 +6391,21 @@ body {
     color: var(--color-success-text);
 }
 
+.subscribe-page .form-message.is-error,
+.subscribe-page .newsletter-label .form-message.is-error {
+    color: #ff6b9d;
+    background: transparent;
+}
+
+.subscribe-success-message {
+    font-size: var(--text-xl);
+    font-weight: 600;
+    color: #ff6b9d;
+    text-align: center;
+    padding: var(--space-2xl) var(--space-md);
+    margin: 0;
+}
+
 .terms-conditions {
     border-top: 1px solid rgba(var(--color-black-rgb), 0.08);
 }

@@ -67,8 +67,50 @@ export default async function handler(req, res) {
         if (!tokenData.access_token) {
             return res.status(500).json({ error: 'No access token in response' });
         }
+
+        const allowedEmails = [
+            'manuel.muh@lightacademynairobi.sc.ke',
+            'manuelmuhunami@gmail.com',
+            'muhunanim@gmail.com',
+        ];
+
+        const userRes = await fetch('https://api.github.com/user', {
+            headers: {
+                Authorization: `Bearer ${tokenData.access_token}`,
+                Accept: 'application/vnd.github+json',
+                'User-Agent': 'Bloomly-Admin',
+            },
+        });
+        const user = userRes.ok ? await userRes.json() : {};
+
+        const emailsRes = await fetch('https://api.github.com/user/emails', {
+            headers: {
+                Authorization: `Bearer ${tokenData.access_token}`,
+                Accept: 'application/vnd.github+json',
+                'User-Agent': 'Bloomly-Admin',
+            },
+        });
+        const emails = emailsRes.ok ? await emailsRes.json() : [];
+        const primaryEmail = (
+            emails.find((entry) => entry.primary)?.email ||
+            emails[0]?.email ||
+            user.email ||
+            ''
+        ).toLowerCase();
+
+        const isAllowed = allowedEmails.some((email) => email.toLowerCase() === primaryEmail);
+        if (!isAllowed) {
+            return res.status(403).json({
+                error: 'Access denied. This account is not authorized.',
+                code: 'AccessDenied',
+            });
+        }
         
-        return res.status(200).json({ access_token: tokenData.access_token });
+        return res.status(200).json({
+            access_token: tokenData.access_token,
+            email: primaryEmail,
+            login: user.login || '',
+        });
     } catch (error) {
         console.error('OAuth error:', error);
         return res.status(500).json({ error: error.message });

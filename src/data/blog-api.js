@@ -1,109 +1,54 @@
 /**
- * Unified Blog Data API
- * Local content first with GitHub fallback
- * NO caching, NO localStorage
+ * Bloomly Blog Data API
+ * Supabase posts (primary) with local markdown fallback
  */
 
 class BlogAPI {
     constructor() {
-        this.repoOwner = 'Emmanueld14';
-        this.repoName = 'bloomly-app';
-        this.repoBranch = 'main';
-        this.basePath = 'content/blog';
-        this.apiBase = 'https://api.github.com';
-        this.rawBase = 'https://raw.githubusercontent.com';
         this.localBase = '/content/blog';
         this.localIndex = '/content/blog/index.json';
+        this.siteBase = 'https://bloomly.co.ke';
         this.debug = this._getDebugFlag();
+        this._supabase = null;
+        this._fetchTimeoutMs = 15000;
     }
 
     _getDebugFlag() {
-        if (typeof window === 'undefined') {
-            return false;
-        }
+        if (typeof window === 'undefined') return false;
         try {
-            return Boolean(
-                window.localStorage &&
-                window.localStorage.getItem('bloomly:blog-debug') === 'true'
-            );
-        } catch (error) {
+            return window.localStorage?.getItem('bloomly:blog-debug') === 'true';
+        } catch {
             return false;
         }
     }
 
     _log(...args) {
-        if (this.debug) {
-            console.log(...args);
-        }
+        if (this.debug) console.log(...args);
     }
 
     _warn(...args) {
-        if (this.debug) {
-            console.warn(...args);
+        if (this.debug) console.warn(...args);
+    }
+
+    _getSupabase() {
+        if (this._supabase) return this._supabase;
+        const url = typeof window !== 'undefined' && window.BLOOMLY_SUPABASE_URL;
+        const key = typeof window !== 'undefined' && window.BLOOMLY_SUPABASE_ANON_KEY;
+        if (!window.supabase?.createClient || !url || !key) return null;
+        this._supabase = window.supabase.createClient(url, key);
+        return this._supabase;
+    }
+
+    async _fetchWithTimeout(url, options = {}) {
+        const controller = new AbortController();
+        const id = setTimeout(() => controller.abort(), this._fetchTimeoutMs);
+        try {
+            const sep = url.includes('?') ? '&' : '?';
+            const busted = `${url}${sep}_t=${Date.now()}`;
+            return await fetch(busted, { ...options, signal: controller.signal, cache: 'no-store' });
+        } finally {
+            clearTimeout(id);
         }
-    }
-
-    /**
-     * Generate cache-busting URL - ensures every request is unique
-     */
-    _cacheBust(url) {
-        const separator = url.includes('?') ? '&' : '?';
-        const timestamp = Date.now();
-        const random = Math.random().toString(36).substring(7);
-        return `${url}${separator}_t=${timestamp}&_r=${random}`;
-    }
-
-    /**
-     * Fetch with explicit no-cache - prevents ALL caching layers
-     * Note: GitHub API doesn't allow custom Cache-Control headers, so we rely on cache-busting URLs
-     */
-    async _fetch(url, options = {}) {
-        const bustedUrl = this._cacheBust(url);
-        
-        // GitHub API doesn't allow custom Cache-Control headers in requests
-        // Cache-busting query parameters are sufficient to prevent caching
-        return fetch(bustedUrl, {
-            ...options,
-            cache: 'no-store',
-            headers: {
-                // Only include headers that GitHub API allows
-                ...(options.headers || {})
-            }
-        });
-    }
-
-    /**
-     * Get list of all blog posts from GitHub
-     * Returns array of file metadata
-     */
-    async listPosts() {
-        const localPosts = await this._tryListLocalPosts();
-        const remotePosts = await this._tryListRemotePosts();
-
-        if (!localPosts.length && !remotePosts.length) {
-            return [];
-        }
-
-        return this._mergePostLists(localPosts, remotePosts);
-    }
-
-    _mergePostLists(localPosts, remotePosts) {
-        const bySlug = new Map();
-
-        const addPosts = (posts) => {
-            posts.forEach((post) => {
-                if (!post) return;
-                const slug = this._normalizeSlug(post.slug || (post.name ? post.name.replace('.md', '') : ''));
-                if (!slug) return;
-                const current = bySlug.get(slug) || {};
-                bySlug.set(slug, { ...current, ...post, slug });
-            });
-        };
-
-        addPosts(localPosts);
-        addPosts(remotePosts);
-
-        return Array.from(bySlug.values());
     }
 
     _normalizeSlug(value) {
@@ -117,120 +62,120 @@ class BlogAPI {
             .replace(/^-+|-+$/g, '');
     }
 
-    async _tryListRemotePosts() {
-        try {
-            return await this._listRemotePosts();
-        } catch (error) {
-            this._warn('GitHub blog listing failed:', error);
-            return [];
-        }
+    _rowToListItem(row) {
+        const slug = this._normalizeSlug(row.slug);
+        return {
+            slug,
+            name: `${slug}.md`,
+            permalink: `/blog/${encodeURIComponent(slug)}`,
+            metadata: {
+                title: row.title,
+                date: row.created_at || row.updated_at,
+                category: row.category || 'Mental Health',
+                summary: row.excerpt || row.summary || '',
+                emoji: row.emoji || '💜',
+                published: row.published !== false,
+            },
+            body: row.content || '',
+            published: row.published !== false,
+        };
     }
 
-    async _listRemotePosts() {
-        const url = `${this.apiBase}/repos/${this.repoOwner}/${this.repoName}/contents/${this.basePath}?ref=${this.repoBranch}`;
-        
-        const response = await this._fetch(url, {
-            headers: {
-                'Accept': 'application/vnd.github.v3+json'
-            }
-        });
+    _rowToFullPost(row) {
+        const item = this._rowToListItem(row);
+        const body = row.content || '';
+        return {
+            ...item,
+            body,
+            html: this.markdownToHTML(body),
+            raw: body,
+        };
+    }
 
-        if (!response.ok) {
-            const errorText = await response.text();
-            let errorMessage = `Failed to list posts: ${response.status} ${response.statusText}`;
-            
-            if (response.status === 403) {
-                errorMessage += '. GitHub API rate limit exceeded. Please wait a few minutes.';
-            } else if (response.status === 404) {
-                errorMessage += '. Blog directory not found.';
-            }
-            
-            this._warn('GitHub API error:', response.status, errorText);
-            throw new Error(errorMessage);
+    async _listSupabasePosts() {
+        const client = this._getSupabase();
+        if (!client) return null;
+
+        const { data, error } = await client
+            .from('posts')
+            .select('*')
+            .eq('published', true)
+            .order('created_at', { ascending: false });
+
+        if (error) {
+            this._warn('Supabase list error:', error);
+            return null;
+        }
+        if (!data?.length) return [];
+        return data.map((row) => this._rowToListItem(row));
+    }
+
+    async _getSupabasePost(slug) {
+        const client = this._getSupabase();
+        if (!client) return null;
+
+        const { data, error } = await client
+            .from('posts')
+            .select('*')
+            .eq('slug', slug)
+            .eq('published', true)
+            .maybeSingle();
+
+        if (error || !data) return null;
+        return this._rowToFullPost(data);
+    }
+
+    async listPosts() {
+        const supabasePosts = await this._listSupabasePosts();
+        if (supabasePosts && supabasePosts.length > 0) {
+            this._log(`Loaded ${supabasePosts.length} post(s) from Supabase`);
+            return supabasePosts;
         }
 
-        const files = await response.json();
-        
-        // Handle both array and single object responses
-        const fileArray = Array.isArray(files) ? files : (files ? [files] : []);
-        
-        // Filter only markdown files
-        const markdownFiles = fileArray
-            .filter(file => {
-                if (!file || !file.name) return false;
-                return file.name.endsWith('.md') && file.type === 'file';
-            })
-            .map(file => ({
-                name: file.name,
-                slug: this._normalizeSlug(file.name),
-                sha: file.sha,
-                size: file.size,
-                url: file.download_url || file.url
-            }));
-
-        if (markdownFiles.length) {
-            this._log(`Found ${markdownFiles.length} blog post(s) from GitHub`);
-            return markdownFiles;
+        const localPosts = await this._tryListLocalPosts();
+        if (localPosts.length) {
+            const enriched = [];
+            for (const file of localPosts) {
+                try {
+                    const post = await this._getLocalPost(file.slug);
+                    if (post && this._isPublished(post)) enriched.push(post);
+                } catch (e) {
+                    this._warn('Local post skip:', file.slug, e);
+                }
+            }
+            return enriched;
         }
-
         return [];
     }
 
-    /**
-     * Get single blog post content from GitHub
-     * Returns parsed markdown with metadata
-     */
+    _isPublished(post) {
+        const v = String(post?.metadata?.published ?? post?.published ?? 'true').toLowerCase();
+        return v !== 'false' && v !== 'draft' && v !== '0';
+    }
+
     async getPost(slug) {
         slug = this._normalizeSlug(slug);
-        const localPost = await this._tryGetLocalPost(slug);
-        if (localPost) {
-            return localPost;
-        }
+        const supabasePost = await this._getSupabasePost(slug);
+        if (supabasePost) return supabasePost;
 
-        const remotePost = await this._tryGetRemotePost(slug);
-        if (remotePost) {
-            return remotePost;
-        }
+        const localPost = await this._tryGetLocalPost(slug);
+        if (localPost) return localPost;
 
         throw new Error(`Post "${slug}" not found`);
     }
 
-    async _tryGetRemotePost(slug) {
-        try {
-            return await this._getRemotePost(slug);
-        } catch (error) {
-            this._warn(`Remote fallback failed for ${slug}:`, error);
-            return null;
-        }
-    }
-
-    async _getRemotePost(slug) {
-        const filename = `${slug}.md`;
-        const url = `${this.rawBase}/${this.repoOwner}/${this.repoName}/${this.repoBranch}/${this.basePath}/${filename}`;
-        
-        const response = await this._fetch(url);
-
-        if (!response.ok) {
-            if (response.status === 404) {
-                throw new Error(`Post "${slug}" not found - it may have been deleted`);
-            }
-            throw new Error(`Failed to load post: ${response.status} ${response.statusText}`);
-        }
-
-        const markdown = await response.text();
-        
-        if (!markdown || markdown.trim().length === 0) {
-            throw new Error(`Post "${slug}" is empty`);
-        }
-
-        return this._parseMarkdown(markdown, slug);
-    }
-
     async _tryListLocalPosts() {
         try {
-            return await this._listLocalPosts();
-        } catch (error) {
-            this._warn('Unable to load local blog index:', error);
+            const response = await this._fetchWithTimeout(this.localIndex);
+            if (!response.ok) return [];
+            const data = await response.json();
+            return (Array.isArray(data) ? data : [])
+                .filter((name) => typeof name === 'string' && name.endsWith('.md'))
+                .map((name) => ({
+                    name,
+                    slug: this._normalizeSlug(name),
+                }));
+        } catch {
             return [];
         }
     }
@@ -238,110 +183,54 @@ class BlogAPI {
     async _tryGetLocalPost(slug) {
         try {
             return await this._getLocalPost(slug);
-        } catch (error) {
-            this._warn(`Local fallback failed for ${slug}:`, error);
+        } catch {
             return null;
         }
     }
 
-    async _listLocalPosts() {
-        try {
-            const response = await this._fetch(this.localIndex);
-            if (!response.ok) {
-                throw new Error(`Local index unavailable: ${response.status}`);
-            }
-            const data = await response.json();
-            const entries = Array.isArray(data) ? data : [];
-            const files = entries
-                .filter(name => typeof name === 'string' && name.endsWith('.md'))
-                .map(name => ({
-                    name,
-                    slug: this._normalizeSlug(name),
-                    url: `${this.localBase}/${name}`
-                }));
-
-            this._log(`Loaded ${files.length} blog post(s) from local index`);
-            return files;
-        } catch (error) {
-            throw error;
-        }
-    }
-
     async _getLocalPost(slug) {
-        const filename = `${slug}.md`;
-        const url = `${this.localBase}/${filename}`;
-
-        try {
-            const response = await this._fetch(url);
-            if (!response.ok) {
-                throw new Error(`Local post not found: ${response.status}`);
-            }
-            const markdown = await response.text();
-            if (!markdown || markdown.trim().length === 0) {
-                throw new Error(`Local post "${slug}" is empty`);
-            }
-            return this._parseMarkdown(markdown, slug);
-        } catch (error) {
-            throw error;
-        }
+        const url = `${this.localBase}/${slug}.md`;
+        const response = await this._fetchWithTimeout(url);
+        if (!response.ok) throw new Error(`Local post not found: ${response.status}`);
+        const markdown = await response.text();
+        const parsed = this._parseMarkdown(markdown, slug);
+        return {
+            ...parsed,
+            html: this.markdownToHTML(parsed.body),
+            permalink: `/blog/${encodeURIComponent(slug)}`,
+        };
     }
 
-    /**
-     * Parse markdown frontmatter and body
-     */
     _parseMarkdown(markdown, slug) {
         const frontmatterRegex = /^---\s*\n([\s\S]*?)\n---\s*\n([\s\S]*)$/;
         const match = markdown.match(frontmatterRegex);
+        if (!match) throw new Error(`Invalid post format: "${slug}"`);
 
-        if (!match) {
-            throw new Error(`Invalid post format: missing frontmatter for "${slug}"`);
-        }
-
-        const frontmatter = match[1];
-        const body = match[2];
         const metadata = {};
-
-        frontmatter.split('\n').forEach(line => {
-            const trimmed = line.trim();
-            if (!trimmed) return;
-
-            const colonIndex = trimmed.indexOf(':');
+        match[1].split('\n').forEach((line) => {
+            const colonIndex = line.indexOf(':');
             if (colonIndex > 0) {
-                const key = trimmed.substring(0, colonIndex).trim();
-                let value = trimmed.substring(colonIndex + 1).trim();
-                
-                // Remove quotes
-                if ((value.startsWith('"') && value.endsWith('"')) || 
-                    (value.startsWith("'") && value.endsWith("'"))) {
+                const key = line.substring(0, colonIndex).trim();
+                let value = line.substring(colonIndex + 1).trim();
+                if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
                     value = value.slice(1, -1);
                 }
-                if (value === 'true') {
-                    metadata[key] = true;
-                } else if (value === 'false') {
-                    metadata[key] = false;
-                } else {
-                    metadata[key] = value;
-                }
+                metadata[key] = value;
             }
         });
 
-        if (!metadata.title) {
-            throw new Error(`Post "${slug}" missing required title in frontmatter`);
-        }
-        metadata.author = String(metadata.author || '').trim();
+        if (!metadata.title) throw new Error(`Post "${slug}" missing title`);
 
         return {
             slug,
             metadata,
-            body,
-            raw: markdown
+            body: match[2],
+            raw: markdown,
         };
     }
 
-    /**
-     * Convert markdown body to HTML
-     */
     markdownToHTML(markdown) {
+        if (!markdown) return '';
         let html = markdown
             .replace(/^#### (.*$)/gim, '<h4>$1</h4>')
             .replace(/^### (.*$)/gim, '<h3>$1</h3>')
@@ -354,25 +243,20 @@ class BlogAPI {
             .replace(/\n\n/g, '</p><p>')
             .replace(/^(.*)$/gm, '<p>$1</p>');
 
-        // Clean up
         html = html.replace(/<p><\/p>/g, '');
         html = html.replace(/<p>(<h[2-4]>.*<\/h[2-4]>)<\/p>/g, '$1');
         html = html.replace(/<p>(<ul>.*<\/ul>)<\/p>/g, '$1');
-
         return html;
     }
 }
 
-// Create singleton instance
 const blogAPI = new BlogAPI();
 
-// Export for browser
 if (typeof window !== 'undefined') {
     window.BlogAPI = BlogAPI;
     window.blogAPI = blogAPI;
 }
 
-// Export for Node.js (if needed)
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = { BlogAPI, blogAPI };
 }

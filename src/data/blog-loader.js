@@ -317,38 +317,26 @@
                 return;
             }
 
-            // Load content for each post
-            logDebug('Loading content for posts...');
-            const postsWithContent = await Promise.allSettled(
-                posts.map(async (post) => {
-                    try {
-                        const content = await blogAPI.getPost(post.slug);
-                        return {
-                            ...post,
-                            ...content,
-                            html: blogAPI.markdownToHTML(content.body)
-                        };
-                    } catch (error) {
-                        warnDebug(`Failed to load post ${post.slug}:`, error);
-                        return {
-                            ...post,
-                            metadata: {
-                                title: post.slug ? post.slug.replace(/-/g, ' ') : 'Untitled Post',
-                                date: new Date().toISOString(),
-                                category: 'Mental Health',
-                                summary: ''
-                            },
-                            body: '',
-                            html: ''
-                        };
-                    }
-                })
-            );
-
-            // Filter out failed loads
-            const validPosts = postsWithContent
-                .filter(result => result.status === 'fulfilled' && result.value !== null)
-                .map(result => result.value);
+            const validPosts = [];
+            for (const post of posts) {
+                if (post.body && post.metadata?.title) {
+                    validPosts.push({
+                        ...post,
+                        html: post.html || blogAPI.markdownToHTML(post.body),
+                    });
+                    continue;
+                }
+                try {
+                    const content = await blogAPI.getPost(post.slug);
+                    validPosts.push({
+                        ...post,
+                        ...content,
+                        html: content.html || blogAPI.markdownToHTML(content.body),
+                    });
+                } catch (error) {
+                    warnDebug(`Failed to load post ${post.slug}:`, error);
+                }
+            }
 
             logDebug(`Successfully loaded ${validPosts.length} post(s)`);
 

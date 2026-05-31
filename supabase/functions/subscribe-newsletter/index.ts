@@ -68,9 +68,11 @@ Deno.serve(async (req) => {
   }
 
   let email = "";
+  let name = "";
   try {
     const body = await req.json();
     email = (body?.email || "").trim().toLowerCase();
+    name = String(body?.name || "").trim();
   } catch (error) {
     return jsonResponse({ error: "Invalid JSON payload." }, 400);
   }

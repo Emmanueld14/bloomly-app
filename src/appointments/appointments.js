@@ -2,13 +2,11 @@
     'use strict';
 
     const config = window.APPOINTMENTS_PUBLIC_CONFIG || {};
+    const DEFAULT_CALENDLY = 'https://calendly.com/bloomlyke';
     const calendlyUrls = {
-        // TODO: Replace with real Calendly event URL — Peer Chat.
-        peer: String(config.calendlyUrls?.peer || '').trim(),
-        // TODO: Replace with real Calendly event URL — Standard Charla.
-        standard: String(config.calendlyUrls?.standard || config.calendlyUrl || '').trim(),
-        // TODO: Replace with real Calendly event URL — Premium Charla.
-        premium: String(config.calendlyUrls?.premium || '').trim()
+        peer: String(config.calendlyUrls?.peer || DEFAULT_CALENDLY).trim(),
+        standard: String(config.calendlyUrls?.standard || config.calendlyUrl || DEFAULT_CALENDLY).trim(),
+        premium: String(config.calendlyUrls?.premium || DEFAULT_CALENDLY).trim(),
     };
     const currency = 'KES';
     const pollIntervalMs = 5000;
@@ -16,13 +14,12 @@
     const sessionLabels = {
         peer: 'Peer Chat',
         standard: 'Standard Charla',
-        premium: 'Premium Charla'
+        premium: 'Premium Charla',
     };
 
     const calendlyWidget = document.querySelector('[data-calendly-widget]');
     const calendlyCard = document.querySelector('[data-calendly-card]');
     const calendlyLock = document.querySelector('[data-calendly-lock]');
-    const calendlyFallback = document.querySelector('[data-calendly-fallback]');
     const sessionCards = Array.from(document.querySelectorAll('[data-session-type]'));
     const form = document.querySelector('[data-charla-payment-form]');
     const amountInput = document.querySelector('[data-charla-amount]');
@@ -36,7 +33,10 @@
         sessionType: 'standard',
         amount: 500,
         pollingId: null,
-        paid: false
+        paid: false,
+        name: '',
+        email: '',
+        phone: '',
     };
 
     function setMessage(message, type) {
@@ -50,7 +50,7 @@
     function setBusy(isBusy) {
         if (!submitButton) return;
         submitButton.disabled = Boolean(isBusy);
-        submitButton.textContent = isBusy ? 'Processing...' : 'Book';
+        submitButton.textContent = isBusy ? 'Processing...' : 'Pay';
     }
 
     function setStatus(status) {
@@ -93,70 +93,60 @@
         if (amountInput) {
             amountInput.value = String(state.amount);
         }
-        refreshCalendlyDisplay();
     }
 
     function getCalendlyUrlForCurrentSession() {
-        return calendlyUrls[state.sessionType] || '';
+        return calendlyUrls[state.sessionType] || DEFAULT_CALENDLY;
     }
 
-    function hasAnyCalendlyUrl() {
-        return Object.values(calendlyUrls).some(Boolean);
+    function readFormContact() {
+        if (!form) return;
+        const fd = new FormData(form);
+        state.name = String(fd.get('name') || '').trim();
+        state.email = String(fd.get('email') || '').trim();
+        state.phone = String(fd.get('phone') || '').trim();
     }
 
-    function showCalendlyFallback() {
-        if (calendlyWidget) {
-            calendlyWidget.hidden = true;
-            calendlyWidget.innerHTML = '';
-        }
-        if (calendlyLock) {
-            calendlyLock.hidden = true;
-        }
-        if (calendlyFallback) {
-            calendlyFallback.hidden = false;
-        }
-        if (calendlyCard) {
-            calendlyCard.classList.add('is-fallback');
-            calendlyCard.classList.remove('is-locked');
-        }
-    }
-
-    function refreshCalendlyDisplay() {
-        if (!hasAnyCalendlyUrl()) {
-            showCalendlyFallback();
-            return;
-        }
-        if (calendlyFallback) {
-            calendlyFallback.hidden = true;
-        }
-        if (!state.paid) {
-            if (calendlyWidget) calendlyWidget.hidden = false;
-            if (calendlyLock) calendlyLock.hidden = false;
-            if (calendlyCard) {
-                calendlyCard.classList.add('is-locked');
-                calendlyCard.classList.remove('is-fallback');
-            }
+    async function saveBooking(paymentMethod, paymentStatus) {
+        readFormContact();
+        try {
+            await fetch('/api/bookings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: state.name,
+                    email: state.email,
+                    phone: state.phone,
+                    plan: state.sessionType,
+                    sessionType: state.sessionType,
+                    amount: state.amount,
+                    payment_method: paymentMethod,
+                    payment_status: paymentStatus,
+                }),
+            });
+        } catch (error) {
+            console.error('Booking save failed', error);
         }
     }
 
     function initCalendly() {
         if (!calendlyWidget) return;
         const calendlyUrl = getCalendlyUrlForCurrentSession();
-        if (!calendlyUrl) {
-            showCalendlyFallback();
-            setMessage('Payment confirmed. Use the booking contact instructions to reserve your time.', 'success');
-            return;
-        }
-
-        if (calendlyFallback) calendlyFallback.hidden = true;
         calendlyWidget.hidden = false;
         calendlyWidget.innerHTML = '';
         calendlyWidget.dataset.url = calendlyUrl;
         if (window.Calendly && typeof window.Calendly.initInlineWidget === 'function') {
             window.Calendly.initInlineWidget({
                 url: calendlyUrl,
-                parentElement: calendlyWidget
+                parentElement: calendlyWidget,
             });
+        }
+    }
+
+    function scrollToCalendly() {
+        const target = document.getElementById('charla-booking') || calendlyCard;
+        if (target) {
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
     }
 
@@ -166,9 +156,21 @@
         if (calendlyCard) calendlyCard.classList.remove('is-locked');
         if (calendlyLock) calendlyLock.hidden = true;
         initCalendly();
-        if (getCalendlyUrlForCurrentSession()) {
-            setMessage('Payment confirmed. Choose your time in the calendar.', 'success');
-        }
+        setMessage('Check your phone and approve the M-Pesa prompt 💜', 'success');
+        setTimeout(() => {
+            setMessage('Payment confirmed. Choose your time in the calendar below.', 'success');
+            scrollToCalendly();
+        }, 1200);
+    }
+
+    function unlockCalendlyAfterCard() {
+        state.paid = true;
+        setStatus('paid');
+        if (calendlyCard) calendlyCard.classList.remove('is-locked');
+        if (calendlyLock) calendlyLock.hidden = true;
+        initCalendly();
+        setMessage('Payment confirmed. Choose your time in the calendar below.', 'success');
+        scrollToCalendly();
     }
 
     function stopPolling() {
@@ -180,7 +182,7 @@
 
     async function pollMpesaStatus(checkoutRequestId) {
         const response = await fetch(`/api/mpesa/status?checkoutRequestId=${encodeURIComponent(checkoutRequestId)}`, {
-            cache: 'no-store'
+            cache: 'no-store',
         });
         const result = await response.json().catch(() => ({}));
         if (!response.ok) {
@@ -188,13 +190,12 @@
         }
         if (result.paid) {
             stopPolling();
-            unlockCalendly();
+            await saveBooking('mpesa', 'confirmed');
+            unlockCalendlyAfterCard();
         } else if (result.failed) {
             stopPolling();
             setStatus('pending');
             setMessage(result.message || 'M-Pesa payment was not completed.', 'error');
-        } else {
-            setMessage('Payment pending. Approve the M-Pesa prompt on your phone.', null);
         }
     }
 
@@ -203,13 +204,12 @@
         state.pollingId = window.setInterval(() => {
             pollMpesaStatus(checkoutRequestId).catch((error) => {
                 console.error('M-Pesa status check failed', error);
-                setMessage(error.message || 'Unable to check payment status.', 'error');
             });
         }, pollIntervalMs);
     }
 
     async function startMpesaPayment(phone) {
-        setMessage('Sending M-Pesa prompt...', null);
+        setMessage('Sending STK push to your phone...', null);
         const response = await fetch('/api/mpesa/stkpush', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -217,8 +217,9 @@
                 phone,
                 amount: state.amount,
                 sessionType: state.sessionType,
-                description: sessionLabels[state.sessionType] || 'Bloomly Charla'
-            })
+                accountReference: 'Bloomly-Charla',
+                description: sessionLabels[state.sessionType] || 'Bloomly Charla',
+            }),
         });
         const result = await response.json().catch(() => ({}));
         if (!response.ok) {
@@ -227,7 +228,8 @@
         if (!result.CheckoutRequestID) {
             throw new Error('M-Pesa did not return a checkout request id.');
         }
-        setMessage('Payment pending. Approve the M-Pesa prompt on your phone.', null);
+        await saveBooking('mpesa', 'pending');
+        setMessage('Check your phone and approve the M-Pesa prompt 💜', 'success');
         startMpesaPolling(result.CheckoutRequestID);
     }
 
@@ -242,8 +244,8 @@
                 sessionType: state.sessionType,
                 description: sessionLabels[state.sessionType] || 'Bloomly Charla',
                 successUrl: `${window.location.origin}${window.location.pathname}?stripe_session_id={CHECKOUT_SESSION_ID}`,
-                cancelUrl: `${window.location.origin}${window.location.pathname}?payment_cancelled=1`
-            })
+                cancelUrl: `${window.location.origin}${window.location.pathname}?payment_cancelled=1`,
+            }),
         });
         const result = await response.json().catch(() => ({}));
         if (!response.ok) {
@@ -252,6 +254,7 @@
         if (!result.checkoutUrl) {
             throw new Error('Stripe Checkout did not return a payment link.');
         }
+        await saveBooking('card', 'pending');
         window.location.href = result.checkoutUrl;
     }
 
@@ -262,13 +265,14 @@
             const response = await fetch('/api/stripe/confirm', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ sessionId })
+                body: JSON.stringify({ sessionId }),
             });
             const result = await response.json().catch(() => ({}));
             if (!response.ok || !result.paid) {
                 throw new Error(result.error || 'Card payment was not confirmed.');
             }
-            unlockCalendly();
+            await saveBooking('card', 'confirmed');
+            unlockCalendlyAfterCard();
             window.history.replaceState({}, document.title, window.location.pathname);
         } catch (error) {
             setMessage(error.message || 'Unable to confirm card payment.', 'error');
@@ -281,11 +285,22 @@
         event.preventDefault();
         if (!form) return;
 
+        readFormContact();
         const provider = getSelectedProvider();
         const formData = new FormData(form);
         const acceptedTerms = formData.get('terms') === 'on';
         const phone = String(formData.get('phone') || '').trim();
+        const email = String(formData.get('email') || '').trim();
+        const name = String(formData.get('name') || '').trim();
 
+        if (!name) {
+            setMessage('Please enter your full name.', 'error');
+            return;
+        }
+        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            setMessage('Please enter a valid email address.', 'error');
+            return;
+        }
         if (!acceptedTerms) {
             setMessage('Please agree to the Terms & Conditions before booking.', 'error');
             return;
@@ -339,7 +354,6 @@
 
     selectSession('standard');
     refreshPaymentMethod();
-    refreshCalendlyDisplay();
     initCalendlyEventListener();
 
     const params = new URLSearchParams(window.location.search);

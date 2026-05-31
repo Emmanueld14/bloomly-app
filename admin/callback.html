@@ -146,6 +146,10 @@
                 }
                 
                 if (!response.ok) {
+                    if (response.status === 403) {
+                        window.location.href = '/admin/login.html?error=AccessDenied';
+                        return;
+                    }
                     throw new Error(data.error || 'Failed to exchange token');
                 }
                 

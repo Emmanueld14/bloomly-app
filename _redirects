@@ -3,6 +3,9 @@
 
 # Admin routing
 /admin /admin/index.html 200
+/admin/login /admin/login.html 200
+/admin/login/ /admin/login.html 200
+/admin/dashboard.html /admin/ 301
 
 # Blog routing
 /blog /blog/index.html 200

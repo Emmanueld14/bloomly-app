@@ -47,7 +47,9 @@
     { "source": "/terms", "destination": "/terms/index.html" },
     { "source": "/terms/", "destination": "/terms/index.html" },
     { "source": "/appointments", "destination": "/appointments/index.html" },
-    { "source": "/appointments/", "destination": "/appointments/index.html" }
+    { "source": "/appointments/", "destination": "/appointments/index.html" },
+    { "source": "/admin/login", "destination": "/admin/login.html" },
+    { "source": "/admin/login/", "destination": "/admin/login.html" }
   ]
 }
 

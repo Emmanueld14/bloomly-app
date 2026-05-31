@@ -3,1099 +3,129 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin - Bloomly Blog</title>
-    
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    
-    <!-- Stylesheet -->
-    <link rel="stylesheet" href="/styles.css?v=20260325a">
-    <link rel="stylesheet" href="/admin/dashboard.css?v=20260325a">
-
-    <style>
-        [hidden] {
-            display: none !important;
-        }
-
-        .admin-container {
-            min-height: 100vh;
-            background: var(--gradient-hero);
-            padding: var(--space-4xl) var(--space-md);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .admin-card {
-            background: rgba(var(--color-white-rgb), 0.95);
-            backdrop-filter: blur(20px);
-            border-radius: var(--radius-2xl);
-            padding: var(--space-3xl);
-            max-width: 1000px;
-            width: 100%;
-            box-shadow: 0 20px 60px rgba(var(--color-black-rgb), 0.3);
-        }
-        
-        .admin-header {
-            text-align: center;
-            margin-bottom: var(--space-2xl);
-        }
-        
-        .admin-header h1 {
-            color: var(--color-text);
-            margin-bottom: var(--space-sm);
-        }
-        
-        .admin-header p {
-            color: var(--color-gray-550);
-        }
-        
-        .auth-section {
-            background: var(--gradient-soft);
-            padding: var(--space-xl);
-            border-radius: var(--radius-lg);
-            margin-bottom: var(--space-xl);
-        }
-        
-        .auth-section h3 {
-            margin-bottom: var(--space-md);
-            color: var(--color-text);
-        }
-        
-        .auth-section p {
-            color: var(--color-gray-550);
-            font-size: var(--text-sm);
-            margin-bottom: var(--space-md);
-        }
-        
-        .token-input {
-            width: 100%;
-            padding: var(--space-md);
-            border: 2px solid var(--color-gray-250);
-            border-radius: var(--radius-md);
-            font-size: var(--text-base);
-            margin-bottom: var(--space-md);
-            font-family: monospace;
-        }
-        
-        .token-input:focus {
-            outline: none;
-            border-color: var(--color-blue);
-        }
-        
-        .btn-auth {
-            background: var(--color-blue);
-            color: var(--color-white);
-            border: none;
-            padding: var(--space-md) var(--space-xl);
-            border-radius: var(--radius-md);
-            cursor: pointer;
-            font-weight: 600;
-            transition: all var(--transition-base);
-        }
-        
-        .btn-auth:hover {
-            background: var(--color-blue-strong);
-            transform: translateY(-2px);
-        }
-        
-        .github-login-btn {
-            background: var(--color-github-dark);
-            color: var(--color-white);
-            border: none;
-            padding: var(--space-md) var(--space-xl);
-            border-radius: var(--radius-md);
-            cursor: pointer;
-            font-weight: 600;
-            font-size: var(--text-base);
-            transition: all var(--transition-base);
-            display: flex;
-            align-items: center;
-            gap: var(--space-sm);
-            justify-content: center;
-            width: 100%;
-        }
-        
-        .github-login-btn:hover {
-            background: var(--color-github-dark-hover);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(var(--color-black-rgb), 0.15);
-        }
-        
-        .github-login-btn svg {
-            width: 20px;
-            height: 20px;
-        }
-        
-        .admin-classic-page .admin-panel {
-            display: none;
-        }
-
-        .admin-classic-page .admin-panel.is-active {
-            display: block;
-        }
-
-        .admin-unlock-wrap {
-            max-width: 480px;
-            margin: 0 auto;
-        }
-
-        .admin-unlock-wrap .token-input {
-            margin-bottom: var(--space-md);
-        }
-
-        .sidebar-footer-actions {
-            margin-top: auto;
-            display: grid;
-            gap: var(--space-sm);
-        }
-
-        .sidebar-footer-actions .btn-sm {
-            width: 100%;
-        }
-
-        .sidebar-dashboard-link {
-            font-size: var(--text-sm);
-            color: var(--color-blue);
-            text-decoration: none;
-            text-align: center;
-        }
-
-        .sidebar-dashboard-link:hover {
-            text-decoration: underline;
-        }
-
-        .admin-classic-page .admin-main {
-            overflow-y: auto;
-            max-height: 100vh;
-        }
-        
-        .user-info {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: var(--space-md);
-            background: var(--gradient-soft);
-            border-radius: var(--radius-lg);
-            margin-bottom: var(--space-xl);
-        }
-        
-        .user-info-left {
-            display: flex;
-            align-items: center;
-            gap: var(--space-md);
-        }
-        
-        .user-avatar {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-        }
-        
-        .user-details h3 {
-            margin: 0;
-            font-size: var(--text-lg);
-        }
-        
-        .user-details p {
-            margin: 0;
-            color: var(--color-gray-550);
-            font-size: var(--text-sm);
-        }
-        
-        .logout-btn {
-            background: var(--color-pink);
-            color: var(--color-white);
-            border: none;
-            padding: var(--space-sm) var(--space-lg);
-            border-radius: var(--radius-md);
-            cursor: pointer;
-            font-weight: 600;
-            transition: all var(--transition-base);
-        }
-        
-        .logout-btn:hover {
-            background: var(--color-pink-strong);
-            transform: translateY(-2px);
-        }
-        
-        .posts-list {
-            margin-top: var(--space-xl);
-        }
-        
-        .post-item {
-            background: var(--color-white);
-            border-radius: var(--radius-lg);
-            padding: var(--space-lg);
-            margin-bottom: var(--space-md);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: var(--shadow-card);
-            transition: all var(--transition-base);
-        }
-        
-        .post-item:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 40px rgba(var(--color-black-rgb), 0.15);
-        }
-        
-        .post-info h3 {
-            margin: 0 0 var(--space-xs) 0;
-            color: var(--color-text);
-        }
-        
-        .post-info p {
-            margin: 0;
-            color: var(--color-gray-550);
-            font-size: var(--text-sm);
-        }
-        
-        .post-actions {
-            display: flex;
-            gap: var(--space-sm);
-            align-items: center;
-        }
-        
-        .btn-edit, .btn-delete {
-            padding: var(--space-xs) var(--space-md);
-            border-radius: var(--radius-md);
-            border: none;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all var(--transition-base);
-            font-size: var(--text-sm);
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .btn-edit {
-            background: var(--color-blue);
-            color: var(--color-white);
-        }
-        
-        .btn-edit:hover {
-            background: var(--color-blue-strong);
-        }
-        
-        .btn-delete {
-            background: var(--color-danger);
-            color: var(--color-white);
-        }
-        
-        .btn-delete:hover {
-            background: var(--color-danger-dark);
-        }
-        
-        .add-post-btn {
-            background: var(--gradient-primary);
-            color: var(--color-white);
-            border: none;
-            padding: var(--space-md) var(--space-2xl);
-            border-radius: var(--radius-lg);
-            cursor: pointer;
-            font-weight: 600;
-            font-size: var(--text-lg);
-            margin-bottom: var(--space-xl);
-            transition: all var(--transition-base);
-            width: 100%;
-        }
-        
-        .add-post-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-button);
-        }
-        
-        .loading {
-            text-align: center;
-            padding: var(--space-2xl);
-            color: var(--color-gray-550);
-        }
-        
-        .error {
-            background: var(--color-error-bg);
-            color: var(--color-error-text);
-            padding: var(--space-md);
-            border-radius: var(--radius-md);
-            margin-bottom: var(--space-lg);
-        }
-        
-        .success {
-            background: var(--color-success-bg);
-            color: var(--color-success-text);
-            padding: var(--space-md);
-            border-radius: var(--radius-md);
-            margin-bottom: var(--space-lg);
-        }
-
-        .appointments-admin-section {
-            margin-top: var(--space-3xl);
-            padding-top: var(--space-2xl);
-            border-top: 1px solid rgba(var(--color-black-rgb), 0.08);
-        }
-
-        .appointments-admin-section h2 {
-            margin-bottom: var(--space-sm);
-        }
-
-        .appointments-day-row {
-            display: flex;
-            flex-wrap: wrap;
-            gap: var(--space-sm);
-            align-items: center;
-            margin-bottom: var(--space-sm);
-        }
-
-        .appointments-day-row label {
-            display: flex;
-            align-items: center;
-            gap: var(--space-xs);
-            min-width: 140px;
-            font-weight: 600;
-        }
-
-        .appointments-day-row input[type="text"] {
-            flex: 1;
-            min-width: 220px;
-        }
-
-        .blackout-controls {
-            display: flex;
-            flex-wrap: wrap;
-            gap: var(--space-sm);
-            align-items: center;
-        }
-
-        .blackout-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: var(--space-sm);
-            margin-top: var(--space-sm);
-        }
-
-        .date-override-list {
-            display: flex;
-            flex-direction: column;
-            gap: var(--space-sm);
-            margin-top: var(--space-sm);
-        }
-
-        .date-override-item {
-            display: flex;
-            justify-content: space-between;
-            gap: var(--space-sm);
-            align-items: center;
-            padding: 0.5rem 0.75rem;
-            border-radius: var(--radius-md);
-            background: rgba(var(--color-black-rgb), 0.04);
-        }
-
-        .date-override-item-text {
-            font-size: var(--text-sm);
-            color: var(--color-text);
-            overflow-wrap: anywhere;
-        }
-
-        .date-override-remove {
-            white-space: nowrap;
-            padding: 0.35rem 0.75rem;
-            font-size: var(--text-xs);
-        }
-
-        .date-override-calendar {
-            margin-top: var(--space-sm);
-            border: 1px solid rgba(var(--color-black-rgb), 0.1);
-            border-radius: var(--radius-md);
-            padding: 0.75rem;
-            background: rgba(var(--color-black-rgb), 0.02);
-        }
-
-        .date-override-calendar-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 0.5rem;
-            gap: var(--space-sm);
-        }
-
-        .date-override-calendar-nav {
-            border: 1px solid rgba(var(--color-black-rgb), 0.15);
-            border-radius: var(--radius-sm);
-            background: var(--color-white);
-            width: 2rem;
-            height: 2rem;
-            cursor: pointer;
-            font-size: 1rem;
-            line-height: 1;
-        }
-
-        .date-override-calendar-month {
-            font-weight: 700;
-            color: var(--color-text);
-        }
-
-        .date-override-calendar-weekdays,
-        .date-override-calendar-grid {
-            display: grid;
-            grid-template-columns: repeat(7, minmax(0, 1fr));
-            gap: 0.25rem;
-        }
-
-        .date-override-calendar-weekday {
-            text-align: center;
-            font-size: 0.75rem;
-            color: var(--color-gray-550);
-            padding: 0.25rem 0;
-            font-weight: 600;
-        }
-
-        .date-override-calendar-empty {
-            min-height: 2.25rem;
-        }
-
-        .date-override-calendar-day {
-            position: relative;
-            min-height: 2.25rem;
-            border: 1px solid rgba(var(--color-black-rgb), 0.1);
-            border-radius: var(--radius-sm);
-            background: var(--color-white);
-            cursor: pointer;
-            font-size: 0.85rem;
-            color: var(--color-text);
-        }
-
-        .date-override-calendar-day:hover {
-            border-color: var(--color-blue);
-        }
-
-        .date-override-calendar-day.is-selected {
-            border-color: var(--color-blue);
-            background: rgba(var(--color-blue-rgb), 0.15);
-        }
-
-        .date-override-calendar-day.is-today {
-            box-shadow: inset 0 0 0 1px rgba(var(--color-blue-rgb), 0.4);
-        }
-
-        .date-override-calendar-day.is-overridden::after {
-            content: '';
-            position: absolute;
-            right: 0.25rem;
-            bottom: 0.25rem;
-            width: 0.35rem;
-            height: 0.35rem;
-            border-radius: 999px;
-            background: var(--color-success);
-        }
-
-        .date-override-calendar-day.is-blackout {
-            border-color: var(--color-danger);
-            background: rgba(var(--color-danger-rgb), 0.1);
-        }
-
-        .payment-diagnostics-results {
-            margin-top: var(--space-sm);
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: var(--space-sm);
-        }
-
-        .payment-diagnostics-card {
-            border: 1px solid rgba(var(--color-black-rgb), 0.1);
-            border-radius: var(--radius-md);
-            background: rgba(var(--color-black-rgb), 0.02);
-            padding: 0.75rem;
-        }
-
-        .payment-diagnostics-card h4 {
-            margin: 0 0 0.35rem 0;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: var(--space-sm);
-        }
-
-        .payment-diagnostics-badge {
-            font-size: 0.7rem;
-            font-weight: 700;
-            border-radius: 999px;
-            padding: 0.2rem 0.5rem;
-            text-transform: uppercase;
-            letter-spacing: 0.03em;
-        }
-
-        .payment-diagnostics-badge.ok {
-            background: rgba(var(--color-success-rgb), 0.15);
-            color: var(--color-success);
-        }
-
-        .payment-diagnostics-badge.warn {
-            background: rgba(var(--color-blue-rgb), 0.15);
-            color: var(--color-blue-strong);
-        }
-
-        .payment-diagnostics-badge.error {
-            background: rgba(var(--color-danger-rgb), 0.15);
-            color: var(--color-danger);
-        }
-
-        .payment-diagnostics-card ul {
-            margin: 0.4rem 0 0 1rem;
-            padding: 0;
-            font-size: 0.85rem;
-            color: var(--color-gray-650);
-        }
-
-        .blackout-chip {
-            display: inline-flex;
-            align-items: center;
-            gap: var(--space-xs);
-            background: rgba(var(--color-black-rgb), 0.05);
-            border-radius: var(--radius-full);
-            padding: 0.35rem 0.75rem;
-            font-size: var(--text-sm);
-        }
-
-        .blackout-chip button {
-            border: none;
-            background: transparent;
-            cursor: pointer;
-            font-weight: 700;
-            color: var(--color-danger);
-        }
-
-        .appointments-admin-message {
-            margin-top: var(--space-sm);
-            font-size: var(--text-sm);
-            padding: 0.5rem 0.75rem;
-            border-radius: var(--radius-md);
-            background: rgba(var(--color-black-rgb), 0.05);
-            color: var(--color-gray-650);
-        }
-
-        .appointments-admin-message.success {
-            background: rgba(var(--color-success-rgb), 0.15);
-            color: var(--color-success);
-        }
-
-        .appointments-admin-message.error {
-            background: rgba(var(--color-danger-rgb), 0.15);
-            color: var(--color-danger);
-        }
-        
-        /* Modal Styles */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(var(--color-black-rgb), 0.5);
-            backdrop-filter: blur(5px);
-        }
-        
-        .modal.active {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .modal-content {
-            background: var(--color-white);
-            border-radius: var(--radius-2xl);
-            padding: var(--space-3xl);
-            max-width: 800px;
-            width: 90%;
-            max-height: 90vh;
-            overflow-y: auto;
-            box-shadow: 0 20px 60px rgba(var(--color-black-rgb), 0.3);
-        }
-        
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: var(--space-xl);
-        }
-        
-        .modal-header h2 {
-            margin: 0;
-            color: var(--color-text);
-        }
-        
-        .close-btn {
-            background: none;
-            border: none;
-            font-size: var(--text-2xl);
-            cursor: pointer;
-            color: var(--color-gray-550);
-            padding: 0;
-            width: 32px;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: var(--radius-md);
-        }
-        
-        .close-btn:hover {
-            background: var(--color-gray-150);
-        }
-        
-        .form-group {
-            margin-bottom: var(--space-lg);
-        }
-        
-        .form-group label {
-            display: block;
-            margin-bottom: var(--space-xs);
-            color: var(--color-text);
-            font-weight: 600;
-        }
-        
-        .form-group input,
-        .form-group textarea,
-        .form-group select {
-            width: 100%;
-            padding: var(--space-md);
-            border: 2px solid var(--color-gray-250);
-            border-radius: var(--radius-md);
-            font-size: var(--text-base);
-            font-family: var(--font-primary);
-        }
-        
-        .form-group input:focus,
-        .form-group textarea:focus,
-        .form-group select:focus {
-            outline: none;
-            border-color: var(--color-blue);
-        }
-        
-        .form-group textarea {
-            min-height: 300px;
-            resize: vertical;
-        }
-        
-        .form-actions {
-            display: flex;
-            gap: var(--space-md);
-            justify-content: flex-end;
-            margin-top: var(--space-xl);
-        }
-        
-        .btn-save {
-            background: var(--color-blue);
-            color: var(--color-white);
-            border: none;
-            padding: var(--space-md) var(--space-2xl);
-            border-radius: var(--radius-md);
-            cursor: pointer;
-            font-weight: 600;
-            transition: all var(--transition-base);
-        }
-        
-        .btn-save:hover {
-            background: var(--color-blue-strong);
-            transform: translateY(-2px);
-        }
-        
-        .btn-cancel {
-            background: var(--color-gray-250);
-            color: var(--color-gray-550);
-            border: none;
-            padding: var(--space-md) var(--space-2xl);
-            border-radius: var(--radius-md);
-            cursor: pointer;
-            font-weight: 600;
-            transition: all var(--transition-base);
-        }
-        
-        .btn-cancel:hover {
-            background: var(--color-gray-220);
-        }
-        
-        .help-link {
-            color: var(--color-blue);
-            text-decoration: none;
-            font-size: var(--text-sm);
-        }
-        
-        .help-link:hover {
-            text-decoration: underline;
-        }
-
-        .email-update-section {
-            margin-top: var(--space-2xl);
-            padding: var(--space-xl);
-            border-radius: var(--radius-lg);
-            background: var(--gradient-soft);
-        }
-
-        .email-update-section h3 {
-            margin-bottom: var(--space-sm);
-            color: var(--color-text);
-        }
-
-        .email-update-section p {
-            color: var(--color-gray-550);
-            font-size: var(--text-sm);
-            margin-bottom: var(--space-lg);
-        }
-
-        .email-post-message {
-            margin-top: var(--space-md);
-            font-size: var(--text-sm);
-        }
-
-        .email-post-message.success {
-            color: var(--color-success-text);
-        }
-
-        .email-post-message.error {
-            color: var(--color-error-text);
-        }
-
-        @media (max-width: 720px) {
-            .post-item {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: var(--space-sm);
-            }
-
-            .post-actions {
-                width: 100%;
-                justify-content: flex-start;
-                flex-wrap: wrap;
-            }
-        }
-    </style>
+    <title>Bloomly Admin</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="/admin/launch-admin.css">
 </head>
-<body class="admin-classic-page">
-    <main id="authSection" class="admin-auth-screen">
-        <div class="admin-auth-card">
-            <div class="admin-auth-header">
-                <h1>Bloomly Admin</h1>
-                <p>Sign in with GitHub to manage the blog and Charla.</p>
-            </div>
-            <button class="github-login-btn" id="githubLoginBtn" type="button">
-                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-                </svg>
-                Login with GitHub
-            </button>
-        </div>
-    </main>
-
-    <main id="adminUnlockSection" class="admin-auth-screen" hidden>
-        <div class="admin-auth-card admin-unlock-wrap">
-            <div class="admin-auth-header">
-                <h1>Admin password</h1>
-                <p>Enter the site admin password. In Supabase, use the <strong>same</strong> value for <code>ADMIN_PUBLISH_KEY</code> and <code>APPOINTMENTS_ADMIN_KEY</code>. It is kept only in this browser tab until you log out or lock.</p>
-            </div>
-            <label for="adminPasswordInput">Password</label>
-            <input type="password" id="adminPasswordInput" class="token-input" autocomplete="current-password" placeholder="Admin password">
-            <button type="button" class="btn-auth" id="adminUnlockBtn">Unlock</button>
-            <p id="adminUnlockError" class="inline-error" style="display: none;"></p>
-        </div>
-    </main>
-
-    <div id="adminAppShell" class="admin-app-shell" hidden>
+<body>
+    <div class="admin-shell">
         <aside class="admin-sidebar">
-            <div class="sidebar-brand">
-                <h2>Bloomly</h2>
-                <p>Classic admin</p>
-            </div>
-            <nav id="adminSidebarNav" class="sidebar-nav" aria-label="Admin sections">
-                <button type="button" class="sidebar-link is-active" data-admin-panel="overview" data-title="Dashboard overview" data-subtitle="Real counts from the admin workspace">📊 Dashboard</button>
-                <button type="button" class="sidebar-link" data-admin-panel="blog" data-title="Blog posts" data-subtitle="Create and edit posts via GitHub">📝 Blog Posts</button>
-                <button type="button" class="sidebar-link" data-admin-panel="email" data-title="Email subscribers" data-subtitle="Notify subscribers about a post">📧 Email Subscribers</button>
-                <button type="button" class="sidebar-link" data-admin-panel="charla" data-title="Charla bookings" data-subtitle="Calendly booking reference and legacy settings">📅 Charla Bookings</button>
-            </nav>
-            <div class="sidebar-user">
-                <img id="sidebarUserAvatar" class="sidebar-user-avatar" alt="" src="" width="44" height="44" decoding="async">
-                <div class="sidebar-user-copy">
-                    <strong id="sidebarUserName"></strong>
-                    <span id="sidebarUserRole">Signed in</span>
+            <div class="admin-brand">
+                <img src="/logo.svg" alt="Bloomly logo" width="40" height="40">
+                <div>
+                    <strong>Bloomly</strong>
+                    <span class="admin-brand-badge">Admin</span>
                 </div>
             </div>
-            <div class="sidebar-footer-actions">
-                <button type="button" class="btn btn-neutral btn-sm" id="adminLockBtn">Lock admin</button>
-                <a href="/admin/dashboard.html" class="sidebar-dashboard-link">Full dashboard (GitHub)</a>
+            <nav class="admin-nav">
+                <button type="button" data-admin-nav="dashboard" class="is-active">Dashboard</button>
+                <button type="button" data-admin-nav="blog">Blog Posts</button>
+                <button type="button" data-admin-nav="bookings">Charla Bookings</button>
+                <button type="button" data-admin-nav="subscribers">Subscribers</button>
+                <button type="button" data-admin-nav="counsellors">Counsellor Applications</button>
+                <button type="button" data-admin-nav="settings">Settings</button>
+            </nav>
+            <div class="admin-sidebar-footer">
+                <button type="button" class="btn btn-secondary" id="logoutBtn" style="width:100%">Logout</button>
             </div>
         </aside>
-        <section class="admin-main">
-            <header class="admin-topbar">
-                <div>
-                    <h1 id="adminViewTitle">Blog posts</h1>
-                    <p id="adminViewSubtitle">Create and edit posts via GitHub</p>
+
+        <main class="admin-main">
+            <section data-view-panel="dashboard">
+                <h1>Dashboard</h1>
+                <div class="admin-stat-grid">
+                    <article class="admin-stat-card"><span>Blog posts</span><strong id="statPosts">0</strong></article>
+                    <article class="admin-stat-card"><span>Subscribers</span><strong id="statSubscribers">0</strong></article>
+                    <article class="admin-stat-card"><span>Charla bookings</span><strong id="statBookings">0</strong></article>
+                    <article class="admin-stat-card"><span>Counsellor apps pending</span><strong id="statCounsellors">0</strong></article>
                 </div>
-                <div class="topbar-actions">
-                    <button type="button" class="btn btn-secondary btn-sm" id="logoutBtn">Logout</button>
+                <div class="admin-panel">
+                    <h2>Recent bookings</h2>
+                    <table class="admin-table" id="recentBookingsTable"><thead><tr><th>Name</th><th>Plan</th><th>Amount</th><th>Status</th></tr></thead><tbody></tbody></table>
                 </div>
-            </header>
-
-            <div class="admin-js-user-stub" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0);" aria-hidden="true">
-                <img id="userAvatar" src="" alt="" width="48" height="48" decoding="async">
-                <span id="userName"></span>
-                <span id="userEmail"></span>
-            </div>
-
-            <div id="errorMessage" class="error" style="display: none;"></div>
-            <div id="successMessage" class="success" style="display: none;"></div>
-
-            <div id="panel-blog" class="admin-panel is-active" data-admin-panel-target="blog">
-                <div class="classic-admin-toolbar">
-                    <label class="admin-search-field">
-                        <span>Search posts</span>
-                        <input type="search" id="classicPostSearch" placeholder="Filter by title or category">
-                    </label>
-                    <button class="add-post-btn" id="addPostBtn">+ Add New Post</button>
+                <div class="admin-panel">
+                    <h2>Recent subscribers</h2>
+                    <table class="admin-table" id="recentSubscribersTable"><thead><tr><th>Name</th><th>Email</th><th>Date</th></tr></thead><tbody></tbody></table>
                 </div>
-                <div id="postsList" class="posts-list">
-                    <div class="loading">Loading posts...</div>
+            </section>
+
+            <section data-view-panel="blog" hidden>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+                    <h1>Blog Posts</h1>
+                    <button type="button" class="btn btn-primary" id="newPostBtn">New Post</button>
                 </div>
-            </div>
-
-            <div id="panel-email" class="admin-panel" data-admin-panel-target="email">
-                <div class="email-update-section">
-                    <h3>Email subscribers about a new post</h3>
-                    <div class="subscriber-count-card">
-                        <span>Total subscribers</span>
-                        <strong id="classicSubscriberCount">0</strong>
-                    </div>
-                    <button type="button" class="btn btn-neutral btn-sm" id="classicExportSubscribersBtn">Export CSV</button>
-                    <p>Send an email update when a new blog post is published. Uses the admin password you entered at unlock.</p>
-                    <form id="emailPostForm">
-                        <div class="form-group">
-                            <label for="emailPostTitle">Title *</label>
-                            <input type="text" id="emailPostTitle" name="title" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="emailPostSummary">Summary *</label>
-                            <textarea id="emailPostSummary" name="summary" rows="3" required></textarea>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="emailPostUrl">Post URL *</label>
-                            <input type="url" id="emailPostUrl" name="url" placeholder="https://yourdomain.com/blog/your-post" required>
-                        </div>
-
-                        <div class="form-actions">
-                            <button type="submit" class="btn-save" id="emailPostSubmit">Send email update</button>
-                        </div>
-                        <p id="emailPostMessage" class="email-post-message"></p>
-                    </form>
+                <div class="admin-panel">
+                    <table class="admin-table" id="postsTable"><thead><tr><th>Title</th><th>Category</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead><tbody></tbody></table>
                 </div>
-            </div>
+            </section>
 
-            <div id="panel-charla" class="admin-panel" data-admin-panel-target="charla">
-                <div class="calendly-admin-note">
-                    New bookings are managed in Calendly. This table shows manually logged sessions.
-                    <a href="https://calendly.com/" target="_blank" rel="noopener noreferrer">Open Calendly dashboard</a>
+            <section data-view-panel="bookings" hidden>
+                <h1>Charla Bookings</h1>
+                <p><label>Filter <select id="bookingFilter"><option value="all">All</option><option value="pending">Pending</option><option value="confirmed">Confirmed</option><option value="cancelled">Cancelled</option></select></label>
+                <button type="button" class="admin-btn-sm" id="exportBookingsBtn">Export CSV</button></p>
+                <div class="admin-panel">
+                    <table class="admin-table" id="bookingsTable"><thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Plan</th><th>Amount</th><th>Status</th><th>Date</th><th></th></tr></thead><tbody></tbody></table>
                 </div>
-                <div class="appointments-admin-section" id="appointmentsAdminSection" style="margin-top: 0; padding-top: 0; border-top: none;">
-                    <h2>Charla</h2>
-                    <p>Control booking availability, pricing, and blackout days.</p>
+            </section>
 
-                    <form id="appointmentsSettingsForm">
-                        <div class="form-group">
-                            <label for="appointmentsEnabled">Enable Charla booking</label>
-                            <input type="checkbox" id="appointmentsEnabled">
-                        </div>
-
-                        <div class="form-group">
-                            <label for="appointmentPrice">Charla price</label>
-                            <div class="blackout-controls">
-                                <input type="number" id="appointmentPrice" min="0" step="1" placeholder="e.g. 1500">
-                                <select id="appointmentCurrency">
-                                    <option value="KES">KES</option>
-                                    <option value="USD">USD</option>
-                                    <option value="GBP">GBP</option>
-                                    <option value="EUR">EUR</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="form-group" id="appointmentsAdminKeyGroup" hidden aria-hidden="true">
-                            <input type="hidden" id="appointmentsAdminKey" value="">
-                        </div>
-
-                        <div class="form-group">
-                            <label>Available days and time slots</label>
-                            <div class="appointments-day-row">
-                                <label><input type="checkbox" data-day-toggle="mon"> Monday</label>
-                                <input type="text" data-day-slots="mon" placeholder="09:00, 13:30, 16:00">
-                            </div>
-                            <div class="appointments-day-row">
-                                <label><input type="checkbox" data-day-toggle="tue"> Tuesday</label>
-                                <input type="text" data-day-slots="tue" placeholder="09:00, 13:30, 16:00">
-                            </div>
-                            <div class="appointments-day-row">
-                                <label><input type="checkbox" data-day-toggle="wed"> Wednesday</label>
-                                <input type="text" data-day-slots="wed" placeholder="09:00, 13:30, 16:00">
-                            </div>
-                            <div class="appointments-day-row">
-                                <label><input type="checkbox" data-day-toggle="thu"> Thursday</label>
-                                <input type="text" data-day-slots="thu" placeholder="09:00, 13:30, 16:00">
-                            </div>
-                            <div class="appointments-day-row">
-                                <label><input type="checkbox" data-day-toggle="fri"> Friday</label>
-                                <input type="text" data-day-slots="fri" placeholder="09:00, 13:30, 16:00">
-                            </div>
-                            <div class="appointments-day-row">
-                                <label><input type="checkbox" data-day-toggle="sat"> Saturday</label>
-                                <input type="text" data-day-slots="sat" placeholder="09:00, 13:30, 16:00">
-                            </div>
-                            <div class="appointments-day-row">
-                                <label><input type="checkbox" data-day-toggle="sun"> Sunday</label>
-                                <input type="text" data-day-slots="sun" placeholder="09:00, 13:30, 16:00">
-                            </div>
-                            <p style="margin-top: var(--space-xs); font-size: var(--text-sm); color: var(--color-gray-550);">
-                                Use 24-hour time. Separate multiple slots with commas.
-                            </p>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Blackout dates</label>
-                            <div class="blackout-controls">
-                                <input type="date" id="blackoutDateInput">
-                                <button type="button" class="btn-save" id="addBlackoutDate">Add date</button>
-                            </div>
-                            <div class="blackout-list" data-blackout-list></div>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Specific date time slots (override weekly schedule)</label>
-                            <div class="date-override-calendar" id="dateOverrideCalendar">
-                                <div class="date-override-calendar-header">
-                                    <button type="button" class="date-override-calendar-nav" id="dateOverridePrevMonth" aria-label="Previous month">&lt;</button>
-                                    <div class="date-override-calendar-month" id="dateOverrideMonthLabel"></div>
-                                    <button type="button" class="date-override-calendar-nav" id="dateOverrideNextMonth" aria-label="Next month">&gt;</button>
-                                </div>
-                                <div class="date-override-calendar-weekdays">
-                                    <div class="date-override-calendar-weekday">Sun</div>
-                                    <div class="date-override-calendar-weekday">Mon</div>
-                                    <div class="date-override-calendar-weekday">Tue</div>
-                                    <div class="date-override-calendar-weekday">Wed</div>
-                                    <div class="date-override-calendar-weekday">Thu</div>
-                                    <div class="date-override-calendar-weekday">Fri</div>
-                                    <div class="date-override-calendar-weekday">Sat</div>
-                                </div>
-                                <div class="date-override-calendar-grid" id="dateOverrideCalendarGrid"></div>
-                            </div>
-                            <div class="blackout-controls">
-                                <input type="date" id="dateOverrideInput">
-                                <input type="text" id="dateOverrideSlotsInput" placeholder="09:00, 13:30, 16:00">
-                                <button type="button" class="btn-save" id="addDateOverride">Add custom date</button>
-                            </div>
-                            <p style="margin-top: var(--space-xs); font-size: var(--text-sm); color: var(--color-gray-550);">
-                                For dates listed here, these slots are used instead of the weekly day template.
-                            </p>
-                            <div class="date-override-list" data-date-override-list></div>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Payment diagnostics</label>
-                            <p style="margin-top: var(--space-xs); font-size: var(--text-sm); color: var(--color-gray-550);">
-                                Run a quick provider readiness check before opening bookings.
-                            </p>
-                            <div class="form-actions">
-                                <button type="button" class="btn-save" id="runPaymentsDiagnosticsBtn">Run payment diagnostics</button>
-                            </div>
-                            <p class="appointments-admin-message" id="paymentsDiagnosticsMessage">Diagnostics have not been run yet.</p>
-                            <div class="payment-diagnostics-results" id="paymentsDiagnosticsResults"></div>
-                        </div>
-
-                        <div class="form-actions">
-                            <button type="button" class="btn-cancel" id="appointmentsRefreshBtn">Refresh</button>
-                            <button type="submit" class="btn-save" id="appointmentsSaveBtn">Save settings</button>
-                        </div>
-                        <p class="appointments-admin-message" id="appointmentsAdminMessage"></p>
-                    </form>
+            <section data-view-panel="subscribers" hidden>
+                <h1>Subscribers <button type="button" class="admin-btn-sm" id="exportSubsBtn">Export CSV</button></h1>
+                <div class="admin-panel">
+                    <table class="admin-table" id="subscribersTable"><thead><tr><th>Name</th><th>Email</th><th>Date</th><th></th></tr></thead><tbody></tbody></table>
                 </div>
-            </div>
-        </section>
+            </section>
+
+            <section data-view-panel="counsellors" hidden>
+                <h1>Counsellor Applications</h1>
+                <div class="admin-panel">
+                    <table class="admin-table" id="counsellorsTable"><thead><tr><th>Name</th><th>Email</th><th>Qualification</th><th>Date</th><th>Actions</th></tr></thead><tbody></tbody></table>
+                </div>
+            </section>
+
+            <section data-view-panel="settings" hidden>
+                <h1>Settings</h1>
+                <div class="admin-panel">
+                    <p>Calendly: <code>https://calendly.com/bloomlyke</code></p>
+                    <p>M-Pesa and Stripe credentials are configured in your hosting environment variables.</p>
+                    <p>GitHub OAuth callback: <code>https://bloomly.co.ke/api/auth/callback/github</code></p>
+                </div>
+            </section>
+        </main>
+
+        <nav class="admin-mobile-tabs" aria-label="Admin navigation">
+            <button type="button" data-admin-nav="dashboard">Home</button>
+            <button type="button" data-admin-nav="blog">Blog</button>
+            <button type="button" data-admin-nav="bookings">Charla</button>
+            <button type="button" data-admin-nav="subscribers">Subs</button>
+            <button type="button" data-admin-nav="counsellors">Apps</button>
+        </nav>
     </div>
 
-    <!-- Edit/Add Post Modal -->
-    <div id="postModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 id="modalTitle">Edit Post</h2>
-                <button class="close-btn" id="closeModalBtn">&times;</button>
-            </div>
+    <div class="admin-slideover" id="postSlideover">
+        <div class="admin-slideover-backdrop" id="closePostEditor"></div>
+        <div class="admin-slideover-panel">
+            <h2>Edit post</h2>
             <form id="postForm">
-                <input type="hidden" id="postSlug" name="slug">
-                <input type="hidden" id="postFileName" name="fileName">
-                <input type="hidden" id="isNewPost" name="isNew" value="false">
-                
-                <div class="form-group">
-                    <label for="postTitle">Title *</label>
-                    <input type="text" id="postTitle" name="title" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="postDate">Date *</label>
-                    <input type="datetime-local" id="postDate" name="date" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="postCategory">Category</label>
-                    <input type="text" id="postCategory" name="category" placeholder="e.g., Mental Health, Self-Care, Wellness">
-                </div>
-
-                <div class="form-group">
-                    <label for="postAuthor">Author *</label>
-                    <input type="text" id="postAuthor" name="author" placeholder="e.g., Manuel Muhunami" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="postSummary">Summary *</label>
-                    <textarea id="postSummary" name="summary" rows="3" required></textarea>
-                </div>
-                
-                <div class="form-group">
-                    <label for="postEmoji">Emoji</label>
-                    <input type="text" id="postEmoji" name="emoji" placeholder="💙" maxlength="2">
-                </div>
-
-                <div class="form-group">
-                    <label class="terms-checkbox" for="postPublished">
-                        <input type="checkbox" id="postPublished" name="published" checked>
-                        <span>Published</span>
-                    </label>
-                    <p style="font-size: var(--text-sm); color: var(--color-gray-550); margin-top: var(--space-xs);">
-                        Uncheck this to keep the post out of the public blog list.
-                    </p>
-                </div>
-                
-                <div class="form-group">
-                    <label for="postContent">Content (Markdown) *</label>
-                    <textarea id="postContent" name="content" rows="15" required></textarea>
-                    <p style="font-size: var(--text-sm); color: var(--color-gray-550); margin-top: var(--space-xs);">
-                        Write your post content in Markdown format. Use <code>##</code> for headings, <code>**bold**</code> for bold text, etc.
-                    </p>
-                </div>
-                
-                <div class="form-actions">
-                    <button type="button" class="btn-cancel" id="cancelBtn">Cancel</button>
-                    <button type="submit" class="btn-save" id="savePostBtn">Save Post</button>
-                </div>
+                <input type="hidden" id="postId">
+                <label>Title <input type="text" id="postTitle" required></label>
+                <label>Slug <input type="text" id="postSlug"></label>
+                <label>Category
+                    <select id="postCategory">
+                        <option>Mental Health</option>
+                        <option>Self-Care</option>
+                        <option>Tips</option>
+                        <option>Poetry</option>
+                    </select>
+                </label>
+                <label>Emoji <input type="text" id="postEmoji" maxlength="4"></label>
+                <label>Content <textarea id="postContent" rows="12"></textarea></label>
+                <label><input type="checkbox" id="postPublished"> Published</label>
+                <button type="submit" class="btn btn-primary">Save</button>
             </form>
         </div>
     </div>
-    
-    <script src="/admin/config.js?v=20260407h"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="/src/data/blog-api.js?v=20260325a"></script>
-    <script src="/src/admin/blog-admin.js?v=20260325a"></script>
-    <script src="/admin/appointments.js?v=20260325a"></script>
-    <script src="/admin/admin.js?v=20260407h"></script>
+
+    <script src="/admin/app.js"></script>
 </body>
 </html>

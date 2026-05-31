@@ -1834,11 +1834,9 @@
 
                         setFormMessage(messageEl, 'Thanks for subscribing! Check your inbox.', 'success');
                     } else if (isSupabaseReady()) {
-                        const fallbackResult = await insertSubscriberDirect(email);
-                        if (fallbackResult.status === 'subscribed') {
-                            setFormMessage(messageEl, 'Thanks for subscribing! You are on the list.', 'success');
-                        } else if (fallbackResult.status === 'already_subscribed') {
-                            setFormMessage(messageEl, 'You are already subscribed.', 'success');
+                        const fallbackResult = await insertSubscriberDirect(email, name);
+                        if (fallbackResult.status === 'subscribed' || fallbackResult.status === 'already_subscribed') {
+                            showNewsletterSuccess(form, messageEl);
                         } else if (fallbackResult.status === 'error') {
                             console.error('Newsletter direct insert failed', fallbackResult.error);
                             setFormMessage(
