@@ -56,3 +56,6 @@ verify_jwt = false
 
 [functions.admin-counsellor-applications]
 verify_jwt = false
+
+[functions.admin-sync-github-posts]
+verify_jwt = false
