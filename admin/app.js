@@ -16,6 +16,20 @@
         return true;
     }
 
+    function showAdminError(message) {
+        let banner = document.getElementById('adminErrorBanner');
+        if (!banner) {
+            banner = document.createElement('div');
+            banner.id = 'adminErrorBanner';
+            banner.className = 'admin-error-banner';
+            banner.setAttribute('role', 'alert');
+            const main = document.querySelector('.admin-main');
+            if (main) main.prepend(banner);
+        }
+        banner.textContent = message;
+        banner.hidden = !message;
+    }
+
     async function api(path, options = {}) {
         const token = getToken();
         const res = await fetch(path, {
@@ -26,13 +40,24 @@
                 ...(options.headers || {}),
             },
         });
-        const data = await res.json().catch(() => ({}));
+        const text = await res.text();
+        let data = {};
+        if (text) {
+            try {
+                data = JSON.parse(text);
+            } catch {
+                throw new Error(`Admin API returned invalid JSON (${path}).`);
+            }
+        } else if (!res.ok) {
+            throw new Error(`Admin API unavailable (${path}, status ${res.status}).`);
+        }
         if (res.status === 401 || res.status === 403) {
             sessionStorage.removeItem(TOKEN_KEY);
             window.location.replace('/admin/login/?error=AccessDenied');
             throw new Error(data.error || 'Unauthorized');
         }
-        if (!res.ok) throw new Error(data.error || 'Request failed');
+        if (!res.ok) throw new Error(data.error || `Request failed (${res.status})`);
+        showAdminError('');
         return data;
     }
 
@@ -70,6 +95,15 @@
     }
 
     async function loadDashboard() {
+        try {
+            await loadDashboardInner();
+        } catch (error) {
+            console.error('Dashboard load failed:', error);
+            showAdminError(error.message || 'Could not load dashboard data.');
+        }
+    }
+
+    async function loadDashboardInner() {
         const data = await api('/api/admin/stats');
         document.getElementById('statPosts').textContent = data.counts.posts;
         document.getElementById('statSubscribers').textContent = data.counts.subscribers;
@@ -101,8 +135,25 @@
     }
 
     async function loadPosts() {
+        try {
+            await loadPostsInner();
+        } catch (error) {
+            console.error('Posts load failed:', error);
+            showAdminError(error.message || 'Could not load blog posts.');
+            const tbody = document.querySelector('#postsTable tbody');
+            if (tbody) {
+                tbody.innerHTML = '<tr><td colspan="5">Could not load posts. Check Cloudflare env vars (SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY).</td></tr>';
+            }
+        }
+    }
+
+    async function loadPostsInner() {
         const { posts } = await api('/api/admin/posts');
         const tbody = document.querySelector('#postsTable tbody');
+        if (!posts?.length) {
+            tbody.innerHTML = '<tr><td colspan="5">No posts in Supabase yet. Click New Post or run the blog seed script.</td></tr>';
+            return;
+        }
         tbody.innerHTML = posts
             .map(
                 (p) => `<tr>
