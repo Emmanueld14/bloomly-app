@@ -30,51 +30,77 @@
         banner.hidden = !message;
     }
 
-    function resolveAdminApiUrl(path) {
+    function getAdminApiUrls(path) {
         const [pathname, query] = path.split('?');
+        const suffix = query ? `?${query}` : '';
+        const urls = [`${pathname}${suffix}`];
+
         const routes =
             (typeof SUPABASE_CONFIG !== 'undefined' && SUPABASE_CONFIG.adminRoutes) || {};
         const fnName = routes[pathname];
         if (fnName && typeof SUPABASE_CONFIG !== 'undefined' && SUPABASE_CONFIG.functionsBase) {
-            const base = `${SUPABASE_CONFIG.functionsBase}/${fnName}`;
-            return query ? `${base}?${query}` : base;
+            urls.push(`${SUPABASE_CONFIG.functionsBase}/${fnName}${suffix}`);
         }
-        return path;
+        return urls.filter((url, index, list) => url && list.indexOf(url) === index);
     }
 
     async function api(path, options = {}) {
         const token = getToken();
-        const url = resolveAdminApiUrl(path);
         const anonKey =
             typeof SUPABASE_CONFIG !== 'undefined' ? SUPABASE_CONFIG.anonKey : '';
-        const res = await fetch(url, {
-            ...options,
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${token}`,
-                ...(anonKey ? { apikey: anonKey } : {}),
-                ...(options.headers || {}),
-            },
-        });
-        const text = await res.text();
-        let data = {};
-        if (text) {
+        const urls = getAdminApiUrls(path);
+        let lastError = null;
+
+        for (const url of urls) {
+            const isSupabase = url.includes('supabase.co');
             try {
-                data = JSON.parse(text);
-            } catch {
-                throw new Error(`Admin API returned invalid JSON (${path}).`);
+                const res = await fetch(url, {
+                    ...options,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`,
+                        ...(isSupabase && anonKey ? { apikey: anonKey } : {}),
+                        ...(options.headers || {}),
+                    },
+                });
+                const text = await res.text();
+                let data = {};
+                if (text) {
+                    try {
+                        data = JSON.parse(text);
+                    } catch {
+                        lastError = new Error(`Invalid JSON from ${url}`);
+                        continue;
+                    }
+                } else if (!res.ok) {
+                    lastError = new Error(`Empty response (${res.status}) from ${url}`);
+                    continue;
+                }
+
+                if (data.code === 'NOT_FOUND' || data.message?.includes('function was not found')) {
+                    lastError = new Error('Supabase admin functions not deployed yet.');
+                    continue;
+                }
+
+                if (res.status === 401 || res.status === 403) {
+                    sessionStorage.removeItem(TOKEN_KEY);
+                    window.location.replace('/admin/login/?error=AccessDenied');
+                    throw new Error(data.error || 'Unauthorized');
+                }
+
+                if (!res.ok) {
+                    lastError = new Error(data.error || `Request failed (${res.status})`);
+                    continue;
+                }
+
+                showAdminError('');
+                return data;
+            } catch (error) {
+                lastError = error;
             }
-        } else if (!res.ok) {
-            throw new Error(`Admin API unavailable (${path}, status ${res.status}).`);
         }
-        if (res.status === 401 || res.status === 403) {
-            sessionStorage.removeItem(TOKEN_KEY);
-            window.location.replace('/admin/login/?error=AccessDenied');
-            throw new Error(data.error || 'Unauthorized');
-        }
-        if (!res.ok) throw new Error(data.error || `Request failed (${res.status})`);
-        showAdminError('');
-        return data;
+
+        throw lastError || new Error('Failed to fetch admin data. Deploy Supabase functions or set Cloudflare SUPABASE_* env vars.');
     }
 
     function setView(view) {

@@ -36,27 +36,27 @@
                 errorEl.hidden = false;
             }
 
-            function statsCheckUrl() {
+            async function validateToken(token) {
+                const urls = ['/api/admin/stats'];
                 const cfg = typeof SUPABASE_CONFIG !== 'undefined' ? SUPABASE_CONFIG : {};
                 if (cfg.functionsBase && cfg.adminRoutes && cfg.adminRoutes['/api/admin/stats']) {
-                    return cfg.functionsBase + '/' + cfg.adminRoutes['/api/admin/stats'];
+                    urls.push(cfg.functionsBase + '/' + cfg.adminRoutes['/api/admin/stats']);
                 }
-                return '/api/admin/stats';
-            }
-
-            async function validateToken(token) {
-                try {
-                    const cfg = typeof SUPABASE_CONFIG !== 'undefined' ? SUPABASE_CONFIG : {};
-                    const res = await fetch(statsCheckUrl(), {
-                        headers: {
-                            Authorization: 'Bearer ' + token,
-                            ...(cfg.anonKey ? { apikey: cfg.anonKey } : {}),
-                        },
-                    });
-                    return res.ok;
-                } catch (e) {
-                    return false;
+                for (const url of urls) {
+                    try {
+                        const isSupabase = url.includes('supabase.co');
+                        const res = await fetch(url, {
+                            headers: {
+                                Authorization: 'Bearer ' + token,
+                                ...(isSupabase && cfg.anonKey ? { apikey: cfg.anonKey } : {}),
+                            },
+                        });
+                        if (res.ok) return true;
+                    } catch (e) {
+                        // try next endpoint
+                    }
                 }
+                return false;
             }
 
             async function init() {

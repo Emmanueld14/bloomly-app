@@ -3,11 +3,6 @@ name: Supabase
 on:
   push:
     branches: [main]
-    paths:
-      - 'supabase/**'
-      - 'content/blog/**'
-      - 'scripts/seed-blog-posts.js'
-      - '.github/workflows/supabase.yml'
   workflow_dispatch:
 
 jobs:
