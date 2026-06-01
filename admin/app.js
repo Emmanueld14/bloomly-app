@@ -321,9 +321,13 @@
         try {
             const result = await api('/api/admin/sync-github-posts', { method: 'POST', body: '{}' });
             showAdminError('');
+            const schemaHint = result.schemaFixRequired
+                ? `\n\nFix database schema:\n${result.schemaFixHint || 'Apply supabase/migrations/202606010001_ensure_posts_cms_columns.sql in Supabase SQL Editor.'}`
+                : '';
             alert(
                 `Imported ${result.synced} of ${result.total} post(s) from GitHub into Supabase.` +
-                    (result.errors?.length ? `\n\nSome issues:\n${result.errors.slice(0, 5).join('\n')}` : '')
+                    (result.errors?.length ? `\n\nSome issues:\n${result.errors.slice(0, 5).join('\n')}` : '') +
+                    schemaHint
             );
             loadPosts();
             loadDashboard();

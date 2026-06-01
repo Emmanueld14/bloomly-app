@@ -84,15 +84,27 @@ export async function onRequestPost(context) {
             if (insertRes.response.ok) {
                 synced += 1;
             } else {
-                errors.push(`${slug}: ${insertRes.data?.message || 'upsert failed'}`);
+                const msg = insertRes.data?.message || insertRes.data?.hint || 'upsert failed';
+                errors.push(`${slug}: ${msg}`);
             }
         }
 
+        const schemaMissing = errors.some((e) =>
+            /category.*schema cache|Could not find the 'category' column/i.test(e)
+        );
+
         return jsonResponse({
-            ok: true,
+            ok: synced > 0 || errors.length === 0,
             synced,
             total: manifest.length,
             errors,
+            ...(schemaMissing
+                ? {
+                      schemaFixRequired: true,
+                      schemaFixHint:
+                          'Run supabase/migrations/202606010001_ensure_posts_cms_columns.sql in the Supabase SQL Editor (or supabase db push), then click Import again.',
+                  }
+                : {}),
         });
     } catch (error) {
         return jsonResponse({ error: error.message || 'Sync failed' }, 500);

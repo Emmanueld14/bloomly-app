@@ -29,7 +29,6 @@ jobs:
       - name: Push database migrations
         if: env.SUPABASE_ACCESS_TOKEN != ''
         run: supabase db push
-        continue-on-error: true
 
       - name: Deploy admin Edge Functions
         if: env.SUPABASE_ACCESS_TOKEN != ''

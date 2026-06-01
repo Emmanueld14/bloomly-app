@@ -25,12 +25,14 @@ Then update:
 
 ## 2) Apply database schema
 
-Migration files:
+Migration files (apply in order via `supabase db push`):
 
-- `supabase/migrations/202602280001_init_bloomly_supabase.sql`
+- `supabase/migrations/202602280001_init_bloomly_supabase.sql` — base tables (`posts`, Charla, subscribers)
 - `supabase/migrations/202602280002_harden_existing_tables.sql`
 - `supabase/migrations/202602280003_add_payment_attempts.sql`
 - `supabase/migrations/202602280004_add_appointment_date_overrides.sql`
+- `supabase/migrations/202605310001_launch_tables.sql` — blog CMS columns (`category`, `content`, `published`, …)
+- `supabase/migrations/202606010001_ensure_posts_cms_columns.sql` — idempotent fix if import says **category column missing**
 
 Apply it with either:
 
@@ -161,6 +163,20 @@ supabase functions deploy appointments-webhook-airtel
 1. Open a blog post page.
 2. Click Like and submit a comment.
 3. Verify rows in `likes` and `comments`.
+
+---
+
+## Troubleshooting: “Could not find the 'category' column of 'posts'”
+
+Admin **Import from GitHub** needs CMS columns on `posts`. If production only ran the init migration, `category` (and `content`, `published`, etc.) are missing.
+
+**Fast fix (Supabase Dashboard → SQL Editor):** open and run the full contents of:
+
+`supabase/migrations/202606010001_ensure_posts_cms_columns.sql`
+
+Then click **Import from GitHub** again (or re-run the GitHub Actions **Supabase** workflow).
+
+**Automated fix:** ensure `SUPABASE_ACCESS_TOKEN` is set in GitHub repo secrets so `supabase db push` runs on push to `main`.
 
 ---
 

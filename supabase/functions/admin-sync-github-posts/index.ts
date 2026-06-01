@@ -88,7 +88,23 @@ Deno.serve(async (req) => {
       }
     }
 
-    return jsonResponse({ ok: true, synced, total: manifest.length, errors });
+    const schemaMissing = errors.some((e) =>
+      /category.*schema cache|Could not find the 'category' column/i.test(e),
+    );
+
+    return jsonResponse({
+      ok: synced > 0 || errors.length === 0,
+      synced,
+      total: manifest.length,
+      errors,
+      ...(schemaMissing
+        ? {
+            schemaFixRequired: true,
+            schemaFixHint:
+              "Run supabase/migrations/202606010001_ensure_posts_cms_columns.sql in the Supabase SQL Editor (or supabase db push), then import again.",
+          }
+        : {}),
+    });
   } catch (error) {
     return jsonResponse(
       { error: error instanceof Error ? error.message : "Sync failed" },
