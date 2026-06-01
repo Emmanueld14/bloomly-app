@@ -1,4 +1,4 @@
-import { handleGitHubOAuthPost, handleGitHubOAuthOptions } from './lib/github-oauth.js';
+import { handleGitHubOAuthPost, handleGitHubOAuthOptions } from '../lib/github-oauth.js';
 
 export async function onRequestPost(context) {
     return handleGitHubOAuthPost(context);

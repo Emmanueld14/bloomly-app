@@ -16,8 +16,11 @@ const GITHUB_CONFIG = {
     // GitHub API base URL
     apiBase: 'https://api.github.com',
     
-    // Backend API URL for OAuth token exchange
-    vercelApiUrl: window.location.origin + '/api/github-auth'
+    // OAuth token exchange (Cloudflare Pages: /github-auth or /api/github-auth)
+    vercelApiUrl: window.location.origin + '/github-auth',
+    oauthFallbackUrls: [
+        'https://bloomly-app.onrender.com/api/github-auth',
+    ],
 };
 
 // Supabase configuration for email notifications

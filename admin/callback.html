@@ -101,61 +101,81 @@
             console.log('Code:', code);
             console.log('Redirect URI:', GITHUB_CONFIG.redirectUri);
             
-            // Use Render API endpoint
-            const apiUrl = GITHUB_CONFIG.vercelApiUrl || 'https://bloomly-app.onrender.com/api/github-auth';
-            console.log('API URL:', apiUrl);
-            
-            fetch(apiUrl, {
-                method: 'POST',
-                mode: 'cors',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify({
-                    client_id: GITHUB_CONFIG.clientId,
-                    code: code,
-                    redirect_uri: GITHUB_CONFIG.redirectUri
-                })
-            })
-            .then(async response => {
-                console.log('Response status:', response.status);
-                console.log('Response headers:', Object.fromEntries(response.headers.entries()));
-                
-                // Check if response has content
-                const text = await response.text();
-                console.log('Response text:', text.substring(0, 200));
-                
-                if (!text) {
-                    throw new Error(`Empty response from server (Status: ${response.status})`);
-                }
-                
-                // Try to parse JSON
-                let data;
-                try {
-                    data = JSON.parse(text);
-                } catch (e) {
-                    // GitHub might return form-encoded data, try parsing that
-                    const params = new URLSearchParams(text);
-                    const accessToken = params.get('access_token');
-                    if (accessToken) {
-                        data = { access_token: accessToken };
-                    } else {
-                        throw new Error('Invalid response format: ' + text.substring(0, 100));
+            const tokenPayload = {
+                client_id: GITHUB_CONFIG.clientId,
+                code: code,
+                redirect_uri: GITHUB_CONFIG.redirectUri
+            };
+
+            const apiUrls = [
+                GITHUB_CONFIG.vercelApiUrl,
+                window.location.origin + '/github-auth',
+                window.location.origin + '/api/github-auth',
+                ...(GITHUB_CONFIG.oauthFallbackUrls || []),
+                'https://bloomly-app.onrender.com/api/github-auth',
+            ].filter((url, index, list) => url && list.indexOf(url) === index);
+
+            async function exchangeToken() {
+                let lastError = null;
+
+                for (const apiUrl of apiUrls) {
+                    console.log('Trying token exchange at:', apiUrl);
+                    try {
+                        const response = await fetch(apiUrl, {
+                            method: 'POST',
+                            mode: 'cors',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json'
+                            },
+                            body: JSON.stringify(tokenPayload)
+                        });
+
+                        const text = await response.text();
+                        console.log('Response status:', response.status, 'from', apiUrl);
+
+                        if (!text) {
+                            if (response.status === 405 || response.status === 404) {
+                                lastError = new Error(`Token endpoint unavailable at ${apiUrl} (${response.status})`);
+                                continue;
+                            }
+                            throw new Error(`Empty response from server (Status: ${response.status})`);
+                        }
+
+                        let data;
+                        try {
+                            data = JSON.parse(text);
+                        } catch (e) {
+                            const params = new URLSearchParams(text);
+                            const accessToken = params.get('access_token');
+                            if (accessToken) {
+                                data = { access_token: accessToken };
+                            } else {
+                                throw new Error('Invalid response format: ' + text.substring(0, 100));
+                            }
+                        }
+
+                        if (!response.ok) {
+                            if (response.status === 403 || data.code === 'AccessDenied') {
+                                window.location.href = '/admin/login/?error=AccessDenied';
+                                return null;
+                            }
+                            lastError = new Error(data.error || `Failed at ${apiUrl}`);
+                            continue;
+                        }
+
+                        return data;
+                    } catch (error) {
+                        lastError = error;
                     }
                 }
-                
-                if (!response.ok) {
-                    if (response.status === 403) {
-                        window.location.href = '/admin/login.html?error=AccessDenied';
-                        return;
-                    }
-                    throw new Error(data.error || 'Failed to exchange token');
-                }
-                
-                return data;
-            })
+
+                throw lastError || new Error('All token exchange endpoints failed');
+            }
+
+            exchangeToken()
             .then(data => {
+                if (!data) return;
                 if (data.error) {
                     throw new Error(data.error);
                 }
