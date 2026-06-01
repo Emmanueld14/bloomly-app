@@ -102,8 +102,8 @@
 
     function setCanonicalUrl(slug) {
         const canonicalHref = slug
-            ? `${window.location.origin}/blog/${encodeURIComponent(slug)}`
-            : `${window.location.origin}/blog`;
+            ? `${window.location.origin}/blog-post/?slug=${encodeURIComponent(slug)}`
+            : `${window.location.origin}/blog/`;
         let canonicalEl = document.querySelector('link[rel="canonical"]');
         if (!canonicalEl) {
             canonicalEl = document.createElement('link');
@@ -202,7 +202,7 @@
 
     function getPostPermalink(post) {
         const slug = normalizeBlogSlug(post.slug || post.metadata?.slug || (post.name ? post.name.replace(/\.md$/, '') : ''));
-        return post.permalink || post.metadata?.permalink || `/blog/${encodeURIComponent(slug)}`;
+        return post.permalink || post.metadata?.permalink || `/blog-post/?slug=${encodeURIComponent(slug)}`;
     }
 
     function escapeHtml(value) {
@@ -440,7 +440,7 @@
             }
             articleAuthorMeta.setAttribute('content', postAuthor || 'Bloomly Team');
 
-            const canonicalUrl = `${window.location.origin}/blog/${encodeURIComponent(slug)}`;
+            const canonicalUrl = `${window.location.origin}/blog-post/?slug=${encodeURIComponent(slug)}`;
 
             const ogFields = [
                 ['og:title', postTitle],

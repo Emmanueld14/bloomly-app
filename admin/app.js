@@ -10,7 +10,7 @@
 
     function requireAuth() {
         if (!getToken()) {
-            window.location.replace('/admin/login');
+            window.location.replace('/admin/login/');
             return false;
         }
         return true;
@@ -29,7 +29,7 @@
         const data = await res.json().catch(() => ({}));
         if (res.status === 401 || res.status === 403) {
             sessionStorage.removeItem(TOKEN_KEY);
-            window.location.replace('/admin/login?error=AccessDenied');
+            window.location.replace('/admin/login/?error=AccessDenied');
             throw new Error(data.error || 'Unauthorized');
         }
         if (!res.ok) throw new Error(data.error || 'Request failed');
@@ -284,7 +284,7 @@
 
         document.getElementById('logoutBtn').addEventListener('click', () => {
             sessionStorage.removeItem(TOKEN_KEY);
-            window.location.replace('/admin/login');
+            window.location.replace('/admin/login/');
         });
 
         document.querySelectorAll('[data-admin-nav]').forEach((btn) => {

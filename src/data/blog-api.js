@@ -62,12 +62,17 @@ class BlogAPI {
             .replace(/^-+|-+$/g, '');
     }
 
+    postPermalink(slug) {
+        const normalized = this._normalizeSlug(slug);
+        return `/blog-post/?slug=${encodeURIComponent(normalized)}`;
+    }
+
     _rowToListItem(row) {
         const slug = this._normalizeSlug(row.slug);
         return {
             slug,
             name: `${slug}.md`,
-            permalink: `/blog/${encodeURIComponent(slug)}`,
+            permalink: this.postPermalink(slug),
             metadata: {
                 title: row.title,
                 date: row.created_at || row.updated_at,
@@ -126,16 +131,11 @@ class BlogAPI {
     }
 
     async listPosts() {
-        const supabasePosts = await this._listSupabasePosts();
-        if (supabasePosts && supabasePosts.length > 0) {
-            this._log(`Loaded ${supabasePosts.length} post(s) from Supabase`);
-            return supabasePosts;
-        }
-
-        const localPosts = await this._tryListLocalPosts();
-        if (localPosts.length) {
+        const localIndex = await this._tryListLocalPosts();
+        const localPromise = (async () => {
+            if (!localIndex.length) return [];
             const enriched = [];
-            for (const file of localPosts) {
+            for (const file of localIndex) {
                 try {
                     const post = await this._getLocalPost(file.slug);
                     if (post && this._isPublished(post)) enriched.push(post);
@@ -144,6 +144,24 @@ class BlogAPI {
                 }
             }
             return enriched;
+        })();
+
+        let supabasePosts = null;
+        try {
+            supabasePosts = await this._listSupabasePosts();
+        } catch (error) {
+            this._warn('Supabase list failed:', error);
+        }
+
+        if (supabasePosts && supabasePosts.length > 0) {
+            this._log(`Loaded ${supabasePosts.length} post(s) from Supabase`);
+            return supabasePosts;
+        }
+
+        const localPosts = await localPromise;
+        if (localPosts.length) {
+            this._log(`Loaded ${localPosts.length} post(s) from local content`);
+            return localPosts;
         }
         return [];
     }
@@ -197,7 +215,7 @@ class BlogAPI {
         return {
             ...parsed,
             html: this.markdownToHTML(parsed.body),
-            permalink: `/blog/${encodeURIComponent(slug)}`,
+            permalink: this.postPermalink(slug),
         };
     }
 

@@ -68,7 +68,7 @@
             const normalizedLinkPath = linkPath.split('?')[0];
             const linkSegment = normalizedLinkPath.split('/').pop();
             const isBlogLink = normalizedLinkPath.endsWith('blog.html') || normalizedLinkPath.endsWith('/blog');
-            const isAboutLink = normalizedLinkPath.endsWith('about.html');
+            const isAboutLink = normalizedLinkPath.endsWith('about.html') || normalizedLinkPath.endsWith('/about');
             const isSubscribeLink = normalizedLinkPath.endsWith('subscribe.html') || normalizedLinkPath.endsWith('/subscribe');
             const isAppointmentsLink = normalizedLinkPath.endsWith('/appointments') || normalizedLinkPath.endsWith('appointments.html');
             
@@ -2274,7 +2274,7 @@ But I can start by being honest about my own story.`,
 
         const link = document.createElement('a');
         link.className = 'btn btn-primary';
-        link.href = '/about.html';
+        link.href = '/about/';
         link.textContent = 'Back to About';
 
         card.append(message, link);
@@ -2315,7 +2315,7 @@ But I can start by being honest about my own story.`,
 
         const returnLink = document.createElement('a');
         returnLink.className = 'btn btn-primary';
-        returnLink.href = '/about.html';
+        returnLink.href = '/about/';
         returnLink.textContent = 'Back to About';
         actions.appendChild(returnLink);
 
@@ -2356,7 +2356,7 @@ But I can start by being honest about my own story.`,
 
         const backLink = document.createElement('a');
         backLink.className = 'simple-profile-back';
-        backLink.href = '/about.html';
+        backLink.href = '/about/';
         backLink.textContent = 'Back to About';
 
         const header = document.createElement('header');

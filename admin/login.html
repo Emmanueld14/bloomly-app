@@ -4,76 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bloomly Admin</title>
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-    <link rel="stylesheet" href="/styles.css">
-    <link rel="stylesheet" href="/admin/launch-admin.css">
+    <link rel="canonical" href="https://bloomly.co.ke/admin/login/">
+    <meta http-equiv="refresh" content="0;url=/admin/login/">
+    <script>location.replace('/admin/login/');</script>
 </head>
-<body class="admin-login-page">
-    <div class="admin-login-card">
-        <div class="admin-login-header">
-            <img src="/logo.svg" alt="Bloomly logo" width="56" height="56">
-            <h1>Bloomly Admin</h1>
-            <p>Access restricted to Bloomly admin only.</p>
-        </div>
-        <p class="admin-login-error" id="loginError" hidden></p>
-        <p class="admin-login-hint" id="loginHint" hidden></p>
-        <button type="button" class="btn btn-primary admin-github-btn" id="githubLoginBtn">Sign in with GitHub</button>
-        <button type="button" class="btn btn-secondary" id="continueDashboardBtn" hidden style="width:100%;margin-top:0.75rem;">Continue to dashboard</button>
-    </div>
-    <script src="/admin/config.js"></script>
-    <script>
-        (function () {
-            const TOKEN_KEY = 'github_token';
-            const params = new URLSearchParams(window.location.search);
-            const errorEl = document.getElementById('loginError');
-            const hintEl = document.getElementById('loginHint');
-            const continueBtn = document.getElementById('continueDashboardBtn');
-            const error = params.get('error');
-
-            if (error === 'AccessDenied' || error === 'access_denied') {
-                sessionStorage.removeItem(TOKEN_KEY);
-                errorEl.textContent = 'Access denied. This account is not authorized.';
-                errorEl.hidden = false;
-            }
-
-            async function validateToken(token) {
-                try {
-                    const res = await fetch('/api/admin/stats', {
-                        headers: { Authorization: 'Bearer ' + token },
-                    });
-                    return res.ok;
-                } catch (e) {
-                    return false;
-                }
-            }
-
-            async function init() {
-                const existing = sessionStorage.getItem(TOKEN_KEY);
-                if (existing) {
-                    const valid = await validateToken(existing);
-                    if (valid) {
-                        continueBtn.hidden = false;
-                        hintEl.textContent = 'You are already signed in.';
-                        hintEl.hidden = false;
-                        continueBtn.addEventListener('click', () => {
-                            window.location.replace('/admin/');
-                        });
-                        return;
-                    }
-                    sessionStorage.removeItem(TOKEN_KEY);
-                }
-            }
-
-            document.getElementById('githubLoginBtn').addEventListener('click', () => {
-                const cfg = typeof GITHUB_CONFIG !== 'undefined' ? GITHUB_CONFIG : {};
-                const clientId = cfg.clientId;
-                const redirectUri = encodeURIComponent(cfg.redirectUri || (window.location.origin + '/api/auth/callback/github'));
-                const scope = encodeURIComponent('repo user:email');
-                window.location.href = 'https://github.com/login/oauth/authorize?client_id=' + clientId + '&redirect_uri=' + redirectUri + '&scope=' + scope;
-            });
-
-            void init();
-        })();
-    </script>
+<body>
+    <p>Redirecting to <a href="/admin/login/">admin sign in</a>…</p>
 </body>
 </html>

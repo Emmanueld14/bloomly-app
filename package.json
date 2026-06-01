@@ -6,7 +6,7 @@
   "scripts": {
     "start": "npx serve . -p 3000",
     "dev": "npx serve . -p 3000",
-    "build": "node scripts/generate-config.js",
+    "build": "node scripts/generate-config.js && node scripts/generate-blog-routes.js",
     "set-admin-secrets": "node scripts/set-supabase-admin-secrets.js"
   },
   "keywords": [

@@ -90,19 +90,15 @@
     },
     {
       "source": "/blog/:slug",
-      "destination": "/blog-post/index.html?slug=:slug"
-    },
-    {
-      "source": "/blog/:slug/",
-      "destination": "/blog-post/index.html?slug=:slug"
+      "destination": "/blog/:slug/"
     },
     {
       "source": "/about",
-      "destination": "/about.html"
+      "destination": "/about/"
     },
     {
-      "source": "/about/",
-      "destination": "/about.html"
+      "source": "/about.html",
+      "destination": "/about/"
     },
     {
       "source": "/blog-post",
@@ -130,11 +126,11 @@
     },
     {
       "source": "/admin/login",
-      "destination": "/admin/login.html"
+      "destination": "/admin/login/"
     },
     {
-      "source": "/admin/login/",
-      "destination": "/admin/login.html"
+      "source": "/admin/login.html",
+      "destination": "/admin/login/"
     },
     {
       "source": "/appointments",

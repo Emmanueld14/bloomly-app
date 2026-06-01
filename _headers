@@ -1,62 +1,44 @@
-# Cloudflare Pages Headers
-# AGGRESSIVE NO-CACHE POLICY - Prevents ALL caching layers
-# This ensures blog data is always fresh from GitHub API
+# Cloudflare Pages headers
 
 /*
-  Cache-Control: no-cache, no-store, must-revalidate, max-age=0
-  Pragma: no-cache
-  Expires: 0
   X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
 
-# Blog pages - NO CACHE
-/blog.html
-  Cache-Control: no-cache, no-store, must-revalidate, max-age=0
-  Pragma: no-cache
-  Expires: 0
-  X-Cache-Control: no-cache
+# Static assets — cache for speed
+/styles.css
+  Cache-Control: public, max-age=86400
 
-/blog/index.html
-  Cache-Control: no-cache, no-store, must-revalidate, max-age=0
-  Pragma: no-cache
-  Expires: 0
-  X-Cache-Control: no-cache
+/script.js
+  Cache-Control: public, max-age=3600
 
-/blog-post.html
-  Cache-Control: no-cache, no-store, must-revalidate, max-age=0
-  Pragma: no-cache
-  Expires: 0
-  X-Cache-Control: no-cache
+/logo.svg
+  Cache-Control: public, max-age=604800, immutable
 
-/blog-post/index.html
-  Cache-Control: no-cache, no-store, must-revalidate, max-age=0
-  Pragma: no-cache
-  Expires: 0
-  X-Cache-Control: no-cache
+/favicon.svg
+  Cache-Control: public, max-age=604800, immutable
+
+/favicon.ico
+  Cache-Control: public, max-age=604800, immutable
+
+/images/*
+  Cache-Control: public, max-age=604800, immutable
+
+/content/blog/*.md
+  Cache-Control: public, max-age=300
+
+/content/blog/index.json
+  Cache-Control: public, max-age=120
+
+/content/blog/legacy.json
+  Cache-Control: public, max-age=300
+
+# Blog pages — short cache
+/blog/*
+  Cache-Control: public, max-age=60, must-revalidate
 
 /blog-post/*
-  Cache-Control: no-cache, no-store, must-revalidate, max-age=0
-  Pragma: no-cache
-  Expires: 0
-  X-Cache-Control: no-cache
+  Cache-Control: public, max-age=60, must-revalidate
 
-# Blog data layer - NO CACHE
-/src/data/*
-  Cache-Control: no-cache, no-store, must-revalidate, max-age=0
-  Pragma: no-cache
-  Expires: 0
-  X-Cache-Control: no-cache
-
-# Admin pages - NO CACHE
+# Admin — no cache
 /admin/*
-  Cache-Control: no-cache, no-store, must-revalidate, max-age=0
-  Pragma: no-cache
-  Expires: 0
-  X-Cache-Control: no-cache
-
-# Static blog content - NO CACHE (if any exists)
-/content/blog/*
-  Cache-Control: no-cache, no-store, must-revalidate, max-age=0
-  Pragma: no-cache
-  Expires: 0
-  X-Cache-Control: no-cache
-
+  Cache-Control: no-cache, no-store, must-revalidate

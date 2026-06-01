@@ -5,90 +5,79 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bloomly - Page Not Found</title>
     <script>
-        // 404.html handler for Cloudflare Pages
-        // This handles routing for blog posts
-        
         (function() {
-            const path = window.location.pathname;
-            const legacyBlogSlugs = new Set([]);
-            
-            // Handle /admin redirects
-            if (path === '/admin' || path === '/admin/') {
-                window.location.replace('/admin/index.html');
-                return;
-            }
-            
-            // Handle /blog root
-            if (path === '/blog' || path === '/blog/') {
-                window.location.replace('/blog/index.html');
+            const path = window.location.pathname.replace(/\/+$/, '') || '/';
+
+            if (path === '/admin' || path === '/admin/index.html') {
+                window.location.replace('/admin/');
                 return;
             }
 
-            // Handle /blog-post root (missing slug)
-            if (path === '/blog-post' || path === '/blog-post/') {
-                window.location.replace('/blog-post/index.html');
+            if (path === '/admin/login' || path === '/admin/login.html') {
+                window.location.replace('/admin/login/');
                 return;
             }
 
-            // Handle /subscribe root
-            if (path === '/subscribe' || path === '/subscribe/') {
-                window.location.replace('/subscribe/index.html');
+            if (path === '/about' || path === '/about.html') {
+                window.location.replace('/about/');
                 return;
             }
 
-            // Charla disabled — send /appointments to home
-            if (path === '/appointments' || path === '/appointments/' || path.startsWith('/appointments/')) {
-                window.location.replace('/index.html');
+            if (path === '/blog' || path === '/blog.html') {
+                window.location.replace('/blog/');
                 return;
             }
 
-            // Handle /people and legacy team/profile routes
-            if (path === '/people' || path === '/people/' || path === '/profile' || path === '/profile/' ||
-                path === '/members' || path === '/members/') {
+            if (path === '/blog-post' || path === '/blog-post.html') {
+                window.location.replace('/blog-post/');
+                return;
+            }
+
+            if (path === '/subscribe' || path === '/subscribe.html') {
+                window.location.replace('/subscribe/');
+                return;
+            }
+
+            if (path === '/appointments' || path.startsWith('/appointments/')) {
+                window.location.replace('/');
+                return;
+            }
+
+            if (path === '/people' || path === '/profile' || path === '/members') {
                 window.location.replace('/members/');
                 return;
             }
 
-            if (path === '/team' || path === '/team/') {
-                window.location.replace('/about.html');
+            if (path === '/team') {
+                window.location.replace('/about/');
                 return;
             }
 
             const profileMatch = path.match(/^\/(people|team|profile|members)\/(.+)$/);
             if (profileMatch) {
-                const slug = profileMatch[2]
-                    .replace(/^\/+/, '')
-                    .replace(/\/+$/, '')
-                    .replace(/\.html$/, '');
-                if (slug) {
-                    if (slug === 'index') {
-                        window.location.replace('/members/');
-                        return;
-                    }
-                    window.location.replace(`/members/?id=${encodeURIComponent(slug)}`);
+                const slug = profileMatch[2].replace(/\.html$/, '');
+                if (slug && slug !== 'index') {
+                    window.location.replace('/members/?id=' + encodeURIComponent(slug));
+                    return;
+                }
+                window.location.replace('/members/');
+                return;
+            }
+
+            const blogMatch = path.match(/^\/blog\/([^/]+)$/);
+            if (blogMatch) {
+                const slug = blogMatch[1].replace(/\.html$/, '').replace(/-+$/, '');
+                if (slug && slug !== 'index') {
+                    window.location.replace('/blog-post/?slug=' + encodeURIComponent(slug));
                     return;
                 }
             }
 
-            // Handle /blog/[slug] redirects
-            const blogMatch = path.match(/^\/blog\/(.+)$/);
-            if (blogMatch) {
-                const slug = blogMatch[1].replace(/\.html$/, '');
-                if (legacyBlogSlugs.has(slug)) {
-                    window.location.replace(`/blog/${slug}.html`);
-                    return;
-                }
-                window.location.replace(`/blog/${slug.replace(/-+$/, '')}`);
-                return;
-            }
-            
-            // Default: redirect to home
             window.location.replace('/');
         })();
     </script>
 </head>
 <body>
-    <p>Redirecting...</p>
+    <p>Redirecting…</p>
 </body>
 </html>
-

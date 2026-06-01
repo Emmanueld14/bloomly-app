@@ -69,7 +69,9 @@
         return {
             slug,
             name: `${slug}.html`,
-            permalink: entry.permalink || `/blog/${slug}.html`,
+            permalink: entry.permalink || (typeof blogAPI !== 'undefined' && blogAPI.postPermalink
+                ? blogAPI.postPermalink(slug)
+                : `/blog-post/?slug=${encodeURIComponent(slug)}`),
             metadata: {
                 title: entry.title || 'Untitled Post',
                 date: entry.date || '',
@@ -272,7 +274,9 @@
             const slug = normalizePostSlug(post.slug || post.metadata?.slug || (post.name ? post.name.replace('.md', '') : ''));
             const permalink = post.permalink
                 || post.metadata?.permalink
-                || `/blog/${encodeURIComponent(slug)}`;
+                || (typeof blogAPI !== 'undefined' && blogAPI.postPermalink
+                    ? blogAPI.postPermalink(slug)
+                    : `/blog-post/?slug=${encodeURIComponent(slug)}`);
 
             if (!slug) {
                 warnDebug('Skipped blog post without slug.', post);
