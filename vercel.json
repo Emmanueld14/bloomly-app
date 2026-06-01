@@ -85,12 +85,24 @@
       "destination": "/blog/index.html"
     },
     {
+      "source": "/blog/index.html",
+      "destination": "/blog/index.html"
+    },
+    {
       "source": "/blog/:slug",
       "destination": "/blog-post/index.html?slug=:slug"
     },
     {
       "source": "/blog/:slug/",
       "destination": "/blog-post/index.html?slug=:slug"
+    },
+    {
+      "source": "/about",
+      "destination": "/about.html"
+    },
+    {
+      "source": "/about/",
+      "destination": "/about.html"
     },
     {
       "source": "/blog-post",

@@ -2060,73 +2060,76 @@ But I can start by being honest about my own story.`,
         return `/members/?id=${encodeURIComponent(profileId)}`;
     }
 
-    function buildSocialIconLink(linkData) {
-        const anchor = document.createElement('a');
-        anchor.className = 'about-profile-social-btn';
-        anchor.href = linkData.url;
-        anchor.target = '_blank';
-        anchor.rel = 'noopener noreferrer';
-        anchor.setAttribute('aria-label', linkData.label);
-        const label = String(linkData.label || '').toLowerCase();
-        if (label.includes('linkedin')) {
-            anchor.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5ZM3 8.98h4v12H3v-12Zm7 0h3.8v1.64h.05c.53-1 1.84-2.06 3.8-2.06 4.06 0 4.8 2.67 4.8 6.15v7.27h-4v-6.45c0-1.54-.03-3.52-2.14-3.52-2.14 0-2.47 1.67-2.47 3.4v6.57H10V8.98Z"/></svg>';
-        } else {
-            anchor.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 2 7l10 5 10-5-10-5Zm0 7L2 4v13l10 5 10-5V4l-10 5Z"/></svg>';
-        }
-        return anchor;
-    }
-
     function buildTeamCard(member, index = 0) {
         const wrapper = document.createElement('article');
-        wrapper.className = 'bloomly-team-item about-profile-card-wrap';
+        wrapper.className = 'bloomly-team-item';
         wrapper.dataset.teamCard = '';
         wrapper.dataset.accent = member.accent || 'sage';
         wrapper.dataset.slug = member.slug;
 
         const card = document.createElement('div');
-        card.className = 'bloomly-team-card about-profile-card';
+        card.className = 'bloomly-team-card';
 
-        const media = document.createElement('div');
-        media.className = 'about-profile-media';
+        const core = document.createElement('div');
+        core.className = 'bloomly-team-core';
+
+        const avatar = document.createElement('div');
+        avatar.className = 'bloomly-team-avatar';
 
         const image = document.createElement('img');
-        image.className = 'about-profile-photo';
+        image.className = 'bloomly-team-photo';
         image.src = member.image || '/logo.svg';
-        image.alt = member.id === 'manuel-muhunami'
-            ? 'Manuel Muhunami, Founder of Bloomly'
-            : `${member.name} portrait`;
+        image.alt = `${member.name} portrait`;
         image.decoding = 'async';
         image.loading = index === 0 ? 'eager' : 'lazy';
         image.fetchPriority = index === 0 ? 'high' : 'auto';
-        image.width = 280;
-        image.height = 320;
-        media.appendChild(image);
+        image.width = 520;
+        image.height = 620;
 
-        const body = document.createElement('div');
-        body.className = 'about-profile-body';
+        avatar.appendChild(image);
+
+        const info = document.createElement('div');
+        info.className = 'bloomly-team-info';
+
+        const eyebrow = document.createElement('p');
+        eyebrow.className = 'bloomly-team-eyebrow';
+        eyebrow.textContent = 'Bloomly Team';
 
         const name = document.createElement('h3');
-        name.className = 'about-profile-name';
+        name.className = 'bloomly-team-name';
         name.textContent = member.name;
 
         const role = document.createElement('p');
-        role.className = 'about-profile-role';
+        role.className = 'bloomly-team-role';
         role.textContent = member.role;
 
         const summary = document.createElement('p');
-        summary.className = 'about-profile-bio';
+        summary.className = 'bloomly-team-summary';
         summary.textContent = member.summary || member.panelSummary || '';
 
         const socialLinks = document.createElement('div');
-        socialLinks.className = 'about-profile-socials';
+        socialLinks.className = 'bloomly-team-social-links';
         if (Array.isArray(member.links) && member.links.length) {
             member.links.forEach((linkData) => {
-                socialLinks.appendChild(buildSocialIconLink(linkData));
+                const social = document.createElement('a');
+                social.href = linkData.url;
+                social.target = '_blank';
+                social.rel = 'noopener noreferrer';
+                social.textContent = linkData.label;
+                socialLinks.appendChild(social);
             });
         }
 
-        body.append(name, role, summary, socialLinks);
-        card.append(media, body);
+        const link = document.createElement('a');
+        link.className = 'bloomly-team-link';
+        link.href = buildTeamProfileHref(member);
+        link.textContent = 'View Profile';
+
+        info.append(eyebrow, name, role, summary);
+        info.appendChild(socialLinks);
+        info.appendChild(link);
+        core.append(avatar, info);
+        card.appendChild(core);
         wrapper.appendChild(card);
 
         return wrapper;

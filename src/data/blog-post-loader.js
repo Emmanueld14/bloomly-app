@@ -346,6 +346,18 @@
         return true;
     }
 
+    function showPostView() {
+        document.querySelectorAll('[data-blog-list-fallback]').forEach((block) => {
+            block.setAttribute('hidden', '');
+        });
+
+        const postWrapper = document.querySelector('.post');
+        if (postWrapper) {
+            postWrapper.removeAttribute('hidden');
+            postWrapper.setAttribute('aria-hidden', 'false');
+        }
+    }
+
     // Load and render the post
     async function loadPost() {
         const slug = (window.BloomlyBlog?.resolveBlogSlug || resolveBlogSlug)();
@@ -369,6 +381,7 @@
         delete document.body.dataset.postUnavailable;
         setCanonicalUrl(slug);
         setPostUnavailableState(false);
+        showPostView();
 
         // Keep post wrapper in sync for modular interactions
         const postWrapper = document.querySelector('.post');

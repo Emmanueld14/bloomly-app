@@ -127,6 +127,40 @@
     let categoryOptions = [];
     let activeSearchQuery = '';
     let visiblePostCount = 6;
+    let blogListInitialized = false;
+
+    function shouldLoadBlogList() {
+        const blogGrid = document.getElementById('blogGrid');
+        if (!blogGrid) return false;
+
+        const path = window.location.pathname.replace(/\/+$/, '') || '/';
+        const isBlogIndex =
+            path === '/blog' ||
+            path.endsWith('/blog/index.html') ||
+            path.endsWith('/blog.html');
+        const isBlogPostRoot =
+            path === '/blog-post' ||
+            path.endsWith('/blog-post/index.html') ||
+            path.endsWith('/blog-post.html');
+
+        if (isBlogIndex) return true;
+        if (!isBlogPostRoot) return false;
+
+        const slug = window.BloomlyBlog?.resolveBlogSlug?.();
+        return !slug;
+    }
+
+    function renderBlogLoadError(blogGrid, detail) {
+        blogGrid.innerHTML = `
+            <div style="text-align: center; padding: var(--space-2xl); color: var(--color-gray-600);">
+                <p style="font-size: var(--text-lg); margin-bottom: var(--space-md);">Couldn't load posts</p>
+                <p style="font-size: var(--text-sm); color: var(--color-gray-500); margin-bottom: var(--space-lg);">
+                    ${detail || 'Please refresh the page or try again in a moment.'}
+                </p>
+                <button type="button" class="btn btn-primary" onclick="window.location.reload()">Try again</button>
+            </div>
+        `;
+    }
 
     function getCategorySlug(value) {
         if (window.BloomlyBlog && typeof window.BloomlyBlog.normalizeCategory === 'function') {
@@ -353,27 +387,7 @@
             console.info('[Bloomly Blog] Published posts ready', finalPosts.length);
 
             if (finalPosts.length === 0) {
-                blogGrid.innerHTML = `
-                    <div style="text-align: center; padding: var(--space-2xl);">
-                        <p style="color: var(--color-gray-600); margin-bottom: var(--space-md); font-size: var(--text-lg);">
-                            Unable to load blog posts
-                        </p>
-                        <p style="color: var(--color-gray-500); margin-bottom: var(--space-lg); font-size: var(--text-sm);">
-                            All posts failed to load. Please check your connection and try again.
-                        </p>
-                        <button onclick="window.location.reload(true)" 
-                                style="padding: var(--space-md) var(--space-xl); 
-                                       background: var(--gradient-primary); 
-                                       color: var(--color-white); 
-                                       border: none; 
-                                       border-radius: var(--radius-lg); 
-                                       font-weight: 600; 
-                                       cursor: pointer;
-                                       font-size: var(--text-base);">
-                            🔄 Retry
-                        </button>
-                    </div>
-                `;
+                renderBlogLoadError(blogGrid, 'All posts failed to load. Please check your connection and try again.');
                 return;
             }
 
@@ -424,29 +438,7 @@
 
         } catch (error) {
             warnDebug('Error loading blog posts:', error);
-            
-            // Show error with retry
-            blogGrid.innerHTML = `
-                <div style="text-align: center; padding: var(--space-2xl);">
-                    <p style="color: var(--color-gray-600); margin-bottom: var(--space-md); font-size: var(--text-lg);">
-                        Unable to load blog posts
-                    </p>
-                    <p style="color: var(--color-gray-500); margin-bottom: var(--space-lg); font-size: var(--text-sm);">
-                        ${error.message || 'Please check your connection and try again.'}
-                    </p>
-                    <button onclick="window.location.reload(true)" 
-                            style="padding: var(--space-md) var(--space-xl); 
-                                   background: var(--gradient-primary); 
-                                   color: var(--color-white); 
-                                   border: none; 
-                                   border-radius: var(--radius-lg); 
-                                   font-weight: 600; 
-                                   cursor: pointer;
-                                   font-size: var(--text-base);">
-                        🔄 Retry
-                    </button>
-                </div>
-            `;
+            renderBlogLoadError(blogGrid, error.message || 'Please refresh the page or try again in a moment.');
         }
     }
 
@@ -458,6 +450,10 @@
 
     // Initialize
     function init() {
+        if (blogListInitialized || !shouldLoadBlogList()) {
+            return;
+        }
+        blogListInitialized = true;
         logDebug('Initializing blog loader...');
         loadBlogPosts();
     }
