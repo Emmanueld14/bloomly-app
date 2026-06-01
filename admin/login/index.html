@@ -67,8 +67,13 @@
             document.getElementById('githubLoginBtn').addEventListener('click', () => {
                 const cfg = typeof GITHUB_CONFIG !== 'undefined' ? GITHUB_CONFIG : {};
                 const clientId = cfg.clientId;
-                const redirectUri = encodeURIComponent(cfg.redirectUri || (window.location.origin + '/api/auth/callback/github'));
+                const redirectUri = encodeURIComponent(cfg.redirectUri || (window.location.origin + '/admin/callback.html'));
                 const scope = encodeURIComponent('repo user:email');
+                try {
+                    sessionStorage.setItem('bloomly_admin_post_auth_redirect', '/admin/');
+                } catch (e) {
+                    // no-op
+                }
                 window.location.href = 'https://github.com/login/oauth/authorize?client_id=' + clientId + '&redirect_uri=' + redirectUri + '&scope=' + scope;
             });
 

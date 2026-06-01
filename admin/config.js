@@ -10,8 +10,8 @@ const GITHUB_CONFIG = {
     repoName: 'bloomly-app',
     repoBranch: 'main',
     
-    // OAuth redirect URI (must match the GitHub OAuth App callback URL)
-    redirectUri: window.location.origin + '/api/auth/callback/github',
+    // Must match GitHub OAuth App → Authorization callback URL exactly
+    redirectUri: window.location.origin + '/admin/callback.html',
     
     // GitHub API base URL
     apiBase: 'https://api.github.com',

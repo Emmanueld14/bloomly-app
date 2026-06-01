@@ -363,26 +363,7 @@
                 return;
             }
 
-            const validPosts = [];
-            for (const post of posts) {
-                if (post.body && post.metadata?.title) {
-                    validPosts.push({
-                        ...post,
-                        html: post.html || blogAPI.markdownToHTML(post.body),
-                    });
-                    continue;
-                }
-                try {
-                    const content = await blogAPI.getPost(post.slug);
-                    validPosts.push({
-                        ...post,
-                        ...content,
-                        html: content.html || blogAPI.markdownToHTML(content.body),
-                    });
-                } catch (error) {
-                    warnDebug(`Failed to load post ${post.slug}:`, error);
-                }
-            }
+            const validPosts = posts.filter((post) => post.metadata?.title);
 
             logDebug(`Successfully loaded ${validPosts.length} post(s)`);
 

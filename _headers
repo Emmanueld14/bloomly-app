@@ -29,6 +29,9 @@
 /content/blog/index.json
   Cache-Control: public, max-age=120
 
+/content/blog/manifest.json
+  Cache-Control: public, max-age=300
+
 /content/blog/legacy.json
   Cache-Control: public, max-age=300
 

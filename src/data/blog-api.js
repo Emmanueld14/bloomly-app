@@ -1,16 +1,19 @@
 /**
  * Bloomly Blog Data API
- * Supabase posts (primary) with local markdown fallback
+ * Fast local manifest first; Supabase optional upgrade when available
  */
 
 class BlogAPI {
     constructor() {
         this.localBase = '/content/blog';
         this.localIndex = '/content/blog/index.json';
+        this.localManifest = '/content/blog/manifest.json';
         this.siteBase = 'https://bloomly.co.ke';
         this.debug = this._getDebugFlag();
         this._supabase = null;
-        this._fetchTimeoutMs = 15000;
+        this._supabaseLoadPromise = null;
+        this._fetchTimeoutMs = 8000;
+        this._supabaseTimeoutMs = 3500;
     }
 
     _getDebugFlag() {
@@ -30,22 +33,49 @@ class BlogAPI {
         if (this.debug) console.warn(...args);
     }
 
-    _getSupabase() {
+    async _ensureSupabaseClient() {
         if (this._supabase) return this._supabase;
+
         const url = typeof window !== 'undefined' && window.BLOOMLY_SUPABASE_URL;
         const key = typeof window !== 'undefined' && window.BLOOMLY_SUPABASE_ANON_KEY;
-        if (!window.supabase?.createClient || !url || !key) return null;
+        if (!url || !key) return null;
+
+        if (!window.supabase?.createClient) {
+            if (!this._supabaseLoadPromise) {
+                this._supabaseLoadPromise = new Promise((resolve, reject) => {
+                    const script = document.createElement('script');
+                    script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js';
+                    script.async = true;
+                    script.onload = () => resolve();
+                    script.onerror = () => reject(new Error('Failed to load Supabase client'));
+                    document.head.appendChild(script);
+                });
+            }
+            try {
+                await this._supabaseLoadPromise;
+            } catch (error) {
+                this._warn(error);
+                return null;
+            }
+        }
+
+        if (!window.supabase?.createClient) return null;
         this._supabase = window.supabase.createClient(url, key);
         return this._supabase;
     }
 
-    async _fetchWithTimeout(url, options = {}) {
+    async _fetchResource(url, { cacheable = false, timeoutMs } = {}) {
         const controller = new AbortController();
-        const id = setTimeout(() => controller.abort(), this._fetchTimeoutMs);
+        const ms = timeoutMs ?? this._fetchTimeoutMs;
+        const id = setTimeout(() => controller.abort(), ms);
         try {
-            const sep = url.includes('?') ? '&' : '?';
-            const busted = `${url}${sep}_t=${Date.now()}`;
-            return await fetch(busted, { ...options, signal: controller.signal, cache: 'no-store' });
+            const fetchUrl = cacheable
+                ? url
+                : `${url}${url.includes('?') ? '&' : '?'}_t=${Date.now()}`;
+            return await fetch(fetchUrl, {
+                signal: controller.signal,
+                cache: cacheable ? 'default' : 'no-store',
+            });
         } finally {
             clearTimeout(id);
         }
@@ -98,12 +128,12 @@ class BlogAPI {
     }
 
     async _listSupabasePosts() {
-        const client = this._getSupabase();
+        const client = await this._ensureSupabaseClient();
         if (!client) return null;
 
         const { data, error } = await client
             .from('posts')
-            .select('*')
+            .select('slug,title,created_at,updated_at,category,excerpt,summary,emoji,published,content')
             .eq('published', true)
             .order('created_at', { ascending: false });
 
@@ -115,8 +145,22 @@ class BlogAPI {
         return data.map((row) => this._rowToListItem(row));
     }
 
+    async _listSupabasePostsWithTimeout() {
+        try {
+            return await Promise.race([
+                this._listSupabasePosts(),
+                new Promise((resolve) => {
+                    setTimeout(() => resolve(null), this._supabaseTimeoutMs);
+                }),
+            ]);
+        } catch (error) {
+            this._warn('Supabase list failed:', error);
+            return null;
+        }
+    }
+
     async _getSupabasePost(slug) {
-        const client = this._getSupabase();
+        const client = await this._ensureSupabaseClient();
         if (!client) return null;
 
         const { data, error } = await client
@@ -130,40 +174,73 @@ class BlogAPI {
         return this._rowToFullPost(data);
     }
 
-    async listPosts() {
+    async _loadManifestPosts() {
+        try {
+            const response = await this._fetchResource(this.localManifest, {
+                cacheable: true,
+                timeoutMs: 5000,
+            });
+            if (!response.ok) return [];
+            const data = await response.json();
+            if (!Array.isArray(data)) return [];
+
+            return data
+                .filter((entry) => entry?.slug && entry?.metadata?.title)
+                .map((entry) => {
+                    const slug = this._normalizeSlug(entry.slug);
+                    return {
+                        slug,
+                        name: `${slug}.md`,
+                        permalink: this.postPermalink(slug),
+                        metadata: entry.metadata,
+                        body: '',
+                    };
+                });
+        } catch (error) {
+            this._warn('Manifest load failed:', error);
+            return [];
+        }
+    }
+
+    async _loadLocalPostsParallel() {
         const localIndex = await this._tryListLocalPosts();
-        const localPromise = (async () => {
-            if (!localIndex.length) return [];
-            const enriched = [];
-            for (const file of localIndex) {
+        if (!localIndex.length) return [];
+
+        const results = await Promise.all(
+            localIndex.map(async (file) => {
                 try {
                     const post = await this._getLocalPost(file.slug);
-                    if (post && this._isPublished(post)) enriched.push(post);
+                    return post && this._isPublished(post) ? post : null;
                 } catch (e) {
                     this._warn('Local post skip:', file.slug, e);
+                    return null;
                 }
-            }
-            return enriched;
-        })();
+            })
+        );
+        return results.filter(Boolean);
+    }
 
-        let supabasePosts = null;
-        try {
-            supabasePosts = await this._listSupabasePosts();
-        } catch (error) {
-            this._warn('Supabase list failed:', error);
-        }
+    async listPosts() {
+        const [manifestPosts, supabasePosts] = await Promise.all([
+            this._loadManifestPosts(),
+            this._listSupabasePostsWithTimeout(),
+        ]);
 
         if (supabasePosts && supabasePosts.length > 0) {
             this._log(`Loaded ${supabasePosts.length} post(s) from Supabase`);
             return supabasePosts;
         }
 
-        const localPosts = await localPromise;
-        if (localPosts.length) {
-            this._log(`Loaded ${localPosts.length} post(s) from local content`);
-            return localPosts;
+        if (manifestPosts.length) {
+            this._log(`Loaded ${manifestPosts.length} post(s) from manifest`);
+            return manifestPosts;
         }
-        return [];
+
+        const localPosts = await this._loadLocalPostsParallel();
+        if (localPosts.length) {
+            this._log(`Loaded ${localPosts.length} post(s) from local markdown`);
+        }
+        return localPosts;
     }
 
     _isPublished(post) {
@@ -184,7 +261,7 @@ class BlogAPI {
 
     async _tryListLocalPosts() {
         try {
-            const response = await this._fetchWithTimeout(this.localIndex);
+            const response = await this._fetchResource(this.localIndex, { cacheable: true });
             if (!response.ok) return [];
             const data = await response.json();
             return (Array.isArray(data) ? data : [])
@@ -208,7 +285,7 @@ class BlogAPI {
 
     async _getLocalPost(slug) {
         const url = `${this.localBase}/${slug}.md`;
-        const response = await this._fetchWithTimeout(url);
+        const response = await this._fetchResource(url, { cacheable: true });
         if (!response.ok) throw new Error(`Local post not found: ${response.status}`);
         const markdown = await response.text();
         const parsed = this._parseMarkdown(markdown, slug);
