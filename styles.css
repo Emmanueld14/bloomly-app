@@ -1817,11 +1817,99 @@ a:hover {
     grid-template-columns: minmax(280px, 600px);
 }
 
+.about-profile-card-wrap {
+    max-width: 360px;
+    margin: 0 auto;
+}
+
+.about-profile-card {
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    overflow: hidden;
+    border-radius: 16px;
+    background: linear-gradient(160deg, rgba(255, 107, 157, 0.08), rgba(96, 165, 250, 0.1));
+    border: 1px solid rgba(var(--color-black-rgb), 0.08);
+    box-shadow: 0 14px 30px rgba(var(--color-black-rgb), 0.08);
+    min-height: auto;
+}
+
+.about-profile-media {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+}
+
+.about-profile-photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 0;
+    display: block;
+}
+
+.about-profile-body {
+    padding: var(--space-lg);
+    text-align: left;
+}
+
+.about-profile-name {
+    margin: 0 0 var(--space-xs);
+    font-size: var(--text-xl);
+    font-weight: 700;
+}
+
+.about-profile-role {
+    margin: 0 0 var(--space-sm);
+    font-size: var(--text-sm);
+    color: var(--color-muted);
+    font-weight: 600;
+}
+
+.about-profile-bio {
+    margin: 0 0 var(--space-md);
+    font-size: var(--text-sm);
+    line-height: 1.6;
+    color: var(--color-gray-600);
+}
+
+.about-profile-socials {
+    display: flex;
+    gap: var(--space-sm);
+}
+
+.about-profile-social-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    border: 1px solid rgba(var(--color-black-rgb), 0.1);
+    background: rgba(var(--color-white-rgb), 0.9);
+    color: var(--color-ink);
+}
+
+.about-profile-social-btn svg {
+    width: 18px;
+    height: 18px;
+    fill: currentColor;
+}
+
+.about-team-hero .bloomly-team-grid {
+    grid-template-columns: minmax(280px, 360px);
+}
+
 .about-team-hero .bloomly-team-card {
     background:
         linear-gradient(var(--color-white), var(--color-white)) padding-box,
         var(--gradient-primary) border-box;
     border: 1px solid transparent;
+}
+
+.about-team-hero .about-profile-card {
+    background: linear-gradient(160deg, rgba(255, 107, 157, 0.08), rgba(96, 165, 250, 0.1));
+    border: 1px solid rgba(var(--color-black-rgb), 0.08);
 }
 
 .about-team-hero .bloomly-team-avatar {
@@ -6389,21 +6477,6 @@ body {
 .appointments-message.is-success {
     background: var(--color-success-bg);
     color: var(--color-success-text);
-}
-
-.subscribe-page .form-message.is-error,
-.subscribe-page .newsletter-label .form-message.is-error {
-    color: #ff6b9d;
-    background: transparent;
-}
-
-.subscribe-success-message {
-    font-size: var(--text-xl);
-    font-weight: 600;
-    color: #ff6b9d;
-    text-align: center;
-    padding: var(--space-2xl) var(--space-md);
-    margin: 0;
 }
 
 .terms-conditions {

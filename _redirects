@@ -5,7 +5,6 @@
 /admin /admin/index.html 200
 /admin/login /admin/login.html 200
 /admin/login/ /admin/login.html 200
-/admin/dashboard.html /admin/ 301
 
 # Blog routing
 /blog /blog/index.html 200
@@ -26,9 +25,10 @@
 /terms /terms/index.html 200
 /terms/ /terms/index.html 200
 
-# Appointments routing
-/appointments /appointments/index.html 200
-/appointments/ /appointments/index.html 200
+# Charla temporarily disabled — redirect home (code kept at /appointments/index.html)
+/appointments /index.html 302
+/appointments/ /index.html 302
+/appointments/* /index.html 302
 
 # Team profile routing - legacy routes
 /team /about.html 301

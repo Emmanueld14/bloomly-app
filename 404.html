@@ -36,9 +36,9 @@
                 return;
             }
 
-            // Handle /appointments root
-            if (path === '/appointments' || path === '/appointments/') {
-                window.location.replace('/appointments/index.html');
+            // Charla disabled — send /appointments to home
+            if (path === '/appointments' || path === '/appointments/' || path.startsWith('/appointments/')) {
+                window.location.replace('/index.html');
                 return;
             }
 

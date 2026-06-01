@@ -29,7 +29,15 @@
 
     // Ensure blogAPI is available
     if (typeof blogAPI === 'undefined') {
-        warnDebug('blogAPI not loaded! Make sure blog-api.js is loaded before blog-loader.js');
+        const blogGrid = document.getElementById('blogGrid');
+        if (blogGrid) {
+            blogGrid.innerHTML = `
+                <div style="text-align: center; padding: var(--space-2xl); color: var(--color-gray-600);">
+                    <p style="font-size: var(--text-lg); margin-bottom: var(--space-md);">Couldn't load posts</p>
+                    <p style="font-size: var(--text-sm);">Please refresh the page or try again in a moment.</p>
+                </div>
+            `;
+        }
         return;
     }
 

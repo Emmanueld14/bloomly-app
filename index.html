@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Bloomly is a safe Kenyan mental wellness space for teens and youth to read comforting stories, book Charla sessions, and find gentle support.">
+    <meta name="description" content="Bloomly is a safe Kenyan mental wellness space for teens and youth to read comforting stories, read stories, and find gentle support.">
     <meta name="keywords" content="teen mental health, mental health awareness, teenage wellbeing, Bloomly">
     <meta name="author" content="Bloomly Team">
     <meta name="date" content="2026-01-01">
@@ -26,7 +26,6 @@
     
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-    <link rel="icon" href="/favicon.ico" sizes="32x32">
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">
     
     <title>Bloomly | Your Safe Space for Mental Wellness | Kenya</title>
@@ -51,7 +50,6 @@
                 <li><a href="/index.html" class="active">Home</a></li>
                 <li><a href="/about.html">About</a></li>
                 <li><a href="/blog">Blog</a></li>
-                <li><a href="/appointments">Charla</a></li>
                 <li><a href="/subscribe">Subscribe</a></li>
             </ul>
             <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Toggle menu">
@@ -76,7 +74,7 @@
                     </p>
                     <div class="home-studio-actions">
                         <a href="/blog" class="btn btn-outline-white">Read the Blog</a>
-                        <a href="/appointments" class="btn btn-white">Book a Charla</a>
+                        <a href="/subscribe" class="btn btn-white">Subscribe</a>
                     </div>
                 </div>
             </div>
@@ -96,8 +94,8 @@
                         <div class="home-pillar-icon" aria-hidden="true">
                             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#9B59B6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                         </div>
-                        <h2>Guided Sessions</h2>
-                        <p>Book Charla support moments with a calm, safe structure.</p>
+                        <h2>Gentle Support</h2>
+                        <p>Calm tools and reflections when you need a quieter place to land.</p>
                     </article>
                     <article class="home-studio-pillar">
                         <div class="home-pillar-icon" aria-hidden="true">
@@ -110,7 +108,8 @@
             </div>
         </section>
 
-        <section class="section pricing-section" aria-labelledby="home-pricing-title">
+        <!-- Charla hidden while disabled -->
+        <section class="section pricing-section charla-feature" hidden aria-labelledby="home-pricing-title">
             <div class="container">
                 <div class="section-header">
                     <h2 id="home-pricing-title">Book a Charla Session</h2>
@@ -167,6 +166,7 @@
         </div>
     </footer>
 
+    <script src="/public/site-features.js"></script>
     <script src="/script.js"></script>
 </body>
 </html>

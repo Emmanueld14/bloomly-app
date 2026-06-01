@@ -24,32 +24,117 @@
     }
   },
   "redirects": [
-    { "source": "/team", "destination": "/about.html", "permanent": true },
-    { "source": "/team/", "destination": "/about.html", "permanent": true },
-    { "source": "/team/:slug", "destination": "/members/?id=:slug", "permanent": true },
-    { "source": "/team/:slug/", "destination": "/members/?id=:slug", "permanent": true },
-    { "source": "/people", "destination": "/members/", "permanent": true },
-    { "source": "/people/", "destination": "/members/", "permanent": true },
-    { "source": "/profile/:slug", "destination": "/members/?id=:slug", "permanent": true },
-    { "source": "/profile/:slug/", "destination": "/members/?id=:slug", "permanent": true },
-    { "source": "/people/:slug", "destination": "/members/?id=:slug", "permanent": true },
-    { "source": "/people/:slug/", "destination": "/members/?id=:slug", "permanent": true }
+    {
+      "source": "/team",
+      "destination": "/about.html",
+      "permanent": true
+    },
+    {
+      "source": "/team/",
+      "destination": "/about.html",
+      "permanent": true
+    },
+    {
+      "source": "/team/:slug",
+      "destination": "/members/?id=:slug",
+      "permanent": true
+    },
+    {
+      "source": "/team/:slug/",
+      "destination": "/members/?id=:slug",
+      "permanent": true
+    },
+    {
+      "source": "/people",
+      "destination": "/members/",
+      "permanent": true
+    },
+    {
+      "source": "/people/",
+      "destination": "/members/",
+      "permanent": true
+    },
+    {
+      "source": "/profile/:slug",
+      "destination": "/members/?id=:slug",
+      "permanent": true
+    },
+    {
+      "source": "/profile/:slug/",
+      "destination": "/members/?id=:slug",
+      "permanent": true
+    },
+    {
+      "source": "/people/:slug",
+      "destination": "/members/?id=:slug",
+      "permanent": true
+    },
+    {
+      "source": "/people/:slug/",
+      "destination": "/members/?id=:slug",
+      "permanent": true
+    }
   ],
   "rewrites": [
-    { "source": "/blog", "destination": "/blog/index.html" },
-    { "source": "/blog/", "destination": "/blog/index.html" },
-    { "source": "/blog/:slug", "destination": "/blog-post.html?slug=:slug" },
-    { "source": "/blog/:slug/", "destination": "/blog-post.html?slug=:slug" },
-    { "source": "/blog-post", "destination": "/blog-post/index.html" },
-    { "source": "/blog-post/", "destination": "/blog-post/index.html" },
-    { "source": "/subscribe", "destination": "/subscribe/index.html" },
-    { "source": "/subscribe/", "destination": "/subscribe/index.html" },
-    { "source": "/terms", "destination": "/terms/index.html" },
-    { "source": "/terms/", "destination": "/terms/index.html" },
-    { "source": "/appointments", "destination": "/appointments/index.html" },
-    { "source": "/appointments/", "destination": "/appointments/index.html" },
-    { "source": "/admin/login", "destination": "/admin/login.html" },
-    { "source": "/admin/login/", "destination": "/admin/login.html" }
+    {
+      "source": "/blog",
+      "destination": "/blog/index.html"
+    },
+    {
+      "source": "/blog/",
+      "destination": "/blog/index.html"
+    },
+    {
+      "source": "/blog/:slug",
+      "destination": "/blog-post/index.html?slug=:slug"
+    },
+    {
+      "source": "/blog/:slug/",
+      "destination": "/blog-post/index.html?slug=:slug"
+    },
+    {
+      "source": "/blog-post",
+      "destination": "/blog-post/index.html"
+    },
+    {
+      "source": "/blog-post/",
+      "destination": "/blog-post/index.html"
+    },
+    {
+      "source": "/subscribe",
+      "destination": "/subscribe/index.html"
+    },
+    {
+      "source": "/subscribe/",
+      "destination": "/subscribe/index.html"
+    },
+    {
+      "source": "/terms",
+      "destination": "/terms/index.html"
+    },
+    {
+      "source": "/terms/",
+      "destination": "/terms/index.html"
+    },
+    {
+      "source": "/admin/login",
+      "destination": "/admin/login.html"
+    },
+    {
+      "source": "/admin/login/",
+      "destination": "/admin/login.html"
+    },
+    {
+      "source": "/appointments",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/appointments/",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/appointments/:path*",
+      "destination": "/index.html"
+    }
   ]
 }
-
