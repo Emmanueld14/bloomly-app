@@ -3,6 +3,7 @@ import {
     optionsResponse,
     requireAdmin,
     supabaseFetch,
+    supabaseFetchList,
     slugify,
 } from '../../lib/admin-api.js';
 
@@ -19,8 +20,8 @@ export async function onRequest(context) {
 
     try {
         if (request.method === 'GET') {
-            const { data } = await supabaseFetch(env, 'posts?select=*&order=created_at.desc');
-            return jsonResponse({ posts: data || [] });
+            const posts = await supabaseFetchList(env, 'posts', ['created_at', 'updated_at']);
+            return jsonResponse({ posts });
         }
 
         const body = request.method !== 'GET' && request.method !== 'DELETE'

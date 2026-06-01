@@ -18,11 +18,27 @@ Deno.serve(async (req) => {
 
   try {
     if (req.method === "GET") {
-      const { data, error } = await supabase
+      let { data, error } = await supabase
         .from("subscribers")
         .select("*")
-        .order("created_at", { ascending: false });
-      if (error) throw error;
+        .order("subscribed_at", { ascending: false });
+
+      if (error) {
+        const fallback = await supabase
+          .from("subscribers")
+          .select("*")
+          .order("created_at", { ascending: false });
+        data = fallback.data;
+        error = fallback.error;
+      }
+
+      if (error) {
+        const plain = await supabase.from("subscribers").select("*");
+        data = plain.data;
+        error = plain.error;
+      }
+
+      if (error) return jsonResponse({ error: error.message }, 500);
       return jsonResponse({ subscribers: data ?? [] });
     }
 

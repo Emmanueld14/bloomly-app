@@ -39,6 +39,7 @@ jobs:
           supabase functions deploy admin-bookings --no-verify-jwt
           supabase functions deploy admin-subscribers --no-verify-jwt
           supabase functions deploy admin-counsellor-applications --no-verify-jwt
+          supabase functions deploy admin-sync-github-posts --no-verify-jwt
 
       - name: Seed blog posts from repo markdown
         if: env.SUPABASE_URL != '' && env.SUPABASE_SERVICE_ROLE_KEY != ''

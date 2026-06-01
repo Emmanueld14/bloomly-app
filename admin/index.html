@@ -51,12 +51,16 @@
             </section>
 
             <section data-view-panel="blog" hidden>
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:0.75rem;">
                     <h1>Blog Posts</h1>
-                    <button type="button" class="btn btn-primary" id="newPostBtn">New Post</button>
+                    <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+                        <button type="button" class="btn btn-secondary" id="syncGithubPostsBtn">Import from GitHub</button>
+                        <button type="button" class="btn btn-primary" id="newPostBtn">New Post</button>
+                    </div>
                 </div>
+                <p class="admin-hint" id="blogPostsHint" style="margin:0 0 1rem;color:#64748b;font-size:0.9rem;">Shows posts in Supabase plus markdown files from <code>content/blog/</code> on GitHub.</p>
                 <div class="admin-panel">
-                    <table class="admin-table" id="postsTable"><thead><tr><th>Title</th><th>Category</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead><tbody></tbody></table>
+                    <table class="admin-table" id="postsTable"><thead><tr><th>Title</th><th>Category</th><th>Date</th><th>Status</th><th>Source</th><th>Actions</th></tr></thead><tbody></tbody></table>
                 </div>
             </section>
 

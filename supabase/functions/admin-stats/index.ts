@@ -18,18 +18,37 @@ Deno.serve(async (req) => {
   );
 
   try {
-    const [posts, subscribers, bookings, counsellors, recentBookings, recentSubscribers] =
-      await Promise.all([
-        supabase.from("posts").select("id", { count: "exact", head: true }),
-        supabase.from("subscribers").select("id", { count: "exact", head: true }),
-        supabase.from("bookings").select("id", { count: "exact", head: true }),
-        supabase
-          .from("counsellor_applications")
-          .select("id", { count: "exact", head: true })
-          .eq("status", "pending"),
-        supabase.from("bookings").select("*").order("booked_at", { ascending: false }).limit(5),
-        supabase.from("subscribers").select("*").order("created_at", { ascending: false }).limit(5),
-      ]);
+    const [posts, subscribers, bookings, counsellors] = await Promise.all([
+      supabase.from("posts").select("id", { count: "exact", head: true }),
+      supabase.from("subscribers").select("id", { count: "exact", head: true }),
+      supabase.from("bookings").select("id", { count: "exact", head: true }),
+      supabase
+        .from("counsellor_applications")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "pending"),
+    ]);
+
+    let recentBookings = await supabase
+      .from("bookings")
+      .select("*")
+      .order("booked_at", { ascending: false })
+      .limit(5);
+    if (recentBookings.error) {
+      recentBookings = await supabase.from("bookings").select("*").limit(5);
+    }
+
+    let recentSubscribers = await supabase
+      .from("subscribers")
+      .select("*")
+      .order("subscribed_at", { ascending: false })
+      .limit(5);
+    if (recentSubscribers.error) {
+      recentSubscribers = await supabase
+        .from("subscribers")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(5);
+    }
 
     return jsonResponse({
       counts: {

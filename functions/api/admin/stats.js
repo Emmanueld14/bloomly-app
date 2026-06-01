@@ -3,6 +3,7 @@ import {
     optionsResponse,
     requireAdmin,
     supabaseFetch,
+    supabaseFetchList,
     countFromRange,
 } from '../../lib/admin-api.js';
 
@@ -25,11 +26,14 @@ export async function onRequestGet(context) {
             }),
         ]);
 
-        const recentBookings = await supabaseFetch(env, 'bookings?select=*&order=booked_at.desc&limit=5');
-        const recentSubscribers = await supabaseFetch(
-            env,
-            'subscribers?select=*&order=created_at.desc&limit=5'
-        );
+        const [recentBookings, recentSubscribers] = await Promise.all([
+            supabaseFetchList(env, 'bookings', ['booked_at', 'created_at']).then((rows) =>
+                rows.slice(0, 5)
+            ),
+            supabaseFetchList(env, 'subscribers', ['subscribed_at', 'created_at']).then((rows) =>
+                rows.slice(0, 5)
+            ),
+        ]);
 
         return jsonResponse({
             counts: {
@@ -38,8 +42,8 @@ export async function onRequestGet(context) {
                 bookings: countFromRange(bookings.response),
                 counsellorApplicationsPending: countFromRange(counsellors.response),
             },
-            recentBookings: recentBookings.data || [],
-            recentSubscribers: recentSubscribers.data || [],
+            recentBookings,
+            recentSubscribers,
         });
     } catch (error) {
         return jsonResponse({ error: error.message || 'Unable to load stats.' }, 500);

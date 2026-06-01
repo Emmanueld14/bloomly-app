@@ -3,6 +3,7 @@ import {
     optionsResponse,
     requireAdmin,
     supabaseFetch,
+    supabaseFetchList,
 } from '../../lib/admin-api.js';
 
 export async function onRequestOptions() {
@@ -18,16 +19,23 @@ export async function onRequest(context) {
 
     try {
         if (request.method === 'GET') {
-            const { data } = await supabaseFetch(env, 'subscribers?select=*&order=created_at.desc');
-            return jsonResponse({ subscribers: data || [] });
+            const subscribers = await supabaseFetchList(env, 'subscribers', [
+                'subscribed_at',
+                'created_at',
+            ]);
+            return jsonResponse({ subscribers });
         }
 
         if (request.method === 'DELETE') {
             const body = await request.json().catch(() => ({}));
             const id = url.searchParams.get('id') || body.id;
             if (!id) return jsonResponse({ error: 'Subscriber id required.' }, 400);
-            const { response } = await supabaseFetch(env, `subscribers?id=eq.${id}`, { method: 'DELETE' });
-            if (!response.ok) return jsonResponse({ error: 'Delete failed' }, 400);
+            const { response, data } = await supabaseFetch(env, `subscribers?id=eq.${id}`, {
+                method: 'DELETE',
+            });
+            if (!response.ok) {
+                return jsonResponse({ error: data?.message || 'Delete failed' }, 400);
+            }
             return jsonResponse({ ok: true });
         }
 

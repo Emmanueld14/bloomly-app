@@ -37,6 +37,7 @@ const SUPABASE_CONFIG = {
         '/api/admin/bookings': 'admin-bookings',
         '/api/admin/subscribers': 'admin-subscribers',
         '/api/admin/counsellor-applications': 'admin-counsellor-applications',
+        '/api/admin/sync-github-posts': 'admin-sync-github-posts',
     },
 };
 

@@ -165,15 +165,83 @@
             .join('') || '<tr><td colspan="4">No bookings yet</td></tr>';
 
         const subsBody = document.querySelector('#recentSubscribersTable tbody');
-        subsBody.innerHTML = (data.recentSubscribers || [])
-            .map(
-                (s) => `<tr>
+        const recentSubs = Array.isArray(data.recentSubscribers) ? data.recentSubscribers : [];
+        subsBody.innerHTML = recentSubs.length
+            ? recentSubs
+                  .map((s) => {
+                      const dateVal = s.subscribed_at || s.created_at;
+                      const dateLabel = dateVal
+                          ? new Date(dateVal).toLocaleDateString()
+                          : '—';
+                      return `<tr>
             <td>${s.name || '—'}</td>
-            <td>${s.email}</td>
-            <td>${new Date(s.created_at || s.subscribed_at).toLocaleDateString()}</td>
-        </tr>`
-            )
-            .join('') || '<tr><td colspan="3">No subscribers yet</td></tr>';
+            <td>${s.email || '—'}</td>
+            <td>${dateLabel}</td>
+        </tr>`;
+                  })
+                  .join('')
+            : '<tr><td colspan="3">No subscribers yet</td></tr>';
+    }
+
+    function isPostPublished(post) {
+        if (post.published === true) return true;
+        if (post.published === false) return false;
+        return String(post.status || '').toLowerCase() === 'published';
+    }
+
+    function formatPostDate(post) {
+        const raw = post.created_at || post.updated_at || post.metadata?.date;
+        if (!raw) return '—';
+        const d = new Date(raw);
+        return Number.isNaN(d.getTime()) ? '—' : d.toLocaleDateString();
+    }
+
+    async function loadGithubManifestPosts() {
+        try {
+            const res = await fetch('/content/blog/manifest.json', { cache: 'default' });
+            if (!res.ok) return [];
+            const manifest = await res.json();
+            if (!Array.isArray(manifest)) return [];
+            return manifest
+                .filter((entry) => entry?.slug && entry?.metadata?.title)
+                .map((entry) => ({
+                    id: `github:${entry.slug}`,
+                    slug: entry.slug,
+                    title: entry.metadata.title,
+                    category: entry.metadata.category || 'Mental Health',
+                    emoji: entry.metadata.emoji || '💜',
+                    created_at: entry.metadata.date,
+                    published: entry.metadata.published !== false,
+                    status: entry.metadata.published !== false ? 'published' : 'draft',
+                    source: 'github',
+                    summary: entry.metadata.summary || '',
+                }));
+        } catch (error) {
+            console.warn('Could not load GitHub manifest:', error);
+            return [];
+        }
+    }
+
+    function mergeAdminPosts(supabasePosts, githubPosts) {
+        const merged = new Map();
+        githubPosts.forEach((post) => {
+            merged.set(post.slug, post);
+        });
+        (supabasePosts || []).forEach((post) => {
+            const slug = post.slug;
+            if (!slug) return;
+            const hadGithub = merged.has(slug);
+            merged.set(slug, {
+                ...merged.get(slug),
+                ...post,
+                source: hadGithub ? 'both' : 'supabase',
+            });
+        });
+        return Array.from(merged.values()).sort((a, b) => {
+            const dateA = new Date(a.created_at || 0).getTime();
+            const dateB = new Date(b.created_at || 0).getTime();
+            return dateB - dateA;
+        });
     }
 
     async function loadPosts() {
@@ -184,54 +252,116 @@
             showAdminError(error.message || 'Could not load blog posts.');
             const tbody = document.querySelector('#postsTable tbody');
             if (tbody) {
-                tbody.innerHTML = '<tr><td colspan="5">Could not load posts. Check Cloudflare env vars (SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY).</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6">Could not load posts. Check Cloudflare env vars (SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY).</td></tr>';
             }
         }
     }
 
     async function loadPostsInner() {
-        const { posts } = await api('/api/admin/posts');
+        const [{ posts: supabasePosts }, githubPosts] = await Promise.all([
+            api('/api/admin/posts'),
+            loadGithubManifestPosts(),
+        ]);
+        const posts = mergeAdminPosts(supabasePosts, githubPosts);
         const tbody = document.querySelector('#postsTable tbody');
-        if (!posts?.length) {
-                tbody.innerHTML = '<tr><td colspan="5">No posts in Supabase yet. Push to main (GitHub → Supabase deploy) or click New Post.</td></tr>';
+        const hint = document.getElementById('blogPostsHint');
+        if (hint) {
+            hint.textContent = `${posts.length} post(s): ${supabasePosts?.length || 0} in Supabase, ${githubPosts.length} on GitHub (content/blog).`;
+        }
+        if (!posts.length) {
+            tbody.innerHTML =
+                '<tr><td colspan="6">No posts found. Click Import from GitHub or New Post.</td></tr>';
             return;
         }
         tbody.innerHTML = posts
-            .map(
-                (p) => `<tr>
+            .map((p) => {
+                const status = isPostPublished(p) ? 'Published' : 'Draft';
+                const source =
+                    p.source === 'github'
+                        ? 'GitHub'
+                        : p.source === 'both'
+                          ? 'Both'
+                          : 'Supabase';
+                const editId = String(p.id).replace(/"/g, '&quot;');
+                const canDelete = p.source === 'supabase' && !String(p.id).startsWith('github:');
+                return `<tr>
             <td>${p.title}</td>
             <td>${p.category || '—'}</td>
-            <td>${new Date(p.created_at).toLocaleDateString()}</td>
-            <td>${p.published ? 'Published' : 'Draft'}</td>
+            <td>${formatPostDate(p)}</td>
+            <td>${status}</td>
+            <td>${source}</td>
             <td class="admin-table-actions">
-                <button type="button" class="admin-btn-sm" data-edit-post="${p.id}">Edit</button>
-                <button type="button" class="admin-btn-sm" data-delete-post="${p.id}">Delete</button>
+                <button type="button" class="admin-btn-sm" data-edit-post="${editId}">Edit</button>
+                ${canDelete ? `<button type="button" class="admin-btn-sm" data-delete-post="${p.id}">Delete</button>` : ''}
             </td>
-        </tr>`
-            )
+        </tr>`;
+            })
             .join('');
         tbody.querySelectorAll('[data-edit-post]').forEach((btn) => {
-            btn.addEventListener('click', () => openPostEditor(posts.find((p) => String(p.id) === btn.dataset.editPost)));
+            btn.addEventListener('click', () => {
+                const post = posts.find((p) => String(p.id) === btn.dataset.editPost);
+                openPostEditor(post);
+            });
         });
         tbody.querySelectorAll('[data-delete-post]').forEach((btn) => {
             btn.addEventListener('click', async () => {
-                if (!confirm('Delete this post?')) return;
+                if (!confirm('Delete this post from Supabase?')) return;
                 await api(`/api/admin/posts?id=${btn.dataset.deletePost}`, { method: 'DELETE' });
                 loadPosts();
             });
         });
     }
 
-    function openPostEditor(post) {
+    async function syncGithubPostsToSupabase() {
+        const btn = document.getElementById('syncGithubPostsBtn');
+        if (btn) {
+            btn.disabled = true;
+            btn.textContent = 'Importing…';
+        }
+        try {
+            const result = await api('/api/admin/sync-github-posts', { method: 'POST', body: '{}' });
+            showAdminError('');
+            alert(
+                `Imported ${result.synced} of ${result.total} post(s) from GitHub into Supabase.` +
+                    (result.errors?.length ? `\n\nSome issues:\n${result.errors.slice(0, 5).join('\n')}` : '')
+            );
+            loadPosts();
+            loadDashboard();
+        } catch (error) {
+            showAdminError(error.message || 'Import failed.');
+        } finally {
+            if (btn) {
+                btn.disabled = false;
+                btn.textContent = 'Import from GitHub';
+            }
+        }
+    }
+
+    async function openPostEditor(post) {
         const panel = document.getElementById('postSlideover');
         panel.classList.add('is-open');
-        document.getElementById('postId').value = post?.id || '';
+        const isGithubOnly = post?.source === 'github' || String(post?.id || '').startsWith('github:');
+        document.getElementById('postId').value = isGithubOnly ? '' : post?.id || '';
         document.getElementById('postTitle').value = post?.title || '';
         document.getElementById('postSlug').value = post?.slug || '';
         document.getElementById('postCategory').value = post?.category || 'Mental Health';
         document.getElementById('postEmoji').value = post?.emoji || '💜';
-        document.getElementById('postContent').value = post?.content || '';
-        document.getElementById('postPublished').checked = Boolean(post?.published);
+        document.getElementById('postPublished').checked = isPostPublished(post);
+
+        let content = post?.content || '';
+        if (!content && post?.slug) {
+            try {
+                const res = await fetch(`/content/blog/${post.slug}.md`);
+                if (res.ok) {
+                    const raw = await res.text();
+                    const match = raw.match(/^---\s*\n[\s\S]*?\n---\s*\n([\s\S]*)$/);
+                    content = match ? match[1].trim() : raw;
+                }
+            } catch (e) {
+                console.warn('Could not load markdown for', post.slug);
+            }
+        }
+        document.getElementById('postContent').value = content;
     }
 
     function closePostEditor() {
@@ -298,32 +428,49 @@
     }
 
     async function loadSubscribers() {
-        const { subscribers } = await api('/api/admin/subscribers');
-        const tbody = document.querySelector('#subscribersTable tbody');
-        tbody.innerHTML = subscribers
-            .map(
-                (s) => `<tr>
+        try {
+            const { subscribers } = await api('/api/admin/subscribers');
+            const list = Array.isArray(subscribers) ? subscribers : [];
+            const tbody = document.querySelector('#subscribersTable tbody');
+            if (!list.length) {
+                tbody.innerHTML = '<tr><td colspan="4">No subscribers in Supabase yet.</td></tr>';
+                return;
+            }
+            tbody.innerHTML = list
+                .map((s) => {
+                    const dateVal = s.subscribed_at || s.created_at;
+                    const dateLabel = dateVal ? new Date(dateVal).toLocaleDateString() : '—';
+                    return `<tr>
             <td>${s.name || '—'}</td>
-            <td>${s.email}</td>
-            <td>${new Date(s.created_at || s.subscribed_at).toLocaleDateString()}</td>
+            <td>${s.email || '—'}</td>
+            <td>${dateLabel}</td>
             <td><button type="button" class="admin-btn-sm" data-delete-sub="${s.id}">Delete</button></td>
-        </tr>`
-            )
-            .join('');
-        tbody.querySelectorAll('[data-delete-sub]').forEach((btn) => {
-            btn.addEventListener('click', async () => {
-                if (!confirm('Remove subscriber?')) return;
-                await api(`/api/admin/subscribers?id=${btn.dataset.deleteSub}`, { method: 'DELETE' });
-                loadSubscribers();
+        </tr>`;
+                })
+                .join('');
+            tbody.querySelectorAll('[data-delete-sub]').forEach((btn) => {
+                btn.addEventListener('click', async () => {
+                    if (!confirm('Remove subscriber?')) return;
+                    await api(`/api/admin/subscribers?id=${btn.dataset.deleteSub}`, { method: 'DELETE' });
+                    loadSubscribers();
+                    loadDashboard();
+                });
             });
-        });
-        document.getElementById('exportSubsBtn').onclick = () => {
-            const header = 'Name,Email,Date';
-            const rows = subscribers.map((s) =>
-                [s.name, s.email, s.created_at].map(escapeCsv).join(',')
-            );
-            downloadCsv('subscribers.csv', [header, ...rows]);
-        };
+            document.getElementById('exportSubsBtn').onclick = () => {
+                const header = 'Name,Email,Date';
+                const rows = list.map((s) =>
+                    [s.name, s.email, s.subscribed_at || s.created_at].map(escapeCsv).join(',')
+                );
+                downloadCsv('subscribers.csv', [header, ...rows]);
+            };
+        } catch (error) {
+            console.error('Subscribers load failed:', error);
+            showAdminError(error.message || 'Could not load subscribers.');
+            const tbody = document.querySelector('#subscribersTable tbody');
+            if (tbody) {
+                tbody.innerHTML = `<tr><td colspan="4">${error.message || 'Could not load subscribers.'}</td></tr>`;
+            }
+        }
     }
 
     async function loadCounsellors() {
@@ -392,7 +539,15 @@
             });
         });
 
-        document.getElementById('newPostBtn').addEventListener('click', () => openPostEditor(null));
+        document.getElementById('newPostBtn').addEventListener('click', () => {
+            void openPostEditor(null);
+        });
+        const syncBtn = document.getElementById('syncGithubPostsBtn');
+        if (syncBtn) {
+            syncBtn.addEventListener('click', () => {
+                void syncGithubPostsToSupabase();
+            });
+        }
         document.getElementById('postForm').addEventListener('submit', savePost);
         document.getElementById('closePostEditor').addEventListener('click', closePostEditor);
         document.getElementById('postTitle').addEventListener('input', (e) => {
