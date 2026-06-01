@@ -42,7 +42,27 @@ or run SQL manually in Supabase SQL Editor.
 
 ---
 
-## 3) Configure environment variables
+## 3) GitHub → Supabase (recommended for admin + blog)
+
+If your Supabase project is linked to this GitHub repo, add these **GitHub repository secrets** (`Settings → Secrets and variables → Actions`):
+
+| Secret | Where to get it |
+|--------|------------------|
+| `SUPABASE_ACCESS_TOKEN` | [Supabase Account → Access Tokens](https://supabase.com/dashboard/account/tokens) |
+| `SUPABASE_URL` | Project Settings → API → Project URL |
+| `SUPABASE_SERVICE_ROLE_KEY` | Project Settings → API → `service_role` key (secret) |
+
+On every push to `main`, the workflow `.github/workflows/supabase.yml` will:
+
+1. Run `supabase db push` (migrations)
+2. Deploy admin Edge Functions (`admin-stats`, `admin-posts`, …)
+3. Seed `posts` from `content/blog/*.md`
+
+The Bloomly admin panel at `/admin/` calls these functions directly — **you do not need to copy Supabase keys into Cloudflare Pages** for dashboard stats or blog posts.
+
+---
+
+## 4) Configure environment variables
 
 Use `.env.example` as reference.
 

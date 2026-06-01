@@ -36,10 +36,22 @@
                 errorEl.hidden = false;
             }
 
+            function statsCheckUrl() {
+                const cfg = typeof SUPABASE_CONFIG !== 'undefined' ? SUPABASE_CONFIG : {};
+                if (cfg.functionsBase && cfg.adminRoutes && cfg.adminRoutes['/api/admin/stats']) {
+                    return cfg.functionsBase + '/' + cfg.adminRoutes['/api/admin/stats'];
+                }
+                return '/api/admin/stats';
+            }
+
             async function validateToken(token) {
                 try {
-                    const res = await fetch('/api/admin/stats', {
-                        headers: { Authorization: 'Bearer ' + token },
+                    const cfg = typeof SUPABASE_CONFIG !== 'undefined' ? SUPABASE_CONFIG : {};
+                    const res = await fetch(statsCheckUrl(), {
+                        headers: {
+                            Authorization: 'Bearer ' + token,
+                            ...(cfg.anonKey ? { apikey: cfg.anonKey } : {}),
+                        },
                     });
                     return res.ok;
                 } catch (e) {

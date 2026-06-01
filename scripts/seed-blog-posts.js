@@ -56,7 +56,7 @@ async function main() {
       slug,
       summary,
       excerpt: summary,
-      url: `https://bloomly.co.ke/blog/${slug}`,
+      url: `https://bloomly.co.ke/blog-post/?slug=${encodeURIComponent(slug)}`,
       category: metadata.category || 'Mental Health',
       content: body,
       emoji: metadata.emoji || '💜',

@@ -23,12 +23,21 @@ const GITHUB_CONFIG = {
     ],
 };
 
-// Supabase configuration for email notifications
+// Supabase configuration (Edge Functions deploy from GitHub via Supabase integration)
 const SUPABASE_CONFIG = {
     url: 'https://xmhyjttyarskimsxcfhl.supabase.co',
     anonKey: 'sb_publishable_IOs-j6rgWuDnwrymIIUHxQ_wCTmcaMp',
+    functionsBase: 'https://xmhyjttyarskimsxcfhl.supabase.co/functions/v1',
     notifyFunctionUrl: 'https://xmhyjttyarskimsxcfhl.supabase.co/functions/v1/notify-subscribers',
-    publishPostFunctionUrl: 'https://xmhyjttyarskimsxcfhl.supabase.co/functions/v1/publish-post'
+    publishPostFunctionUrl: 'https://xmhyjttyarskimsxcfhl.supabase.co/functions/v1/publish-post',
+    // Admin API routes (Supabase Edge Functions — no Cloudflare env vars required)
+    adminRoutes: {
+        '/api/admin/stats': 'admin-stats',
+        '/api/admin/posts': 'admin-posts',
+        '/api/admin/bookings': 'admin-bookings',
+        '/api/admin/subscribers': 'admin-subscribers',
+        '/api/admin/counsellor-applications': 'admin-counsellor-applications',
+    },
 };
 
 // Appointments (Charla) configuration.

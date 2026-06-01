@@ -41,3 +41,18 @@ verify_jwt = false
 
 [functions.appointments-payment-diagnostics]
 verify_jwt = false
+
+[functions.admin-stats]
+verify_jwt = false
+
+[functions.admin-posts]
+verify_jwt = false
+
+[functions.admin-bookings]
+verify_jwt = false
+
+[functions.admin-subscribers]
+verify_jwt = false
+
+[functions.admin-counsellor-applications]
+verify_jwt = false

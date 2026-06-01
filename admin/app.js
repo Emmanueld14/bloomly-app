@@ -30,13 +30,29 @@
         banner.hidden = !message;
     }
 
+    function resolveAdminApiUrl(path) {
+        const [pathname, query] = path.split('?');
+        const routes =
+            (typeof SUPABASE_CONFIG !== 'undefined' && SUPABASE_CONFIG.adminRoutes) || {};
+        const fnName = routes[pathname];
+        if (fnName && typeof SUPABASE_CONFIG !== 'undefined' && SUPABASE_CONFIG.functionsBase) {
+            const base = `${SUPABASE_CONFIG.functionsBase}/${fnName}`;
+            return query ? `${base}?${query}` : base;
+        }
+        return path;
+    }
+
     async function api(path, options = {}) {
         const token = getToken();
-        const res = await fetch(path, {
+        const url = resolveAdminApiUrl(path);
+        const anonKey =
+            typeof SUPABASE_CONFIG !== 'undefined' ? SUPABASE_CONFIG.anonKey : '';
+        const res = await fetch(url, {
             ...options,
             headers: {
                 'Content-Type': 'application/json',
                 Authorization: `Bearer ${token}`,
+                ...(anonKey ? { apikey: anonKey } : {}),
                 ...(options.headers || {}),
             },
         });
@@ -151,7 +167,7 @@
         const { posts } = await api('/api/admin/posts');
         const tbody = document.querySelector('#postsTable tbody');
         if (!posts?.length) {
-            tbody.innerHTML = '<tr><td colspan="5">No posts in Supabase yet. Click New Post or run the blog seed script.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="5">No posts in Supabase yet. Push to main (GitHub → Supabase deploy) or click New Post.</td></tr>';
             return;
         }
         tbody.innerHTML = posts
