@@ -59,6 +59,10 @@
         const isBlogRoot = path === '/blog' || path === '/blog/';
         const isBlogPost = path.includes('/blog/') && !path.endsWith('blog.html') && !isBlogRoot;
         const isBlogPostTemplate = path.includes('/blog-post');
+        const isAboutPage =
+            /^\/about(\/|$)/.test(path) ||
+            path.endsWith('about.html') ||
+            path.includes('/about/');
         const isTeamProfile = /\/(team|profile|people|members)(\/|$)/.test(path);
         const isSubscribePage = path.includes('/subscribe') || path.endsWith('subscribe.html');
         const isAppointmentsPage = path.includes('/appointments');
@@ -91,13 +95,29 @@
                 return;
             }
 
+            if (isAboutPage && isAboutLink) {
+                link.classList.add('active');
+                return;
+            }
+
             if ((isBlogPost || isBlogPostTemplate || isBlogRoot) && isBlogLink) {
                 link.classList.add('active');
-            } else if (!isBlogPost && !isBlogPostTemplate && !isBlogRoot && !isTeamProfile && !isSubscribePage && !isAppointmentsPage) {
+            } else if (
+                !isBlogPost &&
+                !isBlogPostTemplate &&
+                !isBlogRoot &&
+                !isAboutPage &&
+                !isTeamProfile &&
+                !isSubscribePage &&
+                !isAppointmentsPage
+            ) {
                 if (linkSegment === currentPath || 
                     (currentPath === '' && linkSegment === 'index.html') ||
                     (currentPath === 'index.html' && linkSegment === 'index.html') ||
-                    (path.endsWith('/') && linkSegment === 'index.html')) {
+                    (path.endsWith('/') &&
+                        linkSegment === 'index.html' &&
+                        !isAboutPage &&
+                        path !== '/about/')) {
                     link.classList.add('active');
                 }
             }
@@ -2083,8 +2103,9 @@ But I can start by being honest about my own story.`,
         image.decoding = 'async';
         image.loading = index === 0 ? 'eager' : 'lazy';
         image.fetchPriority = index === 0 ? 'high' : 'auto';
-        image.width = 520;
-        image.height = 620;
+        const onAboutPage = Boolean(document.querySelector('.about-team-hero [data-team-grid]'));
+        image.width = onAboutPage ? 224 : 520;
+        image.height = onAboutPage ? 224 : 620;
 
         avatar.appendChild(image);
 

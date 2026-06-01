@@ -1814,7 +1814,9 @@ a:hover {
 }
 
 .about-team-hero .bloomly-team-grid {
-    grid-template-columns: minmax(280px, 600px);
+    grid-template-columns: minmax(260px, 340px);
+    max-width: 360px;
+    margin: 0 auto;
 }
 
 .about-profile-card-wrap {
@@ -5109,21 +5111,41 @@ a:hover {
 }
 
 .about-team-hero .bloomly-team-grid {
-    grid-template-columns: minmax(280px, 760px) !important;
+    grid-template-columns: minmax(260px, 340px);
     justify-content: center;
+    max-width: 360px;
+    margin: 0 auto;
+}
+
+.about-team-hero .bloomly-team-item {
+    width: 100%;
+}
+
+.about-team-hero .bloomly-team-card {
+    min-height: auto;
+    padding: var(--space-lg);
 }
 
 .about-team-hero .bloomly-team-core {
-    grid-template-columns: minmax(220px, 320px) 1fr;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
     align-items: center;
+    text-align: center;
 }
 
 .about-team-hero .bloomly-team-avatar {
-    width: 100% !important;
-    height: auto !important;
-    aspect-ratio: 4 / 5;
-    border-radius: var(--radius-xl);
+    width: 112px;
+    height: 112px;
+    aspect-ratio: 1;
+    border-radius: 50%;
     overflow: hidden;
+    flex-shrink: 0;
+}
+
+.about-team-hero .bloomly-team-photo {
+    border-radius: 50%;
+    object-fit: cover;
 }
 
 .simple-profile-header {
@@ -5298,6 +5320,12 @@ a:hover {
     height: 72px !important;
     padding: 3px !important;
     box-shadow: none !important;
+}
+
+.about-team-hero .bloomly-team-avatar {
+    width: 112px !important;
+    height: 112px !important;
+    border-radius: 50% !important;
 }
 
 .bloomly-team-name {
