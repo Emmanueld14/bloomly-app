@@ -9,7 +9,10 @@
   Cache-Control: public, max-age=86400
 
 /script.js
-  Cache-Control: public, max-age=3600
+  Cache-Control: public, max-age=86400
+
+/src/data/*
+  Cache-Control: public, max-age=86400
 
 /logo.svg
   Cache-Control: public, max-age=604800, immutable

@@ -13,7 +13,8 @@ class BlogAPI {
         this._supabase = null;
         this._supabaseLoadPromise = null;
         this._fetchTimeoutMs = 8000;
-        this._supabaseTimeoutMs = 3500;
+        this._supabaseTimeoutMs = 2000;
+        this._supabaseFastCapMs = 1200;
     }
 
     _getDebugFlag() {
@@ -133,7 +134,7 @@ class BlogAPI {
 
         const { data, error } = await client
             .from('posts')
-            .select('slug,title,created_at,updated_at,category,excerpt,summary,emoji,published,content')
+            .select('slug,title,created_at,updated_at,category,excerpt,summary,emoji,published')
             .eq('published', true)
             .order('created_at', { ascending: false });
 
@@ -221,10 +222,21 @@ class BlogAPI {
     }
 
     async listPosts() {
-        const [manifestPosts, supabasePosts] = await Promise.all([
-            this._loadManifestPosts(),
-            this._listSupabasePostsWithTimeout(),
-        ]);
+        const manifestPromise = this._loadManifestPosts();
+        const supabasePromise = this._listSupabasePostsWithTimeout();
+        const manifestPosts = await manifestPromise;
+
+        let supabasePosts = null;
+        if (manifestPosts.length) {
+            supabasePosts = await Promise.race([
+                supabasePromise,
+                new Promise((resolve) => {
+                    setTimeout(() => resolve(null), this._supabaseFastCapMs);
+                }),
+            ]);
+        } else {
+            supabasePosts = await supabasePromise;
+        }
 
         if (supabasePosts && supabasePosts.length > 0) {
             this._log(`Loaded ${supabasePosts.length} post(s) from Supabase`);
@@ -248,13 +260,36 @@ class BlogAPI {
         return v !== 'false' && v !== 'draft' && v !== '0';
     }
 
+    async _getSupabasePostWithTimeout(slug) {
+        try {
+            return await Promise.race([
+                this._getSupabasePost(slug),
+                new Promise((resolve) => {
+                    setTimeout(() => resolve(null), this._supabaseTimeoutMs);
+                }),
+            ]);
+        } catch (error) {
+            this._warn('Supabase getPost failed:', error);
+            return null;
+        }
+    }
+
     async getPost(slug) {
         slug = this._normalizeSlug(slug);
-        const supabasePost = await this._getSupabasePost(slug);
+        const [supabasePost, localPost] = await Promise.all([
+            this._getSupabasePostWithTimeout(slug),
+            this._tryGetLocalPost(slug),
+        ]);
+
         if (supabasePost) return supabasePost;
 
-        const localPost = await this._tryGetLocalPost(slug);
-        if (localPost) return localPost;
+        if (localPost) {
+            return {
+                ...localPost,
+                html: this.markdownToHTML(localPost.body),
+                permalink: this.postPermalink(slug),
+            };
+        }
 
         throw new Error(`Post "${slug}" not found`);
     }
