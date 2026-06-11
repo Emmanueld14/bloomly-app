@@ -51,35 +51,65 @@
         }
     }
 
+    function normalizeRoute(pathname) {
+        const withoutQuery = (pathname || '/').split('?')[0].split('#')[0];
+        let route = withoutQuery.startsWith('/') ? withoutQuery : `/${withoutQuery}`;
+
+        if (route === '/index.html' || route === '/index') {
+            return '/';
+        }
+
+        route = route.replace(/\/index\.html$/, '').replace(/\.html$/, '');
+        if (route.length > 1) {
+            route = route.replace(/\/$/, '');
+        }
+
+        return route || '/';
+    }
+
     // Set active nav link based on current page
     function setActiveNavLink() {
         if (!navLinks) return;
         const links = navLinks.querySelectorAll('a');
         const path = window.location.pathname;
-        const isBlogRoot = path === '/blog' || path === '/blog/';
-        const isBlogPost = path.includes('/blog/') && !path.endsWith('blog.html') && !isBlogRoot;
+        const currentRoute = normalizeRoute(path);
+        const isBlogRoot = currentRoute === '/blog';
+        const isBlogPost = currentRoute.startsWith('/blog/') && !isBlogRoot;
         const isBlogPostTemplate = path.includes('/blog-post');
-        const isAboutPage =
-            /^\/about(\/|$)/.test(path) ||
-            path.endsWith('about.html') ||
-            path.includes('/about/');
+        const isAboutPage = currentRoute === '/about';
         const isTeamProfile = /\/(team|profile|people|members)(\/|$)/.test(path);
-        const isSubscribePage = path.includes('/subscribe') || path.endsWith('subscribe.html');
-        const isAppointmentsPage = path.includes('/appointments');
+        const isSubscribePage = currentRoute === '/subscribe';
+        const isAppointmentsPage = currentRoute.startsWith('/appointments');
+        const isProgramsPage = currentRoute === '/programs';
+        const isResourcesPage = currentRoute === '/resources';
         
         links.forEach(link => {
             const linkPath = link.getAttribute('href') || '';
-            const normalizedLinkPath = linkPath.split('?')[0];
+            const normalizedLinkPath = linkPath.split('?')[0].split('#')[0];
+            const linkRoute = normalizeRoute(normalizedLinkPath);
             const linkSegment = normalizedLinkPath.split('/').pop();
-            const isBlogLink = normalizedLinkPath.endsWith('blog.html') || normalizedLinkPath.endsWith('/blog');
-            const isAboutLink = normalizedLinkPath.endsWith('about.html') || normalizedLinkPath.endsWith('/about');
-            const isSubscribeLink = normalizedLinkPath.endsWith('subscribe.html') || normalizedLinkPath.endsWith('/subscribe');
-            const isAppointmentsLink = normalizedLinkPath.endsWith('/appointments') || normalizedLinkPath.endsWith('appointments.html');
+            const isHomeLink = linkRoute === '/';
+            const isBlogLink = linkRoute === '/blog';
+            const isAboutLink = linkRoute === '/about';
+            const isSubscribeLink = linkRoute === '/subscribe';
+            const isAppointmentsLink = linkRoute === '/appointments';
+            const isProgramsLink = linkRoute === '/programs';
+            const isResourcesLink = linkRoute === '/resources';
             
             // Remove active class first
             link.classList.remove('active');
             
             // Check if this link should be active
+            if (isProgramsPage && isProgramsLink) {
+                link.classList.add('active');
+                return;
+            }
+
+            if (isResourcesPage && isResourcesLink) {
+                link.classList.add('active');
+                return;
+            }
+
             if (isTeamProfile && isAboutLink) {
                 link.classList.add('active');
                 return;
@@ -109,9 +139,13 @@
                 !isAboutPage &&
                 !isTeamProfile &&
                 !isSubscribePage &&
-                !isAppointmentsPage
+                !isAppointmentsPage &&
+                !isProgramsPage &&
+                !isResourcesPage
             ) {
-                if (linkSegment === currentPath || 
+                if (isHomeLink && currentRoute === '/') {
+                    link.classList.add('active');
+                } else if (linkSegment === currentPath || 
                     (currentPath === '' && linkSegment === 'index.html') ||
                     (currentPath === 'index.html' && linkSegment === 'index.html') ||
                     (path.endsWith('/') &&
