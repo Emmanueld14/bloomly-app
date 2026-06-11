@@ -39,14 +39,26 @@
     </nav>
 
     <main class="resources-main">
-        <section class="resources-hero" aria-labelledby="resources-page-title">
+        <section class="resources-hero resources-hero-enhanced" aria-labelledby="resources-page-title">
             <div class="floating-shape resources-orb resources-orb-one" aria-hidden="true"></div>
             <div class="floating-shape resources-orb resources-orb-two" aria-hidden="true"></div>
             <div class="container">
-                <div class="section-header">
-                    <p class="section-kicker">Student toolkit</p>
-                    <h1 id="resources-page-title">Resources for school, wellbeing, and next steps</h1>
-                    <p>Helpful starter links grouped into friendly categories, ready to grow into Bloomly's student resource hub.</p>
+                <div class="resources-hero-layout">
+                    <div class="resources-hero-copy">
+                        <p class="section-kicker">Resource library</p>
+                        <h1 id="resources-page-title">Helpful material students can read, use, or save for later.</h1>
+                        <p>Bloomly Resources can hold our own custom articles, practical templates, and carefully selected links from trusted websites.</p>
+                        <div class="resource-quick-actions" aria-label="Resource quick actions">
+                            <a href="#bloomly-materials">Bloomly articles</a>
+                            <a href="#curated-links">Curated links</a>
+                            <a href="#resource-submit">Add material</a>
+                        </div>
+                    </div>
+                    <aside class="resource-feature-card" aria-label="Featured resource format">
+                        <span class="resource-type-pill">Featured format</span>
+                        <h2>Student help cards</h2>
+                        <p>Short, friendly cards that link to a full Bloomly article, template download, video, or trusted external guide.</p>
+                    </aside>
                 </div>
             </div>
         </section>
@@ -54,8 +66,9 @@
         <section class="section resources-page-section" aria-labelledby="resources-list-title">
             <div class="container">
                 <div class="section-header home-section-header">
+                    <p class="section-kicker">Explore by need</p>
                     <h2 id="resources-list-title">Browse by what you need today</h2>
-                    <p>Each item is a placeholder link for now, organized so future resources can drop in cleanly.</p>
+                    <p>Each category can mix Bloomly-created articles with external links that have been reviewed before publishing.</p>
                 </div>
                 <div class="resources-grid">
                     <article class="resource-category-card">
@@ -72,9 +85,9 @@
                             </div>
                         </div>
                         <div class="resource-list">
-                            <a href="#">Study techniques library</a>
-                            <a href="#">Exam preparation guides</a>
-                            <a href="#">Time management tools</a>
+                            <a href="#bloomly-materials">Study techniques library <span>Article</span></a>
+                            <a href="#curated-links">Exam preparation guides <span>External</span></a>
+                            <a href="#bloomly-materials">Time management tools <span>Template</span></a>
                         </div>
                     </article>
                     <article class="resource-category-card">
@@ -90,9 +103,9 @@
                             </div>
                         </div>
                         <div class="resource-list">
-                            <a href="#">Stress management guides</a>
-                            <a href="#">Journaling templates</a>
-                            <a href="#">Mindfulness exercises</a>
+                            <a href="#bloomly-materials">Stress management guides <span>Article</span></a>
+                            <a href="#bloomly-materials">Journaling templates <span>Template</span></a>
+                            <a href="#curated-links">Mindfulness exercises <span>External</span></a>
                         </div>
                     </article>
                     <article class="resource-category-card">
@@ -109,9 +122,9 @@
                             </div>
                         </div>
                         <div class="resource-list">
-                            <a href="#">University application checklist</a>
-                            <a href="#">Personal statement writing tips</a>
-                            <a href="#">Scholarship finder guide</a>
+                            <a href="#bloomly-materials">University application checklist <span>Checklist</span></a>
+                            <a href="#bloomly-materials">Personal statement writing tips <span>Guide</span></a>
+                            <a href="#curated-links">Scholarship finder guide <span>External</span></a>
                         </div>
                     </article>
                     <article class="resource-category-card resource-category-card-featured">
@@ -135,6 +148,76 @@
                             <a href="#">Goal setting dashboard <span>Coming soon</span></a>
                         </div>
                     </article>
+                </div>
+            </div>
+        </section>
+
+        <section class="section resource-materials-section" id="bloomly-materials" aria-labelledby="materials-title">
+            <div class="container">
+                <div class="section-header home-section-header">
+                    <p class="section-kicker">Bloomly-made</p>
+                    <h2 id="materials-title">Custom articles and student tools we can publish here</h2>
+                    <p>Use these cards as placeholders for original Bloomly material written in a calm, practical voice.</p>
+                </div>
+                <div class="materials-grid">
+                    <a class="material-card material-card-featured" href="#">
+                        <span class="resource-type-pill">Article</span>
+                        <h3>How to reset after a bad school week</h3>
+                        <p>A gentle step-by-step article for students who feel behind, tired, or disappointed.</p>
+                        <strong>Draft in Bloomly</strong>
+                    </a>
+                    <a class="material-card" href="#">
+                        <span class="resource-type-pill">Template</span>
+                        <h3>7-day study rhythm planner</h3>
+                        <p>A printable or digital planner for balancing revision, rest, and small wins.</p>
+                        <strong>Coming soon</strong>
+                    </a>
+                    <a class="material-card" href="#">
+                        <span class="resource-type-pill">Guide</span>
+                        <h3>Personal statement starter pack</h3>
+                        <p>Prompts for writing about growth, leadership, community, and future goals.</p>
+                        <strong>Coming soon</strong>
+                    </a>
+                    <a class="material-card" href="#">
+                        <span class="resource-type-pill">Checklist</span>
+                        <h3>Exam week calm checklist</h3>
+                        <p>Simple reminders for sleep, preparation, breathing, and asking for help early.</p>
+                        <strong>Coming soon</strong>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <section class="section curated-links-section" id="curated-links" aria-labelledby="curated-links-title">
+            <div class="container">
+                <div class="resource-editor-panel" id="resource-submit">
+                    <div>
+                        <p class="section-kicker">Curated help</p>
+                        <h2 id="curated-links-title">A place for trusted websites and useful outside material</h2>
+                        <p>Bloomly can link to credible resources while keeping the page student-friendly. Each link can include a note explaining why it is helpful.</p>
+                    </div>
+                    <div class="resource-submit-card">
+                        <h3>Add a resource idea</h3>
+                        <p>Future contributors can submit a Bloomly article draft, a trusted website, or a tool students should know about.</p>
+                        <a class="btn btn-primary" href="/subscribe/">Get updates</a>
+                    </div>
+                </div>
+                <div class="curated-link-grid">
+                    <a class="curated-link-card" href="https://www.one2onekenya.org/help/call" target="_blank" rel="noopener noreferrer">
+                        <span>External support</span>
+                        <h3>Kenya crisis support contacts</h3>
+                        <p>Official contact options for urgent emotional or crisis support.</p>
+                    </a>
+                    <a class="curated-link-card" href="https://www.who.int/health-topics/adolescent-health" target="_blank" rel="noopener noreferrer">
+                        <span>External learning</span>
+                        <h3>Adolescent health overview</h3>
+                        <p>Helpful context for youth wellbeing from a global health source.</p>
+                    </a>
+                    <a class="curated-link-card" href="#">
+                        <span>Bloomly draft</span>
+                        <h3>Scholarship finder guide</h3>
+                        <p>A future curated list of scholarship search tips and application reminders.</p>
+                    </a>
                 </div>
             </div>
         </section>
@@ -168,6 +251,6 @@
         </div>
     </footer>
 
-    <script src="/script.js" defer></script>
+    <script src="/public/page-shell.js" defer></script>
 </body>
 </html>
