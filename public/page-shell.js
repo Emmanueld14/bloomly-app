@@ -31,7 +31,8 @@
         const currentRoute = normalizeRoute(window.location.pathname);
         navLinks.querySelectorAll('a').forEach((link) => {
             const linkRoute = normalizeRoute(link.getAttribute('href') || '/');
-            link.classList.toggle('active', linkRoute === currentRoute);
+            const isActive = linkRoute === currentRoute || (linkRoute !== '/' && currentRoute.startsWith(`${linkRoute}/`));
+            link.classList.toggle('active', isActive);
         });
     }
 

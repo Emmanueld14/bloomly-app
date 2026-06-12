@@ -38,92 +38,273 @@
         </div>
     </nav>
 
-    <main class="programs-main">
-        <section class="programs-hero programs-hero-enhanced" aria-labelledby="programs-page-title">
-            <div class="floating-shape programs-hero-orb programs-hero-orb-one" aria-hidden="true"></div>
-            <div class="floating-shape programs-hero-orb programs-hero-orb-two" aria-hidden="true"></div>
+    <main class="programs-main programs-experience">
+        <section class="programs-hero programs-hero-premium" aria-labelledby="programs-page-title">
+            <div class="programs-gradient-blob blob-pink" aria-hidden="true"></div>
+            <div class="programs-gradient-blob blob-purple" aria-hidden="true"></div>
+            <div class="programs-gradient-blob blob-blue" aria-hidden="true"></div>
             <div class="container">
-                <div class="programs-hero-layout">
+                <div class="programs-hero-layout programs-reveal">
                     <div class="programs-hero-copy">
-                        <p class="section-kicker">Hosted programs</p>
-                        <h1 id="programs-page-title">Guided spaces students can join, host, or grow from.</h1>
-                        <p>Bloomly programs are designed as warm, structured experiences for mentorship, academic momentum, wellbeing, leadership, and university preparation.</p>
+                        <p class="section-kicker">Bloomly Programs</p>
+                        <h1 id="programs-page-title">Guided spaces where students connect, heal, grow, and thrive.</h1>
+                        <p>Bloomly brings peer support, wellbeing, academic growth, leadership, and university preparation into warm student-centered programs that feel safe, practical, and empowering.</p>
                         <div class="programs-hero-actions">
-                            <a class="btn btn-primary" href="#program-catalog">Explore programs</a>
-                            <a class="btn btn-outline" href="#host-program">Host an idea</a>
+                            <a class="btn btn-primary" href="#program-catalog">Explore Programs</a>
+                            <a class="btn btn-outline" href="#host-program">Host a Program Idea</a>
                         </div>
                     </div>
-                    <aside class="programs-hero-panel" aria-label="Program highlights">
-                        <span class="program-panel-label">What makes a program</span>
-                        <ul>
-                            <li>Clear weekly rhythm</li>
-                            <li>Mentor or peer facilitation</li>
-                            <li>Student-friendly resources</li>
-                            <li>Progress check-ins</li>
-                        </ul>
+                    <aside class="programs-hero-visual" aria-label="Bloomly student growth illustration">
+                        <div class="wellness-orbit" aria-hidden="true">
+                            <span class="orbit-card orbit-card-one">Peer care</span>
+                            <span class="orbit-card orbit-card-two">Study wins</span>
+                            <span class="orbit-card orbit-card-three">Safe circles</span>
+                            <div class="wellness-core">
+                                <span>Bloomly</span>
+                                <strong>Grow gently</strong>
+                            </div>
+                        </div>
                     </aside>
+                </div>
+                <div class="program-stats-grid programs-reveal" aria-label="Bloomly program highlights">
+                    <div class="program-stat-card">
+                        <strong>5+</strong>
+                        <span>Support Programs</span>
+                    </div>
+                    <div class="program-stat-card">
+                        <strong>Student-Led</strong>
+                        <span>Initiatives</span>
+                    </div>
+                    <div class="program-stat-card">
+                        <strong>Safe</strong>
+                        <span>&amp; Inclusive Spaces</span>
+                    </div>
+                    <div class="program-stat-card">
+                        <strong>Growth</strong>
+                        <span>Focused Community</span>
+                    </div>
                 </div>
             </div>
         </section>
 
-        <section class="section programs-page-section" id="program-catalog" aria-labelledby="programs-list-title">
+        <section class="section programs-page-section programs-catalog-section" id="program-catalog" aria-labelledby="programs-list-title">
             <div class="container">
-                <div class="section-header home-section-header">
+                <div class="section-header home-section-header programs-reveal">
                     <p class="section-kicker">Program catalog</p>
-                    <h2 id="programs-list-title">Possible programs hosted on Bloomly</h2>
-                    <p>Each card can become a cohort, school club, online circle, or mentor-led support track.</p>
+                    <h2 id="programs-list-title">Choose the kind of support you need right now.</h2>
+                    <p>Filter by focus area, explore the experience, then join the interest list when something feels right.</p>
                 </div>
-                <div class="programs-grid">
-                    <article class="program-card">
-                        <span class="program-tag">Popular</span>
+                <div class="program-filter-tabs programs-reveal" role="tablist" aria-label="Filter programs by category">
+                    <button type="button" class="program-filter-tab is-active" data-program-filter="all" aria-pressed="true">All Programs</button>
+                    <button type="button" class="program-filter-tab" data-program-filter="academic" aria-pressed="false">Academic Growth</button>
+                    <button type="button" class="program-filter-tab" data-program-filter="wellness" aria-pressed="false">Mental Wellness</button>
+                    <button type="button" class="program-filter-tab" data-program-filter="peer" aria-pressed="false">Peer Support</button>
+                    <button type="button" class="program-filter-tab" data-program-filter="leadership" aria-pressed="false">Leadership</button>
+                    <button type="button" class="program-filter-tab" data-program-filter="university" aria-pressed="false">University Preparation</button>
+                </div>
+                <div class="programs-grid programs-modern-grid" data-program-grid>
+                    <article class="program-card program-card-modern programs-reveal" data-program-category="peer wellness">
+                        <div class="program-card-glow" aria-hidden="true"></div>
+                        <div class="program-card-topline">
+                            <span class="program-icon" aria-hidden="true">🤝</span>
+                            <span class="program-tag">Popular</span>
+                        </div>
                         <h3>Bloomly Peer Support Program</h3>
-                        <p>A structured peer-to-peer mentorship and emotional support network for students.</p>
-                        <ul class="program-meta-list">
-                            <li>Peer mentors</li>
-                            <li>Weekly reflection circles</li>
-                            <li>Confidential check-ins</li>
-                        </ul>
+                        <p>A structured peer-to-peer mentorship and emotional support network for students who want to feel less alone.</p>
+                        <div class="program-benefit-chips" aria-label="Key benefits">
+                            <span>Peer mentors</span>
+                            <span>Safe check-ins</span>
+                            <span>Belonging</span>
+                        </div>
+                        <div class="program-card-actions">
+                            <a class="btn btn-primary" href="/programs/peer-support/">Learn More</a>
+                            <a class="btn btn-outline" href="/subscribe/">Join Interest List</a>
+                        </div>
                     </article>
-                    <article class="program-card">
-                        <span class="program-tag">New</span>
+                    <article class="program-card program-card-modern programs-reveal" data-program-category="academic">
+                        <div class="program-card-glow" aria-hidden="true"></div>
+                        <div class="program-card-topline">
+                            <span class="program-icon" aria-hidden="true">📚</span>
+                            <span class="program-tag">New</span>
+                        </div>
                         <h3>Academic Growth Program</h3>
-                        <p>Personalized study planning, accountability tracking, and performance improvement system.</p>
-                        <ul class="program-meta-list">
-                            <li>Study planning</li>
-                            <li>Goal reviews</li>
-                            <li>Exam readiness</li>
-                        </ul>
+                        <p>Personalized study planning, accountability tracking, and confidence-building systems for better school rhythm.</p>
+                        <div class="program-benefit-chips" aria-label="Key benefits">
+                            <span>Study plans</span>
+                            <span>Goal reviews</span>
+                            <span>Exam readiness</span>
+                        </div>
+                        <div class="program-card-actions">
+                            <a class="btn btn-primary" href="/programs/academic-growth/">Learn More</a>
+                            <a class="btn btn-outline" href="/subscribe/">Join Interest List</a>
+                        </div>
                     </article>
-                    <article class="program-card">
-                        <span class="program-tag">Pilot</span>
+                    <article class="program-card program-card-modern programs-reveal" data-program-category="leadership">
+                        <div class="program-card-glow" aria-hidden="true"></div>
+                        <div class="program-card-topline">
+                            <span class="program-icon" aria-hidden="true">🌱</span>
+                            <span class="program-tag">Pilot</span>
+                        </div>
                         <h3>Leadership Development Program</h3>
-                        <p>Training students in leadership, communication, and initiative through real-world projects.</p>
-                        <ul class="program-meta-list">
-                            <li>Team projects</li>
-                            <li>Communication practice</li>
-                            <li>Community initiative</li>
-                        </ul>
+                        <p>Training students in leadership, communication, and initiative through meaningful real-world projects.</p>
+                        <div class="program-benefit-chips" aria-label="Key benefits">
+                            <span>Team projects</span>
+                            <span>Confidence</span>
+                            <span>Initiative</span>
+                        </div>
+                        <div class="program-card-actions">
+                            <a class="btn btn-primary" href="/programs/leadership-development/">Learn More</a>
+                            <a class="btn btn-outline" href="/subscribe/">Join Interest List</a>
+                        </div>
                     </article>
-                    <article class="program-card">
-                        <span class="program-tag">Group</span>
+                    <article class="program-card program-card-modern programs-reveal" data-program-category="wellness peer">
+                        <div class="program-card-glow" aria-hidden="true"></div>
+                        <div class="program-card-topline">
+                            <span class="program-icon" aria-hidden="true">💜</span>
+                            <span class="program-tag">Group</span>
+                        </div>
                         <h3>Mental Wellness Circle</h3>
-                        <p>Safe group sessions focused on emotional wellbeing, stress management, and resilience.</p>
-                        <ul class="program-meta-list">
-                            <li>Guided sessions</li>
-                            <li>Stress tools</li>
-                            <li>Resilience habits</li>
-                        </ul>
+                        <p>Safe group sessions focused on emotional wellbeing, stress management, and everyday resilience.</p>
+                        <div class="program-benefit-chips" aria-label="Key benefits">
+                            <span>Calm tools</span>
+                            <span>Guided circles</span>
+                            <span>Resilience</span>
+                        </div>
+                        <div class="program-card-actions">
+                            <a class="btn btn-primary" href="/programs/mental-wellness-circle/">Learn More</a>
+                            <a class="btn btn-outline" href="/subscribe/">Join Interest List</a>
+                        </div>
                     </article>
-                    <article class="program-card program-card-wide">
-                        <span class="program-tag">Guided</span>
+                    <article class="program-card program-card-modern programs-reveal" data-program-category="university academic">
+                        <div class="program-card-glow" aria-hidden="true"></div>
+                        <div class="program-card-topline">
+                            <span class="program-icon" aria-hidden="true">🎓</span>
+                            <span class="program-tag">Guided</span>
+                        </div>
                         <h3>University Prep Accelerator</h3>
-                        <p>Guidance for building strong university applications, essays, and extracurricular profiles.</p>
-                        <ul class="program-meta-list">
-                            <li>Application checklist</li>
-                            <li>Essay support</li>
-                            <li>Profile building</li>
-                        </ul>
+                        <p>Guidance for building strong university applications, essays, extracurricular profiles, and scholarship readiness.</p>
+                        <div class="program-benefit-chips" aria-label="Key benefits">
+                            <span>Applications</span>
+                            <span>Essays</span>
+                            <span>Scholarships</span>
+                        </div>
+                        <div class="program-card-actions">
+                            <a class="btn btn-primary" href="/programs/university-prep/">Learn More</a>
+                            <a class="btn btn-outline" href="/subscribe/">Join Interest List</a>
+                        </div>
                     </article>
+                </div>
+                <p class="program-empty-state" data-program-empty hidden>No programs match this filter yet. Try another category.</p>
+            </div>
+        </section>
+
+        <section class="section student-journey-section" aria-labelledby="journey-title">
+            <div class="container">
+                <div class="section-header home-section-header programs-reveal">
+                    <p class="section-kicker">Student journey</p>
+                    <h2 id="journey-title">From first step to real growth.</h2>
+                    <p>A Bloomly program should feel simple to enter and supportive all the way through.</p>
+                </div>
+                <div class="journey-timeline" aria-label="Bloomly program journey">
+                    <article class="journey-card programs-reveal">
+                        <span aria-hidden="true">🔎</span>
+                        <h3>Discover</h3>
+                        <p>Find a program that matches what you need now.</p>
+                    </article>
+                    <article class="journey-card programs-reveal">
+                        <span aria-hidden="true">✨</span>
+                        <h3>Join</h3>
+                        <p>Register interest and receive gentle next steps.</p>
+                    </article>
+                    <article class="journey-card programs-reveal">
+                        <span aria-hidden="true">🫶</span>
+                        <h3>Connect</h3>
+                        <p>Meet peers, mentors, or facilitators in a safe space.</p>
+                    </article>
+                    <article class="journey-card programs-reveal">
+                        <span aria-hidden="true">🌿</span>
+                        <h3>Grow</h3>
+                        <p>Practice tools, reflect, and build helpful habits.</p>
+                    </article>
+                    <article class="journey-card programs-reveal">
+                        <span aria-hidden="true">🚀</span>
+                        <h3>Thrive</h3>
+                        <p>Carry your confidence into school, life, and future goals.</p>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <section class="section program-testimonials-section" aria-labelledby="program-testimonials-title">
+            <div class="container">
+                <div class="section-header home-section-header programs-reveal">
+                    <p class="section-kicker">Student voice</p>
+                    <h2 id="program-testimonials-title">What students might say</h2>
+                    <p>Placeholder reflections showing the emotional tone these programs are designed to create.</p>
+                </div>
+                <div class="program-testimonial-track" aria-label="Student testimonials">
+                    <article class="program-testimonial-card programs-reveal">
+                        <div class="student-avatar" aria-hidden="true">A</div>
+                        <blockquote>“It felt like a space where I could be honest without being judged.”</blockquote>
+                        <h3>Amina</h3>
+                        <p>Grade 11, Nairobi</p>
+                    </article>
+                    <article class="program-testimonial-card programs-reveal">
+                        <div class="student-avatar" aria-hidden="true">K</div>
+                        <blockquote>“The study check-ins helped me stop feeling behind and start taking small steps.”</blockquote>
+                        <h3>Kevin</h3>
+                        <p>Form 4, Kisumu</p>
+                    </article>
+                    <article class="program-testimonial-card programs-reveal">
+                        <div class="student-avatar" aria-hidden="true">L</div>
+                        <blockquote>“I liked that it was warm but still practical. I left with something to try.”</blockquote>
+                        <h3>Lina</h3>
+                        <p>Year 12, Mombasa</p>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <section class="section program-faq-section" aria-labelledby="program-faq-title">
+            <div class="container">
+                <div class="program-faq-layout">
+                    <div class="program-faq-copy programs-reveal">
+                        <p class="section-kicker">Questions</p>
+                        <h2 id="program-faq-title">Before you join</h2>
+                        <p>Clear answers help students feel safe before taking the first step.</p>
+                    </div>
+                    <div class="program-faq-list programs-reveal" data-program-faq>
+                        <div class="program-faq-item">
+                            <button type="button" id="faq-join" aria-expanded="false" aria-controls="faq-join-panel">Who can join Bloomly programs?</button>
+                            <div id="faq-join-panel" role="region" aria-labelledby="faq-join" hidden>
+                                <p>Bloomly programs are designed for students and young people who want support, growth, and practical guidance in a safe environment.</p>
+                            </div>
+                        </div>
+                        <div class="program-faq-item">
+                            <button type="button" id="faq-free" aria-expanded="false" aria-controls="faq-free-panel">Are programs free?</button>
+                            <div id="faq-free-panel" role="region" aria-labelledby="faq-free" hidden>
+                                <p>Some programs can be free, while guided cohorts or partner workshops may have a small fee. Each program page will clearly show the format before sign-up.</p>
+                            </div>
+                        </div>
+                        <div class="program-faq-item">
+                            <button type="button" id="faq-online" aria-expanded="false" aria-controls="faq-online-panel">Are sessions online or in person?</button>
+                            <div id="faq-online-panel" role="region" aria-labelledby="faq-online" hidden>
+                                <p>Most Bloomly programs can run online first, with school or partner sessions added where safe and appropriate.</p>
+                            </div>
+                        </div>
+                        <div class="program-faq-item">
+                            <button type="button" id="faq-group" aria-expanded="false" aria-controls="faq-group-panel">How do I start a new group?</button>
+                            <div id="faq-group-panel" role="region" aria-labelledby="faq-group" hidden>
+                                <p>Students, mentors, counsellors, or schools can suggest an initiative. Bloomly can help shape the goal, rhythm, resources, and safety guidelines.</p>
+                            </div>
+                        </div>
+                        <div class="program-faq-item">
+                            <button type="button" id="faq-training" aria-expanded="false" aria-controls="faq-training-panel">How are peer supporters trained?</button>
+                            <div id="faq-training-panel" role="region" aria-labelledby="faq-training" hidden>
+                                <p>Peer supporters should receive guidance on listening, boundaries, confidentiality, escalation, and when to involve a trusted adult or professional support.</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -131,32 +312,47 @@
         <section class="section program-host-section" id="host-program" aria-labelledby="host-program-title">
             <div class="container">
                 <div class="program-host-layout">
-                    <div class="program-host-copy">
+                    <div class="program-host-copy programs-reveal">
                         <p class="section-kicker">Host with Bloomly</p>
-                        <h2 id="host-program-title">Turn a helpful idea into a student program.</h2>
-                        <p>Schools, mentors, counsellors, and student leaders can use Bloomly as a home for structured experiences. These cards show the types of hosted programs the platform can support.</p>
+                        <h2 id="host-program-title">Turn a helpful idea into a student initiative.</h2>
+                        <p>Schools, mentors, counsellors, and student leaders can use Bloomly as a home for structured experiences that feel warm, safe, and organized.</p>
                     </div>
                     <div class="program-host-grid">
-                        <article class="program-action-card">
+                        <article class="program-action-card programs-reveal">
                             <span>01</span>
                             <h3>School clubs</h3>
                             <p>Run guided wellbeing, study, or leadership clubs with reusable session material.</p>
                         </article>
-                        <article class="program-action-card">
+                        <article class="program-action-card programs-reveal">
                             <span>02</span>
                             <h3>Mentor cohorts</h3>
                             <p>Group students around a clear outcome, then track sessions, reflections, and next steps.</p>
                         </article>
-                        <article class="program-action-card">
+                        <article class="program-action-card programs-reveal">
                             <span>03</span>
                             <h3>Student challenges</h3>
                             <p>Create short challenges for study habits, journaling, self-care, or university prep.</p>
                         </article>
-                        <article class="program-action-card">
+                        <article class="program-action-card programs-reveal">
                             <span>04</span>
                             <h3>Partner workshops</h3>
                             <p>Feature outside experts with safe, student-friendly workshops and resource packs.</p>
                         </article>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section program-final-cta-section" aria-labelledby="program-final-cta-title">
+            <div class="container">
+                <div class="program-final-cta programs-reveal">
+                    <p class="section-kicker">Take your first step</p>
+                    <h2 id="program-final-cta-title">Ready to grow with Bloomly?</h2>
+                    <p>You do not have to figure everything out alone. Explore a program, join the community, or bring an initiative idea that could help other students too.</p>
+                    <div class="program-final-actions">
+                        <a class="btn btn-white" href="#program-catalog">Explore Programs</a>
+                        <a class="btn btn-outline-white" href="/subscribe/">Join the Community</a>
+                        <a class="btn btn-outline-white" href="#host-program">Host an Initiative</a>
                     </div>
                 </div>
             </div>
@@ -192,5 +388,6 @@
     </footer>
 
     <script src="/public/page-shell.js" defer></script>
+    <script src="/public/programs-page.js" defer></script>
 </body>
 </html>
