@@ -6,16 +6,19 @@
     <title>Bloomly Admin Dashboard</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Nunito:wght@500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/styles.css">
     <link rel="stylesheet" href="/admin/dashboard.css">
 </head>
-<body>
+<body class="admin-dashboard" data-theme="light">
+    <a class="skip-link" href="#adminMainContent">Skip to main content</a>
+
     <main class="admin-auth-screen" id="authScreen">
         <section class="admin-auth-card">
             <div class="admin-auth-header">
-                <h1>Bloomly Admin</h1>
-                <p>Sign in to access role-based tools for blogs, Charla records, reports, and permissions.</p>
+                <p class="auth-kicker">Bloomly Workspace</p>
+                <h1>Sign in to Admin</h1>
+                <p>Access role-based tools for blogs, Charla records, team reports, and account permissions.</p>
             </div>
             <button class="github-login-btn" id="githubLoginBtn" type="button">
                 <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -23,36 +26,60 @@
                 </svg>
                 Continue with GitHub
             </button>
-            <p class="auth-help-text">Your role and page access are applied automatically after login.</p>
+            <p class="auth-help-text">Role permissions and section access are automatically applied after login.</p>
             <p id="authError" class="inline-error" hidden></p>
         </section>
     </main>
 
     <main class="admin-app-shell" id="adminShell" hidden>
-        <aside class="admin-sidebar">
-            <div class="sidebar-brand">
-                <img src="/logo.svg" alt="Bloomly logo" class="sidebar-brand-logo" width="60" height="60" decoding="async">
-                <h2>Bloomly</h2>
-                <p>Admin workspace</p>
+        <aside class="admin-sidebar" id="adminSidebar" aria-label="Admin sidebar">
+            <div class="sidebar-brand-row">
+                <a href="/" class="sidebar-brand" aria-label="Bloomly home">
+                    <img src="/logo.svg" alt="" class="sidebar-brand-logo" width="44" height="44" decoding="async">
+                    <div class="sidebar-brand-copy">
+                        <h2>Bloomly</h2>
+                        <p>Admin Workspace</p>
+                    </div>
+                </a>
+                <button type="button" class="sidebar-collapse-btn" id="desktopSidebarToggle" aria-label="Collapse sidebar">
+                    <span></span>
+                </button>
             </div>
+
             <nav class="sidebar-nav" id="sidebarNav" aria-label="Admin sections">
                 <button type="button" class="sidebar-link is-active" data-view="dashboard">
-                    <span>📊 Dashboard</span>
+                    <span class="sidebar-link-main">
+                        <span class="sidebar-link-icon" aria-hidden="true">📊</span>
+                        <span class="sidebar-link-label">Dashboard</span>
+                    </span>
                 </button>
                 <button type="button" class="sidebar-link" data-view="blogs">
-                    <span>📝 Blog Posts</span>
+                    <span class="sidebar-link-main">
+                        <span class="sidebar-link-icon" aria-hidden="true">📝</span>
+                        <span class="sidebar-link-label">Blog Posts</span>
+                    </span>
                     <span class="nav-badge" id="blogReviewBadge" hidden>0</span>
                 </button>
                 <button type="button" class="sidebar-link" data-view="sessions">
-                    <span>📅 Charla Bookings</span>
+                    <span class="sidebar-link-main">
+                        <span class="sidebar-link-icon" aria-hidden="true">📅</span>
+                        <span class="sidebar-link-label">Charla Bookings</span>
+                    </span>
                 </button>
                 <button type="button" class="sidebar-link" data-view="reports">
-                    <span>📋 Employee Reports</span>
+                    <span class="sidebar-link-main">
+                        <span class="sidebar-link-icon" aria-hidden="true">📋</span>
+                        <span class="sidebar-link-label">Employee Reports</span>
+                    </span>
                 </button>
                 <button type="button" class="sidebar-link" data-view="permissions">
-                    <span>🔐 User Permissions</span>
+                    <span class="sidebar-link-main">
+                        <span class="sidebar-link-icon" aria-hidden="true">🔐</span>
+                        <span class="sidebar-link-label">User Permissions</span>
+                    </span>
                 </button>
             </nav>
+
             <div class="sidebar-user">
                 <img id="sidebarUserAvatar" class="sidebar-user-avatar" alt="User avatar" src="" width="44" height="44" decoding="async">
                 <div class="sidebar-user-copy">
@@ -62,19 +89,28 @@
             </div>
         </aside>
 
-        <section class="admin-main">
+        <button type="button" class="sidebar-overlay" id="sidebarOverlay" hidden aria-label="Close sidebar"></button>
+
+        <section class="admin-main" id="adminMainContent" tabindex="-1">
             <header class="admin-topbar">
-                <button type="button" class="mobile-nav-toggle" id="mobileNavToggle" aria-label="Toggle navigation" aria-expanded="false">
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                </button>
-                <div>
-                    <h1 id="viewTitle">Dashboard</h1>
-                    <p id="viewSubtitle">Overview metrics and quick access tools.</p>
+                <div class="topbar-left">
+                    <button type="button" class="mobile-nav-toggle" id="mobileNavToggle" aria-label="Toggle navigation" aria-expanded="false">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </button>
+                    <div>
+                        <h1 id="viewTitle">Dashboard</h1>
+                        <p id="viewSubtitle">Overview metrics and quick access tools.</p>
+                    </div>
                 </div>
                 <div class="topbar-actions">
+                    <label class="topbar-search" aria-label="Search placeholder">
+                        <span aria-hidden="true">⌘K</span>
+                        <input type="search" placeholder="Search sections, records, users..." aria-label="Search">
+                    </label>
                     <button type="button" class="btn btn-neutral btn-sm" id="refreshCurrentViewBtn">Refresh view</button>
+                    <button type="button" class="btn btn-neutral btn-sm" id="themeToggleBtn" aria-pressed="false">Dark mode</button>
                     <button type="button" class="btn btn-secondary btn-sm" id="logoutBtn">Logout</button>
                 </div>
             </header>
@@ -82,32 +118,11 @@
             <div id="globalMessage" class="global-message" hidden></div>
 
             <section class="admin-view is-active" id="view-dashboard" data-view-panel="dashboard">
-                <div class="metric-grid">
-                    <article class="metric-card">
-                        <span class="metric-icon">📝</span>
-                        <p>Published blog posts</p>
-                        <h2 id="metricPublishedPosts">0</h2>
-                    </article>
-                    <article class="metric-card">
-                        <span class="metric-icon">📄</span>
-                        <p>Drafts pending review</p>
-                        <h2 id="metricPendingDrafts">0</h2>
-                    </article>
-                    <article class="metric-card">
-                        <span class="metric-icon">📅</span>
-                        <p>Confirmed Charla sessions</p>
-                        <h2 id="metricConfirmedSessions">0</h2>
-                    </article>
-                    <article class="metric-card">
-                        <span class="metric-icon">📋</span>
-                        <p>Reports submitted</p>
-                        <h2 id="metricReportsTotal">0</h2>
-                    </article>
-                </div>
-
-                <div class="panel-grid panel-grid-2">
-                    <article class="dashboard-panel">
-                        <h3>Quick Actions</h3>
+                <div class="dashboard-overview-grid">
+                    <article class="dashboard-panel welcome-panel">
+                        <p class="panel-kicker">Workspace overview</p>
+                        <h2 id="dashboardGreeting">Welcome back</h2>
+                        <p>Monitor content operations, bookings, and team workflows in one place.</p>
                         <div class="quick-actions">
                             <button type="button" class="btn btn-primary" data-quick-view="blogs">Review blogs</button>
                             <button type="button" class="btn btn-neutral" data-quick-view="sessions">Track Charla payments</button>
@@ -116,8 +131,86 @@
                         </div>
                     </article>
 
-                    <article class="dashboard-panel">
-                        <h3>Needs attention</h3>
+                    <article class="dashboard-panel notifications-panel">
+                        <div class="panel-headline">
+                            <h3>Notifications</h3>
+                            <p>Latest workspace updates</p>
+                        </div>
+                        <ul class="notifications-list">
+                            <li>
+                                <span class="notification-dot is-info" aria-hidden="true"></span>
+                                <div>
+                                    <strong>Workflow sync complete</strong>
+                                    <p>Blog and report records are up to date.</p>
+                                </div>
+                            </li>
+                            <li>
+                                <span class="notification-dot is-warning" aria-hidden="true"></span>
+                                <div>
+                                    <strong>Review queue reminder</strong>
+                                    <p>Pending draft reviews appear in your dashboard attention list.</p>
+                                </div>
+                            </li>
+                        </ul>
+                    </article>
+                </div>
+
+                <div class="metric-grid" id="dashboardMetricGrid">
+                    <article class="metric-card metric-card-rose">
+                        <div class="metric-card-head">
+                            <span class="metric-icon" aria-hidden="true">📝</span>
+                            <span class="metric-trend is-up">+12.4%</span>
+                        </div>
+                        <p>Published blog posts</p>
+                        <h2 id="metricPublishedPosts" class="metric-value is-skeleton">0</h2>
+                    </article>
+                    <article class="metric-card metric-card-violet">
+                        <div class="metric-card-head">
+                            <span class="metric-icon" aria-hidden="true">📄</span>
+                            <span class="metric-trend is-up">+4.1%</span>
+                        </div>
+                        <p>Drafts pending review</p>
+                        <h2 id="metricPendingDrafts" class="metric-value is-skeleton">0</h2>
+                    </article>
+                    <article class="metric-card metric-card-sky">
+                        <div class="metric-card-head">
+                            <span class="metric-icon" aria-hidden="true">📅</span>
+                            <span class="metric-trend is-down">-2.0%</span>
+                        </div>
+                        <p>Confirmed Charla sessions</p>
+                        <h2 id="metricConfirmedSessions" class="metric-value is-skeleton">0</h2>
+                    </article>
+                    <article class="metric-card metric-card-emerald">
+                        <div class="metric-card-head">
+                            <span class="metric-icon" aria-hidden="true">📋</span>
+                            <span class="metric-trend is-up">+8.3%</span>
+                        </div>
+                        <p>Reports submitted</p>
+                        <h2 id="metricReportsTotal" class="metric-value is-skeleton">0</h2>
+                    </article>
+                </div>
+
+                <div class="panel-grid panel-grid-2">
+                    <article class="dashboard-panel chart-panel">
+                        <div class="panel-headline">
+                            <h3>Analytics snapshot</h3>
+                            <p>Traffic and content trend placeholder</p>
+                        </div>
+                        <div class="chart-placeholder" aria-hidden="true">
+                            <span style="--bar: 45%"></span>
+                            <span style="--bar: 62%"></span>
+                            <span style="--bar: 38%"></span>
+                            <span style="--bar: 71%"></span>
+                            <span style="--bar: 57%"></span>
+                            <span style="--bar: 80%"></span>
+                            <span style="--bar: 64%"></span>
+                        </div>
+                    </article>
+                    <article class="dashboard-panel activity-panel">
+                        <div class="panel-headline">
+                            <h3>Needs attention</h3>
+                            <p>Actionable operational tasks</p>
+                        </div>
                         <ul id="dashboardAttentionList" class="inline-list">
                             <li class="inline-empty">Loading dashboard activity...</li>
                         </ul>
@@ -133,10 +226,19 @@
                         <button type="button" class="btn btn-neutral btn-sm" id="refreshBlogDataBtn">Refresh blog data</button>
                     </div>
                 </div>
-                <label class="admin-search-bar">
-                    <span>Search posts</span>
-                    <input type="search" id="adminBlogSearch" placeholder="Filter by title or category">
-                </label>
+
+                <article class="admin-panel compact-panel">
+                    <div class="table-controls">
+                        <label class="admin-search-bar">
+                            <span>Search posts</span>
+                            <input type="search" id="adminBlogSearch" placeholder="Filter by title or category">
+                        </label>
+                        <div class="table-filter-placeholders" aria-label="Placeholder filters">
+                            <button type="button" class="btn btn-neutral btn-sm" aria-disabled="true">Category</button>
+                            <button type="button" class="btn btn-neutral btn-sm" aria-disabled="true">Status</button>
+                        </div>
+                    </div>
+                </article>
 
                 <article class="admin-panel">
                     <div class="panel-headline">
@@ -161,6 +263,13 @@
                             </tbody>
                         </table>
                     </div>
+                    <div class="table-pagination-placeholder">
+                        <span>Page 1 of 1</span>
+                        <div>
+                            <button type="button" class="btn btn-neutral btn-sm" aria-disabled="true">Previous</button>
+                            <button type="button" class="btn btn-neutral btn-sm" aria-disabled="true">Next</button>
+                        </div>
+                    </div>
                 </article>
 
                 <article class="admin-panel">
@@ -174,8 +283,8 @@
                                 <tr>
                                     <th>Title</th>
                                     <th>Category</th>
+                                    <th>Author</th>
                                     <th>Date</th>
-                                    <th>Status</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -197,9 +306,9 @@
                         <button type="button" class="btn btn-secondary btn-sm" id="exportSessionsPdfBtn">Export PDF</button>
                     </div>
                 </div>
-                <p class="admin-calendly-note">New bookings are managed in Calendly. This table shows manually logged sessions. <a href="https://calendly.com/" target="_blank" rel="noopener noreferrer">Open Calendly dashboard</a>.</p>
+                <p class="admin-note">New bookings are managed in Calendly. This table shows manually logged sessions. <a href="https://calendly.com/" target="_blank" rel="noopener noreferrer">Open Calendly dashboard</a>.</p>
 
-                <article class="admin-panel">
+                <article class="admin-panel compact-panel">
                     <div class="filters-grid">
                         <label>
                             From
@@ -239,12 +348,11 @@
                 </article>
 
                 <article class="admin-panel">
-                    <p class="admin-note">New bookings are managed in Calendly. This table shows manually logged sessions. <a href="https://calendly.com/" target="_blank" rel="noopener noreferrer">Open Calendly dashboard</a>.</p>
                     <div class="table-wrap">
                         <table class="admin-table" aria-label="Charla session and payment records table">
                             <thead>
                                 <tr>
-                                    <th>Date & time</th>
+                                    <th>Date &amp; time</th>
                                     <th>Participant</th>
                                     <th>Facilitator</th>
                                     <th>Participants</th>
@@ -261,12 +369,18 @@
                             </tbody>
                         </table>
                     </div>
+                    <div class="table-pagination-placeholder">
+                        <span>Records stream</span>
+                        <div>
+                            <button type="button" class="btn btn-neutral btn-sm" aria-disabled="true">Load older</button>
+                        </div>
+                    </div>
                 </article>
             </section>
 
             <section class="admin-view" id="view-reports" data-view-panel="reports">
                 <div class="toolbar-row">
-                    <h2>Employee reports & activity logging</h2>
+                    <h2>Employee reports &amp; activity logging</h2>
                     <div class="toolbar-actions">
                         <button type="button" class="btn btn-neutral btn-sm" id="refreshReportsBtn">Refresh reports</button>
                     </div>
@@ -381,7 +495,7 @@
 
             <section class="admin-view" id="view-permissions" data-view-panel="permissions">
                 <div class="toolbar-row">
-                    <h2>User permissions & account authorization</h2>
+                    <h2>User permissions &amp; account authorization</h2>
                     <div class="toolbar-actions">
                         <button type="button" class="btn btn-neutral btn-sm" id="refreshPermissionsBtn">Refresh permissions</button>
                     </div>
