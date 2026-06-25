@@ -70,85 +70,7 @@
                     <h2 id="resources-list-title">Browse by what you need today</h2>
                     <p>Each category can mix Bloomly-created articles with external links that have been reviewed before publishing.</p>
                 </div>
-                <div class="resources-grid">
-                    <article class="resource-category-card">
-                        <div class="resource-category-header">
-                            <span class="resource-icon" aria-hidden="true">
-                                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
-                                    <path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5z"/>
-                                </svg>
-                            </span>
-                            <div>
-                                <span class="resource-label">Learn smarter</span>
-                                <h3>Study Resources</h3>
-                            </div>
-                        </div>
-                        <div class="resource-list">
-                            <a href="#bloomly-materials">Study techniques library <span>Article</span></a>
-                            <a href="#curated-links">Exam preparation guides <span>External</span></a>
-                            <a href="#bloomly-materials">Time management tools <span>Template</span></a>
-                        </div>
-                    </article>
-                    <article class="resource-category-card">
-                        <div class="resource-category-header">
-                            <span class="resource-icon" aria-hidden="true">
-                                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21.2l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/>
-                                </svg>
-                            </span>
-                            <div>
-                                <span class="resource-label">Feel steady</span>
-                                <h3>Mental Wellness</h3>
-                            </div>
-                        </div>
-                        <div class="resource-list">
-                            <a href="#bloomly-materials">Stress management guides <span>Article</span></a>
-                            <a href="#bloomly-materials">Journaling templates <span>Template</span></a>
-                            <a href="#curated-links">Mindfulness exercises <span>External</span></a>
-                        </div>
-                    </article>
-                    <article class="resource-category-card">
-                        <div class="resource-category-header">
-                            <span class="resource-icon" aria-hidden="true">
-                                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M22 10 12 5 2 10l10 5 10-5z"/>
-                                    <path d="M6 12.5V17c0 1.7 2.7 3 6 3s6-1.3 6-3v-4.5"/>
-                                </svg>
-                            </span>
-                            <div>
-                                <span class="resource-label">Plan ahead</span>
-                                <h3>Career &amp; University</h3>
-                            </div>
-                        </div>
-                        <div class="resource-list">
-                            <a href="#bloomly-materials">University application checklist <span>Checklist</span></a>
-                            <a href="#bloomly-materials">Personal statement writing tips <span>Guide</span></a>
-                            <a href="#curated-links">Scholarship finder guide <span>External</span></a>
-                        </div>
-                    </article>
-                    <article class="resource-category-card resource-category-card-featured">
-                        <div class="resource-category-header">
-                            <span class="resource-icon" aria-hidden="true">
-                                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                                    <rect x="3" y="4" width="18" height="14" rx="2"/>
-                                    <path d="M8 21h8"/>
-                                    <path d="M12 18v3"/>
-                                    <path d="m8 11 2.5 2.5L16 8"/>
-                                </svg>
-                            </span>
-                            <div>
-                                <span class="resource-label">Coming next</span>
-                                <h3>Bloomly Tools</h3>
-                            </div>
-                        </div>
-                        <div class="resource-list">
-                            <a href="#">Progress tracker <span>Coming soon</span></a>
-                            <a href="#">Peer match system <span>Coming soon</span></a>
-                            <a href="#">Goal setting dashboard <span>Coming soon</span></a>
-                        </div>
-                    </article>
-                </div>
+                <div class="resources-grid" id="resourceCardsGrid" data-resource-cards></div>
             </div>
         </section>
 
@@ -252,5 +174,6 @@
     </footer>
 
     <script src="/public/page-shell.js" defer></script>
+    <script src="/public/resources-page.js" defer></script>
 </body>
 </html>
