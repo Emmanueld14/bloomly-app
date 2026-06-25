@@ -110,6 +110,11 @@
         activity: dashboardConfig.activityFilePath || 'content/admin/activity-log.json'
     };
 
+    const STORAGE_KEYS = {
+        theme: 'bloomly_admin_theme',
+        sidebarCollapsed: 'bloomly_admin_sidebar_collapsed'
+    };
+
     const DEFAULT_ADMIN_LOGINS = (dashboardConfig.defaultAdminLogins || ['Emmanueld14']).map((value) =>
         String(value || '').trim().toLowerCase()
     );
@@ -129,7 +134,10 @@
         sessionRecords: [],
         sessionRows: [],
         mobileNavOpen: false,
-        draftModalOpen: false
+        draftModalOpen: false,
+        sidebarCollapsed: false,
+        theme: 'light',
+        dashboardLoading: true
     };
 
     const els = {};
@@ -615,11 +623,15 @@
     function cacheElements() {
         els.authScreen = byId('authScreen');
         els.adminShell = byId('adminShell');
+        els.adminSidebar = byId('adminSidebar');
+        els.sidebarOverlay = byId('sidebarOverlay');
         els.githubLoginBtn = byId('githubLoginBtn');
         els.authError = byId('authError');
         els.logoutBtn = byId('logoutBtn');
         els.sidebarNav = byId('sidebarNav');
         els.mobileNavToggle = byId('mobileNavToggle');
+        els.desktopSidebarToggle = byId('desktopSidebarToggle');
+        els.themeToggleBtn = byId('themeToggleBtn');
         els.sidebarUserAvatar = byId('sidebarUserAvatar');
         els.sidebarUserName = byId('sidebarUserName');
         els.sidebarUserRole = byId('sidebarUserRole');
@@ -628,6 +640,8 @@
         els.globalMessage = byId('globalMessage');
         els.refreshCurrentViewBtn = byId('refreshCurrentViewBtn');
         els.blogReviewBadge = byId('blogReviewBadge');
+        els.dashboardGreeting = byId('dashboardGreeting');
+        els.dashboardMetricGrid = byId('dashboardMetricGrid');
 
         els.metricPublishedPosts = byId('metricPublishedPosts');
         els.metricPendingDrafts = byId('metricPendingDrafts');
@@ -709,6 +723,81 @@
     function showDashboardShell() {
         if (els.authScreen) els.authScreen.hidden = true;
         if (els.adminShell) els.adminShell.hidden = false;
+        closeMobileNavigation();
+    }
+
+    function applyTheme(theme) {
+        const nextTheme = theme === 'dark' ? 'dark' : 'light';
+        state.theme = nextTheme;
+        document.body.setAttribute('data-theme', nextTheme);
+        if (els.themeToggleBtn) {
+            const isDark = nextTheme === 'dark';
+            els.themeToggleBtn.setAttribute('aria-pressed', String(isDark));
+            els.themeToggleBtn.textContent = isDark ? 'Light mode' : 'Dark mode';
+        }
+    }
+
+    function toggleTheme() {
+        const nextTheme = state.theme === 'dark' ? 'light' : 'dark';
+        applyTheme(nextTheme);
+        localStorage.setItem(STORAGE_KEYS.theme, nextTheme);
+    }
+
+    function applySidebarCollapsed(collapsed) {
+        state.sidebarCollapsed = Boolean(collapsed);
+        document.body.classList.toggle('sidebar-collapsed', state.sidebarCollapsed);
+        if (els.desktopSidebarToggle) {
+            const label = state.sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar';
+            els.desktopSidebarToggle.setAttribute('aria-label', label);
+        }
+    }
+
+    function toggleSidebarCollapsed() {
+        const nextState = !state.sidebarCollapsed;
+        applySidebarCollapsed(nextState);
+        localStorage.setItem(STORAGE_KEYS.sidebarCollapsed, String(nextState));
+    }
+
+    function initializeUiPreferences() {
+        const savedTheme = localStorage.getItem(STORAGE_KEYS.theme);
+        if (savedTheme === 'dark' || savedTheme === 'light') {
+            applyTheme(savedTheme);
+        } else {
+            const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            applyTheme(prefersDark ? 'dark' : 'light');
+        }
+
+        const savedCollapse = localStorage.getItem(STORAGE_KEYS.sidebarCollapsed) === 'true';
+        applySidebarCollapsed(savedCollapse);
+    }
+
+    function setDashboardLoadingState(loading) {
+        state.dashboardLoading = Boolean(loading);
+        const metricEls = [
+            els.metricPublishedPosts,
+            els.metricPendingDrafts,
+            els.metricConfirmedSessions,
+            els.metricReportsTotal
+        ].filter(Boolean);
+
+        metricEls.forEach((metricEl) => {
+            metricEl.classList.toggle('is-skeleton', state.dashboardLoading);
+        });
+
+        if (state.dashboardLoading && els.dashboardAttentionList) {
+            els.dashboardAttentionList.innerHTML = '<li class="inline-empty">Loading dashboard activity...</li>';
+        }
+    }
+
+    function updateDashboardGreeting() {
+        if (!els.dashboardGreeting) return;
+        const currentHour = new Date().getHours();
+        const firstName = String(state.githubUser?.name || state.githubUser?.login || 'there').split(' ')[0];
+        let greeting = 'Welcome back';
+        if (currentHour < 12) greeting = 'Good morning';
+        else if (currentHour < 17) greeting = 'Good afternoon';
+        else greeting = 'Good evening';
+        els.dashboardGreeting.textContent = `${greeting}, ${firstName}`;
     }
 
     function setUserProfileUI() {
@@ -722,6 +811,7 @@
         if (els.sidebarUserRole) {
             els.sidebarUserRole.textContent = getCurrentRoleLabel();
         }
+        updateDashboardGreeting();
     }
 
     function configureNavigation() {
@@ -771,18 +861,26 @@
     }
 
     function openMobileNavigation() {
-        const sidebar = document.querySelector('.admin-sidebar');
+        const sidebar = els.adminSidebar || document.querySelector('.admin-sidebar');
         if (!sidebar || !els.mobileNavToggle) return;
         state.mobileNavOpen = true;
         sidebar.classList.add('is-open');
+        if (els.sidebarOverlay) {
+            els.sidebarOverlay.hidden = false;
+        }
+        document.body.classList.add('admin-nav-open');
         els.mobileNavToggle.setAttribute('aria-expanded', 'true');
     }
 
     function closeMobileNavigation() {
-        const sidebar = document.querySelector('.admin-sidebar');
+        const sidebar = els.adminSidebar || document.querySelector('.admin-sidebar');
         if (!sidebar || !els.mobileNavToggle) return;
         state.mobileNavOpen = false;
         sidebar.classList.remove('is-open');
+        if (els.sidebarOverlay) {
+            els.sidebarOverlay.hidden = true;
+        }
+        document.body.classList.remove('admin-nav-open');
         els.mobileNavToggle.setAttribute('aria-expanded', 'false');
     }
 
@@ -1180,7 +1278,7 @@
 
     function renderPublishedPostsTable() {
         if (!els.publishedTableBody) return;
-        const search = String(els.publishedPostSearch?.value || '').trim().toLowerCase();
+        const search = String(els.adminBlogSearch?.value || '').trim().toLowerCase();
         const posts = search
             ? state.publishedPosts.filter((post) => {
                 const haystack = `${post.title || ''} ${post.category || ''}`.toLowerCase();
@@ -1230,17 +1328,17 @@
         const items = [];
         const pendingDrafts = state.docs.drafts.data.drafts.filter((draft) => draft.status === 'in_review').length;
         if (pendingDrafts > 0) {
-            items.push(`${pendingDrafts} draft${pendingDrafts === 1 ? '' : 's'} waiting for review.`);
+            items.push(`📝 ${pendingDrafts} draft${pendingDrafts === 1 ? '' : 's'} waiting for review.`);
         }
 
         const unassignedSessions = state.sessionRows.filter((row) => row.facilitator === 'Unassigned').length;
         if (unassignedSessions > 0) {
-            items.push(`${unassignedSessions} Charla record${unassignedSessions === 1 ? '' : 's'} without facilitator report.`);
+            items.push(`📅 ${unassignedSessions} Charla record${unassignedSessions === 1 ? '' : 's'} without facilitator report.`);
         }
 
         const pendingReports = state.docs.reports.data.reports.filter((report) => report.status === 'submitted').length;
         if (pendingReports > 0) {
-            items.push(`${pendingReports} employee report${pendingReports === 1 ? '' : 's'} pending review.`);
+            items.push(`📋 ${pendingReports} employee report${pendingReports === 1 ? '' : 's'} pending review.`);
         }
 
         if (!items.length) {
@@ -1267,6 +1365,8 @@
         }
         renderDashboardAttention();
         updateBlogReviewBadge();
+        setDashboardLoadingState(false);
+        updateDashboardGreeting();
     }
 
     function populateReportBookingOptions() {
@@ -2023,13 +2123,37 @@
         if (els.mobileNavToggle) {
             els.mobileNavToggle.addEventListener('click', toggleMobileNavigation);
         }
+        if (els.sidebarOverlay) {
+            els.sidebarOverlay.addEventListener('click', closeMobileNavigation);
+        }
+        if (els.desktopSidebarToggle) {
+            els.desktopSidebarToggle.addEventListener('click', toggleSidebarCollapsed);
+        }
+        if (els.themeToggleBtn) {
+            els.themeToggleBtn.addEventListener('click', toggleTheme);
+        }
         document.addEventListener('click', (event) => {
             if (!state.mobileNavOpen) return;
-            const sidebar = document.querySelector('.admin-sidebar');
+            const sidebar = els.adminSidebar || document.querySelector('.admin-sidebar');
             if (!sidebar) return;
             const clickedInsideSidebar = sidebar.contains(event.target);
             const clickedToggle = els.mobileNavToggle && els.mobileNavToggle.contains(event.target);
+            const clickedOverlay = els.sidebarOverlay && els.sidebarOverlay.contains(event.target);
+            if (clickedOverlay) {
+                closeMobileNavigation();
+                return;
+            }
             if (!clickedInsideSidebar && !clickedToggle) {
+                closeMobileNavigation();
+            }
+        });
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && state.mobileNavOpen) {
+                closeMobileNavigation();
+            }
+        });
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 980 && state.mobileNavOpen) {
                 closeMobileNavigation();
             }
         });
@@ -2065,8 +2189,8 @@
                 void handlePublishedTableAction(event);
             });
         }
-        if (els.blogPostSearch) {
-            els.blogPostSearch.addEventListener('input', renderPublishedPostsTable);
+        if (els.adminBlogSearch) {
+            els.adminBlogSearch.addEventListener('input', renderPublishedPostsTable);
         }
 
         if (els.applySessionFiltersBtn) {
@@ -2169,6 +2293,7 @@
 
     async function bootstrapDashboard() {
         showMessage('Loading dashboard data...');
+        setDashboardLoadingState(true);
 
         const defaultPermissionsDoc = {
             version: 1,
@@ -2212,10 +2337,13 @@
             showMessage('', 'info');
             await logActivity('login', 'auth', state.githubUser?.login || '', 'Dashboard session started');
         }
+        setDashboardLoadingState(false);
     }
 
     async function initialize() {
         cacheElements();
+        initializeUiPreferences();
+        setDashboardLoadingState(true);
         bindEvents();
 
         state.githubToken = sessionStorage.getItem('github_token');
