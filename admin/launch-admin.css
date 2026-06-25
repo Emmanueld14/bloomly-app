@@ -41,6 +41,92 @@
     display: none !important;
 }
 
+.admin-login-page {
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    padding: 1rem;
+    background:
+        radial-gradient(circle at 12% 15%, rgba(99, 91, 255, 0.24), transparent 42%),
+        radial-gradient(circle at 88% 82%, rgba(14, 165, 233, 0.18), transparent 36%),
+        linear-gradient(180deg, color-mix(in srgb, var(--admin-bg) 92%, white), var(--admin-bg));
+}
+
+.admin-login-card {
+    width: min(520px, 100%);
+    border-radius: 1.2rem;
+    border: 1px solid var(--admin-border);
+    background: color-mix(in srgb, var(--admin-surface) 96%, rgba(255, 255, 255, 0.5));
+    box-shadow: var(--admin-shadow-md);
+    padding: 1.1rem;
+    backdrop-filter: blur(10px);
+}
+
+.admin-login-header {
+    border-radius: 0.95rem;
+    padding: 1.15rem;
+    background: linear-gradient(135deg, rgba(99, 91, 255, 0.16), rgba(14, 165, 233, 0.12));
+    border: 1px solid color-mix(in srgb, var(--admin-border) 75%, rgba(99, 91, 255, 0.25));
+    text-align: left;
+}
+
+.admin-login-header img {
+    border-radius: 0.78rem;
+    background: rgba(255, 255, 255, 0.8);
+    padding: 0.35rem;
+}
+
+.admin-login-header h1 {
+    margin: 0.6rem 0 0.25rem;
+    color: var(--admin-text);
+    font-size: clamp(1.6rem, 4.8vw, 2.3rem);
+    line-height: 1.05;
+}
+
+.admin-login-header p {
+    margin: 0;
+    color: var(--admin-text-muted);
+    font-size: 0.9rem;
+}
+
+.admin-login-error,
+.admin-login-hint {
+    margin: 0.8rem 0 0;
+    border-radius: 0.7rem;
+    padding: 0.58rem 0.7rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+}
+
+.admin-login-error {
+    color: #991b1b;
+    background: rgba(254, 226, 226, 0.95);
+    border: 1px solid rgba(248, 113, 113, 0.44);
+}
+
+.admin-login-hint {
+    color: #0f5132;
+    background: rgba(209, 250, 229, 0.95);
+    border: 1px solid rgba(16, 185, 129, 0.4);
+}
+
+.admin-github-btn,
+.continue-dashboard-btn {
+    width: 100%;
+    margin-top: 0.75rem;
+}
+
+.admin-github-btn {
+    background: linear-gradient(135deg, #f472b6, #8b5cf6 48%, #60a5fa);
+    border: none;
+    box-shadow: 0 10px 22px rgba(139, 92, 246, 0.24);
+}
+
+.admin-github-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 14px 26px rgba(139, 92, 246, 0.3);
+}
+
 .admin-shell {
     min-height: 100vh;
     display: grid;
@@ -759,6 +845,19 @@
 }
 
 @media (max-width: 640px) {
+    .admin-login-page {
+        padding: 0.8rem;
+    }
+
+    .admin-login-card {
+        padding: 0.8rem;
+        border-radius: 1rem;
+    }
+
+    .admin-login-header {
+        padding: 0.9rem;
+    }
+
     .admin-stat-grid {
         grid-template-columns: 1fr;
     }
