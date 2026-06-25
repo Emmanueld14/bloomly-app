@@ -8,86 +8,197 @@
     <link rel="stylesheet" href="/styles.css">
     <link rel="stylesheet" href="/admin/launch-admin.css">
 </head>
-<body>
+<body class="admin-launch" data-theme="light">
     <div class="admin-shell">
-        <aside class="admin-sidebar">
-            <div class="admin-brand">
-                <img src="/logo.svg" alt="Bloomly logo" width="40" height="40">
-                <div>
-                    <strong>Bloomly</strong>
-                    <span class="admin-brand-badge">Admin</span>
-                </div>
+        <aside class="admin-sidebar" id="adminSidebar">
+            <div class="admin-sidebar-top">
+                <a class="admin-brand" href="/" aria-label="Bloomly home">
+                    <img src="/logo.svg" alt="" width="40" height="40">
+                    <div>
+                        <strong>Bloomly</strong>
+                        <span class="admin-brand-badge">Admin Workspace</span>
+                    </div>
+                </a>
+                <button type="button" class="admin-sidebar-toggle" id="adminSidebarToggle" aria-label="Collapse sidebar">⟨⟩</button>
             </div>
-            <nav class="admin-nav">
-                <button type="button" data-admin-nav="dashboard" class="is-active">Dashboard</button>
-                <button type="button" data-admin-nav="blog">Blog Posts</button>
-                <button type="button" data-admin-nav="bookings">Charla Bookings</button>
-                <button type="button" data-admin-nav="subscribers">Subscribers</button>
-                <button type="button" data-admin-nav="counsellors">Counsellor Applications</button>
-                <button type="button" data-admin-nav="settings">Settings</button>
+            <nav class="admin-nav" aria-label="Admin sections">
+                <button type="button" data-admin-nav="dashboard" class="is-active">
+                    <span>📊</span><span>Dashboard</span>
+                </button>
+                <button type="button" data-admin-nav="blog">
+                    <span>📝</span><span>Blog Posts</span>
+                </button>
+                <button type="button" data-admin-nav="bookings">
+                    <span>📅</span><span>Charla Bookings</span>
+                </button>
+                <button type="button" data-admin-nav="subscribers">
+                    <span>💌</span><span>Subscribers</span>
+                </button>
+                <button type="button" data-admin-nav="counsellors">
+                    <span>🧑‍⚕️</span><span>Counsellor Applications</span>
+                </button>
+                <button type="button" data-admin-nav="settings">
+                    <span>⚙️</span><span>Settings</span>
+                </button>
             </nav>
             <div class="admin-sidebar-footer">
-                <button type="button" class="btn btn-secondary" id="logoutBtn" style="width:100%">Logout</button>
+                <div class="admin-user-mini">
+                    <strong>Operator</strong>
+                    <span>Secure session</span>
+                </div>
+                <button type="button" class="btn btn-secondary" id="logoutBtn">Logout</button>
             </div>
         </aside>
+        <button type="button" class="admin-sidebar-overlay" id="adminSidebarOverlay" hidden aria-label="Close sidebar"></button>
 
         <main class="admin-main">
-            <section data-view-panel="dashboard">
-                <h1>Dashboard</h1>
+            <header class="admin-topbar">
+                <div class="admin-topbar-left">
+                    <button type="button" class="admin-menu-toggle" id="adminMenuToggle" aria-label="Open sidebar" aria-expanded="false">
+                        <span></span><span></span><span></span>
+                    </button>
+                    <div>
+                        <p class="admin-topbar-kicker">Operations center</p>
+                        <h1 id="adminViewTitle">Dashboard</h1>
+                        <p id="adminViewSubtitle">Monitor platform performance, content workflows, and operations.</p>
+                    </div>
+                </div>
+                <div class="admin-topbar-actions">
+                    <label class="admin-search-placeholder" aria-label="Search placeholder">
+                        <span>⌘K</span>
+                        <input type="search" placeholder="Search posts, bookings, and reports...">
+                    </label>
+                    <button type="button" class="btn btn-neutral" id="adminThemeToggle" aria-pressed="false">Dark mode</button>
+                </div>
+            </header>
+
+            <div id="adminErrorBanner" class="admin-error-banner" hidden></div>
+
+            <section data-view-panel="dashboard" class="admin-view-panel is-active">
+                <div class="admin-dashboard-welcome">
+                    <article class="admin-panel admin-welcome-panel">
+                        <p class="admin-kicker">Bloomly command center</p>
+                        <h2>Welcome back 👋</h2>
+                        <p>Everything you need to manage content, bookings, subscriber growth, and counsellor intake in one premium workspace.</p>
+                        <div class="admin-quick-actions">
+                            <button type="button" class="btn btn-primary" data-admin-nav="blog">Review blog queue</button>
+                            <button type="button" class="btn btn-neutral" data-admin-nav="bookings">Track bookings</button>
+                            <button type="button" class="btn btn-neutral" data-admin-nav="subscribers">Open subscribers</button>
+                            <button type="button" class="btn btn-secondary" data-admin-nav="counsellors">Review applications</button>
+                        </div>
+                    </article>
+                    <article class="admin-panel admin-notification-panel">
+                        <h3>Notifications</h3>
+                        <ul>
+                            <li><span class="dot info"></span><div><strong>Data sync enabled</strong><p>Supabase + GitHub sources are linked in real time.</p></div></li>
+                            <li><span class="dot warning"></span><div><strong>Workflow reminder</strong><p>Review pending applications and draft content daily.</p></div></li>
+                        </ul>
+                    </article>
+                </div>
+
                 <div class="admin-stat-grid">
-                    <article class="admin-stat-card"><span>Blog posts</span><strong id="statPosts">0</strong></article>
-                    <article class="admin-stat-card"><span>Subscribers</span><strong id="statSubscribers">0</strong></article>
-                    <article class="admin-stat-card"><span>Charla bookings</span><strong id="statBookings">0</strong></article>
-                    <article class="admin-stat-card"><span>Counsellor apps pending</span><strong id="statCounsellors">0</strong></article>
+                    <article class="admin-stat-card pink">
+                        <div class="admin-stat-head"><span class="stat-icon">📝</span><span class="trend up">+8.1%</span></div>
+                        <span>Blog posts</span><strong id="statPosts">0</strong>
+                    </article>
+                    <article class="admin-stat-card blue">
+                        <div class="admin-stat-head"><span class="stat-icon">💌</span><span class="trend up">+5.4%</span></div>
+                        <span>Subscribers</span><strong id="statSubscribers">0</strong>
+                    </article>
+                    <article class="admin-stat-card violet">
+                        <div class="admin-stat-head"><span class="stat-icon">📅</span><span class="trend down">-1.2%</span></div>
+                        <span>Charla bookings</span><strong id="statBookings">0</strong>
+                    </article>
+                    <article class="admin-stat-card green">
+                        <div class="admin-stat-head"><span class="stat-icon">🧑‍⚕️</span><span class="trend up">+2.3%</span></div>
+                        <span>Counsellor apps pending</span><strong id="statCounsellors">0</strong>
+                    </article>
                 </div>
                 <div class="admin-panel">
                     <h2>Recent bookings</h2>
-                    <table class="admin-table" id="recentBookingsTable"><thead><tr><th>Name</th><th>Plan</th><th>Amount</th><th>Status</th></tr></thead><tbody></tbody></table>
+                    <div class="table-wrap">
+                        <table class="admin-table" id="recentBookingsTable">
+                            <thead><tr><th>Name</th><th>Plan</th><th>Amount</th><th>Status</th></tr></thead><tbody></tbody>
+                        </table>
+                    </div>
                 </div>
                 <div class="admin-panel">
                     <h2>Recent subscribers</h2>
-                    <table class="admin-table" id="recentSubscribersTable"><thead><tr><th>Name</th><th>Email</th><th>Date</th></tr></thead><tbody></tbody></table>
+                    <div class="table-wrap">
+                        <table class="admin-table" id="recentSubscribersTable">
+                            <thead><tr><th>Name</th><th>Email</th><th>Date</th></tr></thead><tbody></tbody>
+                        </table>
+                    </div>
                 </div>
             </section>
 
-            <section data-view-panel="blog" hidden>
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:0.75rem;">
+            <section data-view-panel="blog" class="admin-view-panel" hidden>
+                <div class="admin-toolbar">
                     <h1>Blog Posts</h1>
-                    <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+                    <div>
                         <button type="button" class="btn btn-secondary" id="syncGithubPostsBtn">Import from GitHub</button>
                         <button type="button" class="btn btn-primary" id="newPostBtn">New Post</button>
                     </div>
                 </div>
-                <p class="admin-hint" id="blogPostsHint" style="margin:0 0 1rem;color:#64748b;font-size:0.9rem;">Shows posts in Supabase plus markdown files from <code>content/blog/</code> on GitHub.</p>
+                <p class="admin-hint" id="blogPostsHint">Shows posts in Supabase plus markdown files from <code>content/blog/</code> on GitHub.</p>
                 <div class="admin-panel">
-                    <table class="admin-table" id="postsTable"><thead><tr><th>Title</th><th>Category</th><th>Date</th><th>Status</th><th>Source</th><th>Actions</th></tr></thead><tbody></tbody></table>
+                    <div class="table-wrap">
+                        <table class="admin-table" id="postsTable">
+                            <thead><tr><th>Title</th><th>Category</th><th>Date</th><th>Status</th><th>Source</th><th>Actions</th></tr></thead><tbody></tbody>
+                        </table>
+                    </div>
+                    <div class="admin-table-footer">
+                        <span>Pagination placeholder</span>
+                        <div><button type="button" class="admin-btn-sm" aria-disabled="true">Previous</button><button type="button" class="admin-btn-sm" aria-disabled="true">Next</button></div>
+                    </div>
                 </div>
             </section>
 
-            <section data-view-panel="bookings" hidden>
-                <h1>Charla Bookings</h1>
-                <p><label>Filter <select id="bookingFilter"><option value="all">All</option><option value="pending">Pending</option><option value="confirmed">Confirmed</option><option value="cancelled">Cancelled</option></select></label>
-                <button type="button" class="admin-btn-sm" id="exportBookingsBtn">Export CSV</button></p>
+            <section data-view-panel="bookings" class="admin-view-panel" hidden>
+                <div class="admin-toolbar">
+                    <h1>Charla Bookings</h1>
+                    <div><button type="button" class="admin-btn-sm" id="exportBookingsBtn">Export CSV</button></div>
+                </div>
+                <p class="admin-filter-row">
+                    <label>Filter
+                        <select id="bookingFilter"><option value="all">All</option><option value="pending">Pending</option><option value="confirmed">Confirmed</option><option value="cancelled">Cancelled</option></select>
+                    </label>
+                </p>
                 <div class="admin-panel">
-                    <table class="admin-table" id="bookingsTable"><thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Plan</th><th>Amount</th><th>Status</th><th>Date</th><th></th></tr></thead><tbody></tbody></table>
+                    <div class="table-wrap">
+                        <table class="admin-table" id="bookingsTable">
+                            <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Plan</th><th>Amount</th><th>Status</th><th>Date</th><th></th></tr></thead><tbody></tbody>
+                        </table>
+                    </div>
                 </div>
             </section>
 
-            <section data-view-panel="subscribers" hidden>
-                <h1>Subscribers <button type="button" class="admin-btn-sm" id="exportSubsBtn">Export CSV</button></h1>
+            <section data-view-panel="subscribers" class="admin-view-panel" hidden>
+                <div class="admin-toolbar">
+                    <h1>Subscribers</h1>
+                    <div><button type="button" class="admin-btn-sm" id="exportSubsBtn">Export CSV</button></div>
+                </div>
                 <div class="admin-panel">
-                    <table class="admin-table" id="subscribersTable"><thead><tr><th>Name</th><th>Email</th><th>Date</th><th></th></tr></thead><tbody></tbody></table>
+                    <div class="table-wrap">
+                        <table class="admin-table" id="subscribersTable">
+                            <thead><tr><th>Name</th><th>Email</th><th>Date</th><th></th></tr></thead><tbody></tbody>
+                        </table>
+                    </div>
                 </div>
             </section>
 
-            <section data-view-panel="counsellors" hidden>
+            <section data-view-panel="counsellors" class="admin-view-panel" hidden>
                 <h1>Counsellor Applications</h1>
                 <div class="admin-panel">
-                    <table class="admin-table" id="counsellorsTable"><thead><tr><th>Name</th><th>Email</th><th>Qualification</th><th>Date</th><th>Actions</th></tr></thead><tbody></tbody></table>
+                    <div class="table-wrap">
+                        <table class="admin-table" id="counsellorsTable">
+                            <thead><tr><th>Name</th><th>Email</th><th>Qualification</th><th>Date</th><th>Actions</th></tr></thead><tbody></tbody>
+                        </table>
+                    </div>
                 </div>
             </section>
 
-            <section data-view-panel="settings" hidden>
+            <section data-view-panel="settings" class="admin-view-panel" hidden>
                 <h1>Settings</h1>
                 <div class="admin-panel">
                     <p>Calendly: <code>https://calendly.com/bloomlyke</code></p>
