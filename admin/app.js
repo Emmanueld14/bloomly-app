@@ -3,6 +3,34 @@
 
     const TOKEN_KEY = 'github_token';
     const VIEWS = ['dashboard', 'blog', 'bookings', 'subscribers', 'counsellors', 'settings'];
+    const VIEW_META = {
+        dashboard: {
+            title: 'Dashboard',
+            subtitle: 'Monitor platform performance, content workflows, and operations.'
+        },
+        blog: {
+            title: 'Blog Posts',
+            subtitle: 'Create, import, and publish content from Supabase and GitHub.'
+        },
+        bookings: {
+            title: 'Charla Bookings',
+            subtitle: 'Track sessions, statuses, and exports in one place.'
+        },
+        subscribers: {
+            title: 'Subscribers',
+            subtitle: 'Review and export subscriber growth data.'
+        },
+        counsellors: {
+            title: 'Counsellor Applications',
+            subtitle: 'Review applications and approve or reject candidates.'
+        },
+        settings: {
+            title: 'Settings',
+            subtitle: 'Configuration details for integrations and admin access.'
+        }
+    };
+    const THEME_KEY = 'bloomly_admin_theme';
+    const SIDEBAR_COLLAPSE_KEY = 'bloomly_admin_sidebar_collapsed';
 
     function getToken() {
         return sessionStorage.getItem(TOKEN_KEY) || '';
@@ -103,15 +131,118 @@
         throw lastError || new Error('Failed to fetch admin data. Deploy Supabase functions or set Cloudflare SUPABASE_* env vars.');
     }
 
+    function setSidebarOpen(open) {
+        const sidebar = document.getElementById('adminSidebar');
+        const overlay = document.getElementById('adminSidebarOverlay');
+        const toggle = document.getElementById('adminMenuToggle');
+        if (!sidebar) return;
+        const isOpen = Boolean(open);
+        sidebar.classList.toggle('is-open', isOpen);
+        if (overlay) {
+            overlay.hidden = !isOpen;
+        }
+        if (toggle) {
+            toggle.setAttribute('aria-expanded', String(isOpen));
+        }
+        document.body.classList.toggle('admin-sidebar-open', isOpen);
+    }
+
+    function applyTheme(theme) {
+        const nextTheme = theme === 'dark' ? 'dark' : 'light';
+        document.body.setAttribute('data-theme', nextTheme);
+        const toggle = document.getElementById('adminThemeToggle');
+        if (toggle) {
+            const isDark = nextTheme === 'dark';
+            toggle.textContent = isDark ? 'Light mode' : 'Dark mode';
+            toggle.setAttribute('aria-pressed', String(isDark));
+        }
+    }
+
+    function applySidebarCollapsed(collapsed) {
+        const isCollapsed = Boolean(collapsed);
+        document.body.classList.toggle('admin-sidebar-collapsed', isCollapsed);
+        const btn = document.getElementById('adminSidebarToggle');
+        if (btn) {
+            btn.setAttribute('aria-label', isCollapsed ? 'Expand sidebar' : 'Collapse sidebar');
+        }
+    }
+
     function setView(view) {
         VIEWS.forEach((v) => {
             const panel = document.querySelector(`[data-view-panel="${v}"]`);
-            if (panel) panel.hidden = v !== view;
+            if (panel) {
+                const isActive = v === view;
+                panel.hidden = !isActive;
+                panel.classList.toggle('is-active', isActive);
+            }
         });
         document.querySelectorAll('[data-admin-nav]').forEach((btn) => {
             btn.classList.toggle('is-active', btn.dataset.adminNav === view);
         });
+        const meta = VIEW_META[view] || VIEW_META.dashboard;
+        const title = document.getElementById('adminViewTitle');
+        const subtitle = document.getElementById('adminViewSubtitle');
+        if (title) title.textContent = meta.title;
+        if (subtitle) subtitle.textContent = meta.subtitle;
+        setSidebarOpen(false);
         location.hash = view;
+    }
+
+    function initUiChrome() {
+        const savedTheme = localStorage.getItem(THEME_KEY);
+        if (savedTheme === 'dark' || savedTheme === 'light') {
+            applyTheme(savedTheme);
+        } else {
+            const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            applyTheme(prefersDark ? 'dark' : 'light');
+        }
+
+        const collapsed = localStorage.getItem(SIDEBAR_COLLAPSE_KEY) === 'true';
+        applySidebarCollapsed(collapsed);
+
+        const themeToggle = document.getElementById('adminThemeToggle');
+        if (themeToggle) {
+            themeToggle.addEventListener('click', () => {
+                const nextTheme = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+                applyTheme(nextTheme);
+                localStorage.setItem(THEME_KEY, nextTheme);
+            });
+        }
+
+        const sidebarToggle = document.getElementById('adminSidebarToggle');
+        if (sidebarToggle) {
+            sidebarToggle.addEventListener('click', () => {
+                const next = !document.body.classList.contains('admin-sidebar-collapsed');
+                applySidebarCollapsed(next);
+                localStorage.setItem(SIDEBAR_COLLAPSE_KEY, String(next));
+            });
+        }
+
+        const menuToggle = document.getElementById('adminMenuToggle');
+        if (menuToggle) {
+            menuToggle.addEventListener('click', () => {
+                const sidebar = document.getElementById('adminSidebar');
+                const isOpen = sidebar ? sidebar.classList.contains('is-open') : false;
+                setSidebarOpen(!isOpen);
+            });
+        }
+
+        const overlay = document.getElementById('adminSidebarOverlay');
+        if (overlay) {
+            overlay.addEventListener('click', () => setSidebarOpen(false));
+        }
+
+        window.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') {
+                setSidebarOpen(false);
+            }
+        });
+
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 900) {
+                setSidebarOpen(false);
+            }
+        });
     }
 
     function slugify(title) {
@@ -525,6 +656,7 @@
 
     function init() {
         if (!requireAuth()) return;
+        initUiChrome();
 
         document.getElementById('logoutBtn').addEventListener('click', () => {
             sessionStorage.removeItem(TOKEN_KEY);
