@@ -428,6 +428,13 @@
         loadBlogPosts();
     };
 
+    window.addEventListener('storage', (event) => {
+        if (event.key === 'bloomly:blog-last-publish') {
+            logDebug('Detected published post signal; refreshing blog posts.');
+            loadBlogPosts();
+        }
+    });
+
     // Initialize
     function init() {
         if (blogListInitialized || !shouldLoadBlogList()) {

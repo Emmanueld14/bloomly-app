@@ -45,11 +45,12 @@ function getField(root, selector) {
 }
 
 export class BlogPostEditor {
-    constructor({ root, api, uploadImage, onSaved }) {
+    constructor({ root, api, uploadImage, onSaved, notify }) {
         this.root = root;
         this.api = api;
         this.uploadImage = uploadImage;
         this.onSaved = onSaved || (() => {});
+        this.notify = notify || (() => {});
         this.currentPost = null;
         this.previewMode = false;
         this.isUploading = false;
@@ -266,9 +267,12 @@ export class BlogPostEditor {
         if (this.isUploading) return;
         this.isUploading = true;
         this.setSaveStatus('Uploading image...');
+        this.setUploadProgress(12, 'Preparing image...');
         this.root.classList.add('is-uploading');
         try {
-            const uploaded = await this.uploadImage(file);
+            const uploaded = await this.uploadImage(file, {
+                onProgress: ({ percent, message }) => this.setUploadProgress(percent, message),
+            });
             this.editor
                 .chain()
                 .focus()
@@ -281,30 +285,37 @@ export class BlogPostEditor {
                 })
                 .run();
             this.setSaveStatus('Image inserted');
+            this.notify('Image uploaded and inserted.', 'success');
         } catch (error) {
             this.setSaveStatus(error.message || 'Image upload failed');
-            window.alert(error.message || 'Image upload failed.');
+            this.notify(error.message || 'Image upload failed.', 'error');
         } finally {
             this.isUploading = false;
             this.root.classList.remove('is-uploading');
+            window.setTimeout(() => this.hideUploadProgress(), 700);
         }
     }
 
     pickCoverImage() {
         const input = createHiddenImageInput(async (file) => {
             this.setSaveStatus('Uploading cover image...');
+            this.setUploadProgress(12, 'Preparing cover image...');
             try {
-                const uploaded = await this.uploadImage(file);
+                const uploaded = await this.uploadImage(file, {
+                    onProgress: ({ percent, message }) => this.setUploadProgress(percent, message),
+                });
                 setIfPresent(getField(this.root, '#coverImageUrl'), uploaded.url);
                 this.refreshDerivedState();
                 this.renderPreview();
                 this.scheduleAutosave();
                 this.setSaveStatus('Cover image uploaded');
+                this.notify('Cover image uploaded.', 'success');
             } catch (error) {
                 this.setSaveStatus(error.message || 'Cover upload failed');
-                window.alert(error.message || 'Cover upload failed.');
+                this.notify(error.message || 'Cover upload failed.', 'error');
             } finally {
                 input.remove();
+                window.setTimeout(() => this.hideUploadProgress(), 700);
             }
         });
         input.click();
@@ -450,12 +461,31 @@ export class BlogPostEditor {
         };
     }
 
+    validatePayload(payload, { publish = false } = {}) {
+        const errors = [];
+        if (!payload.title || payload.title === 'Untitled post') errors.push('Add a title before saving.');
+        if (!payload.slug) errors.push('A valid slug is required.');
+        if (publish) {
+            const hasText = Boolean(String(payload.content || '').trim());
+            const hasImage = /<img\s/i.test(payload.content_html || '');
+            if (!hasText && !hasImage) errors.push('Add content before publishing.');
+        }
+        if (payload.status === 'scheduled' && !payload.scheduled_at) {
+            errors.push('Choose a schedule date before saving a scheduled post.');
+        }
+        if (errors.length) {
+            throw new Error(errors.join(' '));
+        }
+    }
+
     async save({ publish = false, silent = false, autosave = false } = {}) {
         const payload = this.getPayload();
         if (publish) {
             payload.status = 'published';
             payload.published = true;
+            setIfPresent(getField(this.root, '#postStatus'), 'published');
         }
+        this.validatePayload(payload, { publish });
 
         const saveButtons = Array.from(this.root.querySelectorAll('[data-save-post]'));
         const publishButtons = Array.from(this.root.querySelectorAll('[data-publish-post]'));
@@ -479,13 +509,19 @@ export class BlogPostEditor {
                 setIfPresent(getField(this.root, '#postId'), post.id);
                 this.currentPost = post;
             }
+            if (publish && !(post.published === true || post.status === 'published')) {
+                throw new Error('Supabase saved the post, but did not mark it as published. Please try again.');
+            }
             this.autosave.clear(payload.slug || payload.id || 'new');
-            this.setSaveStatus(autosave ? 'Autosaved to Supabase' : 'Saved');
+            this.setSaveStatus(publish ? 'Published' : autosave ? 'Autosaved to Supabase' : 'Saved');
+            if (!silent) {
+                this.notify(publish ? 'Post published successfully.' : 'Post saved successfully.', 'success');
+            }
             this.onSaved(post);
             return post;
         } catch (error) {
             this.setSaveStatus(error.message || 'Save failed');
-            if (!silent) window.alert(error.message || 'Save failed.');
+            if (!silent) this.notify(error.message || 'Save failed.', 'error');
             throw error;
         } finally {
             if (!silent) {
@@ -503,5 +539,24 @@ export class BlogPostEditor {
         this.root.querySelectorAll('[data-save-status]').forEach((status) => {
             status.textContent = message;
         });
+    }
+
+    setUploadProgress(percent, message) {
+        const progress = getField(this.root, '[data-upload-progress]');
+        if (!progress) return;
+        const bar = progress.querySelector('span');
+        progress.hidden = false;
+        progress.setAttribute('aria-valuenow', String(Math.max(0, Math.min(100, percent || 0))));
+        progress.setAttribute('aria-label', message || 'Uploading');
+        if (bar) bar.style.width = `${Math.max(0, Math.min(100, percent || 0))}%`;
+        if (message) this.setSaveStatus(message);
+    }
+
+    hideUploadProgress() {
+        const progress = getField(this.root, '[data-upload-progress]');
+        if (!progress) return;
+        progress.hidden = true;
+        const bar = progress.querySelector('span');
+        if (bar) bar.style.width = '0%';
     }
 }

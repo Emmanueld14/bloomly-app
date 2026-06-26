@@ -36,6 +36,56 @@ function normalizePostPayload(body: Record<string, unknown>, slug: string) {
   };
 }
 
+function validatePostPayload(
+  row: ReturnType<typeof normalizePostPayload>,
+  { publish = false }: { publish?: boolean } = {},
+) {
+  const errors: string[] = [];
+  if (!row.title || !String(row.title).trim()) errors.push("Title is required.");
+  if (!row.slug || !String(row.slug).trim()) errors.push("Slug is required.");
+  if (publish) {
+    const hasText = Boolean(String(row.content || "").trim());
+    const hasImage = /<img\s/i.test(String(row.content_html || ""));
+    if (!hasText && !hasImage) errors.push("Content is required before publishing.");
+  }
+  if (row.status === "scheduled" && !row.scheduled_at) {
+    errors.push("Scheduled posts require a scheduled_at date.");
+  }
+  return errors.length ? errors.join(" ") : null;
+}
+
+async function verifyPersistedPost(
+  supabase: any,
+  id: unknown,
+  expected: ReturnType<typeof normalizePostPayload>,
+) {
+  const { data, error } = await supabase.from("posts").select("*").eq("id", id).single();
+  if (error || !data) {
+    throw new Error(error?.message || "Post write could not be verified in Supabase.");
+  }
+  if (expected.published && !(data.published === true || data.status === "published")) {
+    throw new Error("Post saved, but Supabase did not persist published=true/status=published.");
+  }
+  if (data.slug !== expected.slug) {
+    throw new Error("Post saved with an unexpected slug. Please reload and try again.");
+  }
+  return data;
+}
+
+function postResponse(post: Record<string, unknown>, action: "created" | "updated") {
+  const slug = String(post.slug || "");
+  return jsonResponse({
+    post,
+    verified: true,
+    action,
+    published: post.published === true || post.status === "published",
+    frontend: {
+      blogUrl: `https://bloomly.co.ke/blog/?fresh=${Date.now()}`,
+      postUrl: `https://bloomly.co.ke/blog-post/?slug=${encodeURIComponent(slug)}&fresh=${Date.now()}`,
+    },
+  });
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -67,9 +117,12 @@ Deno.serve(async (req) => {
     if (req.method === "POST") {
       const slug = body.slug || slugify(body.title || "");
       const row = normalizePostPayload(body, slug);
+      const validationError = validatePostPayload(row, { publish: row.published });
+      if (validationError) return jsonResponse({ error: validationError }, 400);
       const { data, error } = await supabase.from("posts").insert(row).select().single();
       if (error) return jsonResponse({ error: error.message }, 400);
-      return jsonResponse({ post: data });
+      const verified = await verifyPersistedPost(supabase, data.id, row);
+      return postResponse(verified, "created");
     }
 
     if (req.method === "PATCH") {
@@ -77,6 +130,8 @@ Deno.serve(async (req) => {
       if (!id) return jsonResponse({ error: "Post id required." }, 400);
       const slug = body.slug || slugify(body.title || "");
       const updates = normalizePostPayload(body, slug);
+      const validationError = validatePostPayload(updates, { publish: updates.published });
+      if (validationError) return jsonResponse({ error: validationError }, 400);
       const { data, error } = await supabase
         .from("posts")
         .update(updates)
@@ -84,7 +139,8 @@ Deno.serve(async (req) => {
         .select()
         .single();
       if (error) return jsonResponse({ error: error.message }, 400);
-      return jsonResponse({ post: data });
+      const verified = await verifyPersistedPost(supabase, data.id || id, updates);
+      return postResponse(verified, "updated");
     }
 
     if (req.method === "DELETE") {

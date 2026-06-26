@@ -28,6 +28,17 @@ function buildObjectPath(file: File) {
   return `${year}/${month}/${crypto.randomUUID()}-${safeName}.${extensionFor(file)}`;
 }
 
+async function ensureBlogImagesBucket(supabase: any) {
+  const { error } = await supabase.storage.createBucket(BUCKET, {
+    public: true,
+    fileSizeLimit: MAX_BYTES,
+    allowedMimeTypes: Array.from(ALLOWED_TYPES),
+  });
+  if (error && !/already exists|duplicate/i.test(error.message)) {
+    console.warn("[Bloomly Admin] Could not ensure blog-images bucket", error.message);
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -57,13 +68,19 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
     );
 
+    await ensureBlogImagesBucket(supabase);
+
     const path = buildObjectPath(file);
     const { error } = await supabase.storage.from(BUCKET).upload(path, file, {
       contentType: file.type,
       upsert: false,
     });
     if (error) {
-      return jsonResponse({ error: error.message }, 400);
+      console.error("[Bloomly Admin] Supabase storage upload failed", {
+        message: error.message,
+        path,
+      });
+      return jsonResponse({ error: error.message, objectPath: path }, 400);
     }
 
     const { data } = supabase.storage.from(BUCKET).getPublicUrl(path);

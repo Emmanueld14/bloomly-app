@@ -59,6 +59,49 @@
         banner.hidden = !message;
     }
 
+    function showToast(message, type = 'info') {
+        let stack = document.getElementById('adminToastStack');
+        if (!stack) {
+            stack = document.createElement('div');
+            stack.id = 'adminToastStack';
+            stack.className = 'admin-toast-stack';
+            document.body.appendChild(stack);
+        }
+        const toast = document.createElement('div');
+        toast.className = `admin-toast admin-toast-${type}`;
+        toast.setAttribute('role', type === 'error' ? 'alert' : 'status');
+        toast.textContent = message;
+        stack.appendChild(toast);
+        window.setTimeout(() => {
+            toast.classList.add('is-hiding');
+            window.setTimeout(() => toast.remove(), 220);
+        }, type === 'error' ? 7000 : 4200);
+    }
+
+    function sleep(ms) {
+        return new Promise((resolve) => window.setTimeout(resolve, ms));
+    }
+
+    function createRequestError(message, detail = {}) {
+        const error = new Error(message);
+        error.detail = detail;
+        return error;
+    }
+
+    async function fetchWithTimeout(url, options = {}, timeoutMs = 15000) {
+        const controller = new AbortController();
+        const timer = window.setTimeout(() => controller.abort(), timeoutMs);
+        try {
+            return await fetch(url, {
+                cache: 'no-store',
+                ...options,
+                signal: controller.signal,
+            });
+        } finally {
+            window.clearTimeout(timer);
+        }
+    }
+
     function getAdminApiUrls(path) {
         const [pathname, query] = path.split('?');
         const suffix = query ? `?${query}` : '';
@@ -73,6 +116,15 @@
         return urls.filter((url, index, list) => url && list.indexOf(url) === index);
     }
 
+    function getPreferredAdminApiUrls(path) {
+        const urls = getAdminApiUrls(path);
+        return urls.sort((a, b) => {
+            const aIsSupabase = a.includes('supabase.co');
+            const bIsSupabase = b.includes('supabase.co');
+            return Number(bIsSupabase) - Number(aIsSupabase);
+        });
+    }
+
     async function api(path, options = {}) {
         const token = getToken();
         const anonKey =
@@ -83,7 +135,7 @@
         for (const url of urls) {
             const isSupabase = url.includes('supabase.co');
             try {
-                const res = await fetch(url, {
+                const res = await fetchWithTimeout(url, {
                     ...options,
                     headers: {
                         'Content-Type': 'application/json',
@@ -98,11 +150,18 @@
                     try {
                         data = JSON.parse(text);
                     } catch {
-                        lastError = new Error(`Invalid JSON from ${url}`);
+                        lastError = createRequestError(`Invalid JSON from ${url}`, {
+                            url,
+                            status: res.status,
+                            bodyPreview: text.slice(0, 180),
+                        });
                         continue;
                     }
                 } else if (!res.ok) {
-                    lastError = new Error(`Empty response (${res.status}) from ${url}`);
+                    lastError = createRequestError(`Empty response (${res.status}) from ${url}`, {
+                        url,
+                        status: res.status,
+                    });
                     continue;
                 }
 
@@ -118,13 +177,23 @@
                 }
 
                 if (!res.ok) {
-                    lastError = new Error(data.error || `Request failed (${res.status})`);
+                    lastError = createRequestError(data.error || `Request failed (${res.status})`, {
+                        url,
+                        status: res.status,
+                        data,
+                    });
                     continue;
                 }
 
                 showAdminError('');
                 return data;
             } catch (error) {
+                console.warn('[Bloomly Admin] API request failed', {
+                    url,
+                    method: options.method || 'GET',
+                    message: error.message,
+                    detail: error.detail,
+                });
                 lastError = error;
             }
         }
@@ -472,10 +541,10 @@
     }
 
     function getEditorUploadUrls() {
-        return getAdminApiUrls('/api/admin/blog-images');
+        return getPreferredAdminApiUrls('/api/admin/blog-images');
     }
 
-    async function uploadBlogImage(file) {
+    async function uploadBlogImage(file, { onProgress } = {}) {
         if (!cmsEditor) throw new Error('Editor is not ready.');
         if (!file) throw new Error('Choose an image to upload.');
 
@@ -484,36 +553,96 @@
         const anonKey =
             typeof SUPABASE_CONFIG !== 'undefined' ? SUPABASE_CONFIG.anonKey : '';
         let lastError = null;
+        const maxAttemptsPerEndpoint = 2;
+
+        console.info('[Bloomly Admin] Starting blog image upload', {
+            name: file.name,
+            type: file.type,
+            size: file.size,
+            endpoints: urls,
+        });
 
         for (const url of urls) {
-            const formData = new FormData();
-            formData.append('file', file);
             const isSupabase = url.includes('supabase.co');
-            try {
-                const res = await fetch(url, {
-                    method: 'POST',
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                        ...(isSupabase && anonKey ? { apikey: anonKey } : {}),
-                    },
-                    body: formData,
+            for (let attempt = 1; attempt <= maxAttemptsPerEndpoint; attempt += 1) {
+                const formData = new FormData();
+                formData.append('file', file);
+                onProgress?.({
+                    percent: Math.min(85, 15 + (attempt - 1) * 20),
+                    message: `Uploading image (${attempt}/${maxAttemptsPerEndpoint})...`,
                 });
-                const data = await res.json().catch(() => ({}));
-                if (!res.ok) {
-                    lastError = new Error(data.error || `Upload failed (${res.status})`);
-                    continue;
+                try {
+                    const res = await fetchWithTimeout(url, {
+                        method: 'POST',
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                            ...(isSupabase && anonKey ? { apikey: anonKey } : {}),
+                        },
+                        body: formData,
+                    }, 30000);
+                    const text = await res.text();
+                    const data = text ? JSON.parse(text) : {};
+                    console.info('[Bloomly Admin] Upload response', {
+                        endpoint: url,
+                        attempt,
+                        status: res.status,
+                        ok: res.ok,
+                        path: data.path || data.objectPath,
+                    });
+                    if (!res.ok) {
+                        lastError = createRequestError(data.error || data.message || `Upload failed (${res.status})`, {
+                            url,
+                            status: res.status,
+                            data,
+                        });
+                        if (res.status >= 400 && res.status < 500 && res.status !== 429) break;
+                        await sleep(700 * attempt);
+                        continue;
+                    }
+                    if (!data.url) {
+                        lastError = createRequestError('Upload did not return an image URL.', { url, data });
+                        break;
+                    }
+                    onProgress?.({ percent: 92, message: 'Verifying image URL...' });
+                    await verifyUploadedImageUrl(data.url);
+                    onProgress?.({ percent: 100, message: 'Image uploaded' });
+                    showToast('Image uploaded successfully.', 'success');
+                    return data;
+                } catch (error) {
+                    lastError = error.name === 'AbortError'
+                        ? createRequestError('Image upload timed out. Please try again.', { url, attempt })
+                        : error;
+                    console.warn('[Bloomly Admin] Upload attempt failed', {
+                        endpoint: url,
+                        attempt,
+                        message: lastError.message,
+                        detail: lastError.detail,
+                    });
+                    if (attempt < maxAttemptsPerEndpoint) {
+                        await sleep(700 * attempt);
+                    }
                 }
-                if (!data.url) {
-                    lastError = new Error('Upload did not return an image URL.');
-                    continue;
-                }
-                return data;
-            } catch (error) {
-                lastError = error;
             }
         }
 
         throw lastError || new Error('Image upload failed.');
+    }
+
+    async function verifyUploadedImageUrl(url) {
+        try {
+            const response = await fetchWithTimeout(url, { method: 'HEAD', mode: 'cors' }, 10000);
+            if (response.ok) return true;
+            throw createRequestError(`Uploaded image URL is not reachable (${response.status}).`, {
+                url,
+                status: response.status,
+            });
+        } catch (error) {
+            console.warn('[Bloomly Admin] Image URL verification failed; keeping public URL returned by Supabase.', {
+                url,
+                message: error.message,
+            });
+            return false;
+        }
     }
 
     async function openPostEditor(post) {
@@ -676,7 +805,15 @@
                 root: editorRoot,
                 api,
                 uploadImage: uploadBlogImage,
-                onSaved: () => {
+                notify: showToast,
+                onSaved: (post) => {
+                    if (post?.published === true || post?.status === 'published') {
+                        try {
+                            localStorage.setItem('bloomly:blog-last-publish', String(Date.now()));
+                        } catch {
+                            // Ignore localStorage failures.
+                        }
+                    }
                     loadPosts();
                     loadDashboard();
                 },

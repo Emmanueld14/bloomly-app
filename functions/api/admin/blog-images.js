@@ -37,6 +37,30 @@ function buildObjectPath(file) {
     return `${year}/${month}/${crypto.randomUUID()}-${safeName}.${extensionFor(file)}`;
 }
 
+async function ensureBlogImagesBucket(url, key) {
+    const response = await fetch(`${url}/storage/v1/bucket`, {
+        method: 'POST',
+        headers: {
+            apikey: key,
+            Authorization: `Bearer ${key}`,
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            id: BUCKET,
+            name: BUCKET,
+            public: true,
+            file_size_limit: MAX_BYTES,
+            allowed_mime_types: Array.from(ALLOWED_TYPES),
+        }),
+    });
+    if (response.ok || response.status === 409) return;
+    const data = await response.json().catch(() => ({}));
+    console.warn('[Bloomly Admin] Could not ensure blog-images bucket', {
+        status: response.status,
+        message: data.message || data.error,
+    });
+}
+
 export async function onRequest(context) {
     const { request, env } = context;
     const gate = await requireAdmin(request, env);
@@ -63,6 +87,8 @@ export async function onRequest(context) {
             return jsonResponse({ error: 'Supabase storage is not configured.' }, 500);
         }
 
+        await ensureBlogImagesBucket(url, key);
+
         const objectPath = buildObjectPath(file);
         const uploadUrl = `${url}/storage/v1/object/${BUCKET}/${objectPath}`;
         const uploadResponse = await fetch(uploadUrl, {
@@ -71,12 +97,22 @@ export async function onRequest(context) {
                 apikey: key,
                 Authorization: `Bearer ${key}`,
                 'Content-Type': file.type,
+                'x-upsert': 'false',
             },
             body: await file.arrayBuffer(),
         });
         const uploadData = await uploadResponse.json().catch(() => ({}));
         if (!uploadResponse.ok) {
-            return jsonResponse({ error: uploadData.message || 'Image upload failed.' }, 400);
+            console.error('[Bloomly Admin] Supabase storage upload failed', {
+                status: uploadResponse.status,
+                message: uploadData.message || uploadData.error,
+                objectPath,
+            });
+            return jsonResponse({
+                error: uploadData.message || uploadData.error || 'Image upload failed.',
+                status: uploadResponse.status,
+                objectPath,
+            }, 400);
         }
 
         return jsonResponse({

@@ -7,7 +7,7 @@ const ALLOWED_ADMIN_EMAILS = [
 const CORS_HEADERS = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'GET, POST, PATCH, DELETE, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization, apikey, x-client-info',
 };
 
 export function jsonResponse(body, status = 200) {
@@ -15,6 +15,7 @@ export function jsonResponse(body, status = 200) {
         status,
         headers: {
             'Content-Type': 'application/json',
+            'Cache-Control': 'no-store, no-cache, must-revalidate',
             ...CORS_HEADERS,
         },
     });

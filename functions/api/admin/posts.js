@@ -36,6 +36,56 @@ function normalizePostPayload(body, slug) {
     };
 }
 
+function validatePostPayload(row, { publish = false } = {}) {
+    const errors = [];
+    if (!row.title || !String(row.title).trim()) errors.push('Title is required.');
+    if (!row.slug || !String(row.slug).trim()) errors.push('Slug is required.');
+    if (publish) {
+        const hasText = Boolean(String(row.content || '').trim());
+        const hasImage = /<img\s/i.test(row.content_html || '');
+        if (!hasText && !hasImage) errors.push('Content is required before publishing.');
+    }
+    if (row.status === 'scheduled' && !row.scheduled_at) {
+        errors.push('Scheduled posts require a scheduled_at date.');
+    }
+    if (errors.length) {
+        return errors.join(' ');
+    }
+    return null;
+}
+
+async function verifyPersistedPost(env, id, expected) {
+    const { response, data } = await supabaseFetch(
+        env,
+        `posts?id=eq.${encodeURIComponent(id)}&select=*`,
+        { method: 'GET' }
+    );
+    if (!response.ok || !Array.isArray(data) || !data[0]) {
+        throw new Error(data?.message || 'Post write could not be verified in Supabase.');
+    }
+    const post = data[0];
+    if (expected.published && !(post.published === true || post.status === 'published')) {
+        throw new Error('Post saved, but Supabase did not persist published=true/status=published.');
+    }
+    if (post.slug !== expected.slug) {
+        throw new Error('Post saved with an unexpected slug. Please reload and try again.');
+    }
+    return post;
+}
+
+function postResponse(post, action) {
+    return jsonResponse({
+        post,
+        verified: true,
+        action,
+        published: post.published === true || post.status === 'published',
+        frontend: {
+            blogUrl: `https://bloomly.co.ke/blog/?fresh=${Date.now()}`,
+            postUrl: `https://bloomly.co.ke/blog-post/?slug=${encodeURIComponent(post.slug)}&fresh=${Date.now()}`,
+        },
+    });
+}
+
 export async function onRequestOptions() {
     return optionsResponse();
 }
@@ -60,6 +110,8 @@ export async function onRequest(context) {
         if (request.method === 'POST') {
             const slug = body.slug || slugify(body.title);
             const row = normalizePostPayload(body, slug);
+            const validationError = validatePostPayload(row, { publish: row.published });
+            if (validationError) return jsonResponse({ error: validationError }, 400);
             const { response, data } = await supabaseFetch(env, 'posts', {
                 method: 'POST',
                 headers: { Prefer: 'return=representation' },
@@ -68,13 +120,17 @@ export async function onRequest(context) {
             if (!response.ok) {
                 return jsonResponse({ error: data?.message || 'Create failed' }, 400);
             }
-            return jsonResponse({ post: Array.isArray(data) ? data[0] : data });
+            const inserted = Array.isArray(data) ? data[0] : data;
+            const verified = await verifyPersistedPost(env, inserted.id, row);
+            return postResponse(verified, 'created');
         }
 
         if (request.method === 'PATCH') {
             const id = body.id;
             if (!id) return jsonResponse({ error: 'Post id required.' }, 400);
             const updates = normalizePostPayload(body, body.slug || slugify(body.title));
+            const validationError = validatePostPayload(updates, { publish: updates.published });
+            if (validationError) return jsonResponse({ error: validationError }, 400);
             const { response, data } = await supabaseFetch(env, `posts?id=eq.${id}`, {
                 method: 'PATCH',
                 headers: { Prefer: 'return=representation' },
@@ -83,7 +139,9 @@ export async function onRequest(context) {
             if (!response.ok) {
                 return jsonResponse({ error: data?.message || 'Update failed' }, 400);
             }
-            return jsonResponse({ post: Array.isArray(data) ? data[0] : data });
+            const updated = Array.isArray(data) ? data[0] : data;
+            const verified = await verifyPersistedPost(env, updated.id || id, updates);
+            return postResponse(verified, 'updated');
         }
 
         if (request.method === 'DELETE') {

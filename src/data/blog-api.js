@@ -13,8 +13,7 @@ class BlogAPI {
         this._supabase = null;
         this._supabaseLoadPromise = null;
         this._fetchTimeoutMs = 8000;
-        this._supabaseTimeoutMs = 2000;
-        this._supabaseFastCapMs = 1200;
+        this._supabaseTimeoutMs = 8000;
     }
 
     _getDebugFlag() {
@@ -170,6 +169,23 @@ class BlogAPI {
         }
     }
 
+    _mergePostLists(primaryPosts, fallbackPosts) {
+        const merged = new Map();
+        (fallbackPosts || []).forEach((post) => {
+            const slug = this._normalizeSlug(post.slug || post.metadata?.slug || post.name || '');
+            if (slug) merged.set(slug, { ...post, slug });
+        });
+        (primaryPosts || []).forEach((post) => {
+            const slug = this._normalizeSlug(post.slug || post.metadata?.slug || post.name || '');
+            if (slug) merged.set(slug, { ...post, slug });
+        });
+        return Array.from(merged.values()).sort((a, b) => {
+            const dateA = new Date(a.metadata?.date || a.created_at || 0).getTime();
+            const dateB = new Date(b.metadata?.date || b.created_at || 0).getTime();
+            return dateB - dateA;
+        });
+    }
+
     async _getSupabasePost(slug) {
         const client = await this._ensureSupabaseClient();
         if (!client) return null;
@@ -234,27 +250,16 @@ class BlogAPI {
     async listPosts() {
         const manifestPromise = this._loadManifestPosts();
         const supabasePromise = this._listSupabasePostsWithTimeout();
-        const manifestPosts = await manifestPromise;
+        const [manifestPosts, supabasePosts] = await Promise.all([manifestPromise, supabasePromise]);
 
-        let supabasePosts = null;
-        if (manifestPosts.length) {
-            supabasePosts = await Promise.race([
-                supabasePromise,
-                new Promise((resolve) => {
-                    setTimeout(() => resolve(null), this._supabaseFastCapMs);
-                }),
-            ]);
-        } else {
-            supabasePosts = await supabasePromise;
-        }
-
-        if (supabasePosts && supabasePosts.length > 0) {
-            this._log(`Loaded ${supabasePosts.length} post(s) from Supabase`);
-            return supabasePosts;
+        if (Array.isArray(supabasePosts)) {
+            const mergedPosts = this._mergePostLists(supabasePosts, manifestPosts);
+            this._log(`Loaded ${supabasePosts.length} Supabase post(s), merged with ${manifestPosts.length} manifest post(s)`);
+            return mergedPosts;
         }
 
         if (manifestPosts.length) {
-            this._log(`Loaded ${manifestPosts.length} post(s) from manifest`);
+            this._warn('Supabase unavailable; falling back to static manifest posts.');
             return manifestPosts;
         }
 
