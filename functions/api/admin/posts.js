@@ -54,6 +54,19 @@ function validatePostPayload(row, { publish = false } = {}) {
     return null;
 }
 
+function schemaErrorResponse(data) {
+    const message = data?.message || data?.error || '';
+    if (/content_(html|json).*schema cache|Could not find the 'content_(html|json)' column/i.test(message)) {
+        return jsonResponse({
+            error: `${message} Run the Supabase workflow or apply supabase/migrations/202606260001_blog_rich_editor_content.sql.`,
+            schemaFixRequired: true,
+            schemaFixHint:
+                'Run GitHub Actions -> Supabase after the migration history repair, or apply supabase/migrations/202606260001_blog_rich_editor_content.sql in Supabase SQL Editor.',
+        }, 400);
+    }
+    return null;
+}
+
 async function verifyPersistedPost(env, id, expected) {
     const { response, data } = await supabaseFetch(
         env,
@@ -118,7 +131,7 @@ export async function onRequest(context) {
                 body: JSON.stringify(row),
             });
             if (!response.ok) {
-                return jsonResponse({ error: data?.message || 'Create failed' }, 400);
+                return schemaErrorResponse(data) || jsonResponse({ error: data?.message || 'Create failed' }, 400);
             }
             const inserted = Array.isArray(data) ? data[0] : data;
             const verified = await verifyPersistedPost(env, inserted.id, row);
@@ -137,7 +150,7 @@ export async function onRequest(context) {
                 body: JSON.stringify(updates),
             });
             if (!response.ok) {
-                return jsonResponse({ error: data?.message || 'Update failed' }, 400);
+                return schemaErrorResponse(data) || jsonResponse({ error: data?.message || 'Update failed' }, 400);
             }
             const updated = Array.isArray(data) ? data[0] : data;
             const verified = await verifyPersistedPost(env, updated.id || id, updates);

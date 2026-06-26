@@ -53,6 +53,19 @@ function validatePostPayload(row, { publish = false } = {}) {
     return errors.length ? errors.join(' ') : null;
 }
 
+function schemaErrorResponse(res, data) {
+    const message = data?.message || data?.error || '';
+    if (/content_(html|json).*schema cache|Could not find the 'content_(html|json)' column/i.test(message)) {
+        return res.status(400).json({
+            error: `${message} Run the Supabase workflow or apply supabase/migrations/202606260001_blog_rich_editor_content.sql.`,
+            schemaFixRequired: true,
+            schemaFixHint:
+                'Run GitHub Actions -> Supabase after the migration history repair, or apply supabase/migrations/202606260001_blog_rich_editor_content.sql in Supabase SQL Editor.',
+        });
+    }
+    return null;
+}
+
 async function verifyPersistedPost(id, expected) {
     const { response, data } = await supabaseFetch(`posts?id=eq.${encodeURIComponent(id)}&select=*`);
     if (!response.ok || !Array.isArray(data) || !data[0]) {
@@ -105,7 +118,7 @@ export default async function handler(req, res) {
                 headers: { Prefer: 'return=representation' },
                 body: JSON.stringify(row),
             });
-            if (!response.ok) return res.status(400).json({ error: data?.message || 'Create failed' });
+            if (!response.ok) return schemaErrorResponse(res, data) || res.status(400).json({ error: data?.message || 'Create failed' });
             const inserted = Array.isArray(data) ? data[0] : data;
             const verified = await verifyPersistedPost(inserted.id, row);
             return postResponse(res, verified, 'created');
@@ -123,7 +136,7 @@ export default async function handler(req, res) {
                 headers: { Prefer: 'return=representation' },
                 body: JSON.stringify(updates),
             });
-            if (!response.ok) return res.status(400).json({ error: data?.message || 'Update failed' });
+            if (!response.ok) return schemaErrorResponse(res, data) || res.status(400).json({ error: data?.message || 'Update failed' });
             const updated = Array.isArray(data) ? data[0] : data;
             const verified = await verifyPersistedPost(updated.id || id, updates);
             return postResponse(res, verified, 'updated');

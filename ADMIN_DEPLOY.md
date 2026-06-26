@@ -33,3 +33,18 @@ Signed in at `/admin/`, open browser DevTools → Network:
 - `POST .../functions/v1/admin-blog-image-upload` should return `{ url, path }` for blog image uploads
 
 If you see **"Supabase is not configured"**, add Option A or B above.
+
+## Current production schema/storage errors
+
+If production shows either of these errors:
+
+- `Could not find the 'content_html' column of 'posts' in the schema cache`
+- `Supabase storage is not configured`
+
+then the Supabase workflow has not successfully run migrations/functions yet. Re-run **Actions -> Supabase -> Run workflow** after this repository version is on `main`.
+
+The workflow now repairs the legacy remote migration history that previously blocked `supabase db push`, then applies:
+
+- `202606260001_blog_rich_editor_content.sql` for `content_json`, `content_html`, and the `blog-images` bucket
+- `202606260002_harden_blog_publish_visibility.sql` for published-only public reads
+- `admin-blog-image-upload` Edge Function deployment

@@ -26,6 +26,18 @@ jobs:
         if: env.SUPABASE_ACCESS_TOKEN != ''
         run: supabase link --project-ref $SUPABASE_PROJECT_ID
 
+      - name: Repair legacy migration history
+        if: env.SUPABASE_ACCESS_TOKEN != ''
+        run: |
+          # Older remote migration entries are not present in this repository.
+          # Supabase CLI blocks `db push` until they are marked reverted.
+          supabase migration repair --status reverted \
+            20260228102612 \
+            20260228103412 \
+            20260228125027 \
+            20260228132528 \
+            20260408143447 || true
+
       - name: Push database migrations
         if: env.SUPABASE_ACCESS_TOKEN != ''
         run: supabase db push

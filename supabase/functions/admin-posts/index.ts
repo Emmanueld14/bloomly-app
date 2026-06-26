@@ -86,6 +86,20 @@ function postResponse(post: Record<string, unknown>, action: "created" | "update
   });
 }
 
+function schemaErrorResponse(error: { message?: string } | null) {
+  const message = error?.message || "";
+  if (/content_(html|json).*schema cache|Could not find the 'content_(html|json)' column/i.test(message)) {
+    return jsonResponse({
+      error:
+        `${message} Run the Supabase workflow or apply supabase/migrations/202606260001_blog_rich_editor_content.sql.`,
+      schemaFixRequired: true,
+      schemaFixHint:
+        "Run GitHub Actions -> Supabase after the migration history repair, or apply supabase/migrations/202606260001_blog_rich_editor_content.sql in Supabase SQL Editor.",
+    }, 400);
+  }
+  return null;
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -120,7 +134,7 @@ Deno.serve(async (req) => {
       const validationError = validatePostPayload(row, { publish: row.published });
       if (validationError) return jsonResponse({ error: validationError }, 400);
       const { data, error } = await supabase.from("posts").insert(row).select().single();
-      if (error) return jsonResponse({ error: error.message }, 400);
+      if (error) return schemaErrorResponse(error) || jsonResponse({ error: error.message }, 400);
       const verified = await verifyPersistedPost(supabase, data.id, row);
       return postResponse(verified, "created");
     }
@@ -138,7 +152,7 @@ Deno.serve(async (req) => {
         .eq("id", id)
         .select()
         .single();
-      if (error) return jsonResponse({ error: error.message }, 400);
+      if (error) return schemaErrorResponse(error) || jsonResponse({ error: error.message }, 400);
       const verified = await verifyPersistedPost(supabase, data.id || id, updates);
       return postResponse(verified, "updated");
     }
