@@ -20,9 +20,25 @@ alter table public.subscribers
 alter table public.subscribers
   add column if not exists subscribed_at timestamptz;
 
-update public.subscribers
-set subscribed_at = created_at
-where subscribed_at is null;
+do $$
+begin
+  if exists (
+    select 1
+    from information_schema.columns
+    where table_schema = 'public'
+      and table_name = 'subscribers'
+      and column_name = 'created_at'
+  ) then
+    update public.subscribers
+    set subscribed_at = created_at
+    where subscribed_at is null;
+  else
+    update public.subscribers
+    set subscribed_at = now()
+    where subscribed_at is null;
+  end if;
+end
+$$;
 
 create table if not exists public.bookings (
   id uuid primary key default gen_random_uuid(),
@@ -59,6 +75,7 @@ alter table public.bookings enable row level security;
 alter table public.counsellor_applications enable row level security;
 
 drop policy if exists posts_read_public on public.posts;
+drop policy if exists posts_read_published on public.posts;
 create policy posts_read_published
 on public.posts
 for select
@@ -74,6 +91,7 @@ with check (
   email ~* '^[^[:space:]@]+@[^[:space:]@]+\.[^[:space:]@]+$'
 );
 
+drop policy if exists counsellor_applications_insert_public on public.counsellor_applications;
 create policy counsellor_applications_insert_public
 on public.counsellor_applications
 for insert
