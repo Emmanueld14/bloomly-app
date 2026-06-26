@@ -40,7 +40,7 @@ jobs:
 
       - name: Push database migrations
         if: env.SUPABASE_ACCESS_TOKEN != ''
-        run: supabase db push
+        run: supabase db push --include-all
 
       - name: Deploy admin Edge Functions
         if: env.SUPABASE_ACCESS_TOKEN != ''
