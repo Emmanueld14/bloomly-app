@@ -38,6 +38,7 @@ const SUPABASE_CONFIG = {
         '/api/admin/subscribers': 'admin-subscribers',
         '/api/admin/counsellor-applications': 'admin-counsellor-applications',
         '/api/admin/sync-github-posts': 'admin-sync-github-posts',
+        '/api/admin/blog-images': 'admin-blog-image-upload',
     },
 };
 

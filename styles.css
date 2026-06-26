@@ -7462,6 +7462,109 @@ body {
     border-radius: var(--radius-md);
 }
 
+.article-content #articleBody h1,
+.article-content .article-body h1 {
+    margin: var(--space-2xl) 0 var(--space-md);
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    line-height: 1.05;
+    letter-spacing: -0.04em;
+    color: var(--color-heading);
+}
+
+.article-content #articleBody ul,
+.article-content #articleBody ol,
+.article-content .article-body ul,
+.article-content .article-body ol {
+    margin: 0 0 var(--space-lg);
+    padding-left: 1.4rem;
+}
+
+.article-content #articleBody li,
+.article-content .article-body li {
+    margin-bottom: 0.45rem;
+}
+
+.article-content #articleBody pre,
+.article-content .article-body pre {
+    overflow-x: auto;
+    margin: var(--space-xl) 0;
+    border-radius: var(--radius-lg);
+    background: #020817;
+    color: #dbeafe;
+    padding: var(--space-lg);
+}
+
+.article-content #articleBody code,
+.article-content .article-body code {
+    border-radius: 0.35rem;
+    background: rgba(var(--color-lilac-rgb), 0.16);
+    padding: 0.12rem 0.32rem;
+}
+
+.article-content #articleBody pre code,
+.article-content .article-body pre code {
+    background: transparent;
+    padding: 0;
+}
+
+.article-content #articleBody hr,
+.article-content .article-body hr {
+    border: 0;
+    height: 1px;
+    margin: var(--space-2xl) 0;
+    background: linear-gradient(90deg, transparent, rgba(var(--color-black-rgb), 0.14), transparent);
+}
+
+.article-content #articleBody figure.cms-image,
+.article-content .article-body figure.cms-image {
+    max-width: 100%;
+    margin: var(--space-xl) auto;
+    text-align: center;
+}
+
+.article-content #articleBody figure.cms-image[data-align='left'],
+.article-content .article-body figure.cms-image[data-align='left'] {
+    margin-left: 0;
+}
+
+.article-content #articleBody figure.cms-image[data-align='right'],
+.article-content .article-body figure.cms-image[data-align='right'] {
+    margin-right: 0;
+}
+
+.article-content #articleBody figcaption,
+.article-content .article-body figcaption {
+    margin-top: var(--space-sm);
+    color: var(--color-gray-600);
+    font-size: var(--text-sm);
+    line-height: 1.5;
+}
+
+.article-content #articleBody table,
+.article-content .article-body table {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    border-collapse: collapse;
+    margin: var(--space-xl) 0;
+    border-radius: var(--radius-lg);
+}
+
+.article-content #articleBody th,
+.article-content #articleBody td,
+.article-content .article-body th,
+.article-content .article-body td {
+    border: 1px solid rgba(var(--color-black-rgb), 0.1);
+    padding: 0.75rem 0.85rem;
+    vertical-align: top;
+}
+
+.article-content #articleBody th,
+.article-content .article-body th {
+    background: rgba(var(--color-lilac-rgb), 0.16);
+    color: var(--color-heading);
+}
+
 .post-share-section,
 .related-posts-section,
 .author-card-section {

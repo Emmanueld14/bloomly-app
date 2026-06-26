@@ -401,7 +401,7 @@
             if (String(post.metadata?.published ?? 'true').toLowerCase() === 'false') {
                 throw new Error('Post is not published.');
             }
-            const html = blogAPI.markdownToHTML(post.body);
+            const html = post.html || blogAPI.markdownToHTML(post.body);
 
             // Update page title
             const postTitle = post.metadata?.title || slug.replace(/-/g, ' ');
@@ -419,7 +419,7 @@
                 metaDesc.name = 'description';
                 document.head.appendChild(metaDesc);
             }
-            metaDesc.content = post.metadata?.summary || '';
+            metaDesc.content = post.metadata?.metaDescription || post.metadata?.summary || '';
 
             // Keep author available for UI and sharing modules.
             document.body.dataset.postAuthor = postAuthor || 'Bloomly Team';
@@ -444,7 +444,7 @@
 
             const ogFields = [
                 ['og:title', postTitle],
-                ['og:description', post.metadata?.summary || 'Read this post on Bloomly.'],
+                ['og:description', post.metadata?.metaDescription || post.metadata?.summary || 'Read this post on Bloomly.'],
                 ['og:url', canonicalUrl],
                 ['og:type', 'article'],
                 ['og:site_name', 'Bloomly']
@@ -462,7 +462,7 @@
             const twitterFields = [
                 ['twitter:card', 'summary_large_image'],
                 ['twitter:title', postTitle],
-                ['twitter:description', post.metadata?.summary || 'Read this post on Bloomly.']
+                ['twitter:description', post.metadata?.metaDescription || post.metadata?.summary || 'Read this post on Bloomly.']
             ];
             twitterFields.forEach(([name, value]) => {
                 let meta = document.querySelector(`meta[name="${name}"]`);
@@ -478,7 +478,7 @@
             const dateStr = formatDate(post.metadata?.date);
             const category = post.metadata?.category || 'Mental Health';
             const wordCount = post.body.split(' ').length;
-            const readTime = Math.ceil(wordCount / 200);
+            const readTime = post.readTime || Math.max(1, Math.ceil(wordCount / 200));
             const categorySlug = window.BloomlyBlog?.normalizeCategory
                 ? window.BloomlyBlog.normalizeCategory(category)
                 : category.toLowerCase().replace(/\s+/g, '-');
@@ -517,10 +517,10 @@
             // Render body
             const bodyEl = document.getElementById('articleBody');
             if (bodyEl) {
-                bodyEl.innerHTML = html;
+                bodyEl.innerHTML = blogAPI.sanitizeHTML ? blogAPI.sanitizeHTML(html) : html;
 
                 // Add featured image if available
-                if (post.metadata?.featuredImage) {
+                if (post.metadata?.featuredImage && !bodyEl.querySelector('.cms-image img[src], img[src]')) {
                     const img = document.createElement('img');
                     img.src = post.metadata.featuredImage;
                     img.alt = postTitle;

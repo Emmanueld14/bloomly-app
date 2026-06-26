@@ -31,6 +31,7 @@
     };
     const THEME_KEY = 'bloomly_admin_theme';
     const SIDEBAR_COLLAPSE_KEY = 'bloomly_admin_sidebar_collapsed';
+    let cmsEditor = null;
 
     function getToken() {
         return sessionStorage.getItem(TOKEN_KEY) || '';
@@ -245,14 +246,6 @@
         });
     }
 
-    function slugify(title) {
-        return String(title || '')
-            .toLowerCase()
-            .trim()
-            .replace(/[^a-z0-9\s-]/g, '')
-            .replace(/\s+/g, '-');
-    }
-
     function escapeCsv(value) {
         const s = String(value ?? '');
         return `"${s.replace(/"/g, '""')}"`;
@@ -318,6 +311,12 @@
         if (post.published === true) return true;
         if (post.published === false) return false;
         return String(post.status || '').toLowerCase() === 'published';
+    }
+
+    function formatPostStatus(post) {
+        const status = String(post.status || '').toLowerCase();
+        if (status === 'scheduled') return 'Scheduled';
+        return isPostPublished(post) ? 'Published' : 'Draft';
     }
 
     function formatPostDate(post) {
@@ -406,7 +405,7 @@
         }
         tbody.innerHTML = posts
             .map((p) => {
-                const status = isPostPublished(p) ? 'Published' : 'Draft';
+                const status = formatPostStatus(p);
                 const source =
                     p.source === 'github'
                         ? 'GitHub'
@@ -472,58 +471,72 @@
         }
     }
 
-    async function openPostEditor(post) {
-        const panel = document.getElementById('postSlideover');
-        panel.classList.add('is-open');
-        const isGithubOnly = post?.source === 'github' || String(post?.id || '').startsWith('github:');
-        document.getElementById('postId').value = isGithubOnly ? '' : post?.id || '';
-        document.getElementById('postTitle').value = post?.title || '';
-        document.getElementById('postSlug').value = post?.slug || '';
-        document.getElementById('postCategory').value = post?.category || 'Mental Health';
-        document.getElementById('postEmoji').value = post?.emoji || '💜';
-        document.getElementById('postPublished').checked = isPostPublished(post);
+    function getEditorUploadUrls() {
+        return getAdminApiUrls('/api/admin/blog-images');
+    }
 
-        let content = post?.content || '';
-        if (!content && post?.slug) {
+    async function uploadBlogImage(file) {
+        if (!cmsEditor) throw new Error('Editor is not ready.');
+        if (!file) throw new Error('Choose an image to upload.');
+
+        const urls = getEditorUploadUrls();
+        const token = getToken();
+        const anonKey =
+            typeof SUPABASE_CONFIG !== 'undefined' ? SUPABASE_CONFIG.anonKey : '';
+        let lastError = null;
+
+        for (const url of urls) {
+            const formData = new FormData();
+            formData.append('file', file);
+            const isSupabase = url.includes('supabase.co');
             try {
-                const res = await fetch(`/content/blog/${post.slug}.md`);
+                const res = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        ...(isSupabase && anonKey ? { apikey: anonKey } : {}),
+                    },
+                    body: formData,
+                });
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok) {
+                    lastError = new Error(data.error || `Upload failed (${res.status})`);
+                    continue;
+                }
+                if (!data.url) {
+                    lastError = new Error('Upload did not return an image URL.');
+                    continue;
+                }
+                return data;
+            } catch (error) {
+                lastError = error;
+            }
+        }
+
+        throw lastError || new Error('Image upload failed.');
+    }
+
+    async function openPostEditor(post) {
+        if (!cmsEditor) {
+            showAdminError('The rich text editor did not load. Please refresh the page.');
+            return;
+        }
+
+        const hydratedPost = { ...(post || {}) };
+        if (!hydratedPost.content && !hydratedPost.content_html && !hydratedPost.content_json && hydratedPost.slug) {
+            try {
+                const res = await fetch(`/content/blog/${hydratedPost.slug}.md`);
                 if (res.ok) {
                     const raw = await res.text();
                     const match = raw.match(/^---\s*\n[\s\S]*?\n---\s*\n([\s\S]*)$/);
-                    content = match ? match[1].trim() : raw;
+                    hydratedPost.content = match ? match[1].trim() : raw;
                 }
             } catch (e) {
-                console.warn('Could not load markdown for', post.slug);
+                console.warn('Could not load markdown for', hydratedPost.slug);
             }
         }
-        document.getElementById('postContent').value = content;
-    }
 
-    function closePostEditor() {
-        document.getElementById('postSlideover').classList.remove('is-open');
-    }
-
-    async function savePost(event) {
-        event.preventDefault();
-        const id = document.getElementById('postId').value;
-        const title = document.getElementById('postTitle').value.trim();
-        const slug = document.getElementById('postSlug').value.trim() || slugify(title);
-        const body = {
-            title,
-            slug,
-            category: document.getElementById('postCategory').value,
-            emoji: document.getElementById('postEmoji').value,
-            content: document.getElementById('postContent').value,
-            excerpt: document.getElementById('postContent').value.slice(0, 200),
-            published: document.getElementById('postPublished').checked,
-        };
-        if (id) {
-            await api('/api/admin/posts', { method: 'PATCH', body: JSON.stringify({ id: Number(id), ...body }) });
-        } else {
-            await api('/api/admin/posts', { method: 'POST', body: JSON.stringify(body) });
-        }
-        closePostEditor();
-        loadPosts();
+        cmsEditor.open(hydratedPost);
     }
 
     async function loadBookings(filter) {
@@ -657,6 +670,18 @@
     function init() {
         if (!requireAuth()) return;
         initUiChrome();
+        const editorRoot = document.getElementById('postEditorShell');
+        if (editorRoot && window.BloomlyCMS?.createPostEditor) {
+            cmsEditor = window.BloomlyCMS.createPostEditor({
+                root: editorRoot,
+                api,
+                uploadImage: uploadBlogImage,
+                onSaved: () => {
+                    loadPosts();
+                    loadDashboard();
+                },
+            });
+        }
 
         document.getElementById('logoutBtn').addEventListener('click', () => {
             sessionStorage.removeItem(TOKEN_KEY);
@@ -684,16 +709,6 @@
                 void syncGithubPostsToSupabase();
             });
         }
-        document.getElementById('postForm').addEventListener('submit', savePost);
-        document.getElementById('closePostEditor').addEventListener('click', closePostEditor);
-        document.getElementById('postTitle').addEventListener('input', (e) => {
-            const slugEl = document.getElementById('postSlug');
-            if (!slugEl.dataset.touched) slugEl.value = slugify(e.target.value);
-        });
-        document.getElementById('postSlug').addEventListener('input', () => {
-            document.getElementById('postSlug').dataset.touched = 'true';
-        });
-
         document.getElementById('bookingFilter').addEventListener('change', (e) => loadBookings(e.target.value));
 
         const hash = (location.hash || '#dashboard').replace('#', '');

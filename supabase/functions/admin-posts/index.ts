@@ -10,6 +10,32 @@ function slugify(title: string) {
     .replace(/-+/g, "-");
 }
 
+function normalizePostPayload(body: Record<string, unknown>, slug: string) {
+  const status = String(body.status || (body.published ? "published" : "draft"));
+  const normalizedStatus = ["draft", "published", "scheduled"].includes(status) ? status : "draft";
+  const excerpt = String(body.excerpt || body.summary || "").trim();
+  return {
+    title: body.title,
+    slug,
+    category: body.category || "Mental Health",
+    content: body.content || "",
+    content_json: body.content_json || null,
+    content_html: body.content_html || null,
+    excerpt,
+    summary: excerpt,
+    emoji: body.emoji || "Bloomly",
+    published: normalizedStatus === "published",
+    status: normalizedStatus,
+    cover_image_url: body.cover_image_url || null,
+    tags: Array.isArray(body.tags) ? body.tags : [],
+    seo_title: body.seo_title || body.title || null,
+    meta_description: body.meta_description || excerpt || null,
+    scheduled_at: normalizedStatus === "scheduled" ? body.scheduled_at || null : null,
+    read_time_minutes: Math.max(1, Number(body.read_time_minutes || 1)),
+    url: `https://bloomly.co.ke/blog-post/?slug=${encodeURIComponent(slug)}`,
+  };
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -40,18 +66,7 @@ Deno.serve(async (req) => {
 
     if (req.method === "POST") {
       const slug = body.slug || slugify(body.title || "");
-      const row = {
-        title: body.title,
-        slug,
-        category: body.category || "Mental Health",
-        content: body.content || "",
-        excerpt: body.excerpt || body.summary || "",
-        summary: body.excerpt || body.summary || "",
-        emoji: body.emoji || "💜",
-        published: Boolean(body.published),
-        status: body.published ? "published" : "draft",
-        url: `https://bloomly.co.ke/blog-post/?slug=${encodeURIComponent(slug)}`,
-      };
+      const row = normalizePostPayload(body, slug);
       const { data, error } = await supabase.from("posts").insert(row).select().single();
       if (error) return jsonResponse({ error: error.message }, 400);
       return jsonResponse({ post: data });
@@ -60,11 +75,8 @@ Deno.serve(async (req) => {
     if (req.method === "PATCH") {
       const id = body.id;
       if (!id) return jsonResponse({ error: "Post id required." }, 400);
-      const updates = { ...body };
-      delete updates.id;
-      if (updates.published !== undefined) {
-        updates.status = updates.published ? "published" : "draft";
-      }
+      const slug = body.slug || slugify(body.title || "");
+      const updates = normalizePostPayload(body, slug);
       const { data, error } = await supabase
         .from("posts")
         .update(updates)

@@ -108,22 +108,32 @@ class BlogAPI {
                 title: row.title,
                 date: row.created_at || row.updated_at,
                 category: row.category || 'Mental Health',
-                summary: row.excerpt || row.summary || '',
+                summary: row.excerpt || row.summary || row.meta_description || '',
                 emoji: row.emoji || '💜',
                 published: row.published !== false,
+                featuredImage: row.cover_image_url || '',
+                tags: row.tags || [],
+                seoTitle: row.seo_title || row.title,
+                metaDescription: row.meta_description || row.excerpt || row.summary || '',
             },
-            body: row.content || '',
+            body: row.content || this.htmlToText(row.content_html || ''),
+            html: row.content_html ? this.sanitizeHTML(row.content_html) : '',
+            readTime: row.read_time_minutes || null,
             published: row.published !== false,
         };
     }
 
     _rowToFullPost(row) {
         const item = this._rowToListItem(row);
-        const body = row.content || '';
+        const body = row.content || this.htmlToText(row.content_html || '');
+        const html = row.content_html
+            ? this.sanitizeHTML(row.content_html)
+            : this.markdownToHTML(body);
         return {
             ...item,
             body,
-            html: this.markdownToHTML(body),
+            html,
+            content_json: row.content_json || null,
             raw: body,
         };
     }
@@ -134,7 +144,7 @@ class BlogAPI {
 
         const { data, error } = await client
             .from('posts')
-            .select('slug,title,created_at,updated_at,category,excerpt,summary,emoji,published')
+            .select('slug,title,created_at,updated_at,category,excerpt,summary,emoji,published,status,cover_image_url,tags,seo_title,meta_description,read_time_minutes,content_html')
             .eq('published', true)
             .order('created_at', { ascending: false });
 
@@ -376,7 +386,131 @@ class BlogAPI {
         html = html.replace(/<p><\/p>/g, '');
         html = html.replace(/<p>(<h[2-4]>.*<\/h[2-4]>)<\/p>/g, '$1');
         html = html.replace(/<p>(<ul>.*<\/ul>)<\/p>/g, '$1');
-        return html;
+        return this.sanitizeHTML(html);
+    }
+
+    sanitizeHTML(html) {
+        if (!html || typeof document === 'undefined') return '';
+        const allowedTags = new Set([
+            'a',
+            'blockquote',
+            'br',
+            'code',
+            'em',
+            'figcaption',
+            'figure',
+            'h1',
+            'h2',
+            'h3',
+            'h4',
+            'hr',
+            'img',
+            'li',
+            'ol',
+            'p',
+            'pre',
+            'span',
+            'strong',
+            'table',
+            'tbody',
+            'td',
+            'th',
+            'thead',
+            'tr',
+            'u',
+            'ul',
+        ]);
+        const allowedAttrs = new Set([
+            'alt',
+            'class',
+            'colspan',
+            'data-align',
+            'data-type',
+            'data-width',
+            'decoding',
+            'height',
+            'href',
+            'loading',
+            'rel',
+            'rowspan',
+            'src',
+            'style',
+            'target',
+            'title',
+            'width',
+        ]);
+        const template = document.createElement('template');
+        template.innerHTML = String(html);
+        const clean = (element) => {
+            Array.from(element.children).forEach(clean);
+            const tag = element.tagName.toLowerCase();
+            if (!allowedTags.has(tag)) {
+                element.replaceWith(...Array.from(element.childNodes));
+                return;
+            }
+            Array.from(element.attributes).forEach((attr) => {
+                const name = attr.name.toLowerCase();
+                const value = attr.value;
+                if (!allowedAttrs.has(name) || name.startsWith('on')) {
+                    element.removeAttribute(attr.name);
+                    return;
+                }
+                if ((name === 'href' || name === 'src') && !this.isSafeContentUrl(value)) {
+                    element.removeAttribute(attr.name);
+                    return;
+                }
+                if (name === 'style') {
+                    const safe = this.sanitizeInlineStyle(value);
+                    if (safe) element.setAttribute('style', safe);
+                    else element.removeAttribute(attr.name);
+                }
+            });
+            if (tag === 'a') {
+                element.setAttribute('rel', 'noopener noreferrer');
+                if (element.getAttribute('href')?.startsWith('http')) {
+                    element.setAttribute('target', '_blank');
+                }
+            }
+            if (tag === 'img') {
+                element.setAttribute('loading', 'lazy');
+                element.setAttribute('decoding', 'async');
+                if (!element.getAttribute('alt')) element.setAttribute('alt', '');
+            }
+        };
+        Array.from(template.content.children).forEach(clean);
+        return template.innerHTML;
+    }
+
+    isSafeContentUrl(value) {
+        if (!value) return false;
+        try {
+            const url = new URL(value, window.location.origin);
+            return ['http:', 'https:', 'mailto:', 'tel:'].includes(url.protocol);
+        } catch {
+            return false;
+        }
+    }
+
+    sanitizeInlineStyle(value) {
+        return String(value || '')
+            .split(';')
+            .map((rule) => rule.trim())
+            .filter(Boolean)
+            .map((rule) => rule.split(':').map((part) => part.trim()))
+            .filter(([prop, val]) => {
+                if (prop === 'width') return /^(100%|[1-9][0-9]{0,2}px|[1-9][0-9]?%)$/.test(val);
+                if (prop === 'text-align') return /^(left|center|right)$/.test(val);
+                return false;
+            })
+            .map(([prop, val]) => `${prop}: ${val}`)
+            .join('; ');
+    }
+
+    htmlToText(html) {
+        if (!html || typeof document === 'undefined') return '';
+        const template = document.createElement('template');
+        template.innerHTML = this.sanitizeHTML(html);
+        return (template.content.textContent || '').replace(/\s+/g, ' ').trim();
     }
 }
 

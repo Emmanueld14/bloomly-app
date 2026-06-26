@@ -59,3 +59,6 @@ verify_jwt = false
 
 [functions.admin-sync-github-posts]
 verify_jwt = false
+
+[functions.admin-blog-image-upload]
+verify_jwt = false

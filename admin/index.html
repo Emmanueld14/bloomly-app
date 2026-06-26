@@ -7,6 +7,7 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <link rel="stylesheet" href="/styles.css">
     <link rel="stylesheet" href="/admin/launch-admin.css">
+    <link rel="stylesheet" href="/admin/cms-editor.css">
 </head>
 <body class="admin-launch" data-theme="light">
     <div class="admin-shell">
@@ -219,31 +220,163 @@
         </nav>
     </div>
 
-    <div class="admin-slideover" id="postSlideover">
-        <div class="admin-slideover-backdrop" id="closePostEditor"></div>
-        <div class="admin-slideover-panel">
-            <h2>Edit post</h2>
-            <form id="postForm">
-                <input type="hidden" id="postId">
-                <label>Title <input type="text" id="postTitle" required></label>
-                <label>Slug <input type="text" id="postSlug"></label>
-                <label>Category
-                    <select id="postCategory">
-                        <option>Mental Health</option>
-                        <option>Self-Care</option>
-                        <option>Tips</option>
-                        <option>Poetry</option>
-                    </select>
-                </label>
-                <label>Emoji <input type="text" id="postEmoji" maxlength="4"></label>
-                <label>Content <textarea id="postContent" rows="12"></textarea></label>
-                <label><input type="checkbox" id="postPublished"> Published</label>
-                <button type="submit" class="btn btn-primary">Save</button>
-            </form>
+    <section class="cms-editor-shell" id="postEditorShell" hidden aria-label="Bloomly blog editor">
+        <header class="cms-editor-topbar">
+            <div class="cms-editor-brand">
+                <span class="cms-editor-brand-mark" aria-hidden="true">B</span>
+                <div>
+                    <p>Bloomly publishing</p>
+                    <h2>Professional post editor</h2>
+                </div>
+            </div>
+            <div class="cms-topbar-actions">
+                <span class="cms-save-status" data-save-status>Ready</span>
+                <button type="button" class="btn btn-neutral" data-preview-toggle>Live preview</button>
+                <button type="button" class="btn btn-secondary" data-close-editor>Close</button>
+            </div>
+        </header>
+
+        <div class="cms-editor-workspace">
+            <main class="cms-editor-main">
+                <article class="cms-document-card">
+                    <nav class="cms-floating-toolbar" aria-label="Editor toolbar">
+                        <div class="cms-toolbar-group" aria-label="History">
+                            <button type="button" class="cms-tool-btn" data-editor-command="undo" title="Undo">↶</button>
+                            <button type="button" class="cms-tool-btn" data-editor-command="redo" title="Redo">↷</button>
+                        </div>
+                        <div class="cms-toolbar-group" aria-label="Headings">
+                            <button type="button" class="cms-tool-btn" data-editor-command="h1" title="Heading 1">H1</button>
+                            <button type="button" class="cms-tool-btn" data-editor-command="h2" title="Heading 2">H2</button>
+                            <button type="button" class="cms-tool-btn" data-editor-command="h3" title="Heading 3">H3</button>
+                        </div>
+                        <div class="cms-toolbar-group" aria-label="Inline formatting">
+                            <button type="button" class="cms-tool-btn" data-editor-command="bold" title="Bold"><strong>B</strong></button>
+                            <button type="button" class="cms-tool-btn" data-editor-command="italic" title="Italic"><em>I</em></button>
+                            <button type="button" class="cms-tool-btn" data-editor-command="underline" title="Underline"><u>U</u></button>
+                            <button type="button" class="cms-tool-btn" data-editor-command="link" title="Link">🔗</button>
+                        </div>
+                        <div class="cms-toolbar-group" aria-label="Blocks">
+                            <button type="button" class="cms-tool-btn" data-editor-command="quote" title="Quote">“”</button>
+                            <button type="button" class="cms-tool-btn" data-editor-command="bulletList" title="Bullet list">•</button>
+                            <button type="button" class="cms-tool-btn" data-editor-command="orderedList" title="Numbered list">1.</button>
+                            <button type="button" class="cms-tool-btn" data-editor-command="codeBlock" title="Code block">{ }</button>
+                            <button type="button" class="cms-tool-btn" data-editor-command="divider" title="Divider">—</button>
+                        </div>
+                        <div class="cms-toolbar-group" aria-label="Insert">
+                            <button type="button" class="cms-tool-btn" data-editor-command="image" title="Image">🖼</button>
+                            <button type="button" class="cms-tool-btn" data-editor-command="table" title="Table">▦</button>
+                        </div>
+                        <div class="cms-toolbar-group" aria-label="Alignment">
+                            <button type="button" class="cms-tool-btn" data-editor-command="alignLeft" title="Align left">☰</button>
+                            <button type="button" class="cms-tool-btn" data-editor-command="alignCenter" title="Align center">≡</button>
+                            <button type="button" class="cms-tool-btn" data-editor-command="alignRight" title="Align right">☷</button>
+                        </div>
+                    </nav>
+
+                    <div class="cms-document-fields">
+                        <input type="hidden" id="postId">
+                        <input class="cms-title-input" type="text" id="postTitle" placeholder="Untitled story" autocomplete="off" required>
+                        <div class="cms-document-meta">
+                            <span data-reading-time>1 min read</span>
+                            <span>Type <strong>/</strong> for blocks</span>
+                            <span>⌘/Ctrl + S to save</span>
+                        </div>
+                    </div>
+
+                    <section class="cms-editor-canvas">
+                        <div class="cms-rich-editor-wrap" data-rich-editor></div>
+                        <div class="cms-slash-menu" data-slash-menu hidden>
+                            <button type="button" data-slash-command="image">Image upload</button>
+                            <button type="button" data-slash-command="quote">Quote block</button>
+                            <button type="button" data-slash-command="h2">Heading</button>
+                            <button type="button" data-slash-command="divider">Divider</button>
+                            <button type="button" data-slash-command="code">Code block</button>
+                            <button type="button" data-slash-command="table">Table</button>
+                        </div>
+                        <div class="cms-drop-hint">Drag images anywhere into the editor to upload and insert them inline.</div>
+                    </section>
+
+                    <section class="cms-preview-panel" data-post-preview></section>
+                </article>
+            </main>
+
+            <aside class="cms-settings-sidebar" aria-label="Post settings">
+                <section class="cms-sidebar-card">
+                    <h3>Publishing</h3>
+                    <div class="cms-field-grid">
+                        <label class="cms-field">Status
+                            <select id="postStatus" data-editor-field>
+                                <option value="draft">Draft</option>
+                                <option value="published">Published</option>
+                                <option value="scheduled">Scheduled</option>
+                            </select>
+                        </label>
+                        <label class="cms-field">Schedule date
+                            <input type="datetime-local" id="scheduledAt" data-editor-field>
+                        </label>
+                        <p class="cms-reading-stat"><span>Estimated reading time</span><strong data-reading-time>1 min read</strong></p>
+                    </div>
+                </section>
+
+                <section class="cms-sidebar-card">
+                    <h3>Cover image</h3>
+                    <div class="cms-field-grid">
+                        <div class="cms-cover-preview" data-cover-preview><span>Drop in a cover image for richer previews.</span></div>
+                        <button type="button" class="btn btn-neutral" data-cover-upload>Upload cover image</button>
+                        <label class="cms-field">Cover image URL
+                            <input type="url" id="coverImageUrl" data-editor-field placeholder="https://...">
+                        </label>
+                    </div>
+                </section>
+
+                <section class="cms-sidebar-card">
+                    <h3>Post settings</h3>
+                    <div class="cms-field-grid">
+                        <label class="cms-field">Slug
+                            <input type="text" id="postSlug" data-editor-field placeholder="beautiful-blog-post">
+                        </label>
+                        <label class="cms-field">Category
+                            <select id="postCategory" data-editor-field>
+                                <option>Mental Health</option>
+                                <option>Self-Care</option>
+                                <option>Tips</option>
+                                <option>Poetry</option>
+                                <option>Stories</option>
+                            </select>
+                        </label>
+                        <label class="cms-field">Tags
+                            <input type="text" id="postTags" data-editor-field placeholder="wellness, school, support">
+                        </label>
+                        <label class="cms-field">Accent label
+                            <input type="text" id="postEmoji" data-editor-field maxlength="24" placeholder="Bloomly">
+                        </label>
+                    </div>
+                </section>
+
+                <section class="cms-sidebar-card">
+                    <h3>SEO</h3>
+                    <div class="cms-field-grid">
+                        <label class="cms-field">SEO title
+                            <input type="text" id="seoTitle" data-editor-field maxlength="70" placeholder="Search-friendly title">
+                        </label>
+                        <label class="cms-field">Meta description
+                            <textarea id="metaDescription" data-editor-field maxlength="170" placeholder="Short summary for search and social previews"></textarea>
+                        </label>
+                    </div>
+                </section>
+            </aside>
         </div>
-    </div>
+
+        <footer class="cms-sticky-controls">
+            <span class="cms-save-status" data-save-status>Ready</span>
+            <button type="button" class="btn btn-neutral" data-preview-toggle>Live preview</button>
+            <button type="button" class="btn btn-secondary" data-save-post>Save draft</button>
+            <button type="button" class="btn btn-primary" data-publish-post>Publish</button>
+        </footer>
+    </section>
 
     <script src="/admin/config.js"></script>
+    <script src="/admin/blog-cms-editor.js"></script>
     <script src="/admin/app.js"></script>
 </body>
 </html>
