@@ -8,7 +8,10 @@
 -- reads those directly with the publishable anon key.
 
 revoke select on table
+  public.appointment_blackouts,
   public.appointment_bookings,
+  public.appointment_date_overrides,
+  public.appointment_settings,
   public.email_logs,
   public.payment_attempts,
   public.subscribers
