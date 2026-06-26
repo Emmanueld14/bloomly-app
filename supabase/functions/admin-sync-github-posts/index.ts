@@ -76,8 +76,15 @@ Deno.serve(async (req) => {
         url: `https://bloomly.co.ke/blog-post/?slug=${encodeURIComponent(slug)}`,
       };
 
-      const { data: existing } = await supabase.from("posts").select("id").eq("slug", slug).maybeSingle();
+      const { data: existing } = await supabase
+        .from("posts")
+        .select("id,content_json,content_html")
+        .eq("slug", slug)
+        .maybeSingle();
       if (existing?.id) {
+        if (existing.content_json || existing.content_html) {
+          continue;
+        }
         const { error } = await supabase.from("posts").update(row).eq("id", existing.id);
         if (error) errors.push(`${slug}: ${error.message}`);
         else synced += 1;

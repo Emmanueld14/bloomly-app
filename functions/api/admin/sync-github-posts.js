@@ -65,13 +65,28 @@ export async function onRequestPost(context) {
                 url: `https://bloomly.co.ke/blog-post/?slug=${encodeURIComponent(slug)}`,
             };
 
-            const patchRes = await supabaseFetch(
+            const existingRes = await supabaseFetch(
                 env,
-                `posts?slug=eq.${encodeURIComponent(slug)}`,
-                { method: 'PATCH', body: JSON.stringify(row) }
+                `posts?slug=eq.${encodeURIComponent(slug)}&select=id,content_json,content_html`,
+                { method: 'GET' }
             );
+            const existing = Array.isArray(existingRes.data) ? existingRes.data[0] : null;
 
-            if (patchRes.response.ok) {
+            if (existing?.content_json || existing?.content_html) {
+                continue;
+            }
+
+            if (existing?.id) {
+                const patchRes = await supabaseFetch(
+                    env,
+                    `posts?id=eq.${encodeURIComponent(existing.id)}`,
+                    { method: 'PATCH', body: JSON.stringify(row) }
+                );
+                if (!patchRes.response.ok) {
+                    const msg = patchRes.data?.message || patchRes.data?.hint || 'update failed';
+                    errors.push(`${slug}: ${msg}`);
+                    continue;
+                }
                 synced += 1;
                 continue;
             }

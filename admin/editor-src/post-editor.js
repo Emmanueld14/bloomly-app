@@ -2,7 +2,7 @@ import { Editor } from '@tiptap/core';
 import { createEditorExtensions } from './extensions.js';
 import { EditorAutosave, debounce } from './autosave.js';
 import { createExcerpt, estimateReadingTime, getPlainTextFromHTML, renderPreview } from './preview-renderer.js';
-import { createHiddenImageInput } from './upload.js';
+import { createHiddenImageInput, validateImageFile } from './upload.js';
 import { sanitizeHTML } from './html-sanitize.js';
 
 const EMPTY_DOC = {
@@ -270,6 +270,7 @@ export class BlogPostEditor {
         this.setUploadProgress(12, 'Preparing image...');
         this.root.classList.add('is-uploading');
         try {
+            validateImageFile(file);
             const uploaded = await this.uploadImage(file, {
                 onProgress: ({ percent, message }) => this.setUploadProgress(percent, message),
             });
@@ -301,6 +302,7 @@ export class BlogPostEditor {
             this.setSaveStatus('Uploading cover image...');
             this.setUploadProgress(12, 'Preparing cover image...');
             try {
+                validateImageFile(file);
                 const uploaded = await this.uploadImage(file, {
                     onProgress: ({ percent, message }) => this.setUploadProgress(percent, message),
                 });
@@ -513,11 +515,12 @@ export class BlogPostEditor {
                 throw new Error('Supabase saved the post, but did not mark it as published. Please try again.');
             }
             this.autosave.clear(payload.slug || payload.id || 'new');
+            this.setSaveStatus(publish ? 'Refreshing published post...' : autosave ? 'Refreshing saved post...' : 'Refreshing saved post...');
+            await this.onSaved(post);
             this.setSaveStatus(publish ? 'Published' : autosave ? 'Autosaved to Supabase' : 'Saved');
             if (!silent) {
                 this.notify(publish ? 'Post published successfully.' : 'Post saved successfully.', 'success');
             }
-            this.onSaved(post);
             return post;
         } catch (error) {
             this.setSaveStatus(error.message || 'Save failed');

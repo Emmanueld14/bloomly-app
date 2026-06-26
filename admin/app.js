@@ -125,6 +125,22 @@
         });
     }
 
+    function logAdminEnvironmentDiagnostics() {
+        const cfg = typeof SUPABASE_CONFIG !== 'undefined' ? SUPABASE_CONFIG : null;
+        const diagnostics = {
+            hasSupabaseUrl: Boolean(cfg?.url),
+            hasAnonKey: Boolean(cfg?.anonKey),
+            hasFunctionsBase: Boolean(cfg?.functionsBase),
+            hasPostsRoute: Boolean(cfg?.adminRoutes?.['/api/admin/posts']),
+            hasImageUploadRoute: Boolean(cfg?.adminRoutes?.['/api/admin/blog-images']),
+            origin: window.location.origin,
+        };
+        console.info('[Bloomly Admin] Environment diagnostics', diagnostics);
+        if (!diagnostics.hasSupabaseUrl || !diagnostics.hasAnonKey || !diagnostics.hasFunctionsBase) {
+            showAdminError('Supabase admin configuration is incomplete. Check admin/config.js and deployment environment.');
+        }
+    }
+
     async function api(path, options = {}) {
         const token = getToken();
         const anonKey =
@@ -799,6 +815,7 @@
     function init() {
         if (!requireAuth()) return;
         initUiChrome();
+        logAdminEnvironmentDiagnostics();
         const editorRoot = document.getElementById('postEditorShell');
         if (editorRoot && window.BloomlyCMS?.createPostEditor) {
             cmsEditor = window.BloomlyCMS.createPostEditor({
@@ -806,7 +823,7 @@
                 api,
                 uploadImage: uploadBlogImage,
                 notify: showToast,
-                onSaved: (post) => {
+                onSaved: async (post) => {
                     if (post?.published === true || post?.status === 'published') {
                         try {
                             localStorage.setItem('bloomly:blog-last-publish', String(Date.now()));
@@ -814,8 +831,8 @@
                             // Ignore localStorage failures.
                         }
                     }
-                    loadPosts();
-                    loadDashboard();
+                    await loadPosts();
+                    void loadDashboard();
                 },
             });
         }

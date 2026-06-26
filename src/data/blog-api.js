@@ -38,7 +38,13 @@ class BlogAPI {
 
         const url = typeof window !== 'undefined' && window.BLOOMLY_SUPABASE_URL;
         const key = typeof window !== 'undefined' && window.BLOOMLY_SUPABASE_ANON_KEY;
-        if (!url || !key) return null;
+        if (!url || !key) {
+            this._warn('Supabase public config missing; blog will use static fallback.', {
+                hasUrl: Boolean(url),
+                hasKey: Boolean(key),
+            });
+            return null;
+        }
 
         if (!window.supabase?.createClient) {
             if (!this._supabaseLoadPromise) {

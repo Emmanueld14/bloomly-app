@@ -67,19 +67,26 @@ async function main() {
   }
 
   for (const row of rows) {
-    const res = await fetch(`${url}/rest/v1/posts?slug=eq.${encodeURIComponent(row.slug)}`, {
-      method: 'PATCH',
-      headers: {
-        apikey: key,
-        Authorization: `Bearer ${key}`,
-        'Content-Type': 'application/json',
-        Prefer: 'resolution=merge-duplicates',
-      },
-      body: JSON.stringify(row),
-    });
-    if (!res.ok) {
-      const insertRes = await fetch(`${url}/rest/v1/posts`, {
-        method: 'POST',
+    const existingRes = await fetch(
+      `${url}/rest/v1/posts?slug=eq.${encodeURIComponent(row.slug)}&select=id,content_json,content_html`,
+      {
+        headers: {
+          apikey: key,
+          Authorization: `Bearer ${key}`,
+        },
+      }
+    );
+    const existingRows = existingRes.ok ? await existingRes.json().catch(() => []) : [];
+    const existing = Array.isArray(existingRows) ? existingRows[0] : null;
+
+    if (existing?.content_json || existing?.content_html) {
+      console.log('Skipped rich editor post', row.slug);
+      continue;
+    }
+
+    if (existing?.id) {
+      const res = await fetch(`${url}/rest/v1/posts?id=eq.${encodeURIComponent(existing.id)}`, {
+        method: 'PATCH',
         headers: {
           apikey: key,
           Authorization: `Bearer ${key}`,
@@ -88,14 +95,30 @@ async function main() {
         },
         body: JSON.stringify(row),
       });
-      if (!insertRes.ok) {
-        const err = await insertRes.text();
-        console.error('Failed', row.slug, err);
+      if (!res.ok) {
+        const err = await res.text();
+        console.error('Failed update', row.slug, err);
       } else {
-        console.log('Inserted', row.slug);
+        console.log('Updated markdown post', row.slug);
       }
+      continue;
+    }
+
+    const insertRes = await fetch(`${url}/rest/v1/posts`, {
+      method: 'POST',
+      headers: {
+        apikey: key,
+        Authorization: `Bearer ${key}`,
+        'Content-Type': 'application/json',
+        Prefer: 'return=minimal',
+      },
+      body: JSON.stringify(row),
+    });
+    if (!insertRes.ok) {
+      const err = await insertRes.text();
+      console.error('Failed insert', row.slug, err);
     } else {
-      console.log('Updated', row.slug);
+      console.log('Inserted markdown post', row.slug);
     }
   }
   console.log(`Done. Processed ${rows.length} posts.`);
