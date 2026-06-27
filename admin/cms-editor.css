@@ -506,6 +506,34 @@
     box-shadow: 0 0 0 3px color-mix(in srgb, var(--admin-primary) 18%, transparent);
 }
 
+.cms-emoji-picker {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 0.38rem;
+}
+
+.cms-emoji-picker button {
+    min-height: 2.25rem;
+    border: 1px solid var(--admin-border);
+    border-radius: 0.65rem;
+    background: var(--admin-surface-muted);
+    cursor: pointer;
+    font-size: 1.08rem;
+    line-height: 1;
+    transition: transform var(--transition-fast), border-color var(--transition-fast), background var(--transition-fast);
+}
+
+.cms-emoji-picker button:hover,
+.cms-emoji-picker button:focus-visible,
+.cms-emoji-picker button.is-active {
+    border-color: color-mix(in srgb, var(--admin-primary) 70%, var(--admin-border));
+    background: linear-gradient(135deg, rgba(99, 91, 255, 0.16), rgba(244, 114, 182, 0.12));
+}
+
+.cms-emoji-picker button:active {
+    transform: translateY(1px);
+}
+
 .cms-cover-preview {
     min-height: 10rem;
     display: grid;

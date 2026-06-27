@@ -138,6 +138,11 @@ export class BlogPostEditor {
             this.scheduleAutosave();
         });
 
+        this.root.querySelectorAll('[data-emoji-choice]').forEach((button) => {
+            button.addEventListener('click', () => this.setCoverEmoji(button.dataset.emojiChoice || '💜'));
+        });
+        getField(this.root, '#postEmoji')?.addEventListener('input', () => this.updateEmojiPickerState());
+
         this.root.querySelectorAll('[data-editor-field]').forEach((field) => {
             field.addEventListener('input', () => {
                 this.refreshDerivedState();
@@ -200,9 +205,25 @@ export class BlogPostEditor {
 
         const content = post?.content_json || post?.content_html || post?.content || EMPTY_DOC;
         this.editor.commands.setContent(content || EMPTY_DOC, false);
+        this.updateEmojiPickerState();
         this.refreshDerivedState();
         this.renderPreview();
         this.setSaveStatus(post?.id ? 'Loaded from Supabase' : 'New draft');
+    }
+
+    setCoverEmoji(emoji) {
+        const input = getField(this.root, '#postEmoji');
+        if (!input) return;
+        input.value = emoji;
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+        this.updateEmojiPickerState();
+    }
+
+    updateEmojiPickerState() {
+        const selected = getField(this.root, '#postEmoji')?.value || '💜';
+        this.root.querySelectorAll('[data-emoji-choice]').forEach((button) => {
+            button.classList.toggle('is-active', button.dataset.emojiChoice === selected);
+        });
     }
 
     handleDocumentKeydown(event) {
