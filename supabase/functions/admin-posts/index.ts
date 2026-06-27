@@ -72,7 +72,7 @@ async function verifyPersistedPost(
   return data;
 }
 
-function postResponse(post: Record<string, unknown>, action: "created" | "updated") {
+function postResponse(post: Record<string, unknown>, action: "created" | "updated" | "updated_existing_slug") {
   const slug = String(post.slug || "");
   return jsonResponse({
     post,
@@ -98,6 +98,40 @@ function schemaErrorResponse(error: { message?: string } | null) {
     }, 400);
   }
   return null;
+}
+
+function isDuplicateSlugError(error: { code?: string; message?: string } | null) {
+  const message = String(error?.message || "").toLowerCase();
+  return error?.code === "23505" ||
+    (message.includes("duplicate key") && message.includes("posts_slug_key"));
+}
+
+async function updateExistingPostBySlug(
+  supabase: any,
+  row: ReturnType<typeof normalizePostPayload>,
+) {
+  const { data: existing, error: existingError } = await supabase
+    .from("posts")
+    .select("id")
+    .eq("slug", row.slug)
+    .maybeSingle();
+
+  if (existingError || !existing?.id) {
+    return jsonResponse({
+      error: "A post with this slug already exists, but it could not be loaded for update. Refresh and try again.",
+    }, 409);
+  }
+
+  const { data, error } = await supabase
+    .from("posts")
+    .update(row)
+    .eq("id", existing.id)
+    .select()
+    .single();
+  if (error) return schemaErrorResponse(error) || jsonResponse({ error: error.message }, 400);
+
+  const verified = await verifyPersistedPost(supabase, data.id || existing.id, row);
+  return postResponse(verified, "updated_existing_slug");
 }
 
 Deno.serve(async (req) => {
@@ -134,7 +168,12 @@ Deno.serve(async (req) => {
       const validationError = validatePostPayload(row, { publish: row.published });
       if (validationError) return jsonResponse({ error: validationError }, 400);
       const { data, error } = await supabase.from("posts").insert(row).select().single();
-      if (error) return schemaErrorResponse(error) || jsonResponse({ error: error.message }, 400);
+      if (error) {
+        if (isDuplicateSlugError(error)) {
+          return updateExistingPostBySlug(supabase, row);
+        }
+        return schemaErrorResponse(error) || jsonResponse({ error: error.message }, 400);
+      }
       const verified = await verifyPersistedPost(supabase, data.id, row);
       return postResponse(verified, "created");
     }

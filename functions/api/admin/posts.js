@@ -67,6 +67,12 @@ function schemaErrorResponse(data) {
     return null;
 }
 
+function isDuplicateSlugError(data) {
+    const message = String(data?.message || data?.error || '').toLowerCase();
+    return data?.code === '23505' ||
+        (message.includes('duplicate key') && message.includes('posts_slug_key'));
+}
+
 async function verifyPersistedPost(env, id, expected) {
     const { response, data } = await supabaseFetch(
         env,
@@ -97,6 +103,32 @@ function postResponse(post, action) {
             postUrl: `https://bloomly.co.ke/blog-post/?slug=${encodeURIComponent(post.slug)}&fresh=${Date.now()}`,
         },
     });
+}
+
+async function updateExistingPostBySlug(env, row) {
+    const existingRes = await supabaseFetch(
+        env,
+        `posts?slug=eq.${encodeURIComponent(row.slug)}&select=id`,
+        { method: 'GET' }
+    );
+    const existing = Array.isArray(existingRes.data) ? existingRes.data[0] : null;
+    if (!existing?.id) {
+        return jsonResponse({
+            error: 'A post with this slug already exists, but it could not be loaded for update. Refresh and try again.',
+        }, 409);
+    }
+
+    const { response, data } = await supabaseFetch(env, `posts?id=eq.${encodeURIComponent(existing.id)}`, {
+        method: 'PATCH',
+        headers: { Prefer: 'return=representation' },
+        body: JSON.stringify(row),
+    });
+    if (!response.ok) {
+        return schemaErrorResponse(data) || jsonResponse({ error: data?.message || 'Update existing post failed' }, 400);
+    }
+    const updated = Array.isArray(data) ? data[0] : data;
+    const verified = await verifyPersistedPost(env, updated.id || existing.id, row);
+    return postResponse(verified, 'updated_existing_slug');
 }
 
 export async function onRequestOptions() {
@@ -131,6 +163,9 @@ export async function onRequest(context) {
                 body: JSON.stringify(row),
             });
             if (!response.ok) {
+                if (isDuplicateSlugError(data)) {
+                    return updateExistingPostBySlug(env, row);
+                }
                 return schemaErrorResponse(data) || jsonResponse({ error: data?.message || 'Create failed' }, 400);
             }
             const inserted = Array.isArray(data) ? data[0] : data;

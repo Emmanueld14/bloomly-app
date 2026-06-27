@@ -66,6 +66,12 @@ function schemaErrorResponse(res, data) {
     return null;
 }
 
+function isDuplicateSlugError(data) {
+    const message = String(data?.message || data?.error || '').toLowerCase();
+    return data?.code === '23505' ||
+        (message.includes('duplicate key') && message.includes('posts_slug_key'));
+}
+
 async function verifyPersistedPost(id, expected) {
     const { response, data } = await supabaseFetch(`posts?id=eq.${encodeURIComponent(id)}&select=*`);
     if (!response.ok || !Array.isArray(data) || !data[0]) {
@@ -94,6 +100,28 @@ function postResponse(res, post, action) {
     });
 }
 
+async function updateExistingPostBySlug(res, row) {
+    const existingRes = await supabaseFetch(`posts?slug=eq.${encodeURIComponent(row.slug)}&select=id`);
+    const existing = Array.isArray(existingRes.data) ? existingRes.data[0] : null;
+    if (!existing?.id) {
+        return res.status(409).json({
+            error: 'A post with this slug already exists, but it could not be loaded for update. Refresh and try again.',
+        });
+    }
+
+    const { response, data } = await supabaseFetch(`posts?id=eq.${encodeURIComponent(existing.id)}`, {
+        method: 'PATCH',
+        headers: { Prefer: 'return=representation' },
+        body: JSON.stringify(row),
+    });
+    if (!response.ok) {
+        return schemaErrorResponse(res, data) || res.status(400).json({ error: data?.message || 'Update existing post failed' });
+    }
+    const updated = Array.isArray(data) ? data[0] : data;
+    const verified = await verifyPersistedPost(updated.id || existing.id, row);
+    return postResponse(res, verified, 'updated_existing_slug');
+}
+
 export default async function handler(req, res) {
     setCors(res);
     if (req.method === 'OPTIONS') return res.status(200).json({ ok: true });
@@ -118,7 +146,12 @@ export default async function handler(req, res) {
                 headers: { Prefer: 'return=representation' },
                 body: JSON.stringify(row),
             });
-            if (!response.ok) return schemaErrorResponse(res, data) || res.status(400).json({ error: data?.message || 'Create failed' });
+            if (!response.ok) {
+                if (isDuplicateSlugError(data)) {
+                    return updateExistingPostBySlug(res, row);
+                }
+                return schemaErrorResponse(res, data) || res.status(400).json({ error: data?.message || 'Create failed' });
+            }
             const inserted = Array.isArray(data) ? data[0] : data;
             const verified = await verifyPersistedPost(inserted.id, row);
             return postResponse(res, verified, 'created');
