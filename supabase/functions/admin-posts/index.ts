@@ -23,7 +23,7 @@ function normalizePostPayload(body: Record<string, unknown>, slug: string) {
     content_html: body.content_html || null,
     excerpt,
     summary: excerpt,
-    emoji: body.emoji || "Bloomly",
+    emoji: body.emoji || "💜",
     published: normalizedStatus === "published",
     status: normalizedStatus,
     cover_image_url: body.cover_image_url || null,

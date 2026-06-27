@@ -103,18 +103,24 @@ class BlogAPI {
         return `/blog-post/?slug=${encodeURIComponent(normalized)}`;
     }
 
+    _normalizeEmoji(value) {
+        const emoji = String(value || '').trim();
+        return emoji && emoji.toLowerCase() !== 'bloomly' ? emoji : '💜';
+    }
+
     _rowToListItem(row) {
         const slug = this._normalizeSlug(row.slug);
         return {
             slug,
             name: `${slug}.md`,
             permalink: this.postPermalink(slug),
+            source: 'supabase',
             metadata: {
                 title: row.title,
                 date: row.created_at || row.updated_at,
                 category: row.category || 'Mental Health',
                 summary: row.excerpt || row.summary || row.meta_description || '',
-                emoji: row.emoji || '💜',
+                emoji: this._normalizeEmoji(row.emoji),
                 published: row.published !== false,
                 featuredImage: row.cover_image_url || '',
                 tags: row.tags || [],
@@ -179,11 +185,11 @@ class BlogAPI {
         const merged = new Map();
         (fallbackPosts || []).forEach((post) => {
             const slug = this._normalizeSlug(post.slug || post.metadata?.slug || post.name || '');
-            if (slug) merged.set(slug, { ...post, slug });
+            if (slug) merged.set(slug, { ...post, slug, source: post.source || 'github' });
         });
         (primaryPosts || []).forEach((post) => {
             const slug = this._normalizeSlug(post.slug || post.metadata?.slug || post.name || '');
-            if (slug) merged.set(slug, { ...post, slug });
+            if (slug) merged.set(slug, { ...post, slug, source: post.source || 'supabase' });
         });
         return Array.from(merged.values()).sort((a, b) => {
             const dateA = new Date(a.metadata?.date || a.created_at || 0).getTime();
@@ -225,7 +231,11 @@ class BlogAPI {
                         slug,
                         name: `${slug}.md`,
                         permalink: this.postPermalink(slug),
-                        metadata: entry.metadata,
+                        source: 'github',
+                        metadata: {
+                            ...entry.metadata,
+                            emoji: this._normalizeEmoji(entry.metadata?.emoji),
+                        },
                         body: '',
                     };
                 });

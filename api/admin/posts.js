@@ -25,7 +25,7 @@ function normalizePostPayload(body, slug) {
         content_html: body.content_html || null,
         excerpt,
         summary: excerpt,
-        emoji: body.emoji || 'Bloomly',
+        emoji: body.emoji || '💜',
         published: status === 'published',
         status,
         cover_image_url: body.cover_image_url || null,

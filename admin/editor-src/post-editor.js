@@ -184,7 +184,7 @@ export class BlogPostEditor {
         setIfPresent(getField(this.root, '#postTitle'), post?.title || '');
         setIfPresent(getField(this.root, '#postSlug'), post?.slug || '');
         setIfPresent(getField(this.root, '#postCategory'), post?.category || 'Mental Health');
-        setIfPresent(getField(this.root, '#postEmoji'), post?.emoji || 'Bloomly');
+        setIfPresent(getField(this.root, '#postEmoji'), post?.emoji || '💜');
         setIfPresent(getField(this.root, '#postTags'), formatTags(post?.tags));
         setIfPresent(getField(this.root, '#seoTitle'), post?.seo_title || post?.title || '');
         setIfPresent(getField(this.root, '#metaDescription'), post?.meta_description || post?.excerpt || post?.summary || '');
@@ -446,7 +446,7 @@ export class BlogPostEditor {
             title,
             slug,
             category: getField(this.root, '#postCategory')?.value || 'Mental Health',
-            emoji: getField(this.root, '#postEmoji')?.value || 'Bloomly',
+            emoji: getField(this.root, '#postEmoji')?.value || '💜',
             content: text,
             content_json: this.editor.getJSON(),
             content_html: html,
