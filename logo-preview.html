@@ -41,6 +41,7 @@
             margin-top: 40px;
             flex-wrap: wrap;
             justify-content: center;
+            align-items: flex-end;
         }
         .size-item {
             text-align: center;
@@ -50,36 +51,48 @@
             font-size: 14px;
             margin-bottom: 10px;
         }
+        .navbar-preview {
+            margin-top: 40px;
+            padding: 16px 24px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(var(--color-black-rgb), 0.08);
+        }
     </style>
 </head>
 <body>
     <div class="preview-container">
         <h1>Bloomly Logo Preview</h1>
-        <p>Enhanced butterfly logo with vibrant colors and sparkles</p>
+        <p>Official Bloomly wordmark with butterfly, script text, and heart</p>
         
         <div class="logo-wrapper">
-            <img src="/logo.svg" alt="Bloomly Logo" style="max-width: 100%; height: auto;">
+            <img src="/logo.png" alt="Bloomly" style="max-width: 100%; height: auto;">
         </div>
         
         <div class="sizes">
             <div class="size-item">
-                <h3>Small (80px)</h3>
-                <img src="/logo.svg" alt="Logo" style="width: 80px; height: auto;">
+                <h3>Navbar (44px)</h3>
+                <img src="/logo.png" alt="Bloomly" class="logo-image" height="44">
+            </div>
+            <div class="size-item">
+                <h3>Navbar (52px)</h3>
+                <img src="/logo.png" alt="Bloomly" class="logo-image" height="52">
             </div>
             <div class="size-item">
                 <h3>Medium (120px)</h3>
-                <img src="/logo.svg" alt="Logo" style="width: 120px; height: auto;">
+                <img src="/logo.png" alt="Bloomly" style="height: 120px; width: auto;">
             </div>
             <div class="size-item">
                 <h3>Large (200px)</h3>
-                <img src="/logo.svg" alt="Logo" style="width: 200px; height: auto;">
+                <img src="/logo.png" alt="Bloomly" style="height: 200px; width: auto;">
             </div>
-            <div class="size-item">
-                <h3>Full Size (240px)</h3>
-                <img src="/logo.svg" alt="Logo" style="width: 240px; height: auto;">
-            </div>
+        </div>
+
+        <div class="navbar-preview">
+            <a href="/" class="logo-container">
+                <img src="/logo.png" alt="Bloomly" class="logo-image" height="52" decoding="async">
+            </a>
         </div>
     </div>
 </body>
 </html>
-
