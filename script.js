@@ -2114,6 +2114,52 @@ But I can start by being honest about my own story.`,
         return `/members/?id=${encodeURIComponent(profileId)}`;
     }
 
+    function buildSimpleTeamCard(member, index = 0) {
+        const card = document.createElement('article');
+        card.className = 'team-profile-card';
+
+        const photoWrap = document.createElement('div');
+        photoWrap.className = 'team-profile-photo-wrap';
+
+        const image = document.createElement('img');
+        image.className = 'team-profile-photo';
+        image.src = member.image || '/logo.svg';
+        image.alt = `${member.name} portrait`;
+        image.decoding = 'async';
+        image.loading = index === 0 ? 'eager' : 'lazy';
+        image.fetchPriority = index === 0 ? 'high' : 'auto';
+        image.width = 160;
+        image.height = 160;
+
+        photoWrap.appendChild(image);
+
+        const name = document.createElement('h2');
+        name.className = 'team-profile-name';
+        name.textContent = member.name;
+
+        const role = document.createElement('p');
+        role.className = 'team-profile-role';
+        role.textContent = member.role;
+
+        card.append(photoWrap, name, role);
+
+        const linkedInLink = Array.isArray(member.links)
+            ? member.links.find((linkData) => /linkedin/i.test(String(linkData.label || linkData.url || '')))
+            : null;
+
+        if (linkedInLink && linkedInLink.url) {
+            const linkedInButton = document.createElement('a');
+            linkedInButton.className = 'btn btn-secondary team-profile-linkedin';
+            linkedInButton.href = linkedInLink.url;
+            linkedInButton.target = '_blank';
+            linkedInButton.rel = 'noopener noreferrer';
+            linkedInButton.textContent = 'LinkedIn';
+            card.appendChild(linkedInButton);
+        }
+
+        return card;
+    }
+
     function buildTeamCard(member, index = 0) {
         const wrapper = document.createElement('article');
         wrapper.className = 'bloomly-team-item';
@@ -2195,8 +2241,11 @@ But I can start by being honest about my own story.`,
         if (!grid) return;
         grid.innerHTML = '';
         const fragment = document.createDocumentFragment();
+        const useSimpleLayout = grid.dataset.teamLayout === 'simple';
         BLOOMLY_TEAM_MEMBERS.forEach((member, index) => {
-            fragment.appendChild(buildTeamCard(member, index));
+            fragment.appendChild(
+                useSimpleLayout ? buildSimpleTeamCard(member, index) : buildTeamCard(member, index)
+            );
         });
         grid.appendChild(fragment);
     }
