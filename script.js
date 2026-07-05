@@ -2151,10 +2151,15 @@ But I can start by being honest about my own story.`,
         badge.setAttribute('aria-label', country || 'Country');
 
         if ((country || '').toLowerCase() === 'kenya') {
-            const mapWrap = document.createElement('span');
-            mapWrap.className = 'team-grid-country-map';
-            mapWrap.setAttribute('aria-hidden', 'true');
-            badge.appendChild(mapWrap);
+            const mapImage = document.createElement('img');
+            mapImage.className = 'team-grid-country-map';
+            mapImage.src = '/images/kenya-map.svg?v=1';
+            mapImage.width = 38;
+            mapImage.height = 38;
+            mapImage.alt = '';
+            mapImage.setAttribute('aria-hidden', 'true');
+            mapImage.decoding = 'async';
+            badge.appendChild(mapImage);
         }
 
         const label = document.createElement('span');
