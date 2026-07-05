@@ -1973,6 +1973,7 @@
             slug: 'manuel-muhunami',
             name: 'Manuel Muhunami',
             role: 'Founder & Lead Builder',
+            country: 'Kenya',
             image: '/images/team/manuel-muhunami-display-smooth-20260407.webp?v=1',
             accent: 'sage',
             details: [
@@ -2114,34 +2115,56 @@ But I can start by being honest about my own story.`,
         return `/members/?id=${encodeURIComponent(profileId)}`;
     }
 
+    function createCountryBadge(country) {
+        const badge = document.createElement('span');
+        badge.className = 'team-grid-country';
+        badge.setAttribute('aria-label', country || 'Country');
+
+        if ((country || '').toLowerCase() === 'kenya') {
+            badge.innerHTML = `
+                <svg viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+                    <path fill="currentColor" d="M8.4 5.2h6.8l1.8 2.2 4.2.7v3.8l-1.8 2.1-.8 4.1h-3.8l-2.4-1.6-3.5.7-1.4-2.9 1.5-3.5 1.4-3.6z"/>
+                </svg>
+            `;
+        } else {
+            badge.textContent = (country || '').slice(0, 2).toUpperCase();
+        }
+
+        return badge;
+    }
+
     function buildSimpleTeamCard(member, index = 0) {
         const card = document.createElement('article');
-        card.className = 'team-profile-card';
+        card.className = 'team-grid-card';
 
-        const photoWrap = document.createElement('div');
-        photoWrap.className = 'team-profile-photo-wrap';
+        const media = document.createElement('div');
+        media.className = 'team-grid-media';
+
+        const photoRing = document.createElement('div');
+        photoRing.className = 'team-grid-photo-ring';
 
         const image = document.createElement('img');
-        image.className = 'team-profile-photo';
+        image.className = 'team-grid-photo';
         image.src = member.image || '/logo.svg';
         image.alt = `${member.name} portrait`;
         image.decoding = 'async';
         image.loading = index === 0 ? 'eager' : 'lazy';
         image.fetchPriority = index === 0 ? 'high' : 'auto';
-        image.width = 160;
-        image.height = 160;
+        image.width = 176;
+        image.height = 176;
 
-        photoWrap.appendChild(image);
+        photoRing.append(image, createCountryBadge(member.country));
+        media.appendChild(photoRing);
 
         const name = document.createElement('h2');
-        name.className = 'team-profile-name';
+        name.className = 'team-grid-name';
         name.textContent = member.name;
 
         const role = document.createElement('p');
-        role.className = 'team-profile-role';
+        role.className = 'team-grid-role';
         role.textContent = member.role;
 
-        card.append(photoWrap, name, role);
+        card.append(media, name, role);
 
         const linkedInLink = Array.isArray(member.links)
             ? member.links.find((linkData) => /linkedin/i.test(String(linkData.label || linkData.url || '')))
@@ -2149,7 +2172,7 @@ But I can start by being honest about my own story.`,
 
         if (linkedInLink && linkedInLink.url) {
             const linkedInButton = document.createElement('a');
-            linkedInButton.className = 'btn btn-secondary team-profile-linkedin';
+            linkedInButton.className = 'team-grid-linkedin';
             linkedInButton.href = linkedInLink.url;
             linkedInButton.target = '_blank';
             linkedInButton.rel = 'noopener noreferrer';
