@@ -2061,7 +2061,7 @@ But I can start by being honest about my own story.`,
                 'Ship carefully.'
             ],
             links: [
-                { label: 'LinkedIn', url: 'https://www.linkedin.com/in/manuel-muhunami' },
+                { label: 'LinkedIn', url: 'https://www.linkedin.com/in/manuel-indombera/' },
                 { label: 'Portfolio', url: 'https://www.behance.net/manuel-muhunami' }
             ],
             // TODO: Add Manuel's preferred public email link when the owner confirms it.
