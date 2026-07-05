@@ -2098,6 +2098,26 @@ But I can start by being honest about my own story.`,
                 ],
                 quote: 'Build with empathy first, then everything else follows.'
             }
+        },
+        {
+            id: 'ryan-k',
+            slug: 'ryan-k',
+            name: 'Ryan K',
+            role: 'Systems Architect',
+            country: 'Kenya',
+            accent: 'mist',
+            summary: 'Designs the systems that keep Bloomly reliable, secure, and ready to grow.',
+            links: []
+        },
+        {
+            id: 'vinny-k',
+            slug: 'vinny-k',
+            name: 'Vinny K',
+            role: 'Head of Marketing',
+            country: 'Kenya',
+            accent: 'stone',
+            summary: 'Shapes how Bloomly shows up, sounds, and connects with young people.',
+            links: []
         }
     ];
     // ========== Bloomly Team Cards ==========
@@ -2115,6 +2135,24 @@ But I can start by being honest about my own story.`,
         return `/members/?id=${encodeURIComponent(profileId)}`;
     }
 
+    const KENYA_MAP_SVG = `
+        <svg viewBox="0 0 64 64" focusable="false">
+            <path fill="currentColor" d="M11.8 14.2c.2-3.1 3.4-5.1 6.8-5.4l6.4-.7 7.1 2.5 4.5 4.8 1.1 6.1-.8 6.4-3.1 5.6-4.9 4.1-6.2 1.9-6.5-.5-5.3-3.1-4.5-3.7-5.2-.1-4.6 2.1-6.8 4.9z"></path>
+            <path fill="currentColor" d="M37.6 20.8 42.2 17.6 45.8 20.4 45 24.8 41.6 27 38.2 25.8z"></path>
+            <path fill="currentColor" opacity="0.55" d="M18.4 24.6c2.4-1.8 5.2-2.1 7.8-.8 1.4.7 2.4 2.1 2.1 3.6-.4 2.1-3.1 2.8-5.4 1.9-1.8-.7-3-2.2-4.5-4.7z"></path>
+        </svg>
+    `;
+
+    function getTeamInitials(name) {
+        return String(name || '')
+            .trim()
+            .split(/\s+/)
+            .map((part) => part[0] || '')
+            .join('')
+            .slice(0, 2)
+            .toUpperCase();
+    }
+
     function createCountryBadge(country) {
         const badge = document.createElement('span');
         badge.className = 'team-grid-country';
@@ -2125,11 +2163,7 @@ But I can start by being honest about my own story.`,
         mapWrap.setAttribute('aria-hidden', 'true');
 
         if ((country || '').toLowerCase() === 'kenya') {
-            mapWrap.innerHTML = `
-                <svg viewBox="0 0 64 64" focusable="false">
-                    <path fill="currentColor" d="M16 10h12l4.5 5 9 1.5v8l-3.5 4.5-1.5 8.5H30l-5-3.5-7 1.5-3-6 3.5-7.5 3.5-7.5z"></path>
-                </svg>
-            `;
+            mapWrap.innerHTML = KENYA_MAP_SVG;
         }
 
         const label = document.createElement('span');
@@ -2154,17 +2188,26 @@ But I can start by being honest about my own story.`,
         const photoRing = document.createElement('div');
         photoRing.className = 'team-grid-photo-ring';
 
-        const image = document.createElement('img');
-        image.className = 'team-grid-photo';
-        image.src = member.image || '/logo.svg';
-        image.alt = `${member.name} portrait`;
-        image.decoding = 'async';
-        image.loading = index === 0 ? 'eager' : 'lazy';
-        image.fetchPriority = index === 0 ? 'high' : 'auto';
-        image.width = 200;
-        image.height = 200;
+        if (member.image) {
+            const image = document.createElement('img');
+            image.className = 'team-grid-photo';
+            image.src = member.image;
+            image.alt = `${member.name} portrait`;
+            image.decoding = 'async';
+            image.loading = index === 0 ? 'eager' : 'lazy';
+            image.fetchPriority = index === 0 ? 'high' : 'auto';
+            image.width = 200;
+            image.height = 200;
+            photoRing.appendChild(image);
+        } else {
+            const placeholder = document.createElement('div');
+            placeholder.className = 'team-grid-photo team-grid-photo--placeholder';
+            placeholder.setAttribute('aria-hidden', 'true');
+            placeholder.textContent = getTeamInitials(member.name);
+            photoRing.appendChild(placeholder);
+        }
 
-        photoRing.append(image, createCountryBadge(member.country));
+        photoRing.appendChild(createCountryBadge(member.country));
         media.appendChild(photoRing);
 
         const copy = document.createElement('div');
