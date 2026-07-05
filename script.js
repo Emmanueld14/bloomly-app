@@ -2135,14 +2135,6 @@ But I can start by being honest about my own story.`,
         return `/members/?id=${encodeURIComponent(profileId)}`;
     }
 
-    const KENYA_MAP_SVG = `
-        <svg viewBox="0 0 64 64" focusable="false">
-            <path fill="currentColor" d="M11.8 14.2c.2-3.1 3.4-5.1 6.8-5.4l6.4-.7 7.1 2.5 4.5 4.8 1.1 6.1-.8 6.4-3.1 5.6-4.9 4.1-6.2 1.9-6.5-.5-5.3-3.1-4.5-3.7-5.2-.1-4.6 2.1-6.8 4.9z"></path>
-            <path fill="currentColor" d="M37.6 20.8 42.2 17.6 45.8 20.4 45 24.8 41.6 27 38.2 25.8z"></path>
-            <path fill="currentColor" opacity="0.55" d="M18.4 24.6c2.4-1.8 5.2-2.1 7.8-.8 1.4.7 2.4 2.1 2.1 3.6-.4 2.1-3.1 2.8-5.4 1.9-1.8-.7-3-2.2-4.5-4.7z"></path>
-        </svg>
-    `;
-
     function getTeamInitials(name) {
         return String(name || '')
             .trim()
@@ -2158,19 +2150,18 @@ But I can start by being honest about my own story.`,
         badge.className = 'team-grid-country';
         badge.setAttribute('aria-label', country || 'Country');
 
-        const mapWrap = document.createElement('span');
-        mapWrap.className = 'team-grid-country-map';
-        mapWrap.setAttribute('aria-hidden', 'true');
-
         if ((country || '').toLowerCase() === 'kenya') {
-            mapWrap.innerHTML = KENYA_MAP_SVG;
+            const mapWrap = document.createElement('span');
+            mapWrap.className = 'team-grid-country-map';
+            mapWrap.setAttribute('aria-hidden', 'true');
+            badge.appendChild(mapWrap);
         }
 
         const label = document.createElement('span');
         label.className = 'team-grid-country-name';
         label.textContent = country || '';
 
-        badge.append(mapWrap, label);
+        badge.appendChild(label);
         return badge;
     }
 

@@ -231,10 +231,20 @@ a:hover {
 }
 
 .navbar.scrolled {
-    background: rgba(var(--color-white-rgb), 0);
+    background: transparent;
     border-bottom-color: transparent;
     box-shadow: none;
     backdrop-filter: none;
+}
+
+.navbar.scrolled .logo-container,
+.navbar.scrolled .nav-links,
+.navbar.scrolled .mobile-menu-toggle {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-12px);
+    pointer-events: none;
+    transition: opacity 0.24s ease, visibility 0.24s ease, transform 0.24s ease;
 }
 
 .navbar.scrolled:hover,
@@ -244,6 +254,21 @@ body.menu-open .navbar.scrolled {
     border-bottom: 1px solid rgba(var(--color-black-rgb), 0.08);
     box-shadow: 0 12px 28px rgba(var(--color-black-rgb), 0.08);
     backdrop-filter: blur(14px);
+}
+
+.navbar.scrolled:hover .logo-container,
+.navbar.scrolled:hover .nav-links,
+.navbar.scrolled:hover .mobile-menu-toggle,
+.navbar.scrolled:focus-within .logo-container,
+.navbar.scrolled:focus-within .nav-links,
+.navbar.scrolled:focus-within .mobile-menu-toggle,
+body.menu-open .navbar.scrolled .logo-container,
+body.menu-open .navbar.scrolled .nav-links,
+body.menu-open .navbar.scrolled .mobile-menu-toggle {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    pointer-events: auto;
 }
 
 .navbar-content {
@@ -452,9 +477,18 @@ body.menu-open .navbar.scrolled {
     color: var(--color-text);
 }
 
-.home-page .navbar {
+.home-page .navbar.scrolled {
+    background: transparent;
+    border-bottom-color: transparent;
+    box-shadow: none;
+}
+
+.home-page .navbar.scrolled:hover,
+.home-page .navbar.scrolled:focus-within,
+body.menu-open .home-page .navbar.scrolled {
     background: rgba(var(--color-white-rgb), 0.97);
     border-bottom: 1px solid rgba(var(--color-black-rgb), 0.08);
+    box-shadow: 0 12px 28px rgba(var(--color-black-rgb), 0.08);
 }
 
 .home-page .logo-text {
@@ -3513,12 +3547,14 @@ body.menu-open .navbar.scrolled {
     justify-content: center;
     width: 38px;
     height: 38px;
+    background: currentColor;
+    -webkit-mask: url('/images/kenya-map.svg') center / contain no-repeat;
+    mask: url('/images/kenya-map.svg') center / contain no-repeat;
 }
 
-.team-page .team-grid-country-map svg {
-    width: 100%;
-    height: 100%;
-    filter: drop-shadow(0 2px 2px rgba(var(--color-black-rgb), 0.16));
+.team-page .team-grid-country-map svg,
+.team-page .team-grid-country-map img {
+    display: none;
 }
 
 .team-page .team-grid-country-name {
