@@ -5860,6 +5860,31 @@ a:hover {
     color: var(--color-gray-600);
 }
 
+.terms-document ul {
+    margin: 0 0 var(--space-md);
+    padding-left: 1.35rem;
+    color: var(--color-gray-600);
+}
+
+.terms-document li {
+    margin-bottom: 0.45rem;
+}
+
+.terms-document li:last-child {
+    margin-bottom: 0;
+}
+
+.terms-document hr {
+    border: 0;
+    border-top: 1px solid rgba(var(--color-black-rgb), 0.08);
+    margin: var(--space-xl) 0;
+}
+
+.terms-document .terms-intro {
+    font-size: var(--text-lg);
+    color: var(--color-gray-700);
+}
+
 .bloomly-team-social-links,
 .simple-profile-contact-links,
 .simple-profile-skill-list {
