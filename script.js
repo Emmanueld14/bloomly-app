@@ -2145,28 +2145,24 @@ But I can start by being honest about my own story.`,
             .toUpperCase();
     }
 
+    function getCountryCode(country) {
+        const normalized = String(country || '').trim().toLowerCase();
+        if (normalized === 'kenya') return 'KE';
+        if (normalized.length === 2) return normalized.toUpperCase();
+        return (normalized.slice(0, 2) || '??').toUpperCase();
+    }
+
     function createCountryBadge(country) {
         const badge = document.createElement('span');
         badge.className = 'team-grid-country';
         badge.setAttribute('aria-label', country || 'Country');
 
-        if ((country || '').toLowerCase() === 'kenya') {
-            const mapImage = document.createElement('img');
-            mapImage.className = 'team-grid-country-map';
-            mapImage.src = '/images/kenya-map.svg?v=1';
-            mapImage.width = 38;
-            mapImage.height = 38;
-            mapImage.alt = '';
-            mapImage.setAttribute('aria-hidden', 'true');
-            mapImage.decoding = 'async';
-            badge.appendChild(mapImage);
-        }
+        const code = document.createElement('span');
+        code.className = 'team-grid-country-code';
+        code.setAttribute('aria-hidden', 'true');
+        code.textContent = getCountryCode(country);
 
-        const label = document.createElement('span');
-        label.className = 'team-grid-country-name';
-        label.textContent = country || '';
-
-        badge.appendChild(label);
+        badge.appendChild(code);
         return badge;
     }
 
