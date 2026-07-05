@@ -897,8 +897,8 @@ body.admin-nav-open {
 .sidebar-brand-logo {
     border-radius: 0.75rem;
     background: rgba(255, 255, 255, 0.92);
-    padding: 0.25rem 0.45rem;
-    height: 40px;
+    padding: 0.3rem 0.5rem;
+    height: 52px;
     width: auto;
 }
 
