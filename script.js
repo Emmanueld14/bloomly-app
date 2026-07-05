@@ -2261,7 +2261,8 @@ But I can start by being honest about my own story.`,
 
     function renderTeamGrid() {
         const grid = document.querySelector('[data-team-grid]');
-        if (!grid) return;
+        if (!grid || grid.dataset.teamStatic === 'true' || grid.hasAttribute('data-team-static')) return;
+        if (grid.childElementCount > 0) return;
         grid.innerHTML = '';
         const fragment = document.createDocumentFragment();
         const useSimpleLayout = grid.dataset.teamLayout === 'simple';

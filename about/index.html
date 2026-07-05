@@ -19,7 +19,7 @@
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preload" href="/styles.css" as="style">
+    <link rel="preload" href="/styles.css?v=20260705b" as="style">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
     <link
         rel="preload"
@@ -29,7 +29,7 @@
         fetchpriority="high"
     >
     
-    <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="/styles.css?v=20260705b">
 </head>
 <body class="team-page">
     <nav class="navbar" id="navbar">
@@ -59,7 +59,36 @@
                 <header class="team-page-header">
                     <h1 id="team-page-title">Meet the team</h1>
                 </header>
-                <div class="team-page-grid" data-team-grid data-team-layout="simple"></div>
+                <div class="team-page-grid" data-team-grid data-team-layout="simple" data-team-static>
+                    <article class="team-grid-card">
+                        <div class="team-grid-media">
+                            <div class="team-grid-photo-ring">
+                                <img
+                                    class="team-grid-photo"
+                                    src="/images/team/manuel-muhunami-display-smooth-20260407.webp?v=1"
+                                    alt="Manuel Muhunami portrait"
+                                    width="176"
+                                    height="176"
+                                    decoding="async"
+                                    fetchpriority="high"
+                                >
+                                <span class="team-grid-country" aria-label="Kenya">
+                                    <svg viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+                                        <path fill="currentColor" d="M8.4 5.2h6.8l1.8 2.2 4.2.7v3.8l-1.8 2.1-.8 4.1h-3.8l-2.4-1.6-3.5.7-1.4-2.9 1.5-3.5 1.4-3.6z"></path>
+                                    </svg>
+                                </span>
+                            </div>
+                        </div>
+                        <h2 class="team-grid-name">Manuel Muhunami</h2>
+                        <p class="team-grid-role">Founder &amp; Lead Builder</p>
+                        <a
+                            class="team-grid-linkedin"
+                            href="https://www.linkedin.com/in/manuel-muhunami"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >LinkedIn</a>
+                    </article>
+                </div>
             </div>
         </section>
     </main>
@@ -92,6 +121,6 @@
         </div>
     </footer>
 
-    <script src="/script.js" defer></script>
+    <script src="/script.js?v=20260705b" defer></script>
 </body>
 </html>
