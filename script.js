@@ -2120,22 +2120,33 @@ But I can start by being honest about my own story.`,
         badge.className = 'team-grid-country';
         badge.setAttribute('aria-label', country || 'Country');
 
+        const mapWrap = document.createElement('span');
+        mapWrap.className = 'team-grid-country-map';
+        mapWrap.setAttribute('aria-hidden', 'true');
+
         if ((country || '').toLowerCase() === 'kenya') {
-            badge.innerHTML = `
-                <svg viewBox="0 0 32 32" aria-hidden="true" focusable="false">
-                    <path fill="currentColor" d="M8.4 5.2h6.8l1.8 2.2 4.2.7v3.8l-1.8 2.1-.8 4.1h-3.8l-2.4-1.6-3.5.7-1.4-2.9 1.5-3.5 1.4-3.6z"/>
+            mapWrap.innerHTML = `
+                <svg viewBox="0 0 64 64" focusable="false">
+                    <path fill="currentColor" d="M16 10h12l4.5 5 9 1.5v8l-3.5 4.5-1.5 8.5H30l-5-3.5-7 1.5-3-6 3.5-7.5 3.5-7.5z"></path>
                 </svg>
             `;
-        } else {
-            badge.textContent = (country || '').slice(0, 2).toUpperCase();
         }
 
+        const label = document.createElement('span');
+        label.className = 'team-grid-country-name';
+        label.textContent = country || '';
+
+        badge.append(mapWrap, label);
         return badge;
     }
 
     function buildSimpleTeamCard(member, index = 0) {
         const card = document.createElement('article');
         card.className = 'team-grid-card';
+
+        const glow = document.createElement('div');
+        glow.className = 'team-grid-card-glow';
+        glow.setAttribute('aria-hidden', 'true');
 
         const media = document.createElement('div');
         media.className = 'team-grid-media';
@@ -2150,11 +2161,14 @@ But I can start by being honest about my own story.`,
         image.decoding = 'async';
         image.loading = index === 0 ? 'eager' : 'lazy';
         image.fetchPriority = index === 0 ? 'high' : 'auto';
-        image.width = 176;
-        image.height = 176;
+        image.width = 200;
+        image.height = 200;
 
         photoRing.append(image, createCountryBadge(member.country));
         media.appendChild(photoRing);
+
+        const copy = document.createElement('div');
+        copy.className = 'team-grid-copy';
 
         const name = document.createElement('h2');
         name.className = 'team-grid-name';
@@ -2164,7 +2178,8 @@ But I can start by being honest about my own story.`,
         role.className = 'team-grid-role';
         role.textContent = member.role;
 
-        card.append(media, name, role);
+        copy.append(name, role);
+        card.append(glow, media, copy);
 
         const linkedInLink = Array.isArray(member.links)
             ? member.links.find((linkData) => /linkedin/i.test(String(linkData.label || linkData.url || '')))
@@ -2176,7 +2191,12 @@ But I can start by being honest about my own story.`,
             linkedInButton.href = linkedInLink.url;
             linkedInButton.target = '_blank';
             linkedInButton.rel = 'noopener noreferrer';
-            linkedInButton.textContent = 'LinkedIn';
+            linkedInButton.innerHTML = `
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path fill="currentColor" d="M4.98 3.5C4.98 4.88 3.87 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5zM.22 8.5h4.56V23.5H.22V8.5zM8.5 8.5h4.37v2.05h.06c.61-1.16 2.1-2.38 4.32-2.38 4.62 0 5.48 3.04 5.48 6.99v8.34h-4.56v-7.39c0-1.76-.03-4.02-2.45-4.02-2.45 0-2.83 1.92-2.83 3.89v7.52H8.5V8.5z"></path>
+                </svg>
+                LinkedIn
+            `;
             card.appendChild(linkedInButton);
         }
 

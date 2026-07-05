@@ -19,7 +19,7 @@
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preload" href="/styles.css?v=20260705b" as="style">
+    <link rel="preload" href="/styles.css?v=20260705c" as="style">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
     <link
         rel="preload"
@@ -29,7 +29,7 @@
         fetchpriority="high"
     >
     
-    <link rel="stylesheet" href="/styles.css?v=20260705b">
+    <link rel="stylesheet" href="/styles.css?v=20260705c">
 </head>
 <body class="team-page">
     <nav class="navbar" id="navbar">
@@ -55,38 +55,63 @@
 
     <main class="team-page-main">
         <section class="team-page-section" aria-labelledby="team-page-title">
-            <div class="container">
+            <div class="team-page-backdrop" aria-hidden="true">
+                <div class="floating-shape team-page-orb team-page-orb-one"></div>
+                <div class="floating-shape team-page-orb team-page-orb-two"></div>
+                <div class="floating-shape team-page-orb team-page-orb-three"></div>
+                <div class="team-page-pattern"></div>
+                <div class="team-page-sparkle team-page-sparkle-one">✦</div>
+                <div class="team-page-sparkle team-page-sparkle-two">✧</div>
+                <div class="team-page-sparkle team-page-sparkle-three">❋</div>
+            </div>
+
+            <div class="container team-page-container">
                 <header class="team-page-header">
+                    <p class="team-page-kicker">Bloomly Team</p>
                     <h1 id="team-page-title">Meet the team</h1>
+                    <p class="team-page-intro">The people behind Bloomly — building calm, honest support for young people across Kenya.</p>
+                    <div class="team-page-title-accent" aria-hidden="true"></div>
                 </header>
+
                 <div class="team-page-grid" data-team-grid data-team-layout="simple" data-team-static>
                     <article class="team-grid-card">
+                        <div class="team-grid-card-glow" aria-hidden="true"></div>
                         <div class="team-grid-media">
                             <div class="team-grid-photo-ring">
                                 <img
                                     class="team-grid-photo"
                                     src="/images/team/manuel-muhunami-display-smooth-20260407.webp?v=1"
                                     alt="Manuel Muhunami portrait"
-                                    width="176"
-                                    height="176"
+                                    width="200"
+                                    height="200"
                                     decoding="async"
                                     fetchpriority="high"
                                 >
                                 <span class="team-grid-country" aria-label="Kenya">
-                                    <svg viewBox="0 0 32 32" aria-hidden="true" focusable="false">
-                                        <path fill="currentColor" d="M8.4 5.2h6.8l1.8 2.2 4.2.7v3.8l-1.8 2.1-.8 4.1h-3.8l-2.4-1.6-3.5.7-1.4-2.9 1.5-3.5 1.4-3.6z"></path>
-                                    </svg>
+                                    <span class="team-grid-country-map" aria-hidden="true">
+                                        <svg viewBox="0 0 64 64" focusable="false">
+                                            <path fill="currentColor" d="M16 10h12l4.5 5 9 1.5v8l-3.5 4.5-1.5 8.5H30l-5-3.5-7 1.5-3-6 3.5-7.5 3.5-7.5z"></path>
+                                        </svg>
+                                    </span>
+                                    <span class="team-grid-country-name">Kenya</span>
                                 </span>
                             </div>
                         </div>
-                        <h2 class="team-grid-name">Manuel Muhunami</h2>
-                        <p class="team-grid-role">Founder &amp; Lead Builder</p>
+                        <div class="team-grid-copy">
+                            <h2 class="team-grid-name">Manuel Muhunami</h2>
+                            <p class="team-grid-role">Founder &amp; Lead Builder</p>
+                        </div>
                         <a
                             class="team-grid-linkedin"
                             href="https://www.linkedin.com/in/manuel-muhunami"
                             target="_blank"
                             rel="noopener noreferrer"
-                        >LinkedIn</a>
+                        >
+                            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                <path fill="currentColor" d="M4.98 3.5C4.98 4.88 3.87 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5zM.22 8.5h4.56V23.5H.22V8.5zM8.5 8.5h4.37v2.05h.06c.61-1.16 2.1-2.38 4.32-2.38 4.62 0 5.48 3.04 5.48 6.99v8.34h-4.56v-7.39c0-1.76-.03-4.02-2.45-4.02-2.45 0-2.83 1.92-2.83 3.89v7.52H8.5V8.5z"></path>
+                            </svg>
+                            LinkedIn
+                        </a>
                     </article>
                 </div>
             </div>
@@ -121,6 +146,6 @@
         </div>
     </footer>
 
-    <script src="/script.js?v=20260705b" defer></script>
+    <script src="/script.js?v=20260705c" defer></script>
 </body>
 </html>
