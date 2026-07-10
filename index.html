@@ -20,12 +20,12 @@
     <title>Bloomly | Your Safe Space for Mental Wellness | Kenya</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preload" href="/styles.css?v=20260710a" as="style">
+    <link rel="preload" href="/styles.css?v=20260710b" as="style">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/styles.css?v=20260710a">
+    <link rel="stylesheet" href="/styles.css?v=20260710b">
 </head>
 <body class="home-page">
-    <nav class="navbar" id="navbar">
+        <nav class="navbar" id="navbar">
         <div class="navbar-content">
             <a href="/" class="logo-container">
                 <img src="/logo.png" alt="Bloomly" class="logo-image" height="52" decoding="async">
@@ -36,7 +36,9 @@
                 <li><a href="/resources/">Resources</a></li>
                 <li><a href="/blog/">Blog</a></li>
                 <li><a href="/about/">About Us</a></li>
-                <li><a href="/about/">Team</a></li>
+                <li><a href="/about/" data-nav="team">Team</a></li>
+                <li class="nav-mobile-only"><a href="/admin/login/">Log In</a></li>
+                <li class="nav-mobile-only"><a href="/subscribe/">Join Bloomly</a></li>
             </ul>
             <div class="navbar-actions">
                 <a href="/admin/login/" class="btn btn-secondary btn-nav">Log In</a>
@@ -239,6 +241,6 @@
     </footer>
 
     <script src="/public/site-features.js"></script>
-    <script src="/script.js?v=20260710a" defer></script>
+    <script src="/script.js?v=20260710b" defer></script>
 </body>
 </html>

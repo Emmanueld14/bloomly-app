@@ -1,24 +1,25 @@
 .admin-launch {
-    --admin-bg: #f3f6fc;
+    --admin-bg: #FAFBFC;
     --admin-surface: #ffffff;
-    --admin-surface-muted: #f8faff;
-    --admin-border: #e2e8f4;
-    --admin-text: #101828;
-    --admin-text-muted: #667085;
-    --admin-sidebar-bg: #0f172a;
+    --admin-surface-muted: #F4F8FF;
+    --admin-border: #E7EDF5;
+    --admin-text: #1F2937;
+    --admin-text-muted: #5F6C7B;
+    --admin-sidebar-bg: #1F2937;
     --admin-sidebar-border: rgba(255, 255, 255, 0.1);
-    --admin-sidebar-text: #e2e8f0;
-    --admin-sidebar-muted: #94a3b8;
-    --admin-shadow-sm: 0 8px 20px rgba(15, 23, 42, 0.06);
-    --admin-shadow-md: 0 18px 34px rgba(15, 23, 42, 0.1);
-    --admin-primary: #635bff;
-    --admin-success: #16a34a;
-    --admin-danger: #dc2626;
-    --admin-warning: #b45309;
+    --admin-sidebar-text: #F8FAFC;
+    --admin-sidebar-muted: #94A3B8;
+    --admin-shadow-sm: 0 8px 20px rgba(79, 125, 243, 0.06);
+    --admin-shadow-md: 0 18px 34px rgba(79, 125, 243, 0.1);
+    --admin-primary: #4F7DF3;
+    --admin-accent: #5BC0BE;
+    --admin-success: #22C55E;
+    --admin-danger: #EF4444;
+    --admin-warning: #F59E0B;
     margin: 0;
     min-height: 100vh;
     font-family: 'Inter', var(--font-primary);
-    background: radial-gradient(circle at top left, rgba(99, 91, 255, 0.1), transparent 36%), var(--admin-bg);
+    background: radial-gradient(circle at top left, rgba(79, 125, 243, 0.08), transparent 36%), var(--admin-bg);
     color: var(--admin-text);
 }
 
@@ -47,8 +48,8 @@
     place-items: center;
     padding: 1rem;
     background:
-        radial-gradient(circle at 12% 15%, rgba(99, 91, 255, 0.24), transparent 42%),
-        radial-gradient(circle at 88% 82%, rgba(14, 165, 233, 0.18), transparent 36%),
+        radial-gradient(circle at 12% 15%, rgba(79, 125, 243, 0.14), transparent 42%),
+        radial-gradient(circle at 88% 82%, rgba(91, 192, 190, 0.14), transparent 36%),
         linear-gradient(180deg, color-mix(in srgb, var(--admin-bg) 92%, white), var(--admin-bg));
 }
 
@@ -65,8 +66,8 @@
 .admin-login-header {
     border-radius: 0.95rem;
     padding: 1.15rem;
-    background: linear-gradient(135deg, rgba(99, 91, 255, 0.16), rgba(14, 165, 233, 0.12));
-    border: 1px solid color-mix(in srgb, var(--admin-border) 75%, rgba(99, 91, 255, 0.25));
+    background: linear-gradient(135deg, rgba(79, 125, 243, 0.12), rgba(91, 192, 190, 0.1));
+    border: 1px solid color-mix(in srgb, var(--admin-border) 75%, rgba(79, 125, 243, 0.2));
     text-align: left;
 }
 
@@ -117,7 +118,7 @@
 }
 
 .admin-github-btn {
-    background: linear-gradient(135deg, #f472b6, #8b5cf6 48%, #60a5fa);
+    background: linear-gradient(90deg, #4F7DF3 0%, #5BC0BE 100%);
     border: none;
     box-shadow: 0 10px 22px rgba(139, 92, 246, 0.24);
 }
@@ -518,7 +519,7 @@
     justify-content: center;
 }
 
-.admin-stat-card.pink .stat-icon {
+.admin-stat-card.accent .stat-icon {
     background: rgba(244, 63, 94, 0.14);
 }
 

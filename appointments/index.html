@@ -23,11 +23,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="/styles.css?v=20260710a">
+    <link rel="stylesheet" href="/styles.css?v=20260710b">
 </head>
 <body class="appointments-page">
     <!-- Navigation -->
-    <nav class="navbar" id="navbar">
+        <nav class="navbar" id="navbar">
         <div class="navbar-content">
             <a href="/" class="logo-container">
                 <img src="/logo.png" alt="Bloomly" class="logo-image" height="52" decoding="async">
@@ -36,11 +36,16 @@
                 <li><a href="/">Home</a></li>
                 <li><a href="/programs/">Programs</a></li>
                 <li><a href="/resources/">Resources</a></li>
-                <li><a href="/about/">About</a></li>
                 <li><a href="/blog/">Blog</a></li>
-                <li><a href="/appointments" class="active">Charla</a></li>
-                <li><a href="/subscribe/">Subscribe</a></li>
+                <li><a href="/about/">About Us</a></li>
+                <li><a href="/about/" data-nav="team">Team</a></li>
+                <li class="nav-mobile-only"><a href="/admin/login/">Log In</a></li>
+                <li class="nav-mobile-only"><a href="/subscribe/">Join Bloomly</a></li>
             </ul>
+            <div class="navbar-actions">
+                <a href="/admin/login/" class="btn btn-secondary btn-nav">Log In</a>
+                <a href="/subscribe/" class="btn btn-primary btn-nav">Join Bloomly</a>
+            </div>
             <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Toggle menu">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M3 12h18M3 6h18M3 18h18"/>
@@ -186,7 +191,7 @@
                 </div>
                 <div class="footer-section">
                     <h4>Get Support</h4>
-                    <p style="color: rgba(var(--color-white-rgb), 0.7); margin-bottom: var(--space-sm);">If you're in crisis, please use Kenya's national hotline resource page:</p>
+                    <p class="footer-support-note">If you're in crisis, please use Kenya's national hotline resource page:</p>
                     <a href="https://www.befrienderskenya.org" target="_blank" rel="noopener noreferrer">National crisis support contacts (Kenya)</a>
                     <p style="color: rgba(var(--color-white-rgb), 0.6); margin-top: var(--space-sm); margin-bottom: 0;">Bloomly provides counselling support but does not provide emergency services.</p>
                 </div>
@@ -198,7 +203,7 @@
     </footer>
 
     <script src="/appointments/config.js"></script>
-    <script src="/script.js?v=20260710a"></script>
+    <script src="/script.js?v=20260710b"></script>
     <script src="https://assets.calendly.com/assets/external/widget.js" async></script>
     <script src="/src/appointments/appointments.js"></script>
 </body>

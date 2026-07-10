@@ -67,94 +67,32 @@
         return route || '/';
     }
 
-    // Set active nav link based on current page
     function setActiveNavLink() {
         if (!navLinks) return;
-        const links = navLinks.querySelectorAll('a');
+
         const path = window.location.pathname;
         const currentRoute = normalizeRoute(path);
-        const isBlogRoot = currentRoute === '/blog';
-        const isBlogPost = currentRoute.startsWith('/blog/') && !isBlogRoot;
-        const isBlogPostTemplate = path.includes('/blog-post');
-        const isAboutPage = currentRoute === '/about';
         const isTeamProfile = /\/(team|profile|people|members)(\/|$)/.test(path);
-        const isSubscribePage = currentRoute === '/subscribe';
-        const isAppointmentsPage = currentRoute.startsWith('/appointments');
-        const isProgramsPage = currentRoute === '/programs';
-        const isResourcesPage = currentRoute === '/resources';
-        
-        links.forEach(link => {
-            const linkPath = link.getAttribute('href') || '';
-            const normalizedLinkPath = linkPath.split('?')[0].split('#')[0];
-            const linkRoute = normalizeRoute(normalizedLinkPath);
-            const linkSegment = normalizedLinkPath.split('/').pop();
-            const isHomeLink = linkRoute === '/';
-            const isBlogLink = linkRoute === '/blog';
-            const isAboutLink = linkRoute === '/about';
-            const isSubscribeLink = linkRoute === '/subscribe';
-            const isAppointmentsLink = linkRoute === '/appointments';
-            const isProgramsLink = linkRoute === '/programs';
-            const isResourcesLink = linkRoute === '/resources';
-            
-            // Remove active class first
-            link.classList.remove('active');
-            
-            // Check if this link should be active
-            if (isProgramsPage && isProgramsLink) {
-                link.classList.add('active');
-                return;
+        const isBlog = currentRoute === '/blog' || currentRoute.startsWith('/blog/') || path.includes('/blog-post');
+
+        navLinks.querySelectorAll('a').forEach((link) => {
+            const linkRoute = normalizeRoute(link.getAttribute('href') || '/');
+            const navKind = link.getAttribute('data-nav');
+            let isActive = false;
+
+            if (linkRoute === '/' && currentRoute === '/') {
+                isActive = true;
+            } else if (linkRoute === '/programs' && (currentRoute === '/programs' || currentRoute.startsWith('/programs/'))) {
+                isActive = true;
+            } else if (linkRoute === '/resources' && currentRoute.startsWith('/resources')) {
+                isActive = true;
+            } else if (linkRoute === '/blog' && isBlog) {
+                isActive = true;
+            } else if (linkRoute === '/about' && (currentRoute === '/about' || isTeamProfile)) {
+                isActive = navKind === 'team' || currentRoute === '/about' || isTeamProfile;
             }
 
-            if (isResourcesPage && isResourcesLink) {
-                link.classList.add('active');
-                return;
-            }
-
-            if (isTeamProfile && isAboutLink) {
-                link.classList.add('active');
-                return;
-            }
-
-            if (isSubscribePage && isSubscribeLink) {
-                link.classList.add('active');
-                return;
-            }
-
-            if (isAppointmentsPage && isAppointmentsLink) {
-                link.classList.add('active');
-                return;
-            }
-
-            if (isAboutPage && isAboutLink) {
-                link.classList.add('active');
-                return;
-            }
-
-            if ((isBlogPost || isBlogPostTemplate || isBlogRoot) && isBlogLink) {
-                link.classList.add('active');
-            } else if (
-                !isBlogPost &&
-                !isBlogPostTemplate &&
-                !isBlogRoot &&
-                !isAboutPage &&
-                !isTeamProfile &&
-                !isSubscribePage &&
-                !isAppointmentsPage &&
-                !isProgramsPage &&
-                !isResourcesPage
-            ) {
-                if (isHomeLink && currentRoute === '/') {
-                    link.classList.add('active');
-                } else if (linkSegment === currentPath || 
-                    (currentPath === '' && linkSegment === 'index.html') ||
-                    (currentPath === 'index.html' && linkSegment === 'index.html') ||
-                    (path.endsWith('/') &&
-                        linkSegment === 'index.html' &&
-                        !isAboutPage &&
-                        path !== '/about/')) {
-                    link.classList.add('active');
-                }
-            }
+            link.classList.toggle('active', isActive);
         });
     }
 

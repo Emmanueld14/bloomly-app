@@ -137,16 +137,16 @@ body {
 }
 
 .sidebar-link.is-active {
-    background: linear-gradient(135deg, var(--color-pink), var(--color-lilac));
+    background: var(--gradient-primary);
     border-color: transparent;
     color: var(--color-white);
 }
 
 .nav-badge {
     font-size: 0.7rem;
-    background: rgba(var(--color-pink-rgb), 0.16);
-    border: 1px solid rgba(var(--color-pink-rgb), 0.4);
-    color: var(--color-pink-strong);
+    background: rgba(79, 125, 243, 0.12);
+    border: 1px solid rgba(79, 125, 243, 0.28);
+    color: var(--color-blue-hover);
     border-radius: var(--radius-full);
     padding: 0.1rem 0.45rem;
 }
@@ -381,8 +381,8 @@ body {
 
 .admin-note-card {
     border-radius: var(--radius-lg);
-    background: linear-gradient(135deg, rgba(var(--color-pink-rgb), 0.08), rgba(var(--color-lilac-rgb), 0.12));
-    border: 1px solid rgba(var(--color-pink-rgb), 0.16);
+    background: linear-gradient(135deg, rgba(79, 125, 243, 0.08), rgba(168, 216, 248, 0.12));
+    border: 1px solid rgba(79, 125, 243, 0.16);
     padding: var(--space-md);
 }
 
@@ -449,8 +449,8 @@ body {
 }
 
 .status-chip.in_review {
-    background: rgba(var(--color-pink-rgb), 0.15);
-    color: var(--color-pink-strong);
+    background: rgba(79, 125, 243, 0.15);
+    color: var(--color-blue-hover);
 }
 
 .status-chip.pending {
@@ -553,7 +553,7 @@ body {
 }
 
 .calendly-admin-note {
-    background: linear-gradient(135deg, rgba(var(--color-pink-rgb), 0.08), rgba(var(--color-lilac-rgb), 0.14));
+    background: linear-gradient(135deg, rgba(79, 125, 243, 0.08), rgba(168, 216, 248, 0.14));
 }
 
 .full-width {

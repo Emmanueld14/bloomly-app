@@ -11,12 +11,12 @@
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preload" href="/styles.css?v=20260710a" as="style">
+    <link rel="preload" href="/styles.css?v=20260710b" as="style">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/styles.css?v=20260710a">
+    <link rel="stylesheet" href="/styles.css?v=20260710b">
 </head>
 <body class="programs-page">
-    <nav class="navbar" id="navbar">
+        <nav class="navbar" id="navbar">
         <div class="navbar-content">
             <a href="/" class="logo-container">
                 <img src="/logo.png" alt="Bloomly" class="logo-image" height="52" decoding="async">
@@ -25,10 +25,16 @@
                 <li><a href="/">Home</a></li>
                 <li><a href="/programs/" class="active">Programs</a></li>
                 <li><a href="/resources/">Resources</a></li>
-                <li><a href="/about/">About</a></li>
                 <li><a href="/blog/">Blog</a></li>
-                <li><a href="/subscribe/">Subscribe</a></li>
+                <li><a href="/about/">About Us</a></li>
+                <li><a href="/about/" data-nav="team">Team</a></li>
+                <li class="nav-mobile-only"><a href="/admin/login/">Log In</a></li>
+                <li class="nav-mobile-only"><a href="/subscribe/">Join Bloomly</a></li>
             </ul>
+            <div class="navbar-actions">
+                <a href="/admin/login/" class="btn btn-secondary btn-nav">Log In</a>
+                <a href="/subscribe/" class="btn btn-primary btn-nav">Join Bloomly</a>
+            </div>
             <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Toggle menu">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M3 12h18M3 6h18M3 18h18"/>
@@ -39,7 +45,7 @@
 
     <main class="programs-main programs-experience">
         <section class="programs-hero programs-hero-premium" aria-labelledby="programs-page-title">
-            <div class="programs-gradient-blob blob-pink" aria-hidden="true"></div>
+            <div class="programs-gradient-blob blob-aqua" aria-hidden="true"></div>
             <div class="programs-gradient-blob blob-purple" aria-hidden="true"></div>
             <div class="programs-gradient-blob blob-blue" aria-hidden="true"></div>
             <div class="container">
@@ -346,7 +352,7 @@
                 </div>
                 <div class="footer-section">
                     <h4>Get Support</h4>
-                    <p style="color: rgba(var(--color-white-rgb), 0.7); margin-bottom: var(--space-sm);">Bloomly is not an emergency service. For urgent crisis or suicide support in Kenya, use the national helpline contacts:</p>
+                    <p class="footer-support-note">Bloomly is not an emergency service. For urgent crisis or suicide support in Kenya, use the national helpline contacts:</p>
                     <a href="https://www.one2onekenya.org/help/call" target="_blank" rel="noopener noreferrer">Kenya National Crisis Support (1190) - View official contact options</a>
                 </div>
             </div>

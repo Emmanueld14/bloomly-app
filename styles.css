@@ -1701,11 +1701,13 @@ a:hover {
 
 /* ========== Glassmorphic Cards ========== */
 .glass-card {
-    background: rgba(var(--color-white-rgb), 0.96) !important;
-    border-radius: var(--radius-xl);
+    background: var(--color-glass) !important;
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border-radius: var(--radius-card);
     padding: var(--space-xl);
-    border: 1px solid rgba(var(--color-black-rgb), 0.08);
-    box-shadow: 0 14px 30px rgba(var(--color-black-rgb), 0.08);
+    border: 1px solid var(--color-glass-border);
+    box-shadow: var(--shadow-card);
     transition: all var(--transition-base);
     position: relative;
     overflow: visible;
@@ -1725,9 +1727,9 @@ a:hover {
 }
 
 .glass-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 20px 38px rgba(var(--color-black-rgb), 0.12);
-    background: rgba(var(--color-white-rgb), 0.99);
+    transform: translateY(-6px);
+    box-shadow: var(--shadow-card-hover);
+    background: rgba(var(--color-white-rgb), 0.92) !important;
 }
 
 .glass-card:hover::before {
@@ -5825,7 +5827,11 @@ a:hover {
 
 .terms-hero h1,
 .terms-hero p {
-    color: var(--color-white);
+    color: var(--color-heading);
+}
+
+.terms-hero p {
+    color: var(--color-text);
 }
 
 .terms-updated {
@@ -7179,18 +7185,18 @@ body {
 
 .about-mission-content h1,
 .about-mission-content p {
-    color: var(--color-white);
+    color: var(--color-heading);
 }
 
 .about-mission-content p {
-    color: rgba(var(--color-white-rgb), 0.94);
+    color: var(--color-text);
     font-size: var(--text-xl);
 }
 
 .about-hero-orb {
     position: absolute;
     border-radius: 50%;
-    background: rgba(var(--color-white-rgb), 0.18);
+    background: rgba(168, 216, 248, 0.18);
 }
 
 .about-hero-orb-one {
@@ -7696,7 +7702,7 @@ body {
     animation: floatShape 17s ease-in-out infinite;
 }
 
-.programs-gradient-blob.blob-pink {
+.programs-gradient-blob.blob-aqua {
     width: 260px;
     height: 260px;
     left: -80px;
@@ -8865,5 +8871,148 @@ body {
     .home-section-heading {
         flex-direction: column;
         align-items: flex-start;
+    }
+}
+
+/* ========== Shared page heroes, forms, alerts ========== */
+.page-hero-light {
+    position: relative;
+    overflow: hidden;
+    background: var(--gradient-hero);
+}
+
+.page-hero-content {
+    position: relative;
+    z-index: 1;
+}
+
+.page-hero-header {
+    text-align: center;
+    color: var(--color-heading);
+}
+
+.page-hero-header h1 {
+    color: var(--color-heading);
+    text-shadow: none;
+}
+
+.page-hero-header p {
+    color: var(--color-text);
+    font-size: var(--text-xl);
+    max-width: 42rem;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.page-hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-md);
+    justify-content: center;
+    margin-top: var(--space-lg);
+}
+
+.page-hero-orb {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    opacity: 0.16;
+}
+
+.page-hero-orb-one {
+    width: 180px;
+    height: 180px;
+    top: 12%;
+    right: 8%;
+    background: var(--color-sky);
+}
+
+.page-hero-orb-two {
+    width: 130px;
+    height: 130px;
+    bottom: 18%;
+    left: 10%;
+    background: var(--color-aqua);
+}
+
+.footer-support-note {
+    color: var(--color-muted);
+    margin-bottom: var(--space-sm);
+}
+
+.nav-mobile-only {
+    display: none;
+}
+
+.bloomly-input,
+.bloomly-textarea,
+.bloomly-select,
+input[type="text"]:not([class*="admin"]):not([class*="blog"]),
+input[type="email"]:not([class*="admin"]):not([class*="blog"]),
+input[type="search"]:not([class*="admin"]):not([class*="blog"]),
+input[type="password"]:not([class*="admin"]),
+textarea:not([class*="admin"]):not([class*="blog"]),
+select:not([class*="admin"]):not([class*="blog"]) {
+    width: 100%;
+    border: 1px solid var(--color-border);
+    border-radius: 14px;
+    padding: 0.85rem 1rem;
+    font: inherit;
+    color: var(--color-heading);
+    background: var(--color-white);
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.bloomly-input:focus,
+.bloomly-textarea:focus,
+.bloomly-select:focus,
+input[type="text"]:not([class*="admin"]):focus,
+input[type="email"]:not([class*="admin"]):focus,
+input[type="search"]:not([class*="admin"]):focus,
+input[type="password"]:not([class*="admin"]):focus,
+textarea:not([class*="admin"]):not([class*="blog"]):focus,
+select:not([class*="admin"]):not([class*="blog"]):focus {
+    outline: none;
+    border-color: var(--color-blue);
+    box-shadow: 0 0 0 3px rgba(79, 125, 243, 0.15);
+}
+
+.bloomly-alert,
+.alert-banner {
+    border-radius: 14px;
+    border: 1px solid var(--color-border);
+    padding: 0.85rem 1rem;
+    font-size: var(--text-sm);
+    font-weight: 600;
+}
+
+.bloomly-alert-success,
+.alert-banner.is-success {
+    background: var(--color-success-bg);
+    border-color: var(--color-success-border);
+    color: var(--color-success-text);
+}
+
+.bloomly-alert-error,
+.alert-banner.is-error {
+    background: var(--color-error-bg);
+    border-color: var(--color-error-border);
+    color: var(--color-error-text);
+}
+
+.bloomly-alert-warning {
+    background: #FFFBEB;
+    border-color: #FDE68A;
+    color: #92400E;
+}
+
+@media (max-width: 768px) {
+    .nav-mobile-only {
+        display: list-item;
+    }
+
+    .nav-mobile-only a {
+        background: #F4F8FF !important;
+        color: var(--color-blue) !important;
     }
 }

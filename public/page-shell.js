@@ -28,10 +28,28 @@
     function setActiveNavLink() {
         if (!navLinks) return;
 
-        const currentRoute = normalizeRoute(window.location.pathname);
+        const path = window.location.pathname;
+        const currentRoute = normalizeRoute(path);
+        const isTeamProfile = /\/(team|profile|people|members)(\/|$)/.test(path);
+        const isBlog = currentRoute === '/blog' || currentRoute.startsWith('/blog/') || path.includes('/blog-post');
+
         navLinks.querySelectorAll('a').forEach((link) => {
             const linkRoute = normalizeRoute(link.getAttribute('href') || '/');
-            const isActive = linkRoute === currentRoute || (linkRoute !== '/' && currentRoute.startsWith(`${linkRoute}/`));
+            const navKind = link.getAttribute('data-nav');
+            let isActive = false;
+
+            if (linkRoute === '/' && currentRoute === '/') {
+                isActive = true;
+            } else if (linkRoute === '/programs' && (currentRoute === '/programs' || currentRoute.startsWith('/programs/'))) {
+                isActive = true;
+            } else if (linkRoute === '/resources' && currentRoute.startsWith('/resources')) {
+                isActive = true;
+            } else if (linkRoute === '/blog' && isBlog) {
+                isActive = true;
+            } else if (linkRoute === '/about' && (currentRoute === '/about' || isTeamProfile)) {
+                isActive = navKind === 'team' || currentRoute === '/about' || isTeamProfile;
+            }
+
             link.classList.toggle('active', isActive);
         });
     }
