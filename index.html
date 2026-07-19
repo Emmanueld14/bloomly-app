@@ -20,12 +20,12 @@
     <title>Bloomly | Your Safe Space for Mental Wellness | Kenya</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preload" href="/styles.css?v=20260710b" as="style">
+    <link rel="preload" href="/styles.css?v=20260719a" as="style">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/styles.css?v=20260710b">
+    <link rel="stylesheet" href="/styles.css?v=20260719a">
 </head>
 <body class="home-page">
-        <nav class="navbar" id="navbar">
+    <nav class="navbar" id="navbar">
         <div class="navbar-content">
             <a href="/" class="logo-container">
                 <img src="/logo.png" alt="Bloomly" class="logo-image" height="52" decoding="async">
@@ -34,16 +34,10 @@
                 <li><a href="/" class="active">Home</a></li>
                 <li><a href="/programs/">Programs</a></li>
                 <li><a href="/resources/">Resources</a></li>
+                <li><a href="/about/">Team</a></li>
                 <li><a href="/blog/">Blog</a></li>
-                <li><a href="/about/">About Us</a></li>
-                <li><a href="/about/" data-nav="team">Team</a></li>
-                <li class="nav-mobile-only"><a href="/admin/login/">Log In</a></li>
-                <li class="nav-mobile-only"><a href="/subscribe/">Join Bloomly</a></li>
+                <li><a href="/subscribe/">Subscribe</a></li>
             </ul>
-            <div class="navbar-actions">
-                <a href="/admin/login/" class="btn btn-secondary btn-nav">Log In</a>
-                <a href="/subscribe/" class="btn btn-primary btn-nav">Join Bloomly</a>
-            </div>
             <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Toggle menu">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M3 12h18M3 6h18M3 18h18"/>
@@ -53,161 +47,46 @@
     </nav>
 
     <main class="home-main">
-        <section class="home-premium-hero" aria-labelledby="home-hero-title">
-            <div class="home-premium-blob home-premium-blob-one" aria-hidden="true"></div>
-            <div class="home-premium-blob home-premium-blob-two" aria-hidden="true"></div>
-            <div class="container home-premium-hero-grid">
-                <div class="home-premium-hero-copy">
-                    <h1 id="home-hero-title" class="home-premium-title">A quieter place to feel understood.</h1>
-                    <p class="home-premium-lead">Bloomly is a calm digital space where teens can reflect, feel seen, and move forward one gentle step at a time.</p>
-                    <div class="home-premium-actions">
-                        <a href="/programs/" class="btn btn-primary">Explore Programs</a>
-                        <a href="/blog/" class="btn btn-secondary home-btn-play">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
-                            Read Stories
-                        </a>
-                    </div>
-                </div>
-                <div class="home-premium-visual" aria-hidden="true">
-                    <div class="home-premium-illustration">
-                        <div class="home-illustration-sky"></div>
-                        <div class="home-illustration-hill home-illustration-hill-back"></div>
-                        <div class="home-illustration-hill home-illustration-hill-front"></div>
-                        <div class="home-illustration-plant"></div>
-                    </div>
-                    <div class="home-feature-float home-feature-float-one">
-                        <span class="home-feature-icon home-feature-icon-blue" aria-hidden="true">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                        </span>
-                        <div>
-                            <strong>Safe &amp; Private</strong>
-                            <span>Your space, your pace</span>
-                        </div>
-                    </div>
-                    <div class="home-feature-float home-feature-float-two">
-                        <span class="home-feature-icon home-feature-icon-teal" aria-hidden="true">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                        </span>
-                        <div>
-                            <strong>Peer Support</strong>
-                            <span>You're not alone</span>
-                        </div>
-                    </div>
-                    <div class="home-feature-float home-feature-float-three">
-                        <span class="home-feature-icon home-feature-icon-green" aria-hidden="true">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22c4-4 8-7.5 8-12a8 8 0 1 0-16 0c0 4.5 4 8 8 12z"/><path d="M12 12a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/></svg>
-                        </span>
-                        <div>
-                            <strong>Personal Growth</strong>
-                            <span>Small steps count</span>
-                        </div>
+        <section class="home-hero home-hero-studio" aria-labelledby="home-hero-title">
+            <div class="floating-shape home-hero-orb home-hero-orb-one" aria-hidden="true"></div>
+            <div class="floating-shape home-hero-orb home-hero-orb-two" aria-hidden="true"></div>
+            <div class="home-studio-shell">
+                <div class="home-studio-hero">
+                    <h1 id="home-hero-title" class="home-studio-title">A quieter place to feel understood.</h1>
+                    <p class="home-studio-tagline">Bloomly is a calm digital space where teens can reflect, feel seen, and move forward one gentle step at a time.</p>
+                    <div class="home-studio-actions">
+                        <a href="/blog/" class="btn btn-primary">Read the Blog</a>
+                        <a href="/subscribe/" class="btn btn-secondary">Subscribe</a>
                     </div>
                 </div>
             </div>
         </section>
 
-        <section class="home-stats-bar" aria-label="Bloomly impact">
+        <section class="section home-feature-section" aria-label="Bloomly support pillars">
             <div class="container">
-                <div class="home-stats-grid">
-                    <article class="home-stat-card">
-                        <span class="home-stat-icon home-stat-icon-blue" aria-hidden="true">
-                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-                        </span>
-                        <div>
-                            <strong>1,250+</strong>
-                            <span>Teens supported</span>
+                <div class="home-studio-pillars">
+                    <article class="home-studio-pillar">
+                        <div class="home-pillar-icon" aria-hidden="true">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#4F7DF3" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
                         </div>
+                        <h2>Comforting Stories</h2>
+                        <p>Read honest reflections that remind you you are never alone.</p>
                     </article>
-                    <article class="home-stat-card">
-                        <span class="home-stat-icon home-stat-icon-teal" aria-hidden="true">
-                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                        </span>
-                        <div>
-                            <strong>4,800+</strong>
-                            <span>Conversations</span>
+                    <article class="home-studio-pillar">
+                        <div class="home-pillar-icon" aria-hidden="true">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#5BC0BE" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                         </div>
+                        <h2>Gentle Support</h2>
+                        <p>Calm tools and reflections when you need a quieter place to land.</p>
                     </article>
-                    <article class="home-stat-card">
-                        <span class="home-stat-icon home-stat-icon-amber" aria-hidden="true">
-                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-                        </span>
-                        <div>
-                            <strong>320+</strong>
-                            <span>Resources shared</span>
+                    <article class="home-studio-pillar">
+                        <div class="home-pillar-icon" aria-hidden="true">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#4F7DF3" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                         </div>
-                    </article>
-                    <article class="home-stat-card">
-                        <span class="home-stat-icon home-stat-icon-navy" aria-hidden="true">
-                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                        </span>
-                        <div>
-                            <strong>98%</strong>
-                            <span>Feel more supported</span>
-                        </div>
+                        <h2>Daily Gentle Pace</h2>
+                        <p>Small emotional check-ins that help you breathe and reset.</p>
                     </article>
                 </div>
-            </div>
-        </section>
-
-        <section class="section home-catalog-section">
-            <div class="container home-catalog-grid">
-                <div class="home-catalog-column">
-                    <div class="home-section-heading">
-                        <h2>Guided spaces for every step of your journey.</h2>
-                        <a href="/programs/" class="home-section-link">View all programs →</a>
-                    </div>
-                    <div class="home-program-cards">
-                        <article class="home-program-card">
-                            <div class="home-program-card-art home-program-card-art-lavender" aria-hidden="true">
-                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#4F7DF3" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                            </div>
-                            <h3>Peer Support Circles</h3>
-                            <p>Connect with others who understand what you're going through in safe, moderated spaces.</p>
-                            <a href="/programs/peer-support/" class="home-card-link">Join a circle →</a>
-                        </article>
-                        <article class="home-program-card">
-                            <div class="home-program-card-art home-program-card-art-teal" aria-hidden="true">
-                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#5BC0BE" stroke-width="1.8"><path d="M12 22c4-4 8-7.5 8-12a8 8 0 1 0-16 0c0 4.5 4 8 8 12z"/></svg>
-                            </div>
-                            <h3>Wellbeing Workshops</h3>
-                            <p>Learn practical tools for managing stress, anxiety, and building emotional resilience.</p>
-                            <a href="/programs/mental-wellness-circle/" class="home-card-link">See workshops →</a>
-                        </article>
-                        <article class="home-program-card">
-                            <div class="home-program-card-art home-program-card-art-cream" aria-hidden="true">
-                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#4F7DF3" stroke-width="1.8"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-                            </div>
-                            <h3>Journaling &amp; Tools</h3>
-                            <p>Express yourself through guided prompts and gentle reflection exercises.</p>
-                            <a href="/resources/" class="home-card-link">Explore tools →</a>
-                        </article>
-                    </div>
-                </div>
-
-                <aside class="home-catalog-column home-blog-column">
-                    <div class="home-section-heading">
-                        <h2>Real stories. Real talk.</h2>
-                        <a href="/blog/" class="home-section-link">Visit Blog →</a>
-                    </div>
-                    <div class="home-blog-cards">
-                        <a href="/blog/circles/" class="home-blog-card">
-                            <div class="home-blog-thumb home-blog-thumb-one" aria-hidden="true"></div>
-                            <div class="home-blog-copy">
-                                <h3>Circles</h3>
-                                <p>Same thing every day. No change, no wonder — you feel me?</p>
-                                <span class="home-blog-meta">Apr 16 · 4 min read</span>
-                            </div>
-                        </a>
-                        <a href="/blog/not-lonely-just-learning/" class="home-blog-card">
-                            <div class="home-blog-thumb home-blog-thumb-two" aria-hidden="true"></div>
-                            <div class="home-blog-copy">
-                                <h3>Not Lonely, Just Learning</h3>
-                                <p>What if being alone isn't loneliness — but the beginning of discovering who you are?</p>
-                                <span class="home-blog-meta">Apr 8 · 5 min read</span>
-                            </div>
-                        </a>
-                    </div>
-                </aside>
             </div>
         </section>
     </main>
@@ -224,23 +103,23 @@
                     <a href="/">Home</a>
                     <a href="/programs/">Programs</a>
                     <a href="/resources/">Resources</a>
-                    <a href="/about/">About</a>
+                    <a href="/about/">Team</a>
                     <a href="/blog/">Blog</a>
                     <a href="/subscribe/">Subscribe</a>
                 </div>
                 <div class="footer-section">
                     <h4>Get Support</h4>
-                    <p>Bloomly is not an emergency service. For urgent crisis or suicide support in Kenya, use the national helpline contacts:</p>
+                    <p class="footer-support-note">Bloomly is not an emergency service. For urgent crisis or suicide support in Kenya, use the national helpline contacts:</p>
                     <a href="https://www.one2onekenya.org/help/call" target="_blank" rel="noopener noreferrer">Kenya National Crisis Support (1190)</a>
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>&copy; 2026 Bloomly. All rights reserved. Your privacy and safety are our top priorities.</p>
+                <p>&copy; 2026 Bloomly. All rights reserved. Your privacy and safety are your top priorities.</p>
             </div>
         </div>
     </footer>
 
     <script src="/public/site-features.js"></script>
-    <script src="/script.js?v=20260710b" defer></script>
+    <script src="/script.js?v=20260719a" defer></script>
 </body>
 </html>

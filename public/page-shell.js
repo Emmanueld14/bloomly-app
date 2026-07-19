@@ -30,24 +30,25 @@
 
         const path = window.location.pathname;
         const currentRoute = normalizeRoute(path);
-        const isTeamProfile = /\/(team|profile|people|members)(\/|$)/.test(path);
         const isBlog = currentRoute === '/blog' || currentRoute.startsWith('/blog/') || path.includes('/blog-post');
+        const isTeam = currentRoute === '/about' || /\/(team|profile|people|members)(\/|$)/.test(path);
 
         navLinks.querySelectorAll('a').forEach((link) => {
             const linkRoute = normalizeRoute(link.getAttribute('href') || '/');
-            const navKind = link.getAttribute('data-nav');
             let isActive = false;
 
             if (linkRoute === '/' && currentRoute === '/') {
                 isActive = true;
-            } else if (linkRoute === '/programs' && (currentRoute === '/programs' || currentRoute.startsWith('/programs/'))) {
+            } else if (linkRoute === '/programs' && currentRoute.startsWith('/programs')) {
                 isActive = true;
             } else if (linkRoute === '/resources' && currentRoute.startsWith('/resources')) {
                 isActive = true;
             } else if (linkRoute === '/blog' && isBlog) {
                 isActive = true;
-            } else if (linkRoute === '/about' && (currentRoute === '/about' || isTeamProfile)) {
-                isActive = navKind === 'team' || currentRoute === '/about' || isTeamProfile;
+            } else if (linkRoute === '/subscribe' && currentRoute === '/subscribe') {
+                isActive = true;
+            } else if (linkRoute === '/about' && isTeam) {
+                isActive = true;
             }
 
             link.classList.toggle('active', isActive);
