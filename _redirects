@@ -35,9 +35,13 @@
 /appointments/ /index.html 302
 /appointments/* /index.html 302
 
+# Members routing
+/members /members/ 301
+/members/ /members/index.html 200
+
 # Team profile routing - legacy routes
-/team /about.html 301
-/team/ /about.html 301
+/team /about/ 301
+/team/ /about/ 301
 /team/* /members/?id=:splat 301
 
 # Profile routing (legacy)

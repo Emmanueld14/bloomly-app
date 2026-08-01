@@ -26,12 +26,12 @@
   "redirects": [
     {
       "source": "/team",
-      "destination": "/about.html",
+      "destination": "/about/",
       "permanent": true
     },
     {
       "source": "/team/",
-      "destination": "/about.html",
+      "destination": "/about/",
       "permanent": true
     },
     {
