@@ -1,12 +1,13 @@
 /**
- * Generates static blog/{slug}/index.html stubs so /blog/:slug works
- * without relying on Cloudflare _redirects (which may not apply on deploy).
+ * Generates static blog/{slug}/index.html pages from the shared post template
+ * so /blog/:slug/ is the canonical article URL.
  */
 const fs = require('fs');
 const path = require('path');
 
 const root = path.join(__dirname, '..');
 const indexPath = path.join(root, 'content', 'blog', 'index.json');
+const templatePath = path.join(root, 'blog-post', 'index.html');
 
 function normalizeSlug(value) {
     return String(value || '')
@@ -18,23 +19,12 @@ function normalizeSlug(value) {
         .replace(/^-+|-+$/g, '');
 }
 
-function buildStubHtml(slug) {
-    const target = `/blog-post/?slug=${encodeURIComponent(slug)}`;
-    return `<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="canonical" href="${target}">
-    <meta http-equiv="refresh" content="0;url=${target}">
-    <title>Opening article…</title>
-    <script>location.replace(${JSON.stringify(target)});</script>
-</head>
-<body>
-    <p>Opening article… <a href="${target}">Continue</a></p>
-</body>
-</html>
-`;
+function buildPostPage(slug, template) {
+    const canonical = `https://bloomly.co.ke/blog/${slug}/`;
+    return template.replace(
+        '<link rel="canonical" href="https://bloomly.co.ke/blog/">',
+        `<link rel="canonical" href="${canonical}">`
+    );
 }
 
 function main() {
@@ -43,6 +33,12 @@ function main() {
         return;
     }
 
+    if (!fs.existsSync(templatePath)) {
+        console.warn('Missing blog-post/index.html template — skipping blog route generation.');
+        return;
+    }
+
+    const template = fs.readFileSync(templatePath, 'utf8');
     const files = JSON.parse(fs.readFileSync(indexPath, 'utf8'));
     const slugs = files
         .filter((name) => typeof name === 'string' && name.endsWith('.md'))
@@ -56,11 +52,11 @@ function main() {
         const dir = path.join(blogDir, slug);
         fs.mkdirSync(dir, { recursive: true });
         const out = path.join(dir, 'index.html');
-        fs.writeFileSync(out, buildStubHtml(slug));
+        fs.writeFileSync(out, buildPostPage(slug, template));
         created += 1;
     });
 
-    console.log(`✅ Generated ${created} blog post route stub(s) under /blog/{slug}/`);
+    console.log(`✅ Generated ${created} blog post page(s) under /blog/{slug}/`);
 }
 
 main();

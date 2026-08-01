@@ -1744,6 +1744,13 @@
         }
     }
 
+    function redirectToSubscribeThanks(status) {
+        const target = status === 'already_subscribed'
+            ? '/subscribe/thanks/?already=1'
+            : '/subscribe/thanks/';
+        window.location.assign(target);
+    }
+
     function initNewsletterForms() {
         const forms = document.querySelectorAll('[data-newsletter-form]');
         if (!forms.length) return;
@@ -1793,16 +1800,12 @@
                             if (isSupabaseReady()) {
                                 const fallbackResult = await insertSubscriberDirect(email);
                                 if (fallbackResult.status === 'subscribed') {
-                                    setFormMessage(
-                                        messageEl,
-                                        'Thanks for subscribing! You are on the list.',
-                                        'success'
-                                    );
+                                    redirectToSubscribeThanks('subscribed');
                                     return;
                                 }
 
                                 if (fallbackResult.status === 'already_subscribed') {
-                                    setFormMessage(messageEl, 'You are already subscribed.', 'success');
+                                    redirectToSubscribeThanks('already_subscribed');
                                     return;
                                 }
 
@@ -1828,7 +1831,7 @@
                         }
 
                         if (data.status === 'already_subscribed') {
-                            setFormMessage(messageEl, 'You are already subscribed.', 'success');
+                            redirectToSubscribeThanks('already_subscribed');
                             return;
                         }
 
@@ -1839,27 +1842,18 @@
                         }
 
                         const emailStatus = data.email_status || null;
-                        if (emailStatus === 'failed') {
-                            setFormMessage(
-                                messageEl,
-                                'You are subscribed, but we could not send a welcome email.',
-                                'success'
-                            );
+                        if (emailStatus === 'failed' || emailStatus === 'skipped' || !emailStatus) {
+                            redirectToSubscribeThanks('subscribed');
                             return;
                         }
 
-                        if (emailStatus === 'skipped') {
-                            setFormMessage(messageEl, 'Thanks for subscribing! You are on the list.', 'success');
-                            return;
-                        }
-
-                        setFormMessage(messageEl, 'Thanks for subscribing! Check your inbox.', 'success');
+                        redirectToSubscribeThanks('subscribed');
                     } else if (isSupabaseReady()) {
                         const fallbackResult = await insertSubscriberDirect(email);
                         if (fallbackResult.status === 'subscribed') {
-                            setFormMessage(messageEl, 'Thanks for subscribing! You are on the list.', 'success');
+                            redirectToSubscribeThanks('subscribed');
                         } else if (fallbackResult.status === 'already_subscribed') {
-                            setFormMessage(messageEl, 'You are already subscribed.', 'success');
+                            redirectToSubscribeThanks('already_subscribed');
                         } else if (fallbackResult.status === 'error') {
                             console.error('Newsletter direct insert failed', fallbackResult.error);
                             setFormMessage(

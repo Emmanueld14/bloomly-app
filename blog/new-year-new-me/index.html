@@ -3,12 +3,191 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="canonical" href="/blog-post/?slug=new-year-new-me">
-    <meta http-equiv="refresh" content="0;url=/blog-post/?slug=new-year-new-me">
-    <title>Opening article…</title>
-    <script>location.replace("/blog-post/?slug=new-year-new-me");</script>
+    <meta name="author" content="Bloomly Team">
+    <meta name="date" content="2026-01-01">
+    <meta property="article:author" content="Bloomly Team">
+    <meta property="article:published_time" content="2026-01-01T00:00:00+00:00">
+    <meta property="og:image" content="https://bloomly.co.ke/og-image.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="Bloomly Logo - Butterfly with golden glow and elegant text">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="canonical" href="https://bloomly.co.ke/blog/new-year-new-me/">
+    <script>
+        (function () {
+            const params = new URLSearchParams(window.location.search);
+            const slug = params.get('slug');
+            if (!slug || !/\/blog-post\/?$/.test(window.location.pathname)) return;
+            const cleaned = slug.trim().toLowerCase().replace(/\.html$/, '').replace(/\/+$/, '');
+            if (cleaned) {
+                window.location.replace('/blog/' + encodeURIComponent(cleaned) + '/');
+            }
+        })();
+    </script>
+    <title>Loading... - Bloomly Blog</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="dns-prefetch" href="https://xmhyjttyarskimsxcfhl.supabase.co">
+    <link rel="preload" href="/styles.css?v=20260719a" as="style">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/styles.css?v=20260801b">
 </head>
 <body>
-    <p>Opening article… <a href="/blog-post/?slug=new-year-new-me">Continue</a></p>
+    <!-- Navigation -->
+                <nav class="navbar" id="navbar">
+        <div class="navbar-content">
+            <a href="/" class="logo-container">
+                <img src="/logo.png" alt="Bloomly" class="logo-image" height="52" decoding="async">
+            </a>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="/">Home</a></li>
+                <li><a href="/programs/">Programs</a></li>
+                <li><a href="/resources/">Resources</a></li>
+                <li><a href="/about/">Team</a></li>
+                <li><a href="/blog/" class="active">Blog</a></li>
+                <li><a href="/subscribe/">Subscribe</a></li>
+            </ul>
+            <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Toggle menu">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 12h18M3 6h18M3 18h18"/>
+                </svg>
+            </button>
+        </div>
+    </nav>
+    <div class="reading-progress" aria-hidden="true">
+        <div class="reading-progress-bar" data-reading-progress></div>
+    </div>
+
+    <main class="post-page">
+        <div class="post-breadcrumb">
+            <div class="container">
+                <a href="/blog">← Back to Blog</a>
+            </div>
+        </div>
+        <section class="section" data-blog-list-fallback hidden>
+            <div class="container">
+                <div class="section-header">
+                    <h1>Bloomly Blog</h1>
+                    <p>Short reflections and helpful guides to support your mental health journey.</p>
+                </div>
+                <div style="display: flex; flex-wrap: wrap; gap: var(--space-md); justify-content: center; margin-bottom: var(--space-xl);">
+                    <a href="/subscribe" class="btn btn-primary">Get Updates</a>
+                </div>
+            </div>
+        </section>
+
+        <section class="blog-category-panel" aria-label="Blog categories" data-blog-list-fallback hidden>
+            <div class="container">
+                <nav class="blog-category-nav" data-blog-category-panel>
+                    <!-- Categories injected by script -->
+                </nav>
+            </div>
+        </section>
+
+        <section class="section" data-blog-list-fallback hidden>
+            <div class="container">
+                <div class="blog-grid" id="blogGrid">
+                    <div style="text-align: center; padding: var(--space-2xl); color: var(--color-gray-600);">
+                        <p>Loading blog posts...</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Post Wrapper (required for modularity) -->
+        <div class="post" data-post-id="" hidden aria-hidden="true">
+            <!-- Article Header -->
+            <section class="article-header">
+                <div class="container">
+                    <a href="/blog" class="back-button ghost-pill">← Back to Blog</a>
+                    <p class="article-byline" id="articleByline" hidden>By <span id="articleAuthorName">Bloomly Team</span></p>
+                    <h1 id="articleTitle">Loading...</h1>
+                    <div class="article-meta" id="articleMeta">
+                        <span>Loading...</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Article Content -->
+            <article class="article-content">
+                <div class="container">
+                    <div id="articleBody" class="article-body">
+                        <p>Loading article...</p>
+                    </div>
+                </div>
+            </article>
+
+            <section class="post-share-section">
+                <div class="container">
+                    <div class="post-share-row" data-post-share>
+                        <span>Share this:</span>
+                        <a class="share-pill" data-share-whatsapp target="_blank" rel="noopener noreferrer">Share on WhatsApp</a>
+                        <a class="share-pill" data-share-x target="_blank" rel="noopener noreferrer">Share on X</a>
+                        <button type="button" class="share-pill" data-share-copy>Copy link</button>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section related-posts-section" data-related-posts-section hidden>
+                <div class="container">
+                    <div class="section-header">
+                        <h2>More like this</h2>
+                    </div>
+                    <div class="blog-grid" data-related-posts></div>
+                </div>
+            </section>
+
+            <section class="author-card-section">
+                <div class="container">
+                    <article class="author-card">
+                        <img src="/images/team/manuel-muhunami-display-smooth-20260407.webp?v=1" alt="Manuel Muhunami portrait" loading="lazy" decoding="async" width="96" height="96">
+                        <div>
+                            <h2>Manuel Muhunami</h2>
+                            <p class="author-title">Founder &amp; Lead Builder</p>
+                            <p>Manuel writes about teen life, loneliness, pressure, and the small steps that help people keep going.</p>
+                        </div>
+                    </article>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>Bloomly</h4>
+                    <p>A safe space for teens to find support, healing, and hope. You matter, and your mental health matters.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <a href="/">Home</a>
+                    <a href="/programs/">Programs</a>
+                    <a href="/resources/">Resources</a>
+                    <a href="/about/">Team</a>
+                    <a href="/blog/">Blog</a>
+                    <a href="/subscribe/">Subscribe</a>
+                </div>
+                <div class="footer-section">
+                    <h4>Get Support</h4>
+                    <p class="footer-support-note">Bloomly is not an emergency service. For urgent crisis or suicide support in Kenya, call <strong>1190</strong> or visit:</p>
+                    <a href="https://www.one2onekenya.org/help/call" target="_blank" rel="noopener noreferrer">Kenya National Crisis Support (1190)</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Bloomly. All rights reserved. Your privacy and safety are our top priorities.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="/src/data/blog-config.js" defer></script>
+    <script src="/src/data/blog-api.js" defer></script>
+    <script src="/src/data/blog-loader.js" defer></script>
+    <script src="/src/data/blog-post-loader.js" defer></script>
+    <script src="/script.js?v=20260801b" defer fetchpriority="low"></script>
 </body>
 </html>

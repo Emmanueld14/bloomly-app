@@ -45,7 +45,7 @@
                 isActive = true;
             } else if (linkRoute === '/blog' && isBlog) {
                 isActive = true;
-            } else if (linkRoute === '/subscribe' && currentRoute === '/subscribe') {
+            } else if (linkRoute === '/subscribe' && (currentRoute === '/subscribe' || currentRoute.startsWith('/subscribe/'))) {
                 isActive = true;
             } else if (linkRoute === '/about' && isTeam) {
                 isActive = true;

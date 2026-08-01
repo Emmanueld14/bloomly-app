@@ -12,7 +12,18 @@
     <meta property="og:image:height" content="630">
     <meta property="og:image:alt" content="Bloomly Logo - Butterfly with golden glow and elegant text">
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-    <link rel="canonical" href="https://bloomly.co.ke/blog-post/">
+    <link rel="canonical" href="https://bloomly.co.ke/blog/">
+    <script>
+        (function () {
+            const params = new URLSearchParams(window.location.search);
+            const slug = params.get('slug');
+            if (!slug || !/\/blog-post\/?$/.test(window.location.pathname)) return;
+            const cleaned = slug.trim().toLowerCase().replace(/\.html$/, '').replace(/\/+$/, '');
+            if (cleaned) {
+                window.location.replace('/blog/' + encodeURIComponent(cleaned) + '/');
+            }
+        })();
+    </script>
     <title>Loading... - Bloomly Blog</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -21,7 +32,7 @@
     <link rel="dns-prefetch" href="https://xmhyjttyarskimsxcfhl.supabase.co">
     <link rel="preload" href="/styles.css?v=20260719a" as="style">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/styles.css?v=20260801a">
+    <link rel="stylesheet" href="/styles.css?v=20260801b">
 </head>
 <body>
     <!-- Navigation -->
@@ -91,6 +102,7 @@
             <section class="article-header">
                 <div class="container">
                     <a href="/blog" class="back-button ghost-pill">← Back to Blog</a>
+                    <p class="article-byline" id="articleByline" hidden>By <span id="articleAuthorName">Bloomly Team</span></p>
                     <h1 id="articleTitle">Loading...</h1>
                     <div class="article-meta" id="articleMeta">
                         <span>Loading...</span>
@@ -176,6 +188,6 @@
     <script src="/src/data/blog-api.js" defer></script>
     <script src="/src/data/blog-loader.js" defer></script>
     <script src="/src/data/blog-post-loader.js" defer></script>
-    <script src="/script.js?v=20260801a" defer fetchpriority="low"></script>
+    <script src="/script.js?v=20260801b" defer fetchpriority="low"></script>
 </body>
 </html>

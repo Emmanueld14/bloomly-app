@@ -100,7 +100,7 @@ class BlogAPI {
 
     postPermalink(slug) {
         const normalized = this._normalizeSlug(slug);
-        return `/blog-post/?slug=${encodeURIComponent(normalized)}`;
+        return normalized ? `/blog/${normalized}/` : '/blog/';
     }
 
     _normalizeEmoji(value) {

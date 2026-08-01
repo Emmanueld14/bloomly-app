@@ -102,7 +102,7 @@
 
     function setCanonicalUrl(slug) {
         const canonicalHref = slug
-            ? `${window.location.origin}/blog-post/?slug=${encodeURIComponent(slug)}`
+            ? `${window.location.origin}/blog/${encodeURIComponent(slug)}/`
             : `${window.location.origin}/blog/`;
         let canonicalEl = document.querySelector('link[rel="canonical"]');
         if (!canonicalEl) {
@@ -202,7 +202,18 @@
 
     function getPostPermalink(post) {
         const slug = normalizeBlogSlug(post.slug || post.metadata?.slug || (post.name ? post.name.replace(/\.md$/, '') : ''));
-        return post.permalink || post.metadata?.permalink || `/blog-post/?slug=${encodeURIComponent(slug)}`;
+        return post.permalink || post.metadata?.permalink || `/blog/${encodeURIComponent(slug)}/`;
+    }
+
+    function normalizeAuthorName(value) {
+        const author = String(value || '').trim();
+        if (!author || author.toLowerCase() === 'bloomly team') {
+            return 'Manuel Muhunami';
+        }
+        if (/^manuel/i.test(author)) {
+            return 'Manuel Muhunami';
+        }
+        return author;
     }
 
     function escapeHtml(value) {
@@ -285,9 +296,26 @@
     function renderAuthorCard(postAuthor) {
         const card = document.querySelector('.author-card');
         if (!card) return;
+
+        const displayName = normalizeAuthorName(postAuthor);
         const heading = card.querySelector('h2');
-        if (heading && postAuthor) {
-            heading.textContent = postAuthor;
+        const titleEl = card.querySelector('.author-title');
+        const bioEl = card.querySelector('p:not(.author-title)');
+
+        if (heading) {
+            heading.textContent = displayName;
+        }
+
+        if (titleEl) {
+            titleEl.textContent = displayName === 'Manuel Muhunami'
+                ? 'Founder & Lead Builder'
+                : 'Bloomly Contributor';
+        }
+
+        if (bioEl) {
+            bioEl.textContent = displayName === 'Manuel Muhunami'
+                ? 'Manuel writes about teen life, loneliness, pressure, and the small steps that help people keep going.'
+                : 'Writing from lived experience to help young people feel seen and supported.';
         }
     }
 
@@ -405,7 +433,7 @@
 
             // Update page title
             const postTitle = post.metadata?.title || slug.replace(/-/g, ' ');
-            const postAuthor = String(post.metadata?.author || '').trim();
+            const postAuthor = normalizeAuthorName(post.metadata?.author || 'Manuel Muhunami');
             const titleEl = document.getElementById('articleTitle');
             if (titleEl) {
                 titleEl.textContent = postTitle;
@@ -440,7 +468,7 @@
             }
             articleAuthorMeta.setAttribute('content', postAuthor || 'Bloomly Team');
 
-            const canonicalUrl = `${window.location.origin}/blog-post/?slug=${encodeURIComponent(slug)}`;
+            const canonicalUrl = `${window.location.origin}/blog/${encodeURIComponent(slug)}/`;
 
             const ogFields = [
                 ['og:title', postTitle],
@@ -502,15 +530,23 @@
 
             // Update meta info
             const metaEl = document.getElementById('articleMeta');
+            const bylineEl = document.getElementById('articleByline');
+            const bylineNameEl = document.getElementById('articleAuthorName');
+            if (bylineNameEl) {
+                bylineNameEl.textContent = postAuthor;
+            }
+            if (bylineEl) {
+                bylineEl.hidden = false;
+            }
             if (metaEl) {
-                const authorSegment = postAuthor ? `<span>•</span><span>${postAuthor}</span>` : '';
                 metaEl.innerHTML = `
                     <span>${dateStr}</span>
                     <span>•</span>
                     <span>${category}</span>
                     <span>•</span>
                     <span>${readTime} min read</span>
-                    ${authorSegment}
+                    <span>•</span>
+                    <span>By ${postAuthor}</span>
                 `;
             }
 

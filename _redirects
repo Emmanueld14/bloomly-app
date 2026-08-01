@@ -25,6 +25,12 @@
 # Subscribe page routing
 /subscribe /subscribe/index.html 200
 /subscribe/ /subscribe/index.html 200
+/subscribe/thanks /subscribe/thanks/index.html 200
+/subscribe/thanks/ /subscribe/thanks/index.html 200
+
+# Start here
+/start /start/index.html 200
+/start/ /start/index.html 200
 
 # Terms routing
 /terms /terms/index.html 200

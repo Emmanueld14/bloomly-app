@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex">
+    <meta name="description" content="You are subscribed to Bloomly. Here is what to expect next.">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <title>You’re In | Bloomly</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/styles.css?v=20260801b">
+</head>
+<body class="subscribe-thanks-page">
+    <nav class="navbar" id="navbar">
+        <div class="navbar-content">
+            <a href="/" class="logo-container">
+                <img src="/logo.png" alt="Bloomly" class="logo-image" height="52" decoding="async">
+            </a>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="/">Home</a></li>
+                <li><a href="/programs/">Programs</a></li>
+                <li><a href="/resources/">Resources</a></li>
+                <li><a href="/about/">Team</a></li>
+                <li><a href="/blog/">Blog</a></li>
+                <li><a href="/subscribe/">Subscribe</a></li>
+            </ul>
+            <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Toggle menu" aria-expanded="false">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 12h18M3 6h18M3 18h18"/>
+                </svg>
+            </button>
+        </div>
+    </nav>
+
+    <main class="subscribe-thanks-main">
+        <section class="subscribe-thanks-section" aria-labelledby="subscribe-thanks-title">
+            <div class="container subscribe-thanks-container">
+                <p class="subscribe-thanks-kicker">You’re in</p>
+                <h1 id="subscribe-thanks-title">Thanks for subscribing.</h1>
+                <p class="subscribe-thanks-copy" id="subscribeThanksMessage">We’ll send calm updates when new reflections land — no spam, no pressure.</p>
+                <div class="subscribe-thanks-next">
+                    <h2>While you wait, try one of these</h2>
+                    <ul class="subscribe-thanks-links">
+                        <li><a href="/blog/its-okay-to-reflect/">It’s Okay to Reflect</a></li>
+                        <li><a href="/blog/feel-like-giving-up-you-arent-alone/">Feel Like Giving Up? You Aren’t Alone</a></li>
+                        <li><a href="/start/">Start Here guide</a></li>
+                    </ul>
+                </div>
+                <div class="subscribe-thanks-actions">
+                    <a href="/blog/" class="btn btn-primary">Read the Blog</a>
+                    <a href="/" class="btn btn-secondary">Back to Home</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2026 Bloomly. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        (function () {
+            const params = new URLSearchParams(window.location.search);
+            const message = document.getElementById('subscribeThanksMessage');
+            if (!message) return;
+            if (params.get('already') === '1') {
+                message.textContent = 'You were already on the list — we’re glad you’re still here.';
+            }
+        })();
+    </script>
+    <script src="/public/page-shell.js" defer></script>
+</body>
+</html>
