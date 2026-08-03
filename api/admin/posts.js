@@ -16,10 +16,18 @@ function normalizePostPayload(body, slug) {
           ? 'published'
           : 'draft';
     const excerpt = String(body.excerpt || body.summary || '').trim();
+    const contentType = body.content_type === 'resource_guide' ? 'resource_guide' : 'blog';
+    const isResource = contentType === 'resource_guide';
+    const takeaways = Array.isArray(body.takeaways)
+        ? body.takeaways.map((item) => String(item || '').trim()).filter(Boolean).slice(0, 8)
+        : [];
     return {
         title: body.title,
         slug,
-        category: body.category || 'Mental Health',
+        content_type: contentType,
+        category: body.category || (isResource ? 'Mental wellness' : 'Mental Health'),
+        category_slug: isResource ? body.category_slug || null : null,
+        takeaways: isResource ? takeaways : [],
         content: body.content || '',
         content_json: body.content_json || null,
         content_html: body.content_html || null,
@@ -28,13 +36,15 @@ function normalizePostPayload(body, slug) {
         emoji: body.emoji || '💜',
         published: status === 'published',
         status,
-        cover_image_url: body.cover_image_url || null,
-        tags: Array.isArray(body.tags) ? body.tags : [],
+        cover_image_url: isResource ? null : body.cover_image_url || null,
+        tags: isResource ? [] : Array.isArray(body.tags) ? body.tags : [],
         seo_title: body.seo_title || body.title || null,
         meta_description: body.meta_description || excerpt || null,
         scheduled_at: status === 'scheduled' ? body.scheduled_at || null : null,
         read_time_minutes: Math.max(1, Number(body.read_time_minutes || 1)),
-        url: `https://bloomly.co.ke/blog-post/?slug=${encodeURIComponent(slug)}`,
+        url: isResource
+            ? `https://bloomly.co.ke/resources/${encodeURIComponent(slug)}/`
+            : `https://bloomly.co.ke/blog/${encodeURIComponent(slug)}/`,
     };
 }
 
@@ -46,6 +56,9 @@ function validatePostPayload(row, { publish = false } = {}) {
         const hasText = Boolean(String(row.content || '').trim());
         const hasImage = /<img\s/i.test(row.content_html || '');
         if (!hasText && !hasImage) errors.push('Content is required before publishing.');
+        if (row.content_type === 'resource_guide' && (!Array.isArray(row.takeaways) || !row.takeaways.length)) {
+            errors.push('At least one key takeaway is required before publishing a resource guide.');
+        }
     }
     if (row.status === 'scheduled' && !row.scheduled_at) {
         errors.push('Scheduled posts require a scheduled_at date.');
@@ -88,6 +101,8 @@ async function verifyPersistedPost(id, expected) {
 }
 
 function postResponse(res, post, action) {
+    const isResource = post.content_type === 'resource_guide';
+    const path = isResource ? 'resources' : 'blog';
     return res.status(200).json({
         post,
         verified: true,
@@ -95,7 +110,8 @@ function postResponse(res, post, action) {
         published: post.published === true || post.status === 'published',
         frontend: {
             blogUrl: `https://bloomly.co.ke/blog/?fresh=${Date.now()}`,
-            postUrl: `https://bloomly.co.ke/blog-post/?slug=${encodeURIComponent(post.slug)}&fresh=${Date.now()}`,
+            resourcesUrl: `https://bloomly.co.ke/resources/?fresh=${Date.now()}`,
+            postUrl: `https://bloomly.co.ke/${path}/${encodeURIComponent(post.slug)}/?fresh=${Date.now()}`,
         },
     });
 }

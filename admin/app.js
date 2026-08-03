@@ -467,7 +467,7 @@
             showAdminError(error.message || 'Could not load blog posts.');
             const tbody = document.querySelector('#postsTable tbody');
             if (tbody) {
-                tbody.innerHTML = '<tr><td colspan="6">Could not load posts. Check Cloudflare env vars (SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY).</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7">Could not load posts. Check Cloudflare env vars (SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY).</td></tr>';
             }
         }
     }
@@ -485,7 +485,7 @@
         }
         if (!posts.length) {
             tbody.innerHTML =
-                '<tr><td colspan="6">No posts found. Click Import from GitHub or New Post.</td></tr>';
+                '<tr><td colspan="7">No content found. Click Import from GitHub or New content.</td></tr>';
             return;
         }
         tbody.innerHTML = posts
@@ -497,10 +497,12 @@
                         : p.source === 'both'
                           ? 'Both'
                           : 'Supabase';
+                const typeLabel = p.content_type === 'resource_guide' ? 'Resource' : 'Blog';
                 const editId = String(p.id).replace(/"/g, '&quot;');
                 const canDelete = p.source === 'supabase' && !String(p.id).startsWith('github:');
                 return `<tr>
             <td>${p.title}</td>
+            <td><span class="admin-type-pill admin-type-pill--${p.content_type === 'resource_guide' ? 'resource' : 'blog'}">${typeLabel}</span></td>
             <td>${p.category || '—'}</td>
             <td>${formatPostDate(p)}</td>
             <td>${status}</td>
