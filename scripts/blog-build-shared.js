@@ -94,40 +94,80 @@ function markdownToHTML(markdown) {
     return html;
 }
 
+function loadSupabasePosts() {
+    const exportPath = path.join(blogDir, 'supabase-posts.json');
+    if (!fs.existsSync(exportPath)) return [];
+
+    let rows = [];
+    try {
+        rows = JSON.parse(fs.readFileSync(exportPath, 'utf8'));
+    } catch {
+        return [];
+    }
+    if (!Array.isArray(rows)) return [];
+
+    return rows
+        .filter((post) => post?.slug && post?.metadata?.title)
+        .map((post) => ({
+            slug: normalizeSlug(post.slug),
+            metadata: {
+                title: post.metadata.title,
+                date: post.metadata.date || '',
+                category: post.metadata.category || 'Mental Health',
+                summary: post.metadata.summary || '',
+                emoji: post.metadata.emoji || '💜',
+                author: post.metadata.author || 'Manuel Muhunami',
+                published: true,
+                source: post.metadata.source || 'supabase',
+            },
+            body: post.body || '',
+            html: post.html || markdownToHTML(post.body || ''),
+        }));
+}
+
 function loadPublishedPosts() {
     const indexPath = path.join(blogDir, 'index.json');
-    if (!fs.existsSync(indexPath)) return [];
-
-    const files = JSON.parse(fs.readFileSync(indexPath, 'utf8'));
     const posts = [];
+    const bySlug = new Map();
 
-    files
-        .filter((name) => typeof name === 'string' && name.endsWith('.md'))
-        .forEach((name) => {
-            const slug = normalizeSlug(name);
-            const filePath = path.join(blogDir, name);
-            if (!slug || !fs.existsSync(filePath)) return;
+    if (fs.existsSync(indexPath)) {
+        const files = JSON.parse(fs.readFileSync(indexPath, 'utf8'));
 
-            const { metadata, body } = parseMarkdownFile(filePath);
-            if (!metadata.title) return;
-            if (String(metadata.published || 'true').toLowerCase() === 'false') return;
+        files
+            .filter((name) => typeof name === 'string' && name.endsWith('.md'))
+            .forEach((name) => {
+                const slug = normalizeSlug(name);
+                const filePath = path.join(blogDir, name);
+                if (!slug || !fs.existsSync(filePath)) return;
 
-            posts.push({
-                slug,
-                metadata: {
-                    title: metadata.title,
-                    date: metadata.date || '',
-                    category: metadata.category || 'Mental Health',
-                    summary: metadata.summary || '',
-                    emoji: metadata.emoji || '💜',
-                    author: metadata.author || 'Manuel Muhunami',
-                    published: true,
-                },
-                body,
-                html: markdownToHTML(body),
+                const { metadata, body } = parseMarkdownFile(filePath);
+                if (!metadata.title) return;
+                if (String(metadata.published || 'true').toLowerCase() === 'false') return;
+
+                const post = {
+                    slug,
+                    metadata: {
+                        title: metadata.title,
+                        date: metadata.date || '',
+                        category: metadata.category || 'Mental Health',
+                        summary: metadata.summary || '',
+                        emoji: metadata.emoji || '💜',
+                        author: metadata.author || 'Manuel Muhunami',
+                        published: true,
+                        source: 'markdown',
+                    },
+                    body,
+                    html: markdownToHTML(body),
+                };
+                bySlug.set(slug, post);
             });
-        });
+    }
 
+    loadSupabasePosts().forEach((post) => {
+        bySlug.set(post.slug, post);
+    });
+
+    posts.push(...bySlug.values());
     posts.sort((a, b) => new Date(b.metadata.date || 0) - new Date(a.metadata.date || 0));
     return posts;
 }
@@ -297,6 +337,7 @@ module.exports = {
     parseMarkdownFile,
     markdownToHTML,
     loadPublishedPosts,
+    loadSupabasePosts,
     buildBlogCardHtml,
     buildCategoryNavHtml,
     normalizeAuthorName,
