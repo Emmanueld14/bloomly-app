@@ -336,14 +336,14 @@
         `;
 
         try {
-            console.info('[Bloomly Blog] Fetching published posts.');
+            logDebug('[Bloomly Blog] Fetching published posts.');
             
             const [posts, legacyPosts] = await Promise.all([
                 blogAPI.listPosts(),
                 fetchLegacyPosts(),
             ]);
             
-            console.info('[Bloomly Blog] Source counts', {
+            logDebug('[Bloomly Blog] Source counts', {
                 markdown: posts.length,
                 legacy: legacyPosts.length
             });
@@ -364,7 +364,7 @@
 
             const mergedPosts = mergePosts(validPosts, legacyPosts);
             const finalPosts = mergedPosts.filter(isPublishedPost);
-            console.info('[Bloomly Blog] Published posts ready', finalPosts.length);
+            logDebug('[Bloomly Blog] Published posts ready', finalPosts.length);
 
             if (finalPosts.length === 0) {
                 renderBlogLoadError(blogGrid, 'All posts failed to load. Please check your connection and try again.');

@@ -12,8 +12,15 @@ class BlogAPI {
         this.debug = this._getDebugFlag();
         this._supabase = null;
         this._supabaseLoadPromise = null;
-        this._fetchTimeoutMs = 8000;
-        this._supabaseTimeoutMs = 8000;
+        this._fetchTimeoutMs = 4000;
+        this._supabaseTimeoutMs = 2000;
+        this._listCache = null;
+        this._postCache = new Map();
+    }
+
+    _preferLocalContent() {
+        if (typeof window === 'undefined') return true;
+        return window.BLOOMLY_BLOG_PREFER_LOCAL !== false;
     }
 
     _getDebugFlag() {
@@ -34,6 +41,10 @@ class BlogAPI {
     }
 
     async _ensureSupabaseClient() {
+        if (this._preferLocalContent()) {
+            return null;
+        }
+
         if (this._supabase) return this._supabase;
 
         const url = typeof window !== 'undefined' && window.BLOOMLY_SUPABASE_URL;
@@ -217,7 +228,7 @@ class BlogAPI {
         try {
             const response = await this._fetchResource(this.localManifest, {
                 cacheable: true,
-                timeoutMs: 5000,
+                timeoutMs: 2500,
             });
             if (!response.ok) return [];
             const data = await response.json();
@@ -264,24 +275,28 @@ class BlogAPI {
     }
 
     async listPosts() {
-        const manifestPromise = this._loadManifestPosts();
-        const supabasePromise = this._listSupabasePostsWithTimeout();
-        const [manifestPosts, supabasePosts] = await Promise.all([manifestPromise, supabasePromise]);
-
-        if (Array.isArray(supabasePosts)) {
-            const mergedPosts = this._mergePostLists(supabasePosts, manifestPosts);
-            this._log(`Loaded ${supabasePosts.length} Supabase post(s), merged with ${manifestPosts.length} manifest post(s)`);
-            return mergedPosts;
+        if (this._listCache) {
+            return this._listCache;
         }
 
+        const manifestPosts = await this._loadManifestPosts();
         if (manifestPosts.length) {
-            this._warn('Supabase unavailable; falling back to static manifest posts.');
+            this._listCache = manifestPosts;
             return manifestPosts;
+        }
+
+        if (!this._preferLocalContent()) {
+            const supabasePosts = await this._listSupabasePostsWithTimeout();
+            if (Array.isArray(supabasePosts) && supabasePosts.length) {
+                this._listCache = supabasePosts;
+                return supabasePosts;
+            }
         }
 
         const localPosts = await this._loadLocalPostsParallel();
         if (localPosts.length) {
             this._log(`Loaded ${localPosts.length} post(s) from local markdown`);
+            this._listCache = localPosts;
         }
         return localPosts;
     }
@@ -307,19 +322,41 @@ class BlogAPI {
 
     async getPost(slug) {
         slug = this._normalizeSlug(slug);
-        const [supabasePost, localPost] = await Promise.all([
-            this._getSupabasePostWithTimeout(slug),
-            this._tryGetLocalPost(slug),
-        ]);
+        if (!slug) {
+            throw new Error('Post slug is required');
+        }
 
-        if (supabasePost) return supabasePost;
+        if (this._postCache.has(slug)) {
+            return this._postCache.get(slug);
+        }
 
-        if (localPost) {
-            return {
+        const localPost = await this._tryGetLocalPost(slug);
+        if (localPost && this._isPublished(localPost)) {
+            const resolved = {
                 ...localPost,
-                html: this.markdownToHTML(localPost.body),
+                html: localPost.html || this.markdownToHTML(localPost.body),
                 permalink: this.postPermalink(slug),
             };
+            this._postCache.set(slug, resolved);
+            return resolved;
+        }
+
+        if (!this._preferLocalContent()) {
+            const supabasePost = await this._getSupabasePostWithTimeout(slug);
+            if (supabasePost) {
+                this._postCache.set(slug, supabasePost);
+                return supabasePost;
+            }
+        }
+
+        if (localPost) {
+            const resolved = {
+                ...localPost,
+                html: localPost.html || this.markdownToHTML(localPost.body),
+                permalink: this.postPermalink(slug),
+            };
+            this._postCache.set(slug, resolved);
+            return resolved;
         }
 
         throw new Error(`Post "${slug}" not found`);

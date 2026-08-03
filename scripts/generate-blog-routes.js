@@ -21,10 +21,15 @@ function normalizeSlug(value) {
 
 function buildPostPage(slug, template) {
     const canonical = `https://bloomly.co.ke/blog/${slug}/`;
-    return template.replace(
-        '<link rel="canonical" href="https://bloomly.co.ke/blog/">',
-        `<link rel="canonical" href="${canonical}">`
-    );
+    return template
+        .replace(
+            '<link rel="canonical" href="https://bloomly.co.ke/blog/">',
+            `<link rel="canonical" href="${canonical}">`
+        )
+        .replace(
+            '<link rel="preload" href="/styles.css?v=20260803a" as="style">',
+            `<link rel="preload" href="/content/blog/${slug}.md" as="fetch" crossorigin>\n    <link rel="preload" href="/styles.css?v=20260803a" as="style">`
+        );
 }
 
 function main() {

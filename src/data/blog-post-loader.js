@@ -325,19 +325,11 @@
         if (!section || !grid) return;
         try {
             const posts = await blogAPI.listPosts();
-            const enriched = await Promise.all(posts.map(async (post) => {
-                try {
-                    const content = await blogAPI.getPost(post.slug);
-                    return { ...post, ...content };
-                } catch (error) {
-                    return post;
-                }
-            }));
-            const sameCategory = enriched.filter((post) =>
+            const sameCategory = posts.filter((post) =>
                 post.slug !== currentSlug &&
                 String(post.metadata?.category || '').toLowerCase() === String(category || '').toLowerCase()
             );
-            const fallback = enriched.filter((post) => post.slug !== currentSlug);
+            const fallback = posts.filter((post) => post.slug !== currentSlug);
             const related = (sameCategory.length ? sameCategory : fallback).slice(0, 3);
             if (!related.length) {
                 section.hidden = true;
