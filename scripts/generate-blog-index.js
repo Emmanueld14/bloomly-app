@@ -8,6 +8,8 @@ const {
     loadPublishedPosts,
     buildBlogCardHtml,
     buildCategoryNavHtml,
+    applyFastBlogHead,
+    applyFastBlogScripts,
 } = require('./blog-build-shared');
 
 const blogIndexPath = path.join(root, 'blog', 'index.html');
@@ -31,12 +33,6 @@ function main() {
     let html = fs.readFileSync(blogIndexPath, 'utf8');
     const cardsHtml = posts.map(buildBlogCardHtml).join('');
     const categoriesHtml = buildCategoryNavHtml(posts);
-    const manifestScript = `\n    <script>window.__BLOOMLY_BLOG_MANIFEST__=${JSON.stringify(posts.map((post) => ({
-        slug: post.slug,
-        permalink: `/blog/${post.slug}/`,
-        metadata: post.metadata,
-    })))};</script>`;
-
     html = replaceBetweenMarkers(
         html,
         '<!-- bloomly:blog-posts:start -->',
@@ -51,23 +47,15 @@ function main() {
         `\n                    ${categoriesHtml}\n                `
     );
 
-    if (html.includes('<!-- bloomly:blog-manifest:start -->')) {
-        html = replaceBetweenMarkers(
-            html,
-            '<!-- bloomly:blog-manifest:start -->',
-            '<!-- bloomly:blog-manifest:end -->',
-            manifestScript
-        );
-    } else if (!html.includes('window.__BLOOMLY_BLOG_MANIFEST__')) {
-        html = html.replace('</head>', `${manifestScript}\n</head>`);
-    }
-
     if (!html.includes('data-static-blog-grid="true"')) {
         html = html.replace(
             '<div class="blog-grid" id="blogGrid">',
             '<div class="blog-grid" id="blogGrid" data-static-blog-grid="true">'
         );
     }
+
+    html = applyFastBlogHead(html);
+    html = applyFastBlogScripts(html, 'index');
 
     fs.writeFileSync(blogIndexPath, html);
     console.log(`✅ Pre-rendered ${posts.length} blog card(s) in blog/index.html`);

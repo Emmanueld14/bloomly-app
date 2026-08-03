@@ -25,19 +25,14 @@
         })();
     </script>
     <title>I Don’t Know Anymore - Bloomly Blog</title>
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preload" href="/styles.css?v=20260803b" as="style">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/styles.css?v=20260803b">
+    <link rel="stylesheet" href="/public/blog-fast.css?v=20260804a">
 </head>
 <body>
     <!-- Navigation -->
                 <nav class="navbar" id="navbar">
         <div class="navbar-content">
             <a href="/" class="logo-container">
-                <img src="/logo.png" alt="Bloomly" class="logo-image" height="52" decoding="async">
+                <img src="/logo.svg" alt="Bloomly" class="logo-image" height="52" decoding="async">
             </a>
             <ul class="nav-links" id="navLinks">
                 <li><a href="/">Home</a></li>
@@ -165,19 +160,46 @@
                 <div class="container">
                     <div class="post-share-row" data-post-share>
                         <span>Share this:</span>
-                        <a class="share-pill" data-share-whatsapp target="_blank" rel="noopener noreferrer">Share on WhatsApp</a>
-                        <a class="share-pill" data-share-x target="_blank" rel="noopener noreferrer">Share on X</a>
-                        <button type="button" class="share-pill" data-share-copy>Copy link</button>
+                        <a class="share-pill" href="https://wa.me/?text=I%20Don%E2%80%99t%20Know%20Anymore%20https%3A%2F%2Fbloomly.co.ke%2Fblog%2Fi-dont-know-anymore%2F" target="_blank" rel="noopener noreferrer">Share on WhatsApp</a>
+                        <a class="share-pill" href="https://twitter.com/intent/tweet?text=I%20Don%E2%80%99t%20Know%20Anymore&amp;url=https%3A%2F%2Fbloomly.co.ke%2Fblog%2Fi-dont-know-anymore%2F" target="_blank" rel="noopener noreferrer">Share on X</a>
+                        <button type="button" class="share-pill" data-copy-link>Copy link</button>
                     </div>
                 </div>
             </section>
 
-            <section class="section related-posts-section" data-related-posts-section hidden>
+            <section class="section related-posts-section" data-related-posts-section>
                 <div class="container">
                     <div class="section-header">
                         <h2>More like this</h2>
                     </div>
-                    <div class="blog-grid" data-related-posts></div>
+                    <div class="blog-grid" data-related-posts>
+                    <article class="blog-card" data-post-id="circles" data-category="self-awareness">
+                        <div class="blog-card-image" style="font-size: var(--text-5xl);">🤷</div>
+                        <div class="blog-card-content">
+                            <div class="blog-card-date">April 16, 2026 • Self-Awareness</div>
+                            <h3>Circles 😵‍💫</h3>
+                            <p class="excerpt blog-card-excerpt">&quot;Circles… same thing every day. No change, no wonder, no love for what you do—nothing new. You feel me?</p>
+                            <a href="/blog/circles/" class="blog-card-link">Read More →</a>
+                        </div>
+                    </article>
+                    <article class="blog-card" data-post-id="vive-tu-vida" data-category="self-awareness">
+                        <div class="blog-card-image" style="font-size: var(--text-5xl);">🫶</div>
+                        <div class="blog-card-content">
+                            <div class="blog-card-date">April 13, 2026 • Self awareness</div>
+                            <h3>Vive tu Vida 🌸</h3>
+                            <p class="excerpt blog-card-excerpt">&quot;Is it really wrong to stand up for yourself and choose your own path, even when everyone around you has opinions about how you should live? If everyone sees life differently, should you follow their advice blindly, or experience things for yourself and shape your own reality? And at the end of it all, would you rather live safely within expectations—or take risks, be real, and avoid the regret of never trying?</p>
+                            <a href="/blog/vive-tu-vida/" class="blog-card-link">Read More →</a>
+                        </div>
+                    </article>
+                    <article class="blog-card" data-post-id="not-lonely-just-learning" data-category="mental-health">
+                        <div class="blog-card-image" style="font-size: var(--text-5xl);">🪴</div>
+                        <div class="blog-card-content">
+                            <div class="blog-card-date">April 8, 2026 • Mental Health</div>
+                            <h3>Not Lonely, Just Learning</h3>
+                            <p class="excerpt blog-card-excerpt">What if being alone isn’t loneliness—but the beginning of discovering who you really are?</p>
+                            <a href="/blog/not-lonely-just-learning/" class="blog-card-link">Read More →</a>
+                        </div>
+                    </article></div>
                 </div>
             </section>
 
@@ -226,10 +248,7 @@
         </div>
     </footer>
 
-    <script src="/public/blog-shared.js" defer></script>
-    <script src="/src/data/blog-config.js" defer></script>
-    <script src="/src/data/blog-api.js" defer></script>
-    <script src="/src/data/blog-post-loader.js" defer></script>
+    <script src="/public/blog-post-lite.js" defer></script>
     <script src="/public/page-shell.js" defer></script>
 </body>
 </html>

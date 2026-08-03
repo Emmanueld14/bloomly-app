@@ -11,6 +11,10 @@ const {
     formatDate,
     loadPublishedPosts,
     normalizeAuthorName,
+    applyFastBlogHead,
+    applyFastBlogScripts,
+    buildShareSectionHtml,
+    buildRelatedPostsHtml,
 } = require('./blog-build-shared');
 
 const templatePath = path.join(root, 'blog-post', 'index.html');
@@ -20,7 +24,7 @@ function estimateReadTime(body) {
     return Math.max(1, Math.ceil(words / 200));
 }
 
-function buildPostPage(post, template) {
+function buildPostPage(post, template, allPosts) {
     const slug = post.slug;
     const title = post.metadata.title || slug;
     const author = normalizeAuthorName(post.metadata.author);
@@ -28,8 +32,9 @@ function buildPostPage(post, template) {
     const category = post.metadata.category || 'Mental Health';
     const readTime = estimateReadTime(post.body);
     const canonical = `https://bloomly.co.ke/blog/${slug}/`;
+    const related = buildRelatedPostsHtml(slug, category, allPosts);
 
-    return template
+    let html = template
         .replace(
             '<link rel="canonical" href="https://bloomly.co.ke/blog/">',
             `<link rel="canonical" href="${canonical}">`
@@ -69,7 +74,30 @@ function buildPostPage(post, template) {
                         <p>Loading article...</p>
                     </div>`,
             `<div id="articleBody" class="article-body" data-static-content="true">${post.html}</div>`
+        )
+        .replace(
+            `<div class="post-share-row" data-post-share>
+                        <span>Share this:</span>
+                        <a class="share-pill" data-share-whatsapp target="_blank" rel="noopener noreferrer">Share on WhatsApp</a>
+                        <a class="share-pill" data-share-x target="_blank" rel="noopener noreferrer">Share on X</a>
+                        <button type="button" class="share-pill" data-share-copy>Copy link</button>
+                    </div>`,
+            buildShareSectionHtml(title, canonical)
+        )
+        .replace(
+            '<section class="section related-posts-section" data-related-posts-section hidden>',
+            related.visible
+                ? '<section class="section related-posts-section" data-related-posts-section>'
+                : '<section class="section related-posts-section" data-related-posts-section hidden>'
+        )
+        .replace(
+            '<div class="blog-grid" data-related-posts></div>',
+            `<div class="blog-grid" data-related-posts>${related.sectionHtml}</div>`
         );
+
+    html = applyFastBlogHead(html);
+    html = applyFastBlogScripts(html, 'post');
+    return html;
 }
 
 function main() {
@@ -86,7 +114,7 @@ function main() {
     posts.forEach((post) => {
         const dir = path.join(blogDirOut, post.slug);
         fs.mkdirSync(dir, { recursive: true });
-        fs.writeFileSync(path.join(dir, 'index.html'), buildPostPage(post, template));
+        fs.writeFileSync(path.join(dir, 'index.html'), buildPostPage(post, template, posts));
         created += 1;
     });
 

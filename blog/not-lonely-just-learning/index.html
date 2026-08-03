@@ -25,19 +25,14 @@
         })();
     </script>
     <title>Not Lonely, Just Learning - Bloomly Blog</title>
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preload" href="/styles.css?v=20260803b" as="style">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/styles.css?v=20260803b">
+    <link rel="stylesheet" href="/public/blog-fast.css?v=20260804a">
 </head>
 <body>
     <!-- Navigation -->
                 <nav class="navbar" id="navbar">
         <div class="navbar-content">
             <a href="/" class="logo-container">
-                <img src="/logo.png" alt="Bloomly" class="logo-image" height="52" decoding="async">
+                <img src="/logo.svg" alt="Bloomly" class="logo-image" height="52" decoding="async">
             </a>
             <ul class="nav-links" id="navLinks">
                 <li><a href="/">Home</a></li>
@@ -125,19 +120,46 @@
                 <div class="container">
                     <div class="post-share-row" data-post-share>
                         <span>Share this:</span>
-                        <a class="share-pill" data-share-whatsapp target="_blank" rel="noopener noreferrer">Share on WhatsApp</a>
-                        <a class="share-pill" data-share-x target="_blank" rel="noopener noreferrer">Share on X</a>
-                        <button type="button" class="share-pill" data-share-copy>Copy link</button>
+                        <a class="share-pill" href="https://wa.me/?text=Not%20Lonely%2C%20Just%20Learning%20https%3A%2F%2Fbloomly.co.ke%2Fblog%2Fnot-lonely-just-learning%2F" target="_blank" rel="noopener noreferrer">Share on WhatsApp</a>
+                        <a class="share-pill" href="https://twitter.com/intent/tweet?text=Not%20Lonely%2C%20Just%20Learning&amp;url=https%3A%2F%2Fbloomly.co.ke%2Fblog%2Fnot-lonely-just-learning%2F" target="_blank" rel="noopener noreferrer">Share on X</a>
+                        <button type="button" class="share-pill" data-copy-link>Copy link</button>
                     </div>
                 </div>
             </section>
 
-            <section class="section related-posts-section" data-related-posts-section hidden>
+            <section class="section related-posts-section" data-related-posts-section>
                 <div class="container">
                     <div class="section-header">
                         <h2>More like this</h2>
                     </div>
-                    <div class="blog-grid" data-related-posts></div>
+                    <div class="blog-grid" data-related-posts>
+                    <article class="blog-card" data-post-id="built-different-and-proud-of-it" data-category="mental-health">
+                        <div class="blog-card-image" style="font-size: var(--text-5xl);">🔥</div>
+                        <div class="blog-card-content">
+                            <div class="blog-card-date">January 24, 2026 • Mental Health</div>
+                            <h3>Built Different (And Proud of It)</h3>
+                            <p class="excerpt blog-card-excerpt">Have you ever felt like you don’t fit in no matter how hard you try? Honestly, it ain’t easy choosing to be different, choosing to be kind, choosing to be honest when everyone else is doing the opposite. This piece is me talking about what it’s like to go through hate, isolation, and being misunderstood at school just because I stayed true to myself. It’s about the pain, the growth, and learning to stand alone without losing who I am. And in the end, it’s really just a message to anyone out there who feels different: don’t give up on yourself — your light matters.</p>
+                            <a href="/blog/built-different-and-proud-of-it/" class="blog-card-link">Read More →</a>
+                        </div>
+                    </article>
+                    <article class="blog-card" data-post-id="when-effort-turned-into-exhaustion" data-category="mental-health">
+                        <div class="blog-card-image" style="font-size: var(--text-5xl);">👓</div>
+                        <div class="blog-card-content">
+                            <div class="blog-card-date">January 10, 2026 • Mental Health</div>
+                            <h3>When Effort Turned Into Exhaustion</h3>
+                            <p class="excerpt blog-card-excerpt">This piece explores the quiet fear of feeling like you’ve lost your intelligence and the frustration that follows when effort doesn’t bring results. </p>
+                            <a href="/blog/when-effort-turned-into-exhaustion/" class="blog-card-link">Read More →</a>
+                        </div>
+                    </article>
+                    <article class="blog-card" data-post-id="do-you-still-feel-too-attached" data-category="mental-health">
+                        <div class="blog-card-image" style="font-size: var(--text-5xl);">🪴</div>
+                        <div class="blog-card-content">
+                            <div class="blog-card-date">January 2, 2026 • Mental Health</div>
+                            <h3>Do You Still Feel Too Attached?</h3>
+                            <p class="excerpt blog-card-excerpt">Have you ever felt attached to someone so bad, and it seems you cant leave, let&#39;s talk more on that, shall we? ☺️</p>
+                            <a href="/blog/do-you-still-feel-too-attached/" class="blog-card-link">Read More →</a>
+                        </div>
+                    </article></div>
                 </div>
             </section>
 
@@ -186,10 +208,7 @@
         </div>
     </footer>
 
-    <script src="/public/blog-shared.js" defer></script>
-    <script src="/src/data/blog-config.js" defer></script>
-    <script src="/src/data/blog-api.js" defer></script>
-    <script src="/src/data/blog-post-loader.js" defer></script>
+    <script src="/public/blog-post-lite.js" defer></script>
     <script src="/public/page-shell.js" defer></script>
 </body>
 </html>
