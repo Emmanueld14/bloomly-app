@@ -11,13 +11,7 @@
 /public/blog-fast.css
   Cache-Control: public, max-age=604800, immutable
 
-/public/blog-filter.js
-  Cache-Control: public, max-age=604800, immutable
-
-/public/blog-post-lite.js
-  Cache-Control: public, max-age=604800, immutable
-
-/public/page-shell.js
+/public/blog-shell.js
   Cache-Control: public, max-age=604800, immutable
 
 /script.js

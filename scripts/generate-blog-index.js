@@ -55,7 +55,7 @@ function main() {
     }
 
     html = applyFastBlogHead(html);
-    html = applyFastBlogScripts(html, 'index');
+    html = applyFastBlogScripts(html);
 
     fs.writeFileSync(blogIndexPath, html);
     console.log(`✅ Pre-rendered ${posts.length} blog card(s) in blog/index.html`);

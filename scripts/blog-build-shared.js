@@ -187,10 +187,17 @@ function normalizeAuthorName(value) {
     return author;
 }
 
-const BLOG_CSS_VERSION = '20260804a';
+const BLOG_CSS_VERSION = '20260804b';
+
+function getInlinedBlogCss() {
+    const cssPath = path.join(root, 'public', 'blog-fast.css');
+    if (!fs.existsSync(cssPath)) return '';
+    return fs.readFileSync(cssPath, 'utf8');
+}
 
 function applyFastBlogHead(html) {
     let output = html;
+    const inlinedCss = `<style>${getInlinedBlogCss()}</style>`;
 
     output = output.replace(
         /<link rel="preconnect" href="https:\/\/fonts\.googleapis\.com">\s*<link rel="preconnect" href="https:\/\/fonts\.gstatic\.com" crossorigin>\s*/g,
@@ -209,10 +216,18 @@ function applyFastBlogHead(html) {
         ''
     );
     output = output.replace(
-        /<link rel="stylesheet" href="\/styles\.css[^"]*">\s*/g,
-        `<link rel="stylesheet" href="/public/blog-fast.css?v=${BLOG_CSS_VERSION}">\n`
+        /<link rel="stylesheet" href="\/public\/blog-fast\.css[^"]*">\s*/g,
+        `${inlinedCss}\n`
     );
-    output = output.replace(/src="\/logo\.png"/g, 'src="/logo.svg"');
+    output = output.replace(
+        /<link rel="stylesheet" href="\/styles\.css[^"]*">\s*/g,
+        `${inlinedCss}\n`
+    );
+    output = output.replace(
+        /<!-- bloomly:blog-styles:placeholder -->\s*/,
+        `${inlinedCss}\n`
+    );
+    output = output.replace(/src="\/logo\.png"/g, 'src="/logo.svg" width="52" height="44"');
     output = output.replace(
         /<!-- bloomly:blog-manifest:start -->[\s\S]*?<!-- bloomly:blog-manifest:end -->\s*/g,
         ''
@@ -221,17 +236,22 @@ function applyFastBlogHead(html) {
     return output;
 }
 
-function applyFastBlogScripts(html, mode) {
-    const indexScripts = `    <script src="/public/blog-filter.js" defer></script>
-    <script src="/public/page-shell.js" defer></script>`;
-    const postScripts = `    <script src="/public/blog-post-lite.js" defer></script>
-    <script src="/public/page-shell.js" defer></script>`;
-    const replacement = mode === 'index' ? indexScripts : postScripts;
+function applyFastBlogScripts(html) {
+    const scripts = `    <script src="/public/blog-shell.js" defer></script>`;
 
-    return html.replace(
-        /<script src="\/public\/blog-shared\.js" defer><\/script>\s*<script src="\/src\/data\/blog-config\.js" defer><\/script>\s*<script src="\/src\/data\/blog-api\.js" defer><\/script>\s*<script src="\/src\/data\/blog-(?:loader|post-loader)\.js" defer><\/script>\s*<script src="\/public\/page-shell\.js" defer><\/script>/,
-        replacement
-    );
+    return html
+        .replace(
+            /<script src="\/public\/blog-shared\.js" defer><\/script>\s*<script src="\/src\/data\/blog-config\.js" defer><\/script>\s*<script src="\/src\/data\/blog-api\.js" defer><\/script>\s*<script src="\/src\/data\/blog-(?:loader|post-loader)\.js" defer><\/script>\s*<script src="\/public\/page-shell\.js" defer><\/script>/,
+            scripts
+        )
+        .replace(
+            /<script src="\/public\/blog-filter\.js" defer><\/script>\s*<script src="\/public\/page-shell\.js" defer><\/script>/,
+            scripts
+        )
+        .replace(
+            /<script src="\/public\/blog-post-lite\.js" defer><\/script>\s*<script src="\/public\/page-shell\.js" defer><\/script>/,
+            scripts
+        );
 }
 
 function buildShareSectionHtml(title, canonicalUrl) {

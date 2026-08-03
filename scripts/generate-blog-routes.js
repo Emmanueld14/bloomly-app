@@ -96,7 +96,7 @@ function buildPostPage(post, template, allPosts) {
         );
 
     html = applyFastBlogHead(html);
-    html = applyFastBlogScripts(html, 'post');
+    html = applyFastBlogScripts(html);
     return html;
 }
 
