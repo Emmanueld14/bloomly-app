@@ -32,6 +32,11 @@
 /start /start/index.html 200
 /start/ /start/index.html 200
 
+# Resources routing
+/resources /resources/index.html 200
+/resources/ /resources/index.html 200
+/resources/:slug /resources/:slug/ 301
+
 # Terms routing
 /terms /terms/index.html 200
 /terms/ /terms/index.html 200

@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Bloomly Resources for study support, mental wellness, university planning, and future Bloomly student tools.">
-    <meta name="keywords" content="Bloomly resources, study resources, mental wellness, university applications, student tools">
+    <meta name="description" content="Practical Bloomly guides for study, wellness, and planning — written for Kenyan students, not copied from other sites.">
+    <meta name="keywords" content="Bloomly resources, student guides, mental wellness, study tips, Kenya teens">
     <meta name="author" content="Bloomly Team">
     <meta property="og:title" content="Resources | Bloomly">
-    <meta property="og:description" content="Curated study, wellness, and university planning resources for Kenyan students from Bloomly.">
+    <meta property="og:description" content="Original Bloomly guides on study, wellness, and future planning — calm, practical, and made for Kenyan students.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://bloomly.co.ke/resources/">
     <meta property="og:image" content="https://bloomly.co.ke/og-image.png">
@@ -18,15 +18,14 @@
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preload" href="/styles.css?v=20260719a" as="style">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/styles.css?v=20260801a">
+    <link rel="stylesheet" href="/styles.css?v=20260804c">
 </head>
 <body class="resources-page">
-                <nav class="navbar" id="navbar">
+    <nav class="navbar" id="navbar">
         <div class="navbar-content">
             <a href="/" class="logo-container">
-                <img src="/logo.png" alt="Bloomly" class="logo-image" height="52" decoding="async">
+                <img src="/logo.svg" alt="Bloomly" class="logo-image" width="52" height="44" decoding="async">
             </a>
             <ul class="nav-links" id="navLinks">
                 <li><a href="/">Home</a></li>
@@ -49,103 +48,72 @@
             <div class="floating-shape resources-orb resources-orb-one" aria-hidden="true"></div>
             <div class="floating-shape resources-orb resources-orb-two" aria-hidden="true"></div>
             <div class="container">
-                <div class="resources-hero-layout">
-                    <div class="resources-hero-copy">
-                        <p class="section-kicker">Resource library</p>
-                        <h1 id="resources-page-title">Helpful material students can read, use, or save for later.</h1>
-                        <p>Bloomly Resources can hold our own custom articles, practical templates, and carefully selected links from trusted websites.</p>
-                        <div class="resource-quick-actions" aria-label="Resource quick actions">
-                            <a href="#bloomly-materials">Bloomly articles</a>
-                            <a href="#curated-links">Curated links</a>
-                            <a href="#resource-submit">Add material</a>
-                        </div>
-                    </div>
-                    <aside class="resource-feature-card" aria-label="Featured resource format">
-                        <span class="resource-type-pill">Featured format</span>
-                        <h2>Student help cards</h2>
-                        <p>Short, friendly cards that link to a full Bloomly article, template download, video, or trusted external guide.</p>
-                    </aside>
+                <div class="resources-hero-simple">
+                    <p class="section-kicker">Bloomly guides</p>
+                    <h1 id="resources-page-title">Practical help, written by us.</h1>
+                    <p>Short guides on school, wellness, and planning — calm and clear, made for Kenyan students. Not blog diaries. Not links to random websites. Just Bloomly.</p>
                 </div>
             </div>
         </section>
 
-        <section class="section resources-page-section" aria-labelledby="resources-list-title">
+        <section class="section resources-library-section" aria-labelledby="resources-list-title">
             <div class="container">
                 <div class="section-header home-section-header">
-                    <p class="section-kicker">Explore by need</p>
-                    <h2 id="resources-list-title">Browse by what you need today</h2>
-                    <p>Each category can mix Bloomly-created articles with external links that have been reviewed before publishing.</p>
+                    <h2 id="resources-list-title">Browse the library</h2>
+                    <p>Tap a guide to read the full article. Everything here is original Bloomly content.</p>
                 </div>
-                <div class="resources-grid" id="resourceCardsGrid" data-resource-cards></div>
-            </div>
-        </section>
 
-        <section class="section resource-materials-section" id="bloomly-materials" aria-labelledby="materials-title">
-            <div class="container">
-                <div class="section-header home-section-header">
-                    <p class="section-kicker">Bloomly-made</p>
-                    <h2 id="materials-title">Custom articles and student tools we can publish here</h2>
-                    <p>Use these cards as placeholders for original Bloomly material written in a calm, practical voice.</p>
-                </div>
-                <div class="materials-grid">
-                    <a class="material-card material-card-featured" href="#">
-                        <span class="resource-type-pill">Article</span>
-                        <h3>How to reset after a bad school week</h3>
-                        <p>A gentle step-by-step article for students who feel behind, tired, or disappointed.</p>
-                        <strong>Draft in Bloomly</strong>
-                    </a>
-                    <a class="material-card" href="#">
-                        <span class="resource-type-pill">Template</span>
-                        <h3>7-day study rhythm planner</h3>
-                        <p>A printable or digital planner for balancing revision, rest, and small wins.</p>
-                        <strong>Coming soon</strong>
-                    </a>
-                    <a class="material-card" href="#">
-                        <span class="resource-type-pill">Guide</span>
-                        <h3>Personal statement starter pack</h3>
-                        <p>Prompts for writing about growth, leadership, community, and future goals.</p>
-                        <strong>Coming soon</strong>
-                    </a>
-                    <a class="material-card" href="#">
-                        <span class="resource-type-pill">Checklist</span>
-                        <h3>Exam week calm checklist</h3>
-                        <p>Simple reminders for sleep, preparation, breathing, and asking for help early.</p>
-                        <strong>Coming soon</strong>
-                    </a>
-                </div>
-            </div>
-        </section>
+                <nav class="resource-filter-nav" aria-label="Filter guides by topic">
+                    <button type="button" class="resource-filter-btn is-active" data-filter="all">All</button>
+                    <button type="button" class="resource-filter-btn" data-filter="wellness">Mental wellness</button>
+                    <button type="button" class="resource-filter-btn" data-filter="study">Study &amp; school</button>
+                    <button type="button" class="resource-filter-btn" data-filter="planning">Future planning</button>
+                </nav>
 
-        <section class="section curated-links-section" id="curated-links" aria-labelledby="curated-links-title">
-            <div class="container">
-                <div class="resource-editor-panel" id="resource-submit">
-                    <div>
-                        <p class="section-kicker">Curated help</p>
-                        <h2 id="curated-links-title">A place for trusted websites and useful outside material</h2>
-                        <p>Bloomly can link to credible resources while keeping the page student-friendly. Each link can include a note explaining why it is helpful.</p>
-                    </div>
-                    <div class="resource-submit-card">
-                        <h3>Add a resource idea</h3>
-                        <p>Future contributors can submit a Bloomly article draft, a trusted website, or a tool students should know about.</p>
-                        <a class="btn btn-primary" href="/subscribe/">Get updates</a>
-                    </div>
-                </div>
-                <div class="curated-link-grid">
-                    <a class="curated-link-card" href="https://www.one2onekenya.org/help/call" target="_blank" rel="noopener noreferrer">
-                        <span>External support</span>
-                        <h3>Kenya crisis support contacts</h3>
-                        <p>Official contact options for urgent emotional or crisis support.</p>
+                <div class="resource-guides-grid" id="resourceGuidesGrid">
+                    <!-- bloomly:resource-guides:start -->
+                    <a class="resource-guide-card" href="/resources/reset-after-a-bad-week/" data-category="wellness">
+                        <span class="resource-guide-emoji" aria-hidden="true">🌱</span>
+                        <span class="resource-type-pill">Mental wellness</span>
+                        <h3>How to Reset After a Bad School Week</h3>
+                        <p>A gentle reset plan for when school felt heavy, messy, or disappointing — without pretending the week did not happen.</p>
+                        <span class="resource-guide-meta">4 min read · Bloomly Guide</span>
                     </a>
-                    <a class="curated-link-card" href="https://www.who.int/health-topics/adolescent-health" target="_blank" rel="noopener noreferrer">
-                        <span>External learning</span>
-                        <h3>Adolescent health overview</h3>
-                        <p>Helpful context for youth wellbeing from a global health source.</p>
+                    <a class="resource-guide-card" href="/resources/study-rhythm-without-burnout/" data-category="study">
+                        <span class="resource-guide-emoji" aria-hidden="true">📚</span>
+                        <span class="resource-type-pill">Study &amp; school</span>
+                        <h3>Build a Study Rhythm Without Burning Out</h3>
+                        <p>How to study steadily in Kenyan school life — with breaks, boundaries, and room to breathe.</p>
+                        <span class="resource-guide-meta">5 min read · Bloomly Guide</span>
                     </a>
-                    <a class="curated-link-card" href="#">
-                        <span>Bloomly draft</span>
-                        <h3>Scholarship finder guide</h3>
-                        <p>A future curated list of scholarship search tips and application reminders.</p>
+                    <a class="resource-guide-card" href="/resources/exam-week-calm-checklist/" data-category="study">
+                        <span class="resource-guide-emoji" aria-hidden="true">✅</span>
+                        <span class="resource-type-pill">Study &amp; school</span>
+                        <h3>Exam Week Calm Checklist</h3>
+                        <p>A simple before-and-during checklist so exam week feels organised, not chaotic.</p>
+                        <span class="resource-guide-meta">3 min read · Bloomly Guide</span>
                     </a>
+                    <a class="resource-guide-card" href="/resources/personal-statement-starter/" data-category="planning">
+                        <span class="resource-guide-emoji" aria-hidden="true">✍️</span>
+                        <span class="resource-type-pill">Future planning</span>
+                        <h3>Personal Statement Starter Prompts</h3>
+                        <p>Honest writing prompts to help you begin a personal statement or scholarship essay — without sounding like someone else.</p>
+                        <span class="resource-guide-meta">6 min read · Bloomly Guide</span>
+                    </a>
+                    <a class="resource-guide-card" href="/resources/stress-vs-burnout/" data-category="wellness">
+                        <span class="resource-guide-emoji" aria-hidden="true">💙</span>
+                        <span class="resource-type-pill">Mental wellness</span>
+                        <h3>Stress vs Burnout: Know the Difference</h3>
+                        <p>Stress and burnout feel similar on the surface, but they need different responses. Here is how to tell them apart.</p>
+                        <span class="resource-guide-meta">4 min read · Bloomly Guide</span>
+                    </a>
+                    <a class="resource-guide-card" href="/resources/asking-for-help/" data-category="wellness">
+                        <span class="resource-guide-emoji" aria-hidden="true">🤝</span>
+                        <span class="resource-type-pill">Mental wellness</span>
+                        <h3>How to Ask for Help Without Feeling Weak</h3>
+                        <p>Practical ways to reach out when school, friendships, or life feels too heavy to carry alone.</p>
+                        <span class="resource-guide-meta">4 min read · Bloomly Guide</span>
+                    </a><!-- bloomly:resource-guides:end -->
                 </div>
             </div>
         </section>
@@ -169,8 +137,8 @@
                 </div>
                 <div class="footer-section">
                     <h4>Get Support</h4>
-                    <p class="footer-support-note">Bloomly is not an emergency service. For urgent crisis or suicide support in Kenya, use the national helpline contacts:</p>
-                    <a href="https://www.one2onekenya.org/help/call" target="_blank" rel="noopener noreferrer">Kenya National Crisis Support (1190) - View official contact options</a>
+                    <p class="footer-support-note">Bloomly is not an emergency service. For urgent crisis or suicide support in Kenya, call <strong>1190</strong> or visit:</p>
+                    <a href="https://www.one2onekenya.org/help/call" target="_blank" rel="noopener noreferrer">Kenya National Crisis Support (1190)</a>
                 </div>
             </div>
             <div class="footer-bottom">
@@ -180,6 +148,6 @@
     </footer>
 
     <script src="/public/page-shell.js" defer></script>
-    <script src="/public/resources-page.js" defer></script>
+    <script src="/public/resources-filter.js" defer></script>
 </body>
 </html>
