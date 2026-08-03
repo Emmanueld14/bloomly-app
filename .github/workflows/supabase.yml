@@ -66,6 +66,7 @@ jobs:
             fi
             echo "Database password synced to Supabase."
           fi
+          echo "::add-mask::${PASSWORD}"
           echo "SUPABASE_DB_PASSWORD=${PASSWORD}" >> "${GITHUB_ENV}"
 
       - name: Link Supabase project
