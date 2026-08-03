@@ -22,9 +22,35 @@ jobs:
         with:
           version: 2.84.2
 
+      - name: Restore paused Supabase project
+        if: env.SUPABASE_ACCESS_TOKEN != ''
+        run: |
+          set -euo pipefail
+          API="https://api.supabase.com/v1/projects/${SUPABASE_PROJECT_ID}"
+          status="$(curl -sS -H "Authorization: Bearer ${SUPABASE_ACCESS_TOKEN}" "${API}" | jq -r '.status // empty')"
+          echo "Project status: ${status:-unknown}"
+          if [ "${status}" = "INACTIVE" ] || [ "${status}" = "PAUSED" ]; then
+            echo "Restoring paused project..."
+            curl -sS -X POST -H "Authorization: Bearer ${SUPABASE_ACCESS_TOKEN}" "${API}/restore"
+            for attempt in $(seq 1 30); do
+              sleep 10
+              status="$(curl -sS -H "Authorization: Bearer ${SUPABASE_ACCESS_TOKEN}" "${API}" | jq -r '.status // empty')"
+              echo "Restore attempt ${attempt}: ${status:-unknown}"
+              if [ "${status}" = "ACTIVE_HEALTHY" ] || [ "${status}" = "ACTIVE_UNHEALTHY" ]; then
+                echo "Project is active."
+                break
+              fi
+            done
+          fi
+
       - name: Link Supabase project
         if: env.SUPABASE_ACCESS_TOKEN != ''
-        run: supabase link --project-ref $SUPABASE_PROJECT_ID
+        run: |
+          if [ -n "${SUPABASE_DB_PASSWORD:-}" ]; then
+            supabase link --project-ref "$SUPABASE_PROJECT_ID" --password "$SUPABASE_DB_PASSWORD"
+          else
+            supabase link --project-ref "$SUPABASE_PROJECT_ID"
+          fi
 
       - name: Repair legacy migration history
         if: env.SUPABASE_ACCESS_TOKEN != ''
