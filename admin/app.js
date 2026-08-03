@@ -836,6 +836,10 @@
                         } catch {
                             // Ignore localStorage failures.
                         }
+                        showToast(
+                            'Published to Supabase. Run the “Sync CMS content” GitHub Action to update the live site.',
+                            'info'
+                        );
                     }
                     await loadPosts();
                     void loadDashboard();
