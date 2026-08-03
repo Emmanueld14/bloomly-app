@@ -378,6 +378,25 @@
         }
     }
 
+    function hasStaticPostContent() {
+        const body = document.getElementById('articleBody');
+        return Boolean(body?.hasAttribute('data-static-content') && body.innerHTML.trim());
+    }
+
+    function hydrateStaticPost(slug) {
+        const postWrapper = document.querySelector('.post');
+        const postTitle = document.getElementById('articleTitle')?.textContent?.trim() || slug.replace(/-/g, ' ');
+        const postAuthor = normalizeAuthorName(document.getElementById('articleAuthorName')?.textContent || 'Manuel Muhunami');
+        const category = postWrapper?.dataset.postCategory || 'Mental Health';
+
+        document.title = `${postTitle} - Bloomly Blog`;
+        document.body.dataset.postAuthor = postAuthor;
+        renderShareSection(postTitle);
+        renderAuthorCard(postAuthor);
+        initReadingProgress();
+        void renderRelatedPosts(slug, category);
+    }
+
     // Load and render the post
     async function loadPost() {
         const slug = (window.BloomlyBlog?.resolveBlogSlug || resolveBlogSlug)();
@@ -402,6 +421,11 @@
         setCanonicalUrl(slug);
         setPostUnavailableState(false);
         showPostView();
+
+        if (hasStaticPostContent()) {
+            hydrateStaticPost(slug);
+            return;
+        }
 
         // Keep post wrapper in sync for modular interactions
         const postWrapper = document.querySelector('.post');

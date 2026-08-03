@@ -58,6 +58,9 @@
     }
 
     async function fetchLegacyPosts() {
+        if (Array.isArray(window.__BLOOMLY_BLOG_MANIFEST__) && window.__BLOOMLY_BLOG_MANIFEST__.length) {
+            return [];
+        }
         try {
             const response = await fetch('/content/blog/legacy.json', { cache: 'default' });
             if (!response.ok) {
@@ -321,6 +324,87 @@
         renderPostsForCategory(blogGrid, activeCategorySlug);
     }
 
+    function hydratePostsFromInlineManifest() {
+        if (!Array.isArray(window.__BLOOMLY_BLOG_MANIFEST__) || !window.__BLOOMLY_BLOG_MANIFEST__.length) {
+            return null;
+        }
+
+        return window.__BLOOMLY_BLOG_MANIFEST__
+            .map((post) => ({
+                ...post,
+                slug: normalizePostSlug(post.slug || post.metadata?.slug),
+                metadata: post.metadata || {},
+            }))
+            .filter((post) => post.slug && isPublishedPost(post));
+    }
+
+    function setupBlogInteractivity(blogGrid) {
+        categoryOptions = buildCategoryOptionsFromPosts(cachedPosts);
+
+        if (blogGrid.dataset.staticBlogGrid !== 'true') {
+            const defaultCategories = window.BloomlyBlog?.getDefaultBlogCategories?.() || [];
+            window.BloomlyBlog?.renderBlogCategoryPanel({
+                categories: [...defaultCategories, ...categoryOptions.filter((item) => item.slug !== 'all')],
+                activeSlug: activeCategorySlug || 'all',
+                baseUrl: '/blog'
+            });
+        }
+
+        const nav = document.querySelector('[data-blog-category-panel]');
+        if (nav && nav.dataset.blogNavReady !== 'true') {
+            nav.dataset.blogNavReady = 'true';
+            nav.addEventListener('click', (event) => {
+                const link = event.target.closest('[data-category-slug]');
+                if (!link) return;
+                event.preventDefault();
+                const slug = link.dataset.categorySlug || 'all';
+                setActiveCategory(blogGrid, slug, true);
+            });
+        }
+
+        const searchInput = document.querySelector('[data-blog-search]');
+        if (searchInput && searchInput.dataset.blogSearchReady !== 'true') {
+            searchInput.dataset.blogSearchReady = 'true';
+            searchInput.addEventListener('input', () => {
+                activeSearchQuery = searchInput.value.trim().toLowerCase();
+                visiblePostCount = 6;
+                renderPostsForCategory(blogGrid, activeCategorySlug);
+            });
+        }
+
+        if (!window.__bloomlyBlogPopstateReady) {
+            window.__bloomlyBlogPopstateReady = true;
+            window.addEventListener('popstate', () => {
+                const slug = window.BloomlyBlog?.getBlogCategoryFromUrl?.() || 'all';
+                setActiveCategory(blogGrid, slug, false);
+            });
+        }
+    }
+
+    function initializeStaticBlogGrid(blogGrid) {
+        const inlinePosts = hydratePostsFromInlineManifest();
+        if (!inlinePosts?.length) {
+            return false;
+        }
+
+        cachedPosts = inlinePosts.sort((a, b) => {
+            const dateA = new Date(a.metadata.date || 0);
+            const dateB = new Date(b.metadata.date || 0);
+            return dateB - dateA;
+        });
+
+        activeCategorySlug = window.BloomlyBlog?.getBlogCategoryFromUrl?.() || 'all';
+        setupBlogInteractivity(blogGrid);
+
+        if (activeCategorySlug !== 'all') {
+            setActiveCategory(blogGrid, activeCategorySlug, false);
+        } else {
+            updateCategoryNav(activeCategorySlug);
+        }
+
+        return true;
+    }
+
     // Load and render blog posts
     async function loadBlogPosts() {
         const blogGrid = document.getElementById('blogGrid');
@@ -329,11 +413,9 @@
             return;
         }
 
-        blogGrid.innerHTML = `
-            <article class="blog-card blog-card-skeleton" aria-hidden="true"></article>
-            <article class="blog-card blog-card-skeleton" aria-hidden="true"></article>
-            <article class="blog-card blog-card-skeleton" aria-hidden="true"></article>
-        `;
+        if (initializeStaticBlogGrid(blogGrid)) {
+            return;
+        }
 
         try {
             logDebug('[Bloomly Blog] Fetching published posts.');
@@ -378,43 +460,9 @@
                 return dateB - dateA;
             });
             cachedPosts = finalPosts;
-
-            const derivedCategories = buildCategoryOptionsFromPosts(finalPosts);
-            const defaultCategories = window.BloomlyBlog?.getDefaultBlogCategories?.() || [];
-            categoryOptions = (window.BloomlyBlog?.renderBlogCategoryPanel({
-                categories: [...defaultCategories, ...derivedCategories],
-                activeSlug: window.BloomlyBlog?.getBlogCategoryFromUrl?.() || 'all',
-                baseUrl: '/blog'
-            }) || {}).categories || derivedCategories;
-
             activeCategorySlug = window.BloomlyBlog?.getBlogCategoryFromUrl?.() || 'all';
             setActiveCategory(blogGrid, activeCategorySlug, false);
-
-            const nav = document.querySelector('[data-blog-category-panel]');
-            if (nav) {
-                nav.addEventListener('click', (event) => {
-                    const link = event.target.closest('[data-category-slug]');
-                    if (!link) return;
-                    event.preventDefault();
-                    const slug = link.dataset.categorySlug || 'all';
-                    setActiveCategory(blogGrid, slug, true);
-                });
-            }
-
-            const searchInput = document.querySelector('[data-blog-search]');
-            if (searchInput && searchInput.dataset.blogSearchReady !== 'true') {
-                searchInput.dataset.blogSearchReady = 'true';
-                searchInput.addEventListener('input', () => {
-                    activeSearchQuery = searchInput.value.trim().toLowerCase();
-                    visiblePostCount = 6;
-                    renderPostsForCategory(blogGrid, activeCategorySlug);
-                });
-            }
-
-            window.addEventListener('popstate', () => {
-                const slug = window.BloomlyBlog?.getBlogCategoryFromUrl?.() || 'all';
-                setActiveCategory(blogGrid, slug, false);
-            });
+            setupBlogInteractivity(blogGrid);
 
         } catch (error) {
             warnDebug('Error loading blog posts:', error);

@@ -279,6 +279,11 @@ class BlogAPI {
             return this._listCache;
         }
 
+        if (typeof window !== 'undefined' && Array.isArray(window.__BLOOMLY_BLOG_MANIFEST__) && window.__BLOOMLY_BLOG_MANIFEST__.length) {
+            this._listCache = window.__BLOOMLY_BLOG_MANIFEST__;
+            return this._listCache;
+        }
+
         const manifestPosts = await this._loadManifestPosts();
         if (manifestPosts.length) {
             this._listCache = manifestPosts;
