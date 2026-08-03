@@ -8,6 +8,9 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      secrets: write
     env:
       SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
       SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
@@ -42,6 +45,29 @@ jobs:
               fi
             done
           fi
+
+      - name: Ensure Supabase database password
+        if: env.SUPABASE_ACCESS_TOKEN != '' && env.SUPABASE_DB_PASSWORD == ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          PASSWORD="$(openssl rand -hex 24)"
+          echo "SUPABASE_DB_PASSWORD is missing — setting a new database password via Supabase Management API..."
+          http_code="$(curl -sS -o /tmp/supabase-password-response.json -w "%{http_code}" \
+            -X PATCH \
+            -H "Authorization: Bearer ${SUPABASE_ACCESS_TOKEN}" \
+            -H "Content-Type: application/json" \
+            "https://api.supabase.com/v1/projects/${SUPABASE_PROJECT_ID}/database/password" \
+            -d "{\"password\":\"${PASSWORD}\"}")"
+          if [ "${http_code}" -lt 200 ] || [ "${http_code}" -ge 300 ]; then
+            cat /tmp/supabase-password-response.json
+            echo "::error::Failed to set database password (HTTP ${http_code})."
+            exit 1
+          fi
+          echo "${PASSWORD}" | gh secret set SUPABASE_DB_PASSWORD
+          echo "SUPABASE_DB_PASSWORD=${PASSWORD}" >> "${GITHUB_ENV}"
+          echo "Saved SUPABASE_DB_PASSWORD to GitHub Actions secrets."
 
       - name: Link Supabase project
         if: env.SUPABASE_ACCESS_TOKEN != ''
