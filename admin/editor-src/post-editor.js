@@ -598,12 +598,23 @@ export class BlogPostEditor {
 
     async save({ publish = false, silent = false, autosave = false } = {}) {
         const payload = this.getPayload();
-        if (publish) {
+
+        if (autosave && this.currentPost?.id) {
+            const priorStatus = this.currentPost.status ||
+                (this.currentPost.published === true || this.currentPost.published === 'true' ? 'published' : 'draft');
+            payload.status = ['draft', 'published', 'scheduled'].includes(priorStatus) ? priorStatus : 'draft';
+            payload.published = payload.status === 'published';
+        } else if (publish) {
             payload.status = 'published';
             payload.published = true;
             setIfPresent(getField(this.root, '#postStatus'), 'published');
+        } else {
+            payload.status = 'draft';
+            payload.published = false;
+            setIfPresent(getField(this.root, '#postStatus'), 'draft');
         }
-        this.validatePayload(payload, { publish });
+
+        this.validatePayload(payload, { publish: publish && !autosave });
 
         const saveButtons = Array.from(this.root.querySelectorAll('[data-save-post]'));
         const publishButtons = Array.from(this.root.querySelectorAll('[data-publish-post]'));
@@ -640,8 +651,12 @@ export class BlogPostEditor {
             }
             return post;
         } catch (error) {
-            this.setSaveStatus(error.message || 'Save failed');
-            if (!silent) this.notify(error.message || 'Save failed.', 'error');
+            const apiMessage = error?.detail?.data?.error;
+            const schemaHint = error?.detail?.data?.schemaFixHint;
+            const message = apiMessage || error.message || 'Save failed.';
+            const fullMessage = schemaHint ? `${message} ${schemaHint}` : message;
+            this.setSaveStatus(message);
+            if (!silent) this.notify(fullMessage, 'error');
             throw error;
         } finally {
             if (!silent) {

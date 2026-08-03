@@ -9,8 +9,8 @@
             subtitle: 'Monitor platform performance, content workflows, and operations.'
         },
         blog: {
-            title: 'Blog Posts',
-            subtitle: 'Create, import, and publish content from Supabase and GitHub.'
+            title: 'Content',
+            subtitle: 'Write blog posts and resource guides, then publish to Supabase.'
         },
         bookings: {
             title: 'Charla Bookings',
@@ -214,7 +214,11 @@
             }
         }
 
-        throw lastError || new Error('Failed to fetch admin data. Deploy Supabase functions or set Cloudflare SUPABASE_* env vars.');
+        throw lastError || new Error(
+            lastError?.detail?.data?.error ||
+                lastError?.message ||
+                'Failed to reach the admin API. Check GitHub login and Supabase deployment.'
+        );
     }
 
     function setSidebarOpen(open) {
@@ -467,7 +471,7 @@
             showAdminError(error.message || 'Could not load blog posts.');
             const tbody = document.querySelector('#postsTable tbody');
             if (tbody) {
-                tbody.innerHTML = '<tr><td colspan="7">Could not load posts. Check Cloudflare env vars (SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY).</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7">Could not load posts. Sign in again or check Supabase admin functions.</td></tr>';
             }
         }
     }

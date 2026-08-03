@@ -64,10 +64,6 @@
                     </div>
                 </div>
                 <div class="admin-topbar-actions">
-                    <label class="admin-search-placeholder" aria-label="Search placeholder">
-                        <span>⌘K</span>
-                        <input type="search" placeholder="Search posts, bookings, and reports...">
-                    </label>
                     <button type="button" class="btn btn-neutral" id="adminThemeToggle" aria-pressed="false">Dark mode</button>
                 </div>
             </header>
@@ -79,38 +75,30 @@
                     <article class="admin-panel admin-welcome-panel">
                         <p class="admin-kicker">Bloomly command center</p>
                         <h2>Welcome back 👋</h2>
-                        <p>Everything you need to manage content, bookings, subscriber growth, and counsellor intake in one premium workspace.</p>
+                        <p>Manage content, bookings, subscribers, and counsellor applications.</p>
                         <div class="admin-quick-actions">
-                            <button type="button" class="btn btn-primary" data-admin-nav="blog">Review blog queue</button>
+                            <button type="button" class="btn btn-primary" data-admin-nav="blog">Write content</button>
                             <button type="button" class="btn btn-neutral" data-admin-nav="bookings">Track bookings</button>
                             <button type="button" class="btn btn-neutral" data-admin-nav="subscribers">Open subscribers</button>
-                            <button type="button" class="btn btn-secondary" data-admin-nav="counsellors">Review applications</button>
                         </div>
-                    </article>
-                    <article class="admin-panel admin-notification-panel">
-                        <h3>Notifications</h3>
-                        <ul>
-                            <li><span class="dot info"></span><div><strong>Data sync enabled</strong><p>Supabase + GitHub sources are linked in real time.</p></div></li>
-                            <li><span class="dot warning"></span><div><strong>Workflow reminder</strong><p>Review pending applications and draft content daily.</p></div></li>
-                        </ul>
                     </article>
                 </div>
 
                 <div class="admin-stat-grid">
                     <article class="admin-stat-card accent">
-                        <div class="admin-stat-head"><span class="stat-icon">📝</span><span class="trend up">+8.1%</span></div>
-                        <span>Blog posts</span><strong id="statPosts">0</strong>
+                        <div class="admin-stat-head"><span class="stat-icon">📝</span></div>
+                        <span>Content items</span><strong id="statPosts">0</strong>
                     </article>
                     <article class="admin-stat-card blue">
-                        <div class="admin-stat-head"><span class="stat-icon">💌</span><span class="trend up">+5.4%</span></div>
+                        <div class="admin-stat-head"><span class="stat-icon">💌</span></div>
                         <span>Subscribers</span><strong id="statSubscribers">0</strong>
                     </article>
                     <article class="admin-stat-card violet">
-                        <div class="admin-stat-head"><span class="stat-icon">📅</span><span class="trend down">-1.2%</span></div>
+                        <div class="admin-stat-head"><span class="stat-icon">📅</span></div>
                         <span>Charla bookings</span><strong id="statBookings">0</strong>
                     </article>
                     <article class="admin-stat-card green">
-                        <div class="admin-stat-head"><span class="stat-icon">🧑‍⚕️</span><span class="trend up">+2.3%</span></div>
+                        <div class="admin-stat-head"><span class="stat-icon">🧑‍⚕️</span></div>
                         <span>Counsellor apps pending</span><strong id="statCounsellors">0</strong>
                     </article>
                 </div>
@@ -146,10 +134,6 @@
                         <table class="admin-table" id="postsTable">
                             <thead><tr><th>Title</th><th>Type</th><th>Category</th><th>Date</th><th>Status</th><th>Source</th><th>Actions</th></tr></thead><tbody></tbody>
                         </table>
-                    </div>
-                    <div class="admin-table-footer">
-                        <span>Pagination placeholder</span>
-                        <div><button type="button" class="admin-btn-sm" aria-disabled="true">Previous</button><button type="button" class="admin-btn-sm" aria-disabled="true">Next</button></div>
                     </div>
                 </div>
             </section>
@@ -229,9 +213,7 @@
                 </div>
             </div>
             <div class="cms-topbar-actions">
-                <span class="cms-save-status" data-save-status>Ready</span>
                 <div class="cms-upload-progress" data-upload-progress hidden role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span></span></div>
-                <button type="button" class="btn btn-neutral" data-preview-toggle>Live preview</button>
                 <button type="button" class="btn btn-secondary" data-close-editor>Close</button>
             </div>
         </header>
@@ -245,31 +227,22 @@
                             <button type="button" class="cms-tool-btn" data-editor-command="redo" title="Redo">↷</button>
                         </div>
                         <div class="cms-toolbar-group" aria-label="Headings">
-                            <button type="button" class="cms-tool-btn" data-editor-command="h1" title="Heading 1">H1</button>
                             <button type="button" class="cms-tool-btn" data-editor-command="h2" title="Heading 2">H2</button>
                             <button type="button" class="cms-tool-btn" data-editor-command="h3" title="Heading 3">H3</button>
                         </div>
                         <div class="cms-toolbar-group" aria-label="Inline formatting">
                             <button type="button" class="cms-tool-btn" data-editor-command="bold" title="Bold"><strong>B</strong></button>
                             <button type="button" class="cms-tool-btn" data-editor-command="italic" title="Italic"><em>I</em></button>
-                            <button type="button" class="cms-tool-btn" data-editor-command="underline" title="Underline"><u>U</u></button>
                             <button type="button" class="cms-tool-btn" data-editor-command="link" title="Link">🔗</button>
                         </div>
                         <div class="cms-toolbar-group" aria-label="Blocks">
                             <button type="button" class="cms-tool-btn" data-editor-command="quote" title="Quote">“”</button>
                             <button type="button" class="cms-tool-btn" data-editor-command="bulletList" title="Bullet list">•</button>
                             <button type="button" class="cms-tool-btn" data-editor-command="orderedList" title="Numbered list">1.</button>
-                            <button type="button" class="cms-tool-btn" data-editor-command="codeBlock" title="Code block">{ }</button>
                             <button type="button" class="cms-tool-btn" data-editor-command="divider" title="Divider">—</button>
                         </div>
                         <div class="cms-toolbar-group" aria-label="Insert">
                             <button type="button" class="cms-tool-btn" data-editor-command="image" title="Image">🖼</button>
-                            <button type="button" class="cms-tool-btn" data-editor-command="table" title="Table">▦</button>
-                        </div>
-                        <div class="cms-toolbar-group" aria-label="Alignment">
-                            <button type="button" class="cms-tool-btn" data-editor-command="alignLeft" title="Align left">☰</button>
-                            <button type="button" class="cms-tool-btn" data-editor-command="alignCenter" title="Align center">≡</button>
-                            <button type="button" class="cms-tool-btn" data-editor-command="alignRight" title="Align right">☷</button>
                         </div>
                     </nav>
 
@@ -278,8 +251,7 @@
                         <input class="cms-title-input" type="text" id="postTitle" placeholder="Untitled story" autocomplete="off" required>
                         <div class="cms-document-meta">
                             <span data-reading-time>1 min read</span>
-                            <span>Type <strong>/</strong> for blocks</span>
-                            <span>⌘/Ctrl + S to save</span>
+                            <span>⌘/Ctrl + S to save draft</span>
                         </div>
                     </div>
 
@@ -301,34 +273,6 @@
             </main>
 
             <aside class="cms-settings-sidebar" aria-label="Post settings">
-                <section class="cms-sidebar-card">
-                    <h3>Publishing</h3>
-                    <div class="cms-field-grid">
-                        <label class="cms-field">Status
-                            <select id="postStatus" data-editor-field>
-                                <option value="draft">Draft</option>
-                                <option value="published">Published</option>
-                                <option value="scheduled">Scheduled</option>
-                            </select>
-                        </label>
-                        <label class="cms-field">Schedule date
-                            <input type="datetime-local" id="scheduledAt" data-editor-field>
-                        </label>
-                        <p class="cms-reading-stat"><span>Estimated reading time</span><strong data-reading-time>1 min read</strong></p>
-                    </div>
-                </section>
-
-                <section class="cms-sidebar-card" data-content-type-panel="blog">
-                    <h3>Cover image</h3>
-                    <div class="cms-field-grid">
-                        <div class="cms-cover-preview" data-cover-preview><span>Drop in a cover image for richer previews.</span></div>
-                        <button type="button" class="btn btn-neutral" data-cover-upload>Upload cover image</button>
-                        <label class="cms-field">Cover image URL
-                            <input type="url" id="coverImageUrl" data-editor-field placeholder="https://...">
-                        </label>
-                    </div>
-                </section>
-
                 <section class="cms-sidebar-card">
                     <h3>Content type</h3>
                     <div class="cms-field-grid">
@@ -353,13 +297,13 @@
                             </select>
                         </label>
                         <label class="cms-field">Key takeaways
-                            <textarea id="resourceTakeaways" data-editor-field rows="5" placeholder="One takeaway per line — shown in the guide sidebar"></textarea>
+                            <textarea id="resourceTakeaways" data-editor-field rows="4" placeholder="One takeaway per line"></textarea>
                         </label>
                     </div>
                 </section>
 
                 <section class="cms-sidebar-card">
-                    <h3 data-settings-heading>Post settings</h3>
+                    <h3 data-settings-heading>Details</h3>
                     <div class="cms-field-grid">
                         <label class="cms-field">Slug
                             <input type="text" id="postSlug" data-editor-field placeholder="beautiful-blog-post">
@@ -375,26 +319,23 @@
                                 <option>Awareness</option>
                             </select>
                         </label>
-                        <label class="cms-field">Cover emoji
+                        <label class="cms-field">Emoji
                             <input type="text" id="postEmoji" data-editor-field maxlength="8" placeholder="💜">
                         </label>
                         <label class="cms-field" data-content-type-panel="blog">Tags
-                            <input type="text" id="postTags" data-editor-field placeholder="wellness, school, support">
+                            <input type="text" id="postTags" data-editor-field placeholder="wellness, school">
                         </label>
-                        <div class="cms-emoji-picker" aria-label="Choose a cover emoji">
-                            <button type="button" data-emoji-choice="💜" aria-label="Purple heart">💜</button>
-                            <button type="button" data-emoji-choice="💙" aria-label="Blue heart">💙</button>
-                            <button type="button" data-emoji-choice="❤️" aria-label="Red heart">❤️</button>
-                            <button type="button" data-emoji-choice="🌱" aria-label="Seedling">🌱</button>
-                            <button type="button" data-emoji-choice="✨" aria-label="Sparkles">✨</button>
-                            <button type="button" data-emoji-choice="🌸" aria-label="Flower">🌸</button>
-                            <button type="button" data-emoji-choice="🦋" aria-label="Butterfly">🦋</button>
-                            <button type="button" data-emoji-choice="☀️" aria-label="Sun">☀️</button>
-                            <button type="button" data-emoji-choice="🌙" aria-label="Moon">🌙</button>
-                            <button type="button" data-emoji-choice="🫶" aria-label="Heart hands">🫶</button>
-                            <button type="button" data-emoji-choice="🎧" aria-label="Headphones">🎧</button>
-                            <button type="button" data-emoji-choice="📘" aria-label="Book">📘</button>
-                        </div>
+                    </div>
+                </section>
+
+                <section class="cms-sidebar-card" data-content-type-panel="blog">
+                    <h3>Cover image</h3>
+                    <div class="cms-field-grid">
+                        <div class="cms-cover-preview" data-cover-preview><span>Optional cover for blog cards.</span></div>
+                        <button type="button" class="btn btn-neutral" data-cover-upload>Upload cover</button>
+                        <label class="cms-field">Cover image URL
+                            <input type="url" id="coverImageUrl" data-editor-field placeholder="https://...">
+                        </label>
                     </div>
                 </section>
 
@@ -405,16 +346,19 @@
                             <input type="text" id="seoTitle" data-editor-field maxlength="70" placeholder="Search-friendly title">
                         </label>
                         <label class="cms-field">Meta description
-                            <textarea id="metaDescription" data-editor-field maxlength="170" placeholder="Short summary for search and social previews"></textarea>
+                            <textarea id="metaDescription" data-editor-field rows="3" maxlength="170" placeholder="Short summary"></textarea>
                         </label>
                     </div>
                 </section>
+
+                <input type="hidden" id="postStatus" value="draft">
+                <input type="hidden" id="scheduledAt" value="">
             </aside>
         </div>
 
         <footer class="cms-sticky-controls">
             <span class="cms-save-status" data-save-status>Ready</span>
-            <button type="button" class="btn btn-neutral" data-preview-toggle>Live preview</button>
+            <button type="button" class="btn btn-neutral" data-preview-toggle>Preview</button>
             <button type="button" class="btn btn-secondary" data-save-post>Save draft</button>
             <button type="button" class="btn btn-primary" data-publish-post>Publish</button>
         </footer>
