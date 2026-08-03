@@ -36,6 +36,29 @@ function formatTags(tags) {
     return Array.isArray(tags) ? tags.join(', ') : String(tags || '');
 }
 
+function parseTakeaways(value) {
+    return String(value || '')
+        .split('\n')
+        .map((line) => line.trim())
+        .filter(Boolean)
+        .slice(0, 8);
+}
+
+function formatTakeaways(takeaways) {
+    if (!Array.isArray(takeaways)) return '';
+    return takeaways.join('\n');
+}
+
+function getResourceCategorySlug(categoryValue, selectEl) {
+    if (!selectEl) return 'wellness';
+    const option = Array.from(selectEl.options).find((item) => item.value === categoryValue);
+    return option?.dataset.categorySlug || 'wellness';
+}
+
+function getContentType(root) {
+    return getField(root, '#postContentType')?.value === 'resource_guide' ? 'resource_guide' : 'blog';
+}
+
 function setIfPresent(element, value) {
     if (element) element.value = value ?? '';
 }
@@ -143,6 +166,12 @@ export class BlogPostEditor {
         });
         getField(this.root, '#postEmoji')?.addEventListener('input', () => this.updateEmojiPickerState());
 
+        getField(this.root, '#postContentType')?.addEventListener('change', () => {
+            this.applyContentTypeUI();
+            this.scheduleAutosave();
+            this.updatePreview();
+        });
+
         this.root.querySelectorAll('[data-editor-field]').forEach((field) => {
             field.addEventListener('input', () => {
                 this.refreshDerivedState();
@@ -185,10 +214,22 @@ export class BlogPostEditor {
 
     populate(post) {
         const isGithubOnly = post?.source === 'github' || String(post?.id || '').startsWith('github:');
+        const contentType = post?.content_type === 'resource_guide' ? 'resource_guide' : 'blog';
         setIfPresent(getField(this.root, '#postId'), isGithubOnly ? '' : post?.id || '');
         setIfPresent(getField(this.root, '#postTitle'), post?.title || '');
         setIfPresent(getField(this.root, '#postSlug'), post?.slug || '');
+        setIfPresent(getField(this.root, '#postContentType'), contentType);
         setIfPresent(getField(this.root, '#postCategory'), post?.category || 'Mental Health');
+
+        const resourceCategory = getField(this.root, '#resourceCategory');
+        if (resourceCategory) {
+            const match = Array.from(resourceCategory.options).find(
+                (option) => option.value === post?.category || option.dataset.categorySlug === post?.category_slug
+            );
+            resourceCategory.value = match?.value || 'Mental wellness';
+        }
+        setIfPresent(getField(this.root, '#resourceTakeaways'), formatTakeaways(post?.takeaways));
+
         setIfPresent(getField(this.root, '#postEmoji'), post?.emoji || '💜');
         setIfPresent(getField(this.root, '#postTags'), formatTags(post?.tags));
         setIfPresent(getField(this.root, '#seoTitle'), post?.seo_title || post?.title || '');
@@ -205,10 +246,45 @@ export class BlogPostEditor {
 
         const content = post?.content_json || post?.content_html || post?.content || EMPTY_DOC;
         this.editor.commands.setContent(content || EMPTY_DOC, false);
+        this.applyContentTypeUI();
         this.updateEmojiPickerState();
         this.refreshDerivedState();
         this.renderPreview();
         this.setSaveStatus(post?.id ? 'Loaded from Supabase' : 'New draft');
+    }
+
+    applyContentTypeUI() {
+        const contentType = getContentType(this.root);
+        const isResource = contentType === 'resource_guide';
+        const titleInput = getField(this.root, '#postTitle');
+        const heading = getField(this.root, '[data-editor-heading]');
+        const settingsHeading = getField(this.root, '[data-settings-heading]');
+        const hint = getField(this.root, '[data-content-type-hint]');
+
+        this.root.querySelectorAll('[data-content-type-panel]').forEach((panel) => {
+            const target = panel.getAttribute('data-content-type-panel');
+            const show = target === contentType || (target === 'blog' && !isResource);
+            panel.hidden = !show;
+        });
+
+        if (titleInput) {
+            titleInput.placeholder = isResource ? 'Untitled guide' : 'Untitled story';
+        }
+        if (heading) {
+            heading.textContent = isResource ? 'Resource guide editor' : 'Blog post editor';
+        }
+        if (settingsHeading) {
+            settingsHeading.textContent = isResource ? 'Guide details' : 'Post settings';
+        }
+        if (hint) {
+            hint.innerHTML = isResource
+                ? 'Resource guides appear on <strong>/resources/</strong> as practical Bloomly articles.'
+                : 'Blog posts appear on <strong>/blog/</strong> as stories and reflections.';
+        }
+
+        this.root.querySelectorAll('[data-publish-post]').forEach((button) => {
+            button.textContent = isResource ? 'Publish guide' : 'Publish';
+        });
     }
 
     setCoverEmoji(emoji) {
@@ -434,10 +510,14 @@ export class BlogPostEditor {
     renderPreview() {
         const html = sanitizeHTML(this.editor.getHTML());
         const text = getPlainTextFromHTML(html);
+        const isResource = getContentType(this.root) === 'resource_guide';
+        const category = isResource
+            ? getField(this.root, '#resourceCategory')?.value
+            : getField(this.root, '#postCategory')?.value;
         renderPreview({
             container: getField(this.root, '[data-post-preview]'),
             title: getField(this.root, '#postTitle')?.value,
-            category: getField(this.root, '#postCategory')?.value,
+            category,
             coverImageUrl: getField(this.root, '#coverImageUrl')?.value,
             html,
             readTime: estimateReadingTime(text),
@@ -461,37 +541,52 @@ export class BlogPostEditor {
         const text = getPlainTextFromHTML(html);
         const status = getField(this.root, '#postStatus')?.value || 'draft';
         const excerpt = createExcerpt(getField(this.root, '#metaDescription')?.value || text);
+        const contentType = getContentType(this.root);
+        const isResource = contentType === 'resource_guide';
+        const resourceCategoryEl = getField(this.root, '#resourceCategory');
+        const resourceCategory = resourceCategoryEl?.value || 'Mental wellness';
+        const category = isResource ? resourceCategory : getField(this.root, '#postCategory')?.value || 'Mental Health';
+        const categorySlug = isResource ? getResourceCategorySlug(resourceCategory, resourceCategoryEl) : null;
+        const takeaways = isResource ? parseTakeaways(getField(this.root, '#resourceTakeaways')?.value) : [];
+        const readTime = estimateReadingTime(text);
 
         return {
             ...(id ? { id: Number(id) } : {}),
             title,
             slug,
-            category: getField(this.root, '#postCategory')?.value || 'Mental Health',
+            content_type: contentType,
+            category,
+            category_slug: categorySlug,
+            takeaways,
             emoji: getField(this.root, '#postEmoji')?.value || '💜',
             content: text,
             content_json: this.editor.getJSON(),
             content_html: html,
             excerpt,
             summary: excerpt,
-            tags: normalizeTags(getField(this.root, '#postTags')?.value),
+            tags: isResource ? [] : normalizeTags(getField(this.root, '#postTags')?.value),
             seo_title: getField(this.root, '#seoTitle')?.value.trim() || title,
             meta_description: getField(this.root, '#metaDescription')?.value.trim() || excerpt,
-            cover_image_url: getField(this.root, '#coverImageUrl')?.value.trim() || null,
+            cover_image_url: isResource ? null : getField(this.root, '#coverImageUrl')?.value.trim() || null,
             status,
             published: status === 'published',
             scheduled_at: status === 'scheduled' ? getField(this.root, '#scheduledAt')?.value || null : null,
-            read_time_minutes: estimateReadingTime(text),
+            read_time_minutes: readTime,
         };
     }
 
     validatePayload(payload, { publish = false } = {}) {
         const errors = [];
-        if (!payload.title || payload.title === 'Untitled post') errors.push('Add a title before saving.');
+        const label = payload.content_type === 'resource_guide' ? 'guide' : 'post';
+        if (!payload.title || payload.title === 'Untitled post') errors.push(`Add a title before saving this ${label}.`);
         if (!payload.slug) errors.push('A valid slug is required.');
         if (publish) {
             const hasText = Boolean(String(payload.content || '').trim());
             const hasImage = /<img\s/i.test(payload.content_html || '');
             if (!hasText && !hasImage) errors.push('Add content before publishing.');
+            if (payload.content_type === 'resource_guide' && (!Array.isArray(payload.takeaways) || !payload.takeaways.length)) {
+                errors.push('Add at least one key takeaway before publishing a resource guide.');
+            }
         }
         if (payload.status === 'scheduled' && !payload.scheduled_at) {
             errors.push('Choose a schedule date before saving a scheduled post.');
@@ -536,11 +631,12 @@ export class BlogPostEditor {
                 throw new Error('Supabase saved the post, but did not mark it as published. Please try again.');
             }
             this.autosave.clear(payload.slug || payload.id || 'new');
-            this.setSaveStatus(publish ? 'Refreshing published post...' : autosave ? 'Refreshing saved post...' : 'Refreshing saved post...');
+            this.setSaveStatus(publish ? 'Refreshing published content...' : autosave ? 'Refreshing saved content...' : 'Refreshing saved content...');
             await this.onSaved(post);
+            const savedLabel = payload.content_type === 'resource_guide' ? 'Resource guide' : 'Post';
             this.setSaveStatus(publish ? 'Published' : autosave ? 'Autosaved to Supabase' : 'Saved');
             if (!silent) {
-                this.notify(publish ? 'Post published successfully.' : 'Post saved successfully.', 'success');
+                this.notify(publish ? `${savedLabel} published successfully.` : `${savedLabel} saved successfully.`, 'success');
             }
             return post;
         } catch (error) {

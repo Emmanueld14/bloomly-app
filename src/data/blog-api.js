@@ -166,8 +166,9 @@ class BlogAPI {
 
         const { data, error } = await client
             .from('posts')
-            .select('slug,title,created_at,updated_at,category,excerpt,summary,emoji,published,status,cover_image_url,tags,seo_title,meta_description,read_time_minutes,content_html')
+            .select('slug,title,created_at,updated_at,category,excerpt,summary,emoji,published,status,cover_image_url,tags,seo_title,meta_description,read_time_minutes,content_html,content_type')
             .eq('published', true)
+            .or('content_type.eq.blog,content_type.is.null')
             .order('created_at', { ascending: false });
 
         if (error) {
@@ -218,9 +219,10 @@ class BlogAPI {
             .select('*')
             .eq('slug', slug)
             .eq('published', true)
+            .or('content_type.eq.blog,content_type.is.null')
             .maybeSingle();
 
-        if (error || !data) return null;
+        if (error || !data || data.content_type === 'resource_guide') return null;
         return this._rowToFullPost(data);
     }
 

@@ -134,17 +134,17 @@
 
             <section data-view-panel="blog" class="admin-view-panel" hidden>
                 <div class="admin-toolbar">
-                    <h1>Blog Posts</h1>
+                    <h1>Content</h1>
                     <div>
                         <button type="button" class="btn btn-secondary" id="syncGithubPostsBtn">Import from GitHub</button>
-                        <button type="button" class="btn btn-primary" id="newPostBtn">New Post</button>
+                        <button type="button" class="btn btn-primary" id="newPostBtn">New content</button>
                     </div>
                 </div>
-                <p class="admin-hint" id="blogPostsHint">Shows posts in Supabase plus markdown files from <code>content/blog/</code> on GitHub.</p>
+                <p class="admin-hint" id="blogPostsHint">Blog posts and resource guides saved in Supabase, plus legacy markdown from <code>content/blog/</code>.</p>
                 <div class="admin-panel">
                     <div class="table-wrap">
                         <table class="admin-table" id="postsTable">
-                            <thead><tr><th>Title</th><th>Category</th><th>Date</th><th>Status</th><th>Source</th><th>Actions</th></tr></thead><tbody></tbody>
+                            <thead><tr><th>Title</th><th>Type</th><th>Category</th><th>Date</th><th>Status</th><th>Source</th><th>Actions</th></tr></thead><tbody></tbody>
                         </table>
                     </div>
                     <div class="admin-table-footer">
@@ -225,7 +225,7 @@
                 <span class="cms-editor-brand-mark" aria-hidden="true">B</span>
                 <div>
                     <p>Bloomly publishing</p>
-                    <h2>Professional post editor</h2>
+                    <h2 data-editor-heading>Professional post editor</h2>
                 </div>
             </div>
             <div class="cms-topbar-actions">
@@ -318,7 +318,7 @@
                     </div>
                 </section>
 
-                <section class="cms-sidebar-card">
+                <section class="cms-sidebar-card" data-content-type-panel="blog">
                     <h3>Cover image</h3>
                     <div class="cms-field-grid">
                         <div class="cms-cover-preview" data-cover-preview><span>Drop in a cover image for richer previews.</span></div>
@@ -330,25 +330,56 @@
                 </section>
 
                 <section class="cms-sidebar-card">
-                    <h3>Post settings</h3>
+                    <h3>Content type</h3>
+                    <div class="cms-field-grid">
+                        <label class="cms-field">Publish to
+                            <select id="postContentType" data-editor-field>
+                                <option value="blog">Blog page</option>
+                                <option value="resource_guide">Resources page</option>
+                            </select>
+                        </label>
+                        <p class="cms-field-hint" data-content-type-hint>Blog posts appear on <strong>/blog/</strong> as stories and reflections.</p>
+                    </div>
+                </section>
+
+                <section class="cms-sidebar-card" data-content-type-panel="resource_guide" hidden>
+                    <h3>Guide settings</h3>
+                    <div class="cms-field-grid">
+                        <label class="cms-field">Guide category
+                            <select id="resourceCategory" data-editor-field>
+                                <option value="Mental wellness" data-category-slug="wellness">Mental wellness</option>
+                                <option value="Study &amp; school" data-category-slug="study">Study &amp; school</option>
+                                <option value="Future planning" data-category-slug="planning">Future planning</option>
+                            </select>
+                        </label>
+                        <label class="cms-field">Key takeaways
+                            <textarea id="resourceTakeaways" data-editor-field rows="5" placeholder="One takeaway per line — shown in the guide sidebar"></textarea>
+                        </label>
+                    </div>
+                </section>
+
+                <section class="cms-sidebar-card">
+                    <h3 data-settings-heading>Post settings</h3>
                     <div class="cms-field-grid">
                         <label class="cms-field">Slug
                             <input type="text" id="postSlug" data-editor-field placeholder="beautiful-blog-post">
                         </label>
-                        <label class="cms-field">Category
+                        <label class="cms-field" data-content-type-panel="blog">Category
                             <select id="postCategory" data-editor-field>
                                 <option>Mental Health</option>
                                 <option>Self-Care</option>
                                 <option>Tips</option>
                                 <option>Poetry</option>
                                 <option>Stories</option>
+                                <option>Self-Awareness</option>
+                                <option>Awareness</option>
                             </select>
-                        </label>
-                        <label class="cms-field">Tags
-                            <input type="text" id="postTags" data-editor-field placeholder="wellness, school, support">
                         </label>
                         <label class="cms-field">Cover emoji
                             <input type="text" id="postEmoji" data-editor-field maxlength="8" placeholder="💜">
+                        </label>
+                        <label class="cms-field" data-content-type-panel="blog">Tags
+                            <input type="text" id="postTags" data-editor-field placeholder="wellness, school, support">
                         </label>
                         <div class="cms-emoji-picker" aria-label="Choose a cover emoji">
                             <button type="button" data-emoji-choice="💜" aria-label="Purple heart">💜</button>
@@ -367,7 +398,7 @@
                     </div>
                 </section>
 
-                <section class="cms-sidebar-card">
+                <section class="cms-sidebar-card" data-content-type-panel="blog">
                     <h3>SEO</h3>
                     <div class="cms-field-grid">
                         <label class="cms-field">SEO title
