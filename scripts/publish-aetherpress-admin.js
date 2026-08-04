@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
- * Builds the Next.js app (static export) and publishes AetherPress admin/auth
- * routes into the Cloudflare Pages site root so bloomly.co.ke/admin is the new CMS.
+ * Builds the Next.js app (static export) and publishes Bloomly admin/auth
+ * routes into the Cloudflare Pages site root so bloomly.co.ke/admin is the CMS.
  */
 const { execSync } = require("child_process");
 const fs = require("fs");
@@ -70,13 +70,13 @@ for (const [fromName, toName] of publishMap) {
   }
   rmrf(to);
   copyDir(from, to);
-  console.log(`✅ Published /${toName} from AetherPress export`);
+  console.log(`✅ Published /${toName} from Bloomly export`);
 }
 
 // Marker so we can tell which admin is live
 fs.writeFileSync(
-  path.join(root, "admin", "AETHERPRESS.txt"),
-  "AetherPress admin published from web/ static export\n"
+  path.join(root, "admin", "BLOOMLY_CMS.txt"),
+  "Bloomly admin published from web/ static export\n"
 );
 
-console.log("✅ AetherPress is now the site /admin");
+console.log("✅ Bloomly CMS is now the site /admin");

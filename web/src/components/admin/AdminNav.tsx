@@ -28,9 +28,9 @@ export function AdminNav() {
     <aside className="flex w-full flex-col border-b border-[var(--admin-border)] bg-white md:min-h-screen md:w-56 md:border-b-0 md:border-r">
       <div className="px-4 py-4">
         <Link href="/admin" className="text-sm font-semibold tracking-tight text-gray-900">
-          AetherPress Admin
+          Bloomly Admin
         </Link>
-        <p className="mt-0.5 text-xs text-gray-500">Content desk</p>
+        <p className="mt-0.5 text-xs text-gray-500">Writing desk</p>
       </div>
       <nav className="flex gap-1 overflow-x-auto px-2 pb-3 md:flex-col md:px-3 md:pb-0">
         {links.map((link) => {

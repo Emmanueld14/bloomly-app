@@ -21,7 +21,7 @@ export function SignOutButton({ className }: { className?: string }) {
       onClick={() => void signOut()}
       className={
         className ||
-        "rounded-lg border border-white/15 px-4 py-2 text-sm text-white hover:bg-white/5"
+        "rounded-lg border border-[var(--border)] bg-white px-4 py-2 text-sm font-medium text-[var(--fg)] hover:bg-slate-50"
       }
     >
       Sign out

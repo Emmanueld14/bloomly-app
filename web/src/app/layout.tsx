@@ -1,30 +1,31 @@
 import type { Metadata } from "next";
-import { Source_Sans_3, Syne } from "next/font/google";
+import { Inter, Manrope } from "next/font/google";
 import "./globals.css";
 
-const syne = Syne({
-  variable: "--font-syne",
+const manrope = Manrope({
+  variable: "--font-manrope",
   subsets: ["latin"],
-  weight: ["500", "600", "700", "800"],
+  weight: ["600", "700", "800"],
 });
 
-const sourceSans = Source_Sans_3({
-  variable: "--font-source-sans",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
   title: {
-    default: "AetherPress",
-    template: "%s · AetherPress",
+    default: "Bloomly",
+    template: "%s · Bloomly",
   },
-  description: "A dark editorial blog for essays at the edge of ideas.",
+  description:
+    "Bloomly — a calm Kenyan mental wellness space for teens to read, reflect, and feel supported.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${syne.variable} ${sourceSans.variable} h-full`}>
+    <html lang="en" className={`${manrope.variable} ${inter.variable} h-full`}>
       <body className="min-h-full antialiased">{children}</body>
     </html>
   );

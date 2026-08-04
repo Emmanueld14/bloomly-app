@@ -36,37 +36,35 @@ export function SiteHeader() {
   const incomplete = needsProfileSetup(profile);
 
   return (
-    <header className="relative z-20 border-b border-white/10">
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-5 md:px-8">
-        <Link href="/" className="group flex items-baseline gap-2">
-          <span className="font-[family-name:var(--font-syne)] text-2xl font-bold tracking-tight md:text-3xl">
-            Aether<span className="gradient-text">Press</span>
-          </span>
+    <header className="relative z-20 border-b border-[var(--border)] bg-white/80 backdrop-blur">
+      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-4 md:px-8">
+        <Link href="/" className="font-[family-name:var(--font-manrope)] text-2xl font-extrabold tracking-tight text-[var(--fg)] md:text-3xl">
+          Bloomly
         </Link>
         <nav className="flex items-center gap-4 text-sm text-[var(--fg-muted)] md:gap-6">
-          <Link href="/" className="transition hover:text-white">
-            Essays
+          <Link href="/blog/" className="transition hover:text-[var(--accent-2)]">
+            Blog
           </Link>
           {profile ? (
             <>
               {profile.role === "admin" ? (
-                <Link href="/admin/" className="transition hover:text-white">
+                <Link href="/admin/" className="transition hover:text-[var(--accent-2)]">
                   Admin
                 </Link>
               ) : null}
               {incomplete ? (
                 <Link
                   href={profileSetupUrl("/account/")}
-                  className="font-semibold text-teal-300 transition hover:text-teal-200"
+                  className="font-semibold text-[var(--accent-3)] transition hover:text-teal-700"
                 >
                   Finish profile
                 </Link>
               ) : null}
               <Link
                 href="/account/"
-                className="inline-flex items-center gap-2 transition hover:text-white"
+                className="inline-flex items-center gap-2 font-medium text-[var(--fg)] transition hover:text-[var(--accent-2)]"
               >
-                <span className="inline-flex h-7 w-7 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-teal-400 to-sky-500 text-[0.65rem] font-bold text-white">
+                <span className="inline-flex h-7 w-7 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-[#4F7DF3] to-[#5BC0BE] text-[0.65rem] font-bold text-white">
                   {profile.avatar_url ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
@@ -83,12 +81,12 @@ export function SiteHeader() {
             </>
           ) : (
             <>
-              <Link href="/login/" className="transition hover:text-white">
+              <Link href="/login/" className="transition hover:text-[var(--accent-2)]">
                 Log in
               </Link>
               <Link
                 href="/signup/"
-                className="rounded-md bg-white/10 px-3 py-1.5 text-white transition hover:bg-white/15"
+                className="rounded-full bg-gradient-to-r from-[#4F7DF3] to-[#5BC0BE] px-3.5 py-1.5 font-semibold text-white shadow-sm transition hover:brightness-105"
               >
                 Sign up
               </Link>

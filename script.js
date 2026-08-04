@@ -964,12 +964,17 @@
 
         likeButtons.forEach((button) => {
             button.addEventListener('click', async () => {
-                if (window.BloomlyAuth) {
-                    const authed = await window.BloomlyAuth.requireUser({
-                        message: 'Log in to like this post.',
-                    });
-                    if (!authed?.user) return;
+                // Likes require a signed-in Bloomly member.
+                if (!window.BloomlyAuth) {
+                    window.location.href = '/login/?next=' + encodeURIComponent(
+                        window.location.pathname + window.location.search
+                    );
+                    return;
                 }
+                const authed = await window.BloomlyAuth.requireUser({
+                    message: 'Log in to like this post.',
+                });
+                if (!authed?.user) return;
 
                 // Prevent multiple likes per browser by storing a flag
                 if (liked) return;
@@ -1102,25 +1107,49 @@
         let commentProfiles = await fetchCommentProfiles(comments);
         renderComments(list, comments, commentProfiles);
 
+        // Hide the comment form until the visitor is signed in.
+        const authState = window.BloomlyAuth?.getState?.();
+        const nicknameField = form.querySelector('input[name="nickname"]')?.closest('label');
+        if (nicknameField) nicknameField.hidden = true;
+        if (!authState?.user) {
+            form.hidden = true;
+            let loginHint = container.querySelector('[data-comment-login-hint]');
+            if (!loginHint) {
+                loginHint = document.createElement('p');
+                loginHint.className = 'comment-login-hint';
+                loginHint.setAttribute('data-comment-login-hint', 'true');
+                form.insertAdjacentElement('beforebegin', loginHint);
+            }
+            const loginHref =
+                window.BloomlyAuth?.loginUrl?.() ||
+                '/login/?next=' + encodeURIComponent(window.location.pathname + window.location.search);
+            loginHint.hidden = false;
+            loginHint.innerHTML = `<a href="${loginHref}">Log in</a> to leave a comment.`;
+        } else {
+            form.hidden = false;
+        }
+
         form.addEventListener('submit', async (event) => {
             event.preventDefault();
 
-            let authed = null;
-            if (window.BloomlyAuth) {
-                authed = await window.BloomlyAuth.requireUser({
-                    message: 'Log in to leave a comment.',
-                });
-                if (!authed?.user) return;
+            // Comments require a signed-in Bloomly member.
+            if (!window.BloomlyAuth) {
+                window.location.href = '/login/?next=' + encodeURIComponent(
+                    window.location.pathname + window.location.search
+                );
+                return;
             }
+            const authed = await window.BloomlyAuth.requireUser({
+                message: 'Log in to leave a comment.',
+            });
+            if (!authed?.user) return;
 
-            const nicknameInput = form.querySelector('input[name="nickname"]');
             const commentInput = form.querySelector('textarea[name="comment"]');
             const h = window.BloomlyProfile;
-            const nickname = authed
-                ? ((h ? h.displayName(authed.profile, authed.user) : authed.profile?.username) ||
-                  authed.profile?.display_name ||
-                  'Member')
-                : (nicknameInput ? nicknameInput.value.trim() : '');
+            const nickname =
+                (h ? h.displayName(authed.profile, authed.user) : authed.profile?.username) ||
+                authed.profile?.display_name ||
+                'Member';
             const text = commentInput ? commentInput.value.trim() : '';
 
             if (!text) {
@@ -1131,36 +1160,26 @@
                 return;
             }
 
-            if (isSupabaseReady()) {
-                const savedComment = await insertSupabaseComment(postId, nickname, text);
-                if (!savedComment) {
-                    setFormMessage(messageEl, 'Unable to save comment. Please try again.', 'error');
-                    return;
-                }
-
-                comments.unshift(savedComment);
-                if (authed?.user) {
-                    commentProfiles[authed.user.id] = {
-                        id: authed.user.id,
-                        username: authed.profile?.username,
-                        avatar_url: authed.profile?.avatar_url,
-                        display_name: authed.profile?.display_name,
-                    };
-                }
-                renderComments(list, comments, commentProfiles);
-                setFormMessage(messageEl, 'Thanks! Your comment is now public.', 'success');
-            } else {
-                const newComment = {
-                    nick: nickname || 'Anonymous',
-                    text,
-                    timestamp: new Date().toISOString()
-                };
-
-                comments.unshift(newComment);
-                safeStorageSet(commentsKey, JSON.stringify(comments));
-                renderComments(list, comments, commentProfiles);
-                setFormMessage(messageEl, 'Thanks! Your comment is saved on this device.', 'success');
+            if (!isSupabaseReady()) {
+                setFormMessage(messageEl, 'Comments need an online connection. Please try again.', 'error');
+                return;
             }
+
+            const savedComment = await insertSupabaseComment(postId, nickname, text);
+            if (!savedComment) {
+                setFormMessage(messageEl, 'Unable to save comment. Please try again.', 'error');
+                return;
+            }
+
+            comments.unshift(savedComment);
+            commentProfiles[authed.user.id] = {
+                id: authed.user.id,
+                username: authed.profile?.username,
+                avatar_url: authed.profile?.avatar_url,
+                display_name: authed.profile?.display_name,
+            };
+            renderComments(list, comments, commentProfiles);
+            setFormMessage(messageEl, 'Thanks! Your comment is now public.', 'success');
 
             if (!isDrawerOpen) {
                 setDrawerState(true);

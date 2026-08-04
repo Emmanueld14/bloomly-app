@@ -20,9 +20,9 @@ export function Pagination({
   };
 
   return (
-    <nav className="mt-12 flex items-center justify-between border-t border-white/10 pt-6 text-sm">
+    <nav className="mt-12 flex items-center justify-between border-t border-[var(--border)] pt-6 text-sm">
       {page > 1 ? (
-        <Link href={hrefFor(page - 1)} className="text-[var(--fg-muted)] hover:text-white">
+        <Link href={hrefFor(page - 1)} className="text-[var(--fg-muted)] hover:text-[var(--accent-2)]">
           ← Previous
         </Link>
       ) : (
@@ -32,7 +32,7 @@ export function Pagination({
         Page {page} of {totalPages}
       </span>
       {page < totalPages ? (
-        <Link href={hrefFor(page + 1)} className="text-[var(--fg-muted)] hover:text-white">
+        <Link href={hrefFor(page + 1)} className="text-[var(--fg-muted)] hover:text-[var(--accent-2)]">
           Next →
         </Link>
       ) : (

@@ -26,7 +26,7 @@ export default function TagsIndexPage() {
 
   return (
     <div className="mx-auto max-w-4xl px-5 py-16 md:px-8">
-      <h1 className="font-[family-name:var(--font-syne)] text-4xl font-bold tracking-tight md:text-5xl">
+      <h1 className="font-[family-name:var(--font-manrope)] text-4xl font-bold tracking-tight md:text-5xl">
         Tags
       </h1>
       <p className="mt-3 text-[var(--fg-muted)]">Follow threads across essays.</p>
@@ -43,7 +43,7 @@ export default function TagsIndexPage() {
               <Link
                 key={tag.id}
                 href={`/tag/${tag.slug}/`}
-                className="border border-white/15 px-4 py-2 text-sm transition hover:border-[var(--accent)] hover:text-[var(--accent)]"
+                className="border border-[var(--border)] px-4 py-2 text-sm transition hover:border-[var(--accent)] hover:text-[var(--accent)]"
               >
                 {tag.name}
               </Link>

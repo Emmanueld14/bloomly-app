@@ -60,8 +60,11 @@ function AccountInner() {
 
   return (
     <div className="mx-auto max-w-xl px-5 py-16 md:px-8">
-      <h1 className="font-[family-name:var(--font-syne)] text-4xl font-bold tracking-tight">
-        Your Bloomly account
+      <p className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--accent-3)]">
+        Bloomly
+      </p>
+      <h1 className="mt-2 font-[family-name:var(--font-manrope)] text-4xl font-extrabold tracking-tight text-[var(--fg)]">
+        Your account
       </h1>
       <p className="mt-3 text-[var(--fg-muted)]">
         {profile?.role === "admin"
@@ -70,13 +73,13 @@ function AccountInner() {
       </p>
 
       {searchParams.get("error") === "admin_required" ? (
-        <p className="mt-6 rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-100">
+        <p className="mt-6 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
           That area is for admins only. Ask an existing admin to promote your account.
         </p>
       ) : null}
 
-      <div className="mt-8 flex items-center gap-4 rounded-xl border border-white/10 bg-black/30 p-6">
-        <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-teal-400 to-sky-500 text-lg font-bold text-white">
+      <div className="bloomly-card mt-8 flex items-center gap-4 p-6">
+        <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-[#4F7DF3] to-[#5BC0BE] text-lg font-bold text-white">
           {profile?.avatar_url ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -89,42 +92,42 @@ function AccountInner() {
           )}
         </div>
         <div className="min-w-0">
-          <p className="truncate text-lg font-semibold">@{name}</p>
+          <p className="truncate text-lg font-semibold text-[var(--fg)]">@{name}</p>
           <p className="truncate text-sm text-[var(--fg-muted)]">{email || profile?.email}</p>
         </div>
       </div>
 
-      <div className="mt-4 space-y-3 rounded-xl border border-white/10 bg-black/30 p-6 text-sm">
+      <div className="bloomly-card mt-4 space-y-3 p-6 text-sm">
         <div className="flex justify-between gap-4">
           <span className="text-[var(--fg-muted)]">Username</span>
-          <span>{profile?.username || "—"}</span>
+          <span className="font-medium text-[var(--fg)]">{profile?.username || "—"}</span>
         </div>
         <div className="flex justify-between gap-4">
           <span className="text-[var(--fg-muted)]">Role</span>
-          <span className="capitalize">{profile?.role || "user"}</span>
+          <span className="capitalize text-[var(--fg)]">{profile?.role || "user"}</span>
         </div>
       </div>
 
       <div className="mt-8 flex flex-wrap gap-3">
         <Link
           href={profileSetupUrl("/account/")}
-          className="rounded-lg bg-[var(--accent)] px-4 py-2 text-sm font-semibold text-black"
+          className="rounded-lg bg-gradient-to-r from-[#4F7DF3] to-[#5BC0BE] px-4 py-2 text-sm font-semibold text-white"
         >
           {incomplete ? "Finish profile" : "Edit profile"}
         </Link>
         {profile?.role === "admin" ? (
           <Link
             href="/admin/"
-            className="rounded-lg border border-white/15 px-4 py-2 text-sm text-white hover:bg-white/5"
+            className="rounded-lg border border-[var(--border)] bg-white px-4 py-2 text-sm font-medium text-[var(--fg)] hover:bg-slate-50"
           >
             Open admin
           </Link>
         ) : null}
         <Link
-          href="/"
-          className="rounded-lg border border-white/15 px-4 py-2 text-sm text-white hover:bg-white/5"
+          href="/blog/"
+          className="rounded-lg border border-[var(--border)] bg-white px-4 py-2 text-sm font-medium text-[var(--fg)] hover:bg-slate-50"
         >
-          Browse essays
+          Browse blog
         </Link>
         <SignOutButton />
       </div>

@@ -100,7 +100,7 @@ export function FilterPageClient({ kind }: { kind: "category" | "tag" }) {
       <p className="text-xs uppercase tracking-[0.22em] text-[var(--accent)]">
         {kind === "category" ? "Category" : "Tag"}
       </p>
-      <h1 className="mt-3 font-[family-name:var(--font-syne)] text-4xl font-bold tracking-tight md:text-5xl">
+      <h1 className="mt-3 font-[family-name:var(--font-manrope)] text-4xl font-bold tracking-tight md:text-5xl">
         {kind === "tag" ? `#${title}` : title}
       </h1>
       <div className="mt-12 space-y-12">

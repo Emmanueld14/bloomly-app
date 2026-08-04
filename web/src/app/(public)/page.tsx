@@ -46,15 +46,14 @@ export default function HomePage() {
   return (
     <div className="mx-auto max-w-6xl px-5 pb-20 pt-10 md:px-8 md:pt-16">
       <section className="mb-16 max-w-3xl">
-        <p className="fade-up text-xs uppercase tracking-[0.28em] text-[var(--accent)]">
-          Editorial dispatch
+        <p className="fade-up text-xs font-bold uppercase tracking-[0.18em] text-[var(--accent-3)]">
+          Bloomly essays
         </p>
-        <h1 className="fade-up-delay mt-4 font-[family-name:var(--font-syne)] text-5xl font-extrabold leading-[0.95] tracking-tight md:text-7xl">
-          Aether<span className="gradient-text">Press</span>
+        <h1 className="fade-up-delay mt-4 font-[family-name:var(--font-manrope)] text-5xl font-extrabold leading-[0.95] tracking-tight text-[var(--fg)] md:text-7xl">
+          Stories that help you feel less alone
         </h1>
         <p className="fade-up-delay-2 mt-6 max-w-xl text-lg leading-relaxed text-[var(--fg-muted)]">
-          Long-form notes on culture, systems, and the futures we build — published when ready,
-          never rushed.
+          Honest reflections for teens — calm support, one gentle page at a time.
         </p>
       </section>
 
@@ -76,12 +75,16 @@ export default function HomePage() {
       )}
 
       <div className="mt-16 flex flex-wrap gap-4 text-sm text-[var(--fg-muted)]">
-        <Link href="/category/" className="hover:text-white">
-          Browse categories
+        <Link href="/blog/" className="font-semibold text-[var(--accent-2)] hover:underline">
+          Open the Bloomly blog
         </Link>
         <span aria-hidden>·</span>
-        <Link href="/tag/" className="hover:text-white">
-          Browse tags
+        <Link href="/category/" className="hover:text-[var(--accent-2)]">
+          Categories
+        </Link>
+        <span aria-hidden>·</span>
+        <Link href="/tag/" className="hover:text-[var(--accent-2)]">
+          Tags
         </Link>
       </div>
     </div>

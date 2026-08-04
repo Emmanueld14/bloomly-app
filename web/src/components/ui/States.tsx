@@ -11,7 +11,7 @@ export function LoadingState({ label = "Loading…" }: { label?: string }) {
 
 export function ErrorState({ message }: { message: string }) {
   return (
-    <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-200">
+    <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
       {message}
     </div>
   );
@@ -19,8 +19,10 @@ export function ErrorState({ message }: { message: string }) {
 
 export function EmptyState({ title, description }: { title: string; description?: string }) {
   return (
-    <div className="rounded-lg border border-dashed border-white/15 px-6 py-16 text-center">
-      <h2 className="font-[family-name:var(--font-syne)] text-xl font-semibold text-white">{title}</h2>
+    <div className="rounded-lg border border-dashed border-[var(--border)] bg-white/70 px-6 py-16 text-center">
+      <h2 className="font-[family-name:var(--font-manrope)] text-xl font-semibold text-[var(--fg)]">
+        {title}
+      </h2>
       {description ? <p className="mt-2 text-sm text-[var(--fg-muted)]">{description}</p> : null}
     </div>
   );

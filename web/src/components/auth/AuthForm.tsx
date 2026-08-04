@@ -97,18 +97,21 @@ export function AuthForm({
   }
 
   return (
-    <div className="mx-auto w-full max-w-md rounded-xl border border-white/10 bg-black/40 p-8 backdrop-blur">
-      <h1 className="font-[family-name:var(--font-syne)] text-3xl font-bold tracking-tight">
+    <div className="bloomly-card mx-auto w-full max-w-md p-8">
+      <p className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--accent-3)]">
+        Bloomly
+      </p>
+      <h1 className="mt-2 font-[family-name:var(--font-manrope)] text-3xl font-extrabold tracking-tight text-[var(--fg)]">
         {mode === "login" ? "Welcome back" : "Join Bloomly"}
       </h1>
       <p className="mt-2 text-sm text-[var(--fg-muted)]">
         {mode === "login"
-          ? "Log in to like posts and comment. Admins are taken to the writing desk."
+          ? "Log in to like posts and leave comments. Admins open the writing desk."
           : "Create a free account to like posts and join the conversation."}
       </p>
 
       <form onSubmit={onSubmit} className="mt-8 space-y-4">
-        <label className="block space-y-1.5 text-sm">
+        <label className="block space-y-1.5 text-sm font-medium text-[var(--fg)]">
           <span>Email</span>
           <input
             type="email"
@@ -116,10 +119,10 @@ export function AuthForm({
             autoComplete="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded-lg border border-white/15 bg-white/5 px-3 py-2.5 outline-none focus:border-[var(--accent)]"
+            className="w-full rounded-lg border border-[var(--border)] bg-white px-3 py-2.5 outline-none focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--glow)]"
           />
         </label>
-        <label className="block space-y-1.5 text-sm">
+        <label className="block space-y-1.5 text-sm font-medium text-[var(--fg)]">
           <span>Password</span>
           <input
             type="password"
@@ -128,17 +131,17 @@ export function AuthForm({
             autoComplete={mode === "login" ? "current-password" : "new-password"}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full rounded-lg border border-white/15 bg-white/5 px-3 py-2.5 outline-none focus:border-[var(--accent)]"
+            className="w-full rounded-lg border border-[var(--border)] bg-white px-3 py-2.5 outline-none focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--glow)]"
           />
         </label>
 
         {error ? (
-          <p className="rounded-md border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-200">
+          <p className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
             {error}
           </p>
         ) : null}
         {message ? (
-          <p className="rounded-md border border-teal-500/30 bg-teal-500/10 px-3 py-2 text-sm text-teal-100">
+          <p className="rounded-md border border-teal-200 bg-teal-50 px-3 py-2 text-sm text-teal-800">
             {message}
           </p>
         ) : null}
@@ -146,7 +149,7 @@ export function AuthForm({
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded-lg bg-[var(--accent)] px-4 py-2.5 text-sm font-semibold text-black transition hover:brightness-110 disabled:opacity-60"
+          className="w-full rounded-lg bg-gradient-to-r from-[#4F7DF3] to-[#5BC0BE] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:brightness-105 disabled:opacity-60"
         >
           {loading ? "Please wait…" : mode === "login" ? "Log in" : "Sign up"}
         </button>
@@ -156,14 +159,14 @@ export function AuthForm({
         {mode === "login" ? (
           <>
             Need an account?{" "}
-            <Link href="/signup" className="text-white hover:underline">
+            <Link href="/signup" className="font-semibold text-[var(--accent-2)] hover:underline">
               Sign up
             </Link>
           </>
         ) : (
           <>
             Already registered?{" "}
-            <Link href="/login" className="text-white hover:underline">
+            <Link href="/login" className="font-semibold text-[var(--accent-2)] hover:underline">
               Log in
             </Link>
           </>
