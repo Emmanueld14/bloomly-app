@@ -41,10 +41,12 @@ function AccountInner() {
   return (
     <div className="mx-auto max-w-xl px-5 py-16 md:px-8">
       <h1 className="font-[family-name:var(--font-syne)] text-4xl font-bold tracking-tight">
-        Your account
+        Your Bloomly account
       </h1>
       <p className="mt-3 text-[var(--fg-muted)]">
-        Signed in as a {profile?.role === "admin" ? "admin" : "reader"}.
+        {profile?.role === "admin"
+          ? "You're an admin — you can write posts and manage the site."
+          : "You're signed in as a member — you can like posts and leave comments."}
       </p>
 
       {searchParams.get("error") === "admin_required" ? (
