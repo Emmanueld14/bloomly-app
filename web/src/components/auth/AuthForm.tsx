@@ -22,7 +22,6 @@ export function AuthForm({
   const [loading, setLoading] = useState(false);
 
   async function resolveDestination() {
-    if (nextPath?.startsWith("/")) return nextPath;
     const supabase = createClient();
     const {
       data: { user },
@@ -33,7 +32,14 @@ export function AuthForm({
       .select("role")
       .eq("id", user.id)
       .maybeSingle();
-    return profile?.role === "admin" ? "/admin" : "/account";
+
+    // Admins can open the CMS; everyone else returns to the site (or ?next=).
+    if (profile?.role === "admin") {
+      if (nextPath?.startsWith("/") && !nextPath.startsWith("/login")) return nextPath;
+      return "/admin/";
+    }
+    if (nextPath?.startsWith("/") && !nextPath.startsWith("/admin")) return nextPath;
+    return "/blog/";
   }
 
   async function onSubmit(e: FormEvent) {
@@ -79,12 +85,12 @@ export function AuthForm({
   return (
     <div className="mx-auto w-full max-w-md rounded-xl border border-white/10 bg-black/40 p-8 backdrop-blur">
       <h1 className="font-[family-name:var(--font-syne)] text-3xl font-bold tracking-tight">
-        {mode === "login" ? "Welcome back" : "Join AetherPress"}
+        {mode === "login" ? "Welcome back" : "Join Bloomly"}
       </h1>
       <p className="mt-2 text-sm text-[var(--fg-muted)]">
         {mode === "login"
-          ? "Sign in to your account. Admins go to the dashboard; everyone else goes to their account."
-          : "Create a free reader account. Admin access is granted separately."}
+          ? "Log in to like posts and comment. Admins are taken to the writing desk."
+          : "Create a free account to like posts and join the conversation."}
       </p>
 
       <form onSubmit={onSubmit} className="mt-8 space-y-4">

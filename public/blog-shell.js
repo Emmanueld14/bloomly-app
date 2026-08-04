@@ -230,10 +230,31 @@
         }
     }
 
+    function ensureAuthNav() {
+        if (document.querySelector('script[data-bloomly-auth-nav]')) return;
+        const script = document.createElement('script');
+        script.src = '/public/auth-nav.js?v=20260804a';
+        script.defer = true;
+        script.setAttribute('data-bloomly-auth-nav', 'true');
+        document.head.appendChild(script);
+    }
+
+    function ensureInteractions() {
+        if (!document.querySelector('.post[data-post-id]')) return;
+        if (document.querySelector('script[data-bloomly-interactions]')) return;
+        const script = document.createElement('script');
+        script.src = '/public/blog-interactions.js?v=20260804a';
+        script.defer = true;
+        script.setAttribute('data-bloomly-interactions', 'true');
+        document.body.appendChild(script);
+    }
+
     function init() {
         initNav();
+        ensureAuthNav();
         initBlogFilter();
         initPostExtras();
+        ensureInteractions();
     }
 
     if (document.readyState === 'loading') {

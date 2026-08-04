@@ -600,7 +600,17 @@
     // ========== Supabase Setup ==========
     // Public Supabase credentials for browser features.
     const SUPABASE_URL = 'https://xmhyjttyarskimsxcfhl.supabase.co';
-    const SUPABASE_ANON_KEY = 'sb_publishable_IOs-j6rgWuDnwrymIIUHxQ_wCTmcaMp';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhtaHlqdHR5YXJza2ltc3hjZmhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkzNDA0MjMsImV4cCI6MjA4NDkxNjQyM30.FlKaDDdR7FebbrrYQ8yNfelpQAeO4KZfGeSZEMoRMW4';
+
+    // Sitewide Login / Account / Admin nav
+    (function ensureAuthNav() {
+        if (document.querySelector('script[data-bloomly-auth-nav]')) return;
+        const script = document.createElement('script');
+        script.src = '/public/auth-nav.js?v=20260804a';
+        script.defer = true;
+        script.setAttribute('data-bloomly-auth-nav', 'true');
+        document.head.appendChild(script);
+    })();
 
     function createSupabaseClient() {
         // Supabase library is loaded via CDN in blog pages
@@ -752,9 +762,15 @@
     async function insertSupabaseComment(postId, nickname, text) {
         if (!isSupabaseReady()) return null;
 
+        const userId = window.BloomlyAuth?.getState()?.user?.id || null;
         const { data, error } = await supabaseClient
             .from('comments')
-            .insert({ post_id: postId, nick: nickname || null, text })
+            .insert({
+                post_id: postId,
+                nick: nickname || null,
+                text,
+                ...(userId ? { user_id: userId } : {}),
+            })
             .select('*')
             .single();
 
@@ -902,6 +918,13 @@
 
         likeButtons.forEach((button) => {
             button.addEventListener('click', async () => {
+                if (window.BloomlyAuth) {
+                    const authed = await window.BloomlyAuth.requireUser({
+                        message: 'Log in to like this post.',
+                    });
+                    if (!authed?.user) return;
+                }
+
                 // Prevent multiple likes per browser by storing a flag
                 if (liked) return;
                 liked = true;
@@ -911,6 +934,16 @@
                 setBusyState(true);
 
                 if (isSupabaseReady()) {
+                    try {
+                        if (window.BloomlyAuth?.getState()?.user) {
+                            await supabaseClient.from('user_post_likes').insert({
+                                post_id: postId,
+                                user_id: window.BloomlyAuth.getState().user.id,
+                            });
+                        }
+                    } catch (e) {
+                        // ignore duplicate like rows
+                    }
                     const saved = await upsertSupabaseLikeCount(postId, likeCount);
                     if (!saved) {
                         // Fallback to local storage if Supabase write fails
@@ -1024,6 +1057,20 @@
 
         form.addEventListener('submit', async (event) => {
             event.preventDefault();
+
+            if (window.BloomlyAuth) {
+                const authed = await window.BloomlyAuth.requireUser({
+                    message: 'Log in to leave a comment.',
+                });
+                if (!authed?.user) return;
+                const nicknameInput = form.querySelector('input[name="nickname"]');
+                if (nicknameInput && !nicknameInput.value.trim()) {
+                    nicknameInput.value =
+                        authed.profile?.display_name ||
+                        authed.user.email?.split('@')[0] ||
+                        '';
+                }
+            }
 
             const nicknameInput = form.querySelector('input[name="nickname"]');
             const commentInput = form.querySelector('textarea[name="comment"]');

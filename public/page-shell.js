@@ -77,9 +77,19 @@
         document.body.classList.toggle('menu-open', shouldOpen);
     }
 
+    function ensureAuthNav() {
+        if (document.querySelector('script[data-bloomly-auth-nav]')) return;
+        const script = document.createElement('script');
+        script.src = '/public/auth-nav.js?v=20260804a';
+        script.defer = true;
+        script.setAttribute('data-bloomly-auth-nav', 'true');
+        document.head.appendChild(script);
+    }
+
     function init() {
         setActiveNavLink();
         handleNavbarScroll();
+        ensureAuthNav();
 
         if (mobileMenuToggle) {
             mobileMenuToggle.addEventListener('click', toggleMobileMenu);
