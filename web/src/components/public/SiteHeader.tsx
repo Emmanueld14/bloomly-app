@@ -4,9 +4,11 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { Profile } from "@/lib/auth";
+import { displayName, initials, needsProfileSetup, profileSetupUrl } from "@/lib/profile";
 
 export function SiteHeader() {
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [email, setEmail] = useState<string | null>(null);
 
   useEffect(() => {
     async function load() {
@@ -16,9 +18,10 @@ export function SiteHeader() {
           data: { user },
         } = await supabase.auth.getUser();
         if (!user) return;
+        setEmail(user.email || null);
         const { data } = await supabase
           .from("profiles")
-          .select("id, email, display_name, role")
+          .select("id, email, display_name, role, username, avatar_url")
           .eq("id", user.id)
           .maybeSingle();
         if (data) setProfile(data as Profile);
@@ -28,6 +31,9 @@ export function SiteHeader() {
     }
     void load();
   }, []);
+
+  const name = displayName(profile, email);
+  const incomplete = needsProfileSetup(profile);
 
   return (
     <header className="relative z-20 border-b border-white/10">
@@ -48,8 +54,31 @@ export function SiteHeader() {
                   Admin
                 </Link>
               ) : null}
-              <Link href="/account/" className="transition hover:text-white">
-                Account
+              {incomplete ? (
+                <Link
+                  href={profileSetupUrl("/account/")}
+                  className="font-semibold text-teal-300 transition hover:text-teal-200"
+                >
+                  Finish profile
+                </Link>
+              ) : null}
+              <Link
+                href="/account/"
+                className="inline-flex items-center gap-2 transition hover:text-white"
+              >
+                <span className="inline-flex h-7 w-7 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-teal-400 to-sky-500 text-[0.65rem] font-bold text-white">
+                  {profile.avatar_url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={profile.avatar_url}
+                      alt=""
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    initials(name)
+                  )}
+                </span>
+                <span className="hidden sm:inline">{name}</span>
               </Link>
             </>
           ) : (

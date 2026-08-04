@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Set your Bloomly username and profile photo.">
+    <meta name="robots" content="noindex">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <title>Set up your profile | Bloomly</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/styles.css?v=20260804c">
+    <link rel="stylesheet" href="/public/profile-ui.css?v=20260804c">
+</head>
+<body class="profile-setup-page">
+    <nav class="navbar" id="navbar">
+        <div class="navbar-content">
+            <a href="/" class="logo-container">
+                <img src="/logo.png" alt="Bloomly" class="logo-image" height="52" decoding="async">
+            </a>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="/">Home</a></li>
+                <li><a href="/blog/">Blog</a></li>
+            </ul>
+            <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Toggle menu">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 12h18M3 6h18M3 18h18"/>
+                </svg>
+            </button>
+        </div>
+    </nav>
+
+    <main class="profile-setup-main">
+        <section class="profile-setup-section">
+            <div class="floating-shape profile-setup-orb profile-setup-orb-one" aria-hidden="true"></div>
+            <div class="floating-shape profile-setup-orb profile-setup-orb-two" aria-hidden="true"></div>
+            <div class="container">
+                <div class="profile-setup-card" id="profileSetupCard">
+                    <p class="profile-setup-kicker">Your Bloomly profile</p>
+                    <h1 id="profileSetupTitle">Choose a username</h1>
+                    <p class="profile-setup-lead" id="profileSetupLead">
+                        Pick a name the community will see on likes and comments. You can add a photo too.
+                    </p>
+
+                    <div class="profile-setup-status" id="profileSetupStatus" hidden></div>
+
+                    <form id="profileSetupForm" class="profile-setup-form" novalidate>
+                        <div class="profile-setup-avatar-block">
+                            <button type="button" class="profile-setup-avatar-btn" id="avatarPreviewBtn" aria-label="Choose profile photo">
+                                <span class="bloomly-avatar bloomly-avatar--lg bloomly-avatar--initials" id="avatarPreview">B</span>
+                                <span class="profile-setup-avatar-hint">Change photo</span>
+                            </button>
+                            <input type="file" id="avatarInput" accept="image/jpeg,image/png,image/webp,image/gif" hidden>
+                            <p class="profile-setup-field-hint">Optional · JPG, PNG, or WebP up to 2MB</p>
+                            <p class="profile-setup-inline-error" id="avatarError" hidden></p>
+                        </div>
+
+                        <label class="profile-setup-label">
+                            <span>Username</span>
+                            <div class="profile-setup-username-row">
+                                <span class="profile-setup-at" aria-hidden="true">@</span>
+                                <input
+                                    type="text"
+                                    id="usernameInput"
+                                    name="username"
+                                    maxlength="24"
+                                    autocomplete="username"
+                                    spellcheck="false"
+                                    placeholder="your_name"
+                                    required
+                                >
+                            </div>
+                            <p class="profile-setup-field-hint">3–24 characters · letters, numbers, underscores</p>
+                            <p class="profile-setup-inline-error" id="usernameError" hidden></p>
+                        </label>
+
+                        <div class="profile-setup-actions">
+                            <button type="submit" class="btn btn-primary" id="saveProfileBtn">Save profile</button>
+                            <button type="button" class="btn btn-secondary" id="skipProfileBtn">Not now</button>
+                        </div>
+                        <p class="profile-setup-skip-note">
+                            You can browse Bloomly without finishing, but liking and commenting need a real username.
+                        </p>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="/public/profile-helpers.js?v=20260804c" defer></script>
+    <script src="/public/auth-nav.js?v=20260804c" defer></script>
+    <script src="/public/profile-setup.js?v=20260804c" defer></script>
+    <script src="/script.js?v=20260804c" defer></script>
+</body>
+</html>

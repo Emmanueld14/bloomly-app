@@ -48,13 +48,25 @@ export function UsersTable({
             {users.map((user) => (
               <tr key={user.id} className="border-b border-gray-100 last:border-0">
                 <td className="px-4 py-3">
-                  <div className="font-medium text-gray-900">
-                    {user.display_name || "Untitled"}
-                    {user.id === currentUserId ? (
-                      <span className="ml-2 text-xs text-teal-700">(you)</span>
-                    ) : null}
+                  <div className="flex items-center gap-3">
+                    <span className="inline-flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-teal-400 to-sky-500 text-[0.65rem] font-bold text-white">
+                      {user.avatar_url ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={user.avatar_url} alt="" className="h-full w-full object-cover" />
+                      ) : (
+                        (user.username || user.display_name || "?").charAt(0).toUpperCase()
+                      )}
+                    </span>
+                    <div>
+                      <div className="font-medium text-gray-900">
+                        {user.username || user.display_name || "Untitled"}
+                        {user.id === currentUserId ? (
+                          <span className="ml-2 text-xs text-teal-700">(you)</span>
+                        ) : null}
+                      </div>
+                      <div className="text-xs text-gray-500">{user.email}</div>
+                    </div>
                   </div>
-                  <div className="text-xs text-gray-500">{user.email}</div>
                 </td>
                 <td className="px-4 py-3 capitalize text-gray-700">{user.role}</td>
                 <td className="px-4 py-3">

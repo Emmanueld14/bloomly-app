@@ -231,9 +231,16 @@
     }
 
     function ensureAuthNav() {
+        if (!document.querySelector('script[data-bloomly-profile-helpers]')) {
+            const helpers = document.createElement('script');
+            helpers.src = '/public/profile-helpers.js?v=20260804c';
+            helpers.defer = true;
+            helpers.setAttribute('data-bloomly-profile-helpers', 'true');
+            document.head.appendChild(helpers);
+        }
         if (document.querySelector('script[data-bloomly-auth-nav]')) return;
         const script = document.createElement('script');
-        script.src = '/public/auth-nav.js?v=20260804a';
+        script.src = '/public/auth-nav.js?v=20260804c';
         script.defer = true;
         script.setAttribute('data-bloomly-auth-nav', 'true');
         document.head.appendChild(script);
@@ -243,7 +250,7 @@
         if (!document.querySelector('.post[data-post-id]')) return;
         if (document.querySelector('script[data-bloomly-interactions]')) return;
         const script = document.createElement('script');
-        script.src = '/public/blog-interactions.js?v=20260804a';
+        script.src = '/public/blog-interactions.js?v=20260804c';
         script.defer = true;
         script.setAttribute('data-bloomly-interactions', 'true');
         document.body.appendChild(script);

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { needsProfileSetup, profileSetupUrl, syncSessionToLocalStorage } from "@/lib/profile";
 
 type Mode = "login" | "signup";
 
@@ -27,19 +28,31 @@ export function AuthForm({
       data: { user },
     } = await supabase.auth.getUser();
     if (!user) return "/";
+
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    syncSessionToLocalStorage(session);
+
     const { data: profile } = await supabase
       .from("profiles")
-      .select("role")
+      .select("role, username")
       .eq("id", user.id)
       .maybeSingle();
 
-    // Admins can open the CMS; everyone else returns to the site (or ?next=).
-    if (profile?.role === "admin") {
-      if (nextPath?.startsWith("/") && !nextPath.startsWith("/login")) return nextPath;
-      return "/admin/";
+    const preferred =
+      profile?.role === "admin"
+        ? nextPath?.startsWith("/") && !nextPath.startsWith("/login")
+          ? nextPath
+          : "/admin/"
+        : nextPath?.startsWith("/") && !nextPath.startsWith("/admin")
+          ? nextPath
+          : "/blog/";
+
+    if (needsProfileSetup(profile)) {
+      return profileSetupUrl(preferred);
     }
-    if (nextPath?.startsWith("/") && !nextPath.startsWith("/admin")) return nextPath;
-    return "/blog/";
+    return preferred;
   }
 
   async function onSubmit(e: FormEvent) {
@@ -69,6 +82,7 @@ export function AuthForm({
         });
         if (signUpError) throw signUpError;
         if (data.session) {
+          syncSessionToLocalStorage(data.session);
           router.replace(await resolveDestination());
           router.refresh();
         } else {

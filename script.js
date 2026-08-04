@@ -602,28 +602,38 @@
     const SUPABASE_URL = 'https://xmhyjttyarskimsxcfhl.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhtaHlqdHR5YXJza2ltc3hjZmhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkzNDA0MjMsImV4cCI6MjA4NDkxNjQyM30.FlKaDDdR7FebbrrYQ8yNfelpQAeO4KZfGeSZEMoRMW4';
 
-    // Sitewide Login / Account / Admin nav
+    // Sitewide Login / Account / Admin nav (+ profile helpers)
     (function ensureAuthNav() {
+        if (!document.querySelector('script[data-bloomly-profile-helpers]')) {
+            const helpers = document.createElement('script');
+            helpers.src = '/public/profile-helpers.js?v=20260804c';
+            helpers.defer = true;
+            helpers.setAttribute('data-bloomly-profile-helpers', 'true');
+            document.head.appendChild(helpers);
+        }
         if (document.querySelector('script[data-bloomly-auth-nav]')) return;
         const script = document.createElement('script');
-        script.src = '/public/auth-nav.js?v=20260804a';
+        script.src = '/public/auth-nav.js?v=20260804c';
         script.defer = true;
         script.setAttribute('data-bloomly-auth-nav', 'true');
         document.head.appendChild(script);
     })();
 
     function createSupabaseClient() {
-        // Supabase library is loaded via CDN in blog pages
+        // Prefer the shared BloomlyAuth client when available.
+        if (window.BloomlyAuth && typeof window.BloomlyAuth.getClient === 'function') {
+            // getClient is async; sync path falls through until auth-nav is ready
+        }
         if (!window.supabase || typeof window.supabase.createClient !== 'function') {
             return null;
         }
 
-        // Prevent accidental use before credentials are set
         if (SUPABASE_URL === 'SUPABASE_URL' || SUPABASE_ANON_KEY === 'SUPABASE_ANON_KEY') {
             console.warn('Supabase not configured. Replace SUPABASE_URL and SUPABASE_ANON_KEY.');
             return null;
         }
 
+        // Reuse a single module-level client (created once).
         return window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     }
 
@@ -782,11 +792,17 @@
         return data;
     }
 
-    function getCommentAuthorName(comment) {
+    function getCommentAuthorName(comment, profile) {
+        const h = window.BloomlyProfile;
+        if (profile?.username && h && !h.isDefaultUsername(profile.username)) {
+            return profile.username;
+        }
+        if (profile?.display_name) return profile.display_name;
         return comment.nick || comment.nickname || comment.author || 'Anonymous';
     }
 
     function getCommentInitials(name) {
+        if (window.BloomlyProfile) return window.BloomlyProfile.initials(name);
         const parts = String(name || 'A')
             .trim()
             .split(/\s+/)
@@ -805,8 +821,27 @@
         );
     }
 
-    function renderComments(list, comments) {
+    async function fetchCommentProfiles(comments) {
+        const map = {};
+        if (!isSupabaseReady() || !Array.isArray(comments) || !comments.length) return map;
+        const ids = Array.from(
+            new Set(comments.map((c) => c.user_id).filter(Boolean))
+        );
+        if (!ids.length) return map;
+        const { data, error } = await supabaseClient
+            .from('public_profiles')
+            .select('id, username, avatar_url, display_name')
+            .in('id', ids);
+        if (error || !data) return map;
+        data.forEach((row) => {
+            map[row.id] = row;
+        });
+        return map;
+    }
+
+    function renderComments(list, comments, profileMap) {
         list.innerHTML = '';
+        const profiles = profileMap || {};
 
         if (!comments.length) {
             const empty = document.createElement('p');
@@ -826,10 +861,21 @@
                 item.classList.add('is-new');
             }
 
+            const profile = comment.user_id ? profiles[comment.user_id] : null;
+            const authorName = getCommentAuthorName(comment, profile);
             const avatar = document.createElement('span');
-            avatar.className = 'comment-avatar';
-            const authorName = getCommentAuthorName(comment);
-            avatar.textContent = getCommentInitials(authorName);
+            avatar.className = 'comment-avatar bloomly-avatar';
+            if (profile?.avatar_url) {
+                const img = document.createElement('img');
+                img.className = 'bloomly-avatar-img';
+                img.src = profile.avatar_url;
+                img.alt = '';
+                img.loading = 'lazy';
+                avatar.appendChild(img);
+            } else {
+                avatar.classList.add('bloomly-avatar--initials');
+                avatar.textContent = getCommentInitials(authorName);
+            }
 
             const content = document.createElement('div');
             content.className = 'comment-content';
@@ -1053,28 +1099,28 @@
             }
         }
 
-        renderComments(list, comments);
+        let commentProfiles = await fetchCommentProfiles(comments);
+        renderComments(list, comments, commentProfiles);
 
         form.addEventListener('submit', async (event) => {
             event.preventDefault();
 
+            let authed = null;
             if (window.BloomlyAuth) {
-                const authed = await window.BloomlyAuth.requireUser({
+                authed = await window.BloomlyAuth.requireUser({
                     message: 'Log in to leave a comment.',
                 });
                 if (!authed?.user) return;
-                const nicknameInput = form.querySelector('input[name="nickname"]');
-                if (nicknameInput && !nicknameInput.value.trim()) {
-                    nicknameInput.value =
-                        authed.profile?.display_name ||
-                        authed.user.email?.split('@')[0] ||
-                        '';
-                }
             }
 
             const nicknameInput = form.querySelector('input[name="nickname"]');
             const commentInput = form.querySelector('textarea[name="comment"]');
-            const nickname = nicknameInput ? nicknameInput.value.trim() : '';
+            const h = window.BloomlyProfile;
+            const nickname = authed
+                ? ((h ? h.displayName(authed.profile, authed.user) : authed.profile?.username) ||
+                  authed.profile?.display_name ||
+                  'Member')
+                : (nicknameInput ? nicknameInput.value.trim() : '');
             const text = commentInput ? commentInput.value.trim() : '';
 
             if (!text) {
@@ -1093,7 +1139,15 @@
                 }
 
                 comments.unshift(savedComment);
-                renderComments(list, comments);
+                if (authed?.user) {
+                    commentProfiles[authed.user.id] = {
+                        id: authed.user.id,
+                        username: authed.profile?.username,
+                        avatar_url: authed.profile?.avatar_url,
+                        display_name: authed.profile?.display_name,
+                    };
+                }
+                renderComments(list, comments, commentProfiles);
                 setFormMessage(messageEl, 'Thanks! Your comment is now public.', 'success');
             } else {
                 const newComment = {
@@ -1104,7 +1158,7 @@
 
                 comments.unshift(newComment);
                 safeStorageSet(commentsKey, JSON.stringify(comments));
-                renderComments(list, comments);
+                renderComments(list, comments, commentProfiles);
                 setFormMessage(messageEl, 'Thanks! Your comment is saved on this device.', 'success');
             }
 

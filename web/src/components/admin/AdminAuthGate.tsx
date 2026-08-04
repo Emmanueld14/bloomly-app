@@ -29,7 +29,7 @@ export function AdminAuthGate({ children }: { children: React.ReactNode }) {
 
         const { data, error: profileError } = await supabase
           .from("profiles")
-          .select("id, email, display_name, role")
+          .select("id, email, display_name, role, username, avatar_url")
           .eq("id", user.id)
           .maybeSingle();
 
@@ -43,9 +43,10 @@ export function AdminAuthGate({ children }: { children: React.ReactNode }) {
               id: user.id,
               email: user.email,
               display_name: user.email?.split("@")[0] || "User",
+              username: "user_" + String(user.id).replace(/-/g, "").slice(0, 8),
               role: "user",
             })
-            .select("id, email, display_name, role")
+            .select("id, email, display_name, role, username, avatar_url")
             .single();
           if (insertError) throw insertError;
           nextProfile = created as Profile;

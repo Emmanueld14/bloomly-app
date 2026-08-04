@@ -24,7 +24,7 @@ export function UsersPageClient() {
       setCurrentUserId(user.id);
       const { data, error: fetchError } = await supabase
         .from("profiles")
-        .select("id, email, display_name, role")
+        .select("id, email, display_name, role, username, avatar_url")
         .order("created_at", { ascending: false });
       if (fetchError) {
         setError(fetchError.message);

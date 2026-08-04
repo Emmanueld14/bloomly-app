@@ -8,6 +8,13 @@ import { SignOutButton } from "@/components/auth/SignOutButton";
 import { createClient } from "@/lib/supabase/client";
 import type { Profile } from "@/lib/auth";
 import { LoadingState } from "@/components/ui/States";
+import {
+  displayName,
+  initials,
+  needsProfileSetup,
+  profileSetupUrl,
+  syncSessionToLocalStorage,
+} from "@/lib/profile";
 
 function AccountInner() {
   const router = useRouter();
@@ -25,18 +32,31 @@ function AccountInner() {
         router.replace("/login/?next=/account/");
         return;
       }
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      syncSessionToLocalStorage(session);
+
       setEmail(user.email || "");
       const { data } = await supabase
         .from("profiles")
-        .select("id, email, display_name, role")
+        .select("id, email, display_name, role, username, avatar_url")
         .eq("id", user.id)
         .maybeSingle();
-      setProfile((data as Profile) || null);
+      const nextProfile = (data as Profile) || null;
+      setProfile(nextProfile);
+
+      if (needsProfileSetup(nextProfile)) {
+        router.replace(profileSetupUrl("/account/"));
+      }
     }
     void load();
   }, [router]);
 
   if (!profile && !email) return <LoadingState label="Loading account…" />;
+
+  const name = displayName(profile, email);
+  const incomplete = needsProfileSetup(profile);
 
   return (
     <div className="mx-auto max-w-xl px-5 py-16 md:px-8">
@@ -55,14 +75,29 @@ function AccountInner() {
         </p>
       ) : null}
 
-      <div className="mt-8 space-y-3 rounded-xl border border-white/10 bg-black/30 p-6 text-sm">
-        <div className="flex justify-between gap-4">
-          <span className="text-[var(--fg-muted)]">Email</span>
-          <span>{email || profile?.email || "—"}</span>
+      <div className="mt-8 flex items-center gap-4 rounded-xl border border-white/10 bg-black/30 p-6">
+        <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-teal-400 to-sky-500 text-lg font-bold text-white">
+          {profile?.avatar_url ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={profile.avatar_url}
+              alt=""
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            initials(name)
+          )}
         </div>
+        <div className="min-w-0">
+          <p className="truncate text-lg font-semibold">@{name}</p>
+          <p className="truncate text-sm text-[var(--fg-muted)]">{email || profile?.email}</p>
+        </div>
+      </div>
+
+      <div className="mt-4 space-y-3 rounded-xl border border-white/10 bg-black/30 p-6 text-sm">
         <div className="flex justify-between gap-4">
-          <span className="text-[var(--fg-muted)]">Display name</span>
-          <span>{profile?.display_name || "—"}</span>
+          <span className="text-[var(--fg-muted)]">Username</span>
+          <span>{profile?.username || "—"}</span>
         </div>
         <div className="flex justify-between gap-4">
           <span className="text-[var(--fg-muted)]">Role</span>
@@ -71,10 +106,16 @@ function AccountInner() {
       </div>
 
       <div className="mt-8 flex flex-wrap gap-3">
+        <Link
+          href={profileSetupUrl("/account/")}
+          className="rounded-lg bg-[var(--accent)] px-4 py-2 text-sm font-semibold text-black"
+        >
+          {incomplete ? "Finish profile" : "Edit profile"}
+        </Link>
         {profile?.role === "admin" ? (
           <Link
             href="/admin/"
-            className="rounded-lg bg-[var(--accent)] px-4 py-2 text-sm font-semibold text-black"
+            className="rounded-lg border border-white/15 px-4 py-2 text-sm text-white hover:bg-white/5"
           >
             Open admin
           </Link>

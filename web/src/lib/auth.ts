@@ -6,6 +6,8 @@ export type Profile = {
   id: string;
   email: string | null;
   display_name: string | null;
+  username: string | null;
+  avatar_url: string | null;
   role: UserRole;
 };
 
@@ -33,7 +35,7 @@ export async function getProfile(): Promise<{
 
   const { data, error } = await supabase
     .from("profiles")
-    .select("id, email, display_name, role")
+    .select("id, email, display_name, role, username, avatar_url")
     .eq("id", user.id)
     .maybeSingle();
 
@@ -43,15 +45,18 @@ export async function getProfile(): Promise<{
 
   // If trigger hasn't fired yet, create a default profile row
   if (!data) {
+    const defaultUsername =
+      "user_" + String(user.id).replace(/-/g, "").slice(0, 8);
     const { data: created, error: insertError } = await supabase
       .from("profiles")
       .upsert({
         id: user.id,
         email: user.email,
         display_name: user.email?.split("@")[0] || "User",
+        username: defaultUsername,
         role: "user",
       })
-      .select("id, email, display_name, role")
+      .select("id, email, display_name, role, username, avatar_url")
       .single();
 
     if (insertError) {

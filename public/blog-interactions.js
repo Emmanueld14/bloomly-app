@@ -31,6 +31,10 @@
     });
   }
 
+  function helpers() {
+    return window.BloomlyProfile || null;
+  }
+
   function ensurePanel(postEl, postId) {
     let panel = postEl.querySelector("[data-post-interactions]");
     if (panel) return panel;
@@ -55,10 +59,7 @@
               <a data-comment-login-link href="/login/">Log in</a> to leave a comment.
             </p>
             <form class="comment-form" data-comment-form>
-              <label>
-                <span>Display as</span>
-                <input type="text" name="nickname" maxlength="40" placeholder="Your name" />
-              </label>
+              <p class="comment-as" data-comment-as hidden></p>
               <label>
                 <span>Comment</span>
                 <textarea name="comment" rows="3" maxlength="4000" required placeholder="Share a kind thought…"></textarea>
@@ -90,7 +91,30 @@
     });
   }
 
-  function renderComments(listEl, comments) {
+  function escapeHtml(value) {
+    return String(value || "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  async function loadProfilesByIds(client, ids) {
+    const unique = Array.from(new Set((ids || []).filter(Boolean)));
+    const map = {};
+    if (!unique.length) return map;
+    const { data } = await client
+      .from("public_profiles")
+      .select("id, username, avatar_url, display_name")
+      .in("id", unique);
+    (data || []).forEach((row) => {
+      map[row.id] = row;
+    });
+    return map;
+  }
+
+  function renderComments(listEl, comments, profileMap) {
+    const h = helpers();
     listEl.innerHTML = "";
     if (!comments.length) {
       const empty = document.createElement("p");
@@ -100,13 +124,28 @@
       return;
     }
     comments.forEach((comment) => {
+      const profile = comment.user_id ? profileMap[comment.user_id] : null;
+      const author =
+        (profile && h && !h.isDefaultUsername(profile.username) && profile.username) ||
+        profile?.display_name ||
+        comment.nick ||
+        "Member";
+      const avatarUrl = profile?.avatar_url || null;
+      const initial = h ? h.initials(author) : author.charAt(0).toUpperCase();
+
       const item = document.createElement("div");
       item.className = "comment-item";
-      const author = comment.nick || "Member";
       item.innerHTML = `
+        <span class="comment-avatar bloomly-avatar ${avatarUrl ? "" : "bloomly-avatar--initials"}">
+          ${
+            avatarUrl
+              ? `<img class="bloomly-avatar-img" src="${escapeHtml(avatarUrl)}" alt="" loading="lazy" />`
+              : escapeHtml(initial)
+          }
+        </span>
         <div class="comment-content">
           <div class="comment-meta">
-            <strong class="comment-author">${author}</strong>
+            <strong class="comment-author">${escapeHtml(author)}</strong>
             <span class="comment-time">${formatTimestamp(comment.timestamp || comment.created_at)}</span>
           </div>
           <p class="comment-text"></p>
@@ -124,6 +163,7 @@
     const panel = ensurePanel(postEl, postId);
     const client = await auth.getClient();
     const state = auth.getState();
+    const h = helpers();
     const likeButton = panel.querySelector("[data-like-button]");
     const likeCountEl = panel.querySelector("[data-like-count]");
     const authHint = panel.querySelector("[data-auth-hint]");
@@ -132,11 +172,10 @@
     const messageEl = panel.querySelector("[data-comment-message]");
     const loginHint = panel.querySelector("[data-comment-login-hint]");
     const loginLink = panel.querySelector("[data-comment-login-link]");
-    const nickInput = form.querySelector('input[name="nickname"]');
+    const commentAs = panel.querySelector("[data-comment-as]");
 
     if (loginLink) loginLink.href = auth.loginUrl();
 
-    // Load count
     const { data: likeRow } = await client
       .from("likes")
       .select("count")
@@ -153,12 +192,27 @@
         .eq("user_id", state.user.id)
         .maybeSingle();
       liked = Boolean(mine);
-      if (nickInput) {
-        nickInput.value = state.profile?.display_name || state.user.email?.split("@")[0] || "";
+
+      const needsSetup = h && h.needsProfileSetup(state.profile);
+      if (needsSetup) {
+        form.hidden = true;
+        if (loginHint) {
+          loginHint.hidden = false;
+          loginHint.innerHTML = `<a href="${h.setupUrl()}">Finish your profile</a> to leave a comment.`;
+        }
+        if (authHint) {
+          authHint.hidden = false;
+          authHint.innerHTML = `<a href="${h.setupUrl()}">Finish your profile</a> to like this post.`;
+        }
+      } else {
+        form.hidden = false;
+        if (loginHint) loginHint.hidden = true;
+        if (authHint) authHint.hidden = true;
+        if (commentAs) {
+          commentAs.hidden = false;
+          commentAs.textContent = "Commenting as @" + h.displayName(state.profile, state.user);
+        }
       }
-      form.hidden = false;
-      if (loginHint) loginHint.hidden = true;
-      if (authHint) authHint.hidden = true;
     } else {
       form.hidden = true;
       if (loginHint) loginHint.hidden = false;
@@ -218,7 +272,12 @@
       .select("*")
       .eq("post_id", postId)
       .order("timestamp", { ascending: false });
-    renderComments(list, comments || []);
+    const commentRows = comments || [];
+    const profileMap = await loadProfilesByIds(
+      client,
+      commentRows.map((c) => c.user_id)
+    );
+    renderComments(list, commentRows, profileMap);
 
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
@@ -227,7 +286,10 @@
       });
       if (!authed?.user) return;
 
-      const nickname = (nickInput?.value || "").trim() || authed.profile?.display_name || "Member";
+      const nickname =
+        (h && h.displayName(authed.profile, authed.user)) ||
+        authed.profile?.display_name ||
+        "Member";
       const text = (form.querySelector('textarea[name="comment"]')?.value || "").trim();
       if (!text) {
         messageEl.textContent = "Please write a comment before submitting.";
@@ -252,8 +314,14 @@
         return;
       }
 
-      const next = [saved].concat(comments || []);
-      renderComments(list, next);
+      const next = [saved].concat(commentRows);
+      profileMap[authed.user.id] = {
+        id: authed.user.id,
+        username: authed.profile?.username,
+        avatar_url: authed.profile?.avatar_url,
+        display_name: authed.profile?.display_name,
+      };
+      renderComments(list, next, profileMap);
       form.querySelector('textarea[name="comment"]').value = "";
       messageEl.textContent = "Thanks! Your comment is now public.";
       messageEl.className = "comment-message is-success";
@@ -261,6 +329,15 @@
   }
 
   async function init() {
+    if (!window.BloomlyProfile) {
+      await new Promise((resolve, reject) => {
+        const el = document.createElement("script");
+        el.src = "/public/profile-helpers.js?v=20260804c";
+        el.onload = resolve;
+        el.onerror = reject;
+        document.head.appendChild(el);
+      }).catch(() => null);
+    }
     const auth = await waitForAuth();
     if (!auth) return;
     const posts = Array.from(document.querySelectorAll(".post[data-post-id]"));

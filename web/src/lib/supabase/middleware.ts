@@ -69,11 +69,24 @@ export async function updateSession(request: NextRequest) {
   if (isAuthPage && user) {
     const { data: profile } = await supabase
       .from("profiles")
-      .select("role")
+      .select("role, username")
       .eq("id", user.id)
       .maybeSingle();
 
     const redirectUrl = request.nextUrl.clone();
+    const incomplete =
+      !profile?.username || /^user_[a-f0-9]{8}$/i.test(profile.username);
+    if (incomplete) {
+      // Static /profile-setup lives on the Cloudflare site root (outside Next).
+      return NextResponse.redirect(
+        new URL(
+          `/profile-setup/?next=${encodeURIComponent(
+            profile?.role === "admin" ? "/admin/" : "/account/"
+          )}`,
+          request.url
+        )
+      );
+    }
     redirectUrl.pathname = profile?.role === "admin" ? "/admin" : "/account";
     redirectUrl.search = "";
     return NextResponse.redirect(redirectUrl);
