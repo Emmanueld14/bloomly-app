@@ -15,7 +15,6 @@ try {
   // ignore invalid URL at build time
 }
 
-// Allow common Supabase storage hosts when env is not baked in yet
 remotePatterns.push({
   protocol: "https",
   hostname: "*.supabase.co",
@@ -23,7 +22,13 @@ remotePatterns.push({
 });
 
 const nextConfig: NextConfig = {
-  images: { remotePatterns },
+  // Static export so Cloudflare Pages can serve AetherPress admin at /admin
+  output: "export",
+  trailingSlash: true,
+  images: {
+    unoptimized: true,
+    remotePatterns,
+  },
   turbopack: {
     root: __dirname,
   },

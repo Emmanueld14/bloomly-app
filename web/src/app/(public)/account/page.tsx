@@ -1,15 +1,42 @@
+"use client";
+
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 import { SignOutButton } from "@/components/auth/SignOutButton";
-import { getProfile } from "@/lib/auth";
+import { createClient } from "@/lib/supabase/client";
+import type { Profile } from "@/lib/auth";
+import { LoadingState } from "@/components/ui/States";
 
-export const dynamic = "force-dynamic";
-export const metadata = { title: "Account" };
+function AccountInner() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [email, setEmail] = useState<string>("");
+  const [profile, setProfile] = useState<Profile | null>(null);
 
-type SearchParams = Promise<{ error?: string }>;
+  useEffect(() => {
+    async function load() {
+      const supabase = createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) {
+        router.replace("/login/?next=/account/");
+        return;
+      }
+      setEmail(user.email || "");
+      const { data } = await supabase
+        .from("profiles")
+        .select("id, email, display_name, role")
+        .eq("id", user.id)
+        .maybeSingle();
+      setProfile((data as Profile) || null);
+    }
+    void load();
+  }, [router]);
 
-export default async function AccountPage({ searchParams }: { searchParams: SearchParams }) {
-  const params = await searchParams;
-  const { user, profile } = await getProfile();
+  if (!profile && !email) return <LoadingState label="Loading account…" />;
 
   return (
     <div className="mx-auto max-w-xl px-5 py-16 md:px-8">
@@ -20,7 +47,7 @@ export default async function AccountPage({ searchParams }: { searchParams: Sear
         Signed in as a {profile?.role === "admin" ? "admin" : "reader"}.
       </p>
 
-      {params.error === "admin_required" ? (
+      {searchParams.get("error") === "admin_required" ? (
         <p className="mt-6 rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-100">
           That area is for admins only. Ask an existing admin to promote your account.
         </p>
@@ -29,7 +56,7 @@ export default async function AccountPage({ searchParams }: { searchParams: Sear
       <div className="mt-8 space-y-3 rounded-xl border border-white/10 bg-black/30 p-6 text-sm">
         <div className="flex justify-between gap-4">
           <span className="text-[var(--fg-muted)]">Email</span>
-          <span>{user?.email || profile?.email || "—"}</span>
+          <span>{email || profile?.email || "—"}</span>
         </div>
         <div className="flex justify-between gap-4">
           <span className="text-[var(--fg-muted)]">Display name</span>
@@ -44,7 +71,7 @@ export default async function AccountPage({ searchParams }: { searchParams: Sear
       <div className="mt-8 flex flex-wrap gap-3">
         {profile?.role === "admin" ? (
           <Link
-            href="/admin"
+            href="/admin/"
             className="rounded-lg bg-[var(--accent)] px-4 py-2 text-sm font-semibold text-black"
           >
             Open admin
@@ -59,5 +86,13 @@ export default async function AccountPage({ searchParams }: { searchParams: Sear
         <SignOutButton />
       </div>
     </div>
+  );
+}
+
+export default function AccountPage() {
+  return (
+    <Suspense fallback={<LoadingState label="Loading account…" />}>
+      <AccountInner />
+    </Suspense>
   );
 }

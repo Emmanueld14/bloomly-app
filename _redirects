@@ -1,10 +1,18 @@
 # Cloudflare Pages redirects
 # Format: /from /to [status]
 
-# Admin routing
-/admin /admin/index.html 200
-/admin/login /admin/login/ 301
-/admin/login.html /admin/login/ 301
+# Admin routing — AetherPress (Next static export published into /admin)
+/admin /admin/ 301
+/admin/ /admin/index.html 200
+/admin/login /login/ 301
+/admin/login/ /login/ 301
+/admin/login.html /login/ 301
+/login /login/ 301
+/login/ /login/index.html 200
+/signup /signup/ 301
+/signup/ /signup/index.html 200
+/account /account/ 301
+/account/ /account/index.html 200
 
 # Blog routing
 /blog /blog/index.html 200

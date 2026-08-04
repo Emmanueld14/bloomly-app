@@ -57,7 +57,13 @@ Open [http://localhost:3000](http://localhost:3000).
 - Public nav has **Log in** / **Sign up** for everyone.
 - New accounts get role `user` in `public.profiles`.
 - `/account` is for all signed-in users.
-- `/admin/*` requires role `admin` (middleware + RLS).
+- `/admin/*` requires role `admin` (client auth gate + RLS).
+
+### Deployed on bloomly.co.ke
+
+The root `npm run build` static-exports this app and publishes it into the
+Cloudflare Pages site so **`https://bloomly.co.ke/admin`** is AetherPress
+(not the legacy GitHub admin).
 
 ### Make the first admin
 

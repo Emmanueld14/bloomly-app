@@ -6,11 +6,11 @@ import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 
 const links = [
-  { href: "/admin", label: "Dashboard" },
-  { href: "/admin/posts", label: "Posts" },
-  { href: "/admin/media", label: "Media" },
-  { href: "/admin/categories", label: "Categories & Tags" },
-  { href: "/admin/users", label: "Users" },
+  { href: "/admin/", label: "Dashboard" },
+  { href: "/admin/posts/", label: "Posts" },
+  { href: "/admin/media/", label: "Media" },
+  { href: "/admin/categories/", label: "Categories & Tags" },
+  { href: "/admin/users/", label: "Users" },
 ];
 
 export function AdminNav() {
@@ -35,9 +35,9 @@ export function AdminNav() {
       <nav className="flex gap-1 overflow-x-auto px-2 pb-3 md:flex-col md:px-3 md:pb-0">
         {links.map((link) => {
           const active =
-            link.href === "/admin"
-              ? pathname === "/admin"
-              : pathname.startsWith(link.href);
+            link.href === "/admin/"
+              ? pathname === "/admin" || pathname === "/admin/"
+              : pathname.startsWith(link.href.replace(/\/$/, ""));
           return (
             <Link
               key={link.href}

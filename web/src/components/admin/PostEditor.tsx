@@ -185,7 +185,7 @@ export function PostEditor({
         setAutosaveNote(`Draft autosaved at ${new Date().toLocaleTimeString()}`);
       } else {
         setAutosaveNote(intent === "publish" ? "Published." : "Saved.");
-        router.replace(`/admin/posts/${id}/edit`);
+        router.replace(`/admin/posts/edit/?id=${id}`);
         router.refresh();
       }
     } catch (err) {

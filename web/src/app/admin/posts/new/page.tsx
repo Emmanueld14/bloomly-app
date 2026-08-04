@@ -1,16 +1,11 @@
-import { PostEditor } from "@/components/admin/PostEditor";
-import { AdminErrorState } from "@/components/ui/States";
-import { getCategoriesAndTags } from "@/lib/posts";
+import { Suspense } from "react";
+import { EditorPageClient } from "@/components/admin/EditorPageClient";
+import { AdminLoadingState } from "@/components/ui/States";
 
-export const metadata = { title: "New Post" };
-
-export default async function NewPostPage() {
-  const { categories, tags, error } = await getCategoriesAndTags();
-
+export default function NewPostPage() {
   return (
-    <div>
-      {error ? <AdminErrorState message={error} /> : null}
-      <PostEditor categories={categories} tags={tags} />
-    </div>
+    <Suspense fallback={<AdminLoadingState />}>
+      <EditorPageClient mode="new" />
+    </Suspense>
   );
 }

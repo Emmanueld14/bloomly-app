@@ -1,11 +1,31 @@
+"use client";
+
 import Link from "next/link";
-import { EmptyState, ErrorState } from "@/components/ui/States";
-import { getCategoriesAndTags } from "@/lib/posts";
+import { useEffect, useState } from "react";
+import { EmptyState, ErrorState, LoadingState } from "@/components/ui/States";
+import { createClient } from "@/lib/supabase/client";
+import type { Category } from "@/lib/types";
 
-export const metadata = { title: "Categories" };
+export default function CategoriesIndexPage() {
+  const [categories, setCategories] = useState<Category[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-export default async function CategoriesIndexPage() {
-  const { categories, error } = await getCategoriesAndTags();
+  useEffect(() => {
+    async function load() {
+      const supabase = createClient();
+      const { data, error: fetchError } = await supabase
+        .from("categories")
+        .select("*")
+        .order("name");
+      if (fetchError) {
+        setError(fetchError.message);
+        setCategories([]);
+        return;
+      }
+      setCategories((data || []) as Category[]);
+    }
+    void load();
+  }, []);
 
   return (
     <div className="mx-auto max-w-4xl px-5 py-16 md:px-8">
@@ -13,9 +33,10 @@ export default async function CategoriesIndexPage() {
         Categories
       </h1>
       <p className="mt-3 text-[var(--fg-muted)]">Browse essays by theme.</p>
-
       <div className="mt-10">
-        {error ? (
+        {categories === null ? (
+          <LoadingState />
+        ) : error ? (
           <ErrorState message={error} />
         ) : categories.length === 0 ? (
           <EmptyState title="No categories yet" />
@@ -24,7 +45,7 @@ export default async function CategoriesIndexPage() {
             {categories.map((category) => (
               <li key={category.id}>
                 <Link
-                  href={`/category/${category.slug}`}
+                  href={`/category/${category.slug}/`}
                   className="flex items-center justify-between py-5 transition hover:text-[var(--accent)]"
                 >
                   <span className="font-[family-name:var(--font-syne)] text-xl font-semibold">
