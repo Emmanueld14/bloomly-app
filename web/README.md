@@ -52,9 +52,24 @@ Open [http://localhost:3000](http://localhost:3000).
 | `/admin/categories` | Category & tag CRUD |
 | `/api/health` | Keep-alive ping for free-tier pause |
 
-## Auth
+## Auth & roles
 
-`/admin/*` is protected by Next.js middleware that verifies the Supabase session on every request. Unauthenticated users are redirected to `/login`.
+- Public nav has **Log in** / **Sign up** for everyone.
+- New accounts get role `user` in `public.profiles`.
+- `/account` is for all signed-in users.
+- `/admin/*` requires role `admin` (middleware + RLS).
+
+### Make the first admin
+
+After signing up once, run this in the Supabase SQL editor (replace the email):
+
+```sql
+update public.profiles
+set role = 'admin'
+where email = 'you@example.com';
+```
+
+Then open `/admin/users` to promote or demote others.
 
 ## Keep Supabase awake
 

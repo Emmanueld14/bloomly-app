@@ -40,19 +40,41 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const path = request.nextUrl.pathname;
-  const isAdmin = path.startsWith("/admin");
+  const isAdminRoute = path.startsWith("/admin");
   const isAuthPage = path === "/login" || path === "/signup";
+  const isAccountRoute = path.startsWith("/account");
 
-  if (isAdmin && !user) {
+  if ((isAdminRoute || isAccountRoute) && !user) {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = "/login";
     redirectUrl.searchParams.set("next", path);
     return NextResponse.redirect(redirectUrl);
   }
 
+  if (isAdminRoute && user) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    if (profile?.role !== "admin") {
+      const redirectUrl = request.nextUrl.clone();
+      redirectUrl.pathname = "/account";
+      redirectUrl.searchParams.set("error", "admin_required");
+      return NextResponse.redirect(redirectUrl);
+    }
+  }
+
   if (isAuthPage && user) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .maybeSingle();
+
     const redirectUrl = request.nextUrl.clone();
-    redirectUrl.pathname = "/admin";
+    redirectUrl.pathname = profile?.role === "admin" ? "/admin" : "/account";
     redirectUrl.search = "";
     return NextResponse.redirect(redirectUrl);
   }

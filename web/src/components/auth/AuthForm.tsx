@@ -7,13 +7,34 @@ import { createClient } from "@/lib/supabase/client";
 
 type Mode = "login" | "signup";
 
-export function AuthForm({ mode, nextPath = "/admin" }: { mode: Mode; nextPath?: string }) {
+export function AuthForm({
+  mode,
+  nextPath,
+}: {
+  mode: Mode;
+  nextPath?: string;
+}) {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  async function resolveDestination() {
+    if (nextPath?.startsWith("/")) return nextPath;
+    const supabase = createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return "/";
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .maybeSingle();
+    return profile?.role === "admin" ? "/admin" : "/account";
+  }
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
@@ -30,16 +51,19 @@ export function AuthForm({ mode, nextPath = "/admin" }: { mode: Mode; nextPath?:
           password,
         });
         if (signInError) throw signInError;
-        router.replace(nextPath);
+        router.replace(await resolveDestination());
         router.refresh();
       } else {
         const { data, error: signUpError } = await supabase.auth.signUp({
           email,
           password,
+          options: {
+            data: { display_name: email.split("@")[0] },
+          },
         });
         if (signUpError) throw signUpError;
         if (data.session) {
-          router.replace(nextPath);
+          router.replace(await resolveDestination());
           router.refresh();
         } else {
           setMessage("Check your email to confirm your account, then sign in.");
@@ -55,12 +79,12 @@ export function AuthForm({ mode, nextPath = "/admin" }: { mode: Mode; nextPath?:
   return (
     <div className="mx-auto w-full max-w-md rounded-xl border border-white/10 bg-black/40 p-8 backdrop-blur">
       <h1 className="font-[family-name:var(--font-syne)] text-3xl font-bold tracking-tight">
-        {mode === "login" ? "Sign in" : "Create account"}
+        {mode === "login" ? "Welcome back" : "Join AetherPress"}
       </h1>
       <p className="mt-2 text-sm text-[var(--fg-muted)]">
         {mode === "login"
-          ? "Access the AetherPress admin dashboard."
-          : "Register an admin account with email and password."}
+          ? "Sign in to your account. Admins go to the dashboard; everyone else goes to their account."
+          : "Create a free reader account. Admin access is granted separately."}
       </p>
 
       <form onSubmit={onSubmit} className="mt-8 space-y-4">
@@ -104,7 +128,7 @@ export function AuthForm({ mode, nextPath = "/admin" }: { mode: Mode; nextPath?:
           disabled={loading}
           className="w-full rounded-lg bg-[var(--accent)] px-4 py-2.5 text-sm font-semibold text-black transition hover:brightness-110 disabled:opacity-60"
         >
-          {loading ? "Please wait…" : mode === "login" ? "Sign in" : "Sign up"}
+          {loading ? "Please wait…" : mode === "login" ? "Log in" : "Sign up"}
         </button>
       </form>
 
@@ -120,7 +144,7 @@ export function AuthForm({ mode, nextPath = "/admin" }: { mode: Mode; nextPath?:
           <>
             Already registered?{" "}
             <Link href="/login" className="text-white hover:underline">
-              Sign in
+              Log in
             </Link>
           </>
         )}

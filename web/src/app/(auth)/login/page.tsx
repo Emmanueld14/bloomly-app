@@ -2,11 +2,11 @@ import { AuthForm } from "@/components/auth/AuthForm";
 
 type SearchParams = Promise<{ next?: string; error?: string }>;
 
-export const metadata = { title: "Login" };
+export const metadata = { title: "Log in" };
 
 export default async function LoginPage({ searchParams }: { searchParams: SearchParams }) {
   const params = await searchParams;
-  const nextPath = params.next?.startsWith("/") ? params.next : "/admin";
+  const nextPath = params.next?.startsWith("/") ? params.next : undefined;
 
   return (
     <div className="w-full">

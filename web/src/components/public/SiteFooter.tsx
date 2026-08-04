@@ -13,7 +13,10 @@ export function SiteFooter() {
             Home
           </Link>
           <Link href="/login" className="hover:text-white">
-            Sign in
+            Log in
+          </Link>
+          <Link href="/signup" className="hover:text-white">
+            Sign up
           </Link>
         </div>
       </div>

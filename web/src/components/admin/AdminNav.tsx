@@ -10,6 +10,7 @@ const links = [
   { href: "/admin/posts", label: "Posts" },
   { href: "/admin/media", label: "Media" },
   { href: "/admin/categories", label: "Categories & Tags" },
+  { href: "/admin/users", label: "Users" },
 ];
 
 export function AdminNav() {
