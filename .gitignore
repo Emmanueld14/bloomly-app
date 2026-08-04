@@ -1,10 +1,10 @@
 # Dependencies
 node_modules/
-package-lock.json
 
 # Environment variables
 .env
 .env.local
+web/.env.local
 
 # Netlify
 .netlify/
@@ -26,3 +26,5 @@ Thumbs.db
 # Build outputs
 dist/
 build/
+web/.next/
+web/out/

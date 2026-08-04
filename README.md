@@ -2,6 +2,18 @@
 
 A modern, teen-friendly website for mental health awareness, support, and resources. Built with clean HTML, CSS, and JavaScript, featuring Netlify CMS for easy content management.
 
+## Next.js blog app (`web/`)
+
+A full-stack editorial blog (AetherPress) lives in [`web/`](./web/): Next.js App Router, TypeScript, Tailwind, and Supabase Auth/Postgres/Storage. See [`web/README.md`](./web/README.md) for setup. Quick start:
+
+```bash
+cd web
+cp .env.example .env.local
+# fill Supabase URL + anon key, apply supabase/migrations/20260804010000_nextjs_blog_schema.sql
+npm install
+npm run dev
+```
+
 ## Features
 
 - 🏠 **Home Page** - Welcoming hero section with mission and wellness tips

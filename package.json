@@ -6,6 +6,8 @@
   "scripts": {
     "start": "npx serve . -p 3000",
     "dev": "npx serve . -p 3000",
+    "dev:web": "npm --prefix web run dev",
+    "build:web": "npm --prefix web run build",
     "build:admin-editor": "esbuild admin/editor-src/index.js --bundle --minify --format=iife --global-name=BloomlyCMSEditorBundle --outfile=admin/blog-cms-editor.js --target=es2020",
     "export:content": "node scripts/export-supabase-content.js",
     "build": "npm run build:admin-editor && node scripts/export-supabase-content.js && node scripts/generate-config.js && node scripts/build-blog-css.js && node scripts/generate-blog-manifest.js && node scripts/generate-blog-index.js && node scripts/generate-blog-routes.js && node scripts/generate-resources.js",
