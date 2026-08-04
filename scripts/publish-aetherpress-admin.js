@@ -11,6 +11,7 @@ const root = path.join(__dirname, "..");
 const webDir = path.join(root, "web");
 const outDir = path.join(webDir, "out");
 
+// Defaults live in web/src/lib/supabase/config.ts as well (public anon key).
 const supabaseUrl =
   process.env.NEXT_PUBLIC_SUPABASE_URL ||
   process.env.SUPABASE_URL ||
@@ -18,9 +19,10 @@ const supabaseUrl =
 const supabaseAnon =
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
   process.env.SUPABASE_ANON_KEY ||
-  "sb_publishable_IOs-j6rgWuDnwrymIIUHxQ_wCTmcaMp";
+  "";
 
 console.log("Building AetherPress (static export) for /admin…");
+console.log("Supabase URL:", supabaseUrl);
 execSync("npm install", { cwd: webDir, stdio: "inherit" });
 execSync("npm run build", {
   cwd: webDir,
@@ -28,7 +30,7 @@ execSync("npm run build", {
   env: {
     ...process.env,
     NEXT_PUBLIC_SUPABASE_URL: supabaseUrl,
-    NEXT_PUBLIC_SUPABASE_ANON_KEY: supabaseAnon,
+    ...(supabaseAnon ? { NEXT_PUBLIC_SUPABASE_ANON_KEY: supabaseAnon } : {}),
   },
 });
 

@@ -20,25 +20,25 @@ export default function HomePage() {
 
   useEffect(() => {
     async function load() {
-      if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-        setError("Configure NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY.");
+      try {
+        const supabase = createClient();
+        const { data, error: fetchError } = await supabase
+          .from("posts")
+          .select(POST_SELECT)
+          .eq("status", "published")
+          .eq("published", true)
+          .order("published_at", { ascending: false, nullsFirst: false })
+          .limit(9);
+        if (fetchError) {
+          setError(fetchError.message);
+          setPosts([]);
+          return;
+        }
+        setPosts((data || []) as unknown as PostWithRelations[]);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to load posts");
         setPosts([]);
-        return;
       }
-      const supabase = createClient();
-      const { data, error: fetchError } = await supabase
-        .from("posts")
-        .select(POST_SELECT)
-        .eq("status", "published")
-        .eq("published", true)
-        .order("published_at", { ascending: false, nullsFirst: false })
-        .limit(9);
-      if (fetchError) {
-        setError(fetchError.message);
-        setPosts([]);
-        return;
-      }
-      setPosts((data || []) as unknown as PostWithRelations[]);
     }
     void load();
   }, []);
