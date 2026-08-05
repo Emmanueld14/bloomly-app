@@ -22,7 +22,10 @@ remotePatterns.push({
 });
 
 const nextConfig: NextConfig = {
-  // Static export so Cloudflare Pages can serve AetherPress admin at /admin
+  // Static HTML export for Cloudflare Pages (/admin, /login, /account).
+  // Vercel should deploy web/ as a static "Other" project with outputDirectory=out
+  // (see web/vercel.json). Do not set Vercel Output Directory to "." — that makes
+  // the Next.js builder look for routes-manifest.json outside .next/.
   output: "export",
   trailingSlash: true,
   images: {

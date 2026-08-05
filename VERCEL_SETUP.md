@@ -52,6 +52,12 @@ After deployment, Vercel will give you a URL like: `https://bloomly-app-xxxxx.ve
 - **"Failed to exchange token"**: Check that environment variables are set correctly in Vercel
 - **CORS errors**: Make sure the API URL in `callback.html` matches your Vercel deployment URL
 - **Function not found**: Ensure the `api/github-auth.js` file exists and Vercel has redeployed
+- **`routes-manifest.json` couldn't be found** (Next.js / `web/` project):
+  1. In Vercel → Project Settings → General, if **Root Directory** is `web`, open **Build & Development Settings**
+  2. Set **Framework Preset** to **Other** (not Next.js) — `web` is a static export (`output: "export"` → `out/`)
+  3. Clear any **Output Directory** override, or set it to `out` (matches `web/vercel.json`)
+  4. Do **not** set Output Directory to `.` — that makes Vercel look for `web/routes-manifest.json` instead of `.next/routes-manifest.json`
+  5. Redeploy
 
 ## Alternative: Use Without Vercel
 
