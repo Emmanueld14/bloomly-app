@@ -5961,8 +5961,11 @@ a:hover {
 }
 
 .about-team-hero .bloomly-team-photo {
+    width: 100%;
+    height: 100%;
     border-radius: 50%;
     object-fit: cover;
+    object-position: center;
 }
 
 .simple-profile-header {
@@ -5981,6 +5984,7 @@ a:hover {
     height: 220px;
     border-radius: var(--radius-full);
     object-fit: cover;
+    object-position: center;
     border: 4px solid rgba(var(--color-white-rgb), 0.9);
     box-shadow: 0 16px 32px rgba(var(--color-black-rgb), 0.12);
 }
@@ -8697,6 +8701,7 @@ body {
     box-shadow:
         0 22px 42px rgba(var(--color-black-rgb), 0.18),
         0 0 0 6px rgba(var(--color-white-rgb), 0.75);
+    /* Keep visible so the country badge can sit on the ring edge */
     overflow: visible;
 }
 
@@ -8705,7 +8710,12 @@ body {
     height: 100%;
     border-radius: 50%;
     object-fit: cover;
+    object-position: center;
     display: block;
+    image-rendering: auto;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    transform: translateZ(0);
 }
 
 .team-page .team-grid-photo--placeholder {
