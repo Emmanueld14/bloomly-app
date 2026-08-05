@@ -81,13 +81,103 @@
     });
   }
 
+  const MAX_PICK_BYTES = 50 * 1024 * 1024;
+  const MAX_EDGE_PX = 1600;
+  const TARGET_UPLOAD_BYTES = 1.5 * 1024 * 1024;
+
+  function errorMessage(err) {
+    if (!err) return "Unknown error";
+    if (typeof err === "string") return err;
+    return err.message || err.error_description || err.error || "Unknown error";
+  }
+
+  function friendlyAvatarError(err) {
+    const msg = errorMessage(err);
+    if (/exceeded the maximum allowed size|EntityTooLarge|Payload too large|413/i.test(msg)) {
+      return "That photo is still too large for storage. Try a smaller image, or run the 50MB avatars migration in Supabase.";
+    }
+    if (/mime type|not allowed|invalid.*type/i.test(msg)) {
+      return "Use a JPG, PNG, WebP, or GIF photo.";
+    }
+    if (/row-level security|not authorized|403|Unauthorized/i.test(msg)) {
+      return "Couldn’t save the photo (permission denied). Sign out and back in, then try again.";
+    }
+    if (/Failed to fetch|NetworkError|network/i.test(msg)) {
+      return "Network error while uploading the photo. Check your connection and try again.";
+    }
+    return msg;
+  }
+
+  function loadImageElement(file) {
+    return new Promise((resolve, reject) => {
+      const url = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        resolve(img);
+      };
+      img.onerror = () => {
+        URL.revokeObjectURL(url);
+        reject(new Error("Couldn’t read that image. Try JPG, PNG, or WebP."));
+      };
+      img.src = url;
+    });
+  }
+
+  function canvasToBlob(canvas, type, quality) {
+    return new Promise((resolve, reject) => {
+      canvas.toBlob(
+        (blob) => {
+          if (!blob) reject(new Error("Couldn’t process that image."));
+          else resolve(blob);
+        },
+        type,
+        quality
+      );
+    });
+  }
+
+  /**
+   * Accept large camera rolls (up to 50MB) but upload a resized JPEG avatar.
+   * Avoids Supabase bucket / network failures on huge originals.
+   */
+  async function prepareAvatarFile(file) {
+    if (!file.type || !file.type.startsWith("image/")) {
+      throw new Error("Use a JPG, PNG, WebP, or GIF photo.");
+    }
+
+    const img = await loadImageElement(file);
+    const scale = Math.min(1, MAX_EDGE_PX / Math.max(img.naturalWidth || img.width, img.naturalHeight || img.height));
+    const width = Math.max(1, Math.round((img.naturalWidth || img.width) * scale));
+    const height = Math.max(1, Math.round((img.naturalHeight || img.height) * scale));
+
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext("2d", { alpha: false });
+    if (!ctx) throw new Error("Couldn’t process that image.");
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, width, height);
+    ctx.drawImage(img, 0, 0, width, height);
+
+    let quality = 0.88;
+    let blob = await canvasToBlob(canvas, "image/jpeg", quality);
+    while (blob.size > TARGET_UPLOAD_BYTES && quality > 0.55) {
+      quality -= 0.1;
+      blob = await canvasToBlob(canvas, "image/jpeg", quality);
+    }
+
+    const base = (file.name || "avatar").replace(/\.[^.]+$/, "") || "avatar";
+    return new File([blob], `${base}.jpg`, { type: "image/jpeg", lastModified: Date.now() });
+  }
+
   async function uploadAvatar(client, userId, file) {
-    const ext = (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "");
-    const path = `${userId}/avatar-${Date.now()}.${ext || "jpg"}`;
-    const { error: uploadError } = await client.storage.from("avatars").upload(path, file, {
+    const prepared = await prepareAvatarFile(file);
+    const path = `${userId}/avatar-${Date.now()}.jpg`;
+    const { error: uploadError } = await client.storage.from("avatars").upload(path, prepared, {
       cacheControl: "3600",
       upsert: true,
-      contentType: file.type || "image/jpeg",
+      contentType: "image/jpeg",
     });
     if (uploadError) throw uploadError;
 
@@ -160,8 +250,14 @@
       setText(avatarError, "", false);
       const file = avatarInput.files && avatarInput.files[0];
       if (!file) return;
-      if (file.size > 50 * 1024 * 1024) {
+      if (file.size > MAX_PICK_BYTES) {
         setText(avatarError, "Please choose an image under 50MB.", true);
+        avatarInput.value = "";
+        selectedFile = null;
+        return;
+      }
+      if (!file.type || !file.type.startsWith("image/")) {
+        setText(avatarError, "Use a JPG, PNG, WebP, or GIF photo.", true);
         avatarInput.value = "";
         selectedFile = null;
         return;
@@ -227,12 +323,14 @@
         // Avatar is independent — failure must not undo username.
         if (selectedFile) {
           try {
+            setText(statusEl, "Optimizing & uploading photo…", false);
             await uploadAvatar(client, state.user.id, selectedFile);
+            selectedFile = null;
           } catch (avatarErr) {
             console.warn("Avatar upload failed", avatarErr);
             setText(
               avatarError,
-              "Username saved, but the photo didn’t upload. You can try the photo again anytime.",
+              `Username saved, but the photo didn’t upload: ${friendlyAvatarError(avatarErr)}`,
               true
             );
             helpers.clearDeferSetup();
