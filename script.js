@@ -2027,7 +2027,7 @@
             name: 'Manuel Muhunami',
             role: 'Founder & Lead Builder',
             country: 'Kenya',
-            image: '/images/team/manuel-muhunami-avatar-800.webp?v=20260805',
+            image: '/images/team/manuel-muhunami-avatar-800.webp?v=20260805b',
             accent: 'sage',
             details: [
                 'Product building',
