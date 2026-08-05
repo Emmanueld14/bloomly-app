@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { BrandLogo } from "@/components/BrandLogo";
 import { createClient } from "@/lib/supabase/client";
 import type { Profile } from "@/lib/auth";
 import { displayName, initials, needsProfileSetup, profileSetupUrl } from "@/lib/profile";
@@ -38,9 +39,7 @@ export function SiteHeader() {
   return (
     <header className="relative z-20 border-b border-[var(--border)] bg-white/80 backdrop-blur">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-4 md:px-8">
-        <Link href="/" className="font-[family-name:var(--font-manrope)] text-2xl font-extrabold tracking-tight text-[var(--fg)] md:text-3xl">
-          Bloomly
-        </Link>
+        <BrandLogo />
         <nav className="flex items-center gap-4 text-sm text-[var(--fg-muted)] md:gap-6">
           <Link href="/blog/" className="transition hover:text-[var(--accent-2)]">
             Blog

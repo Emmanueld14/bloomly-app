@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { BrandLogo } from "@/components/BrandLogo";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 
@@ -27,10 +28,11 @@ export function AdminNav() {
   return (
     <aside className="flex w-full flex-col border-b border-[var(--admin-border)] bg-white md:min-h-screen md:w-56 md:border-b-0 md:border-r">
       <div className="px-4 py-4">
-        <Link href="/admin" className="text-sm font-semibold tracking-tight text-gray-900">
-          Bloomly Admin
-        </Link>
-        <p className="mt-0.5 text-xs text-gray-500">Writing desk</p>
+        <BrandLogo
+          href="/"
+          imgClassName="h-8 w-auto max-w-[140px] object-contain"
+        />
+        <p className="mt-1 text-xs font-medium text-gray-500">Admin · Writing desk</p>
       </div>
       <nav className="flex gap-1 overflow-x-auto px-2 pb-3 md:flex-col md:px-3 md:pb-0">
         {links.map((link) => {

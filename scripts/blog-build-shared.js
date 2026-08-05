@@ -271,7 +271,10 @@ function applyFastBlogHead(html) {
         /<style>[\s\S]*?<\/style>\s*/,
         `${inlinedCss}\n`
     );
-    output = output.replace(/src="\/logo\.png"/g, 'src="/logo.svg" width="52" height="44"');
+    output = output.replace(
+        /<img src="\/logo\.(?:png|svg)"[^>]*>/g,
+        '<img src="/logo.svg" alt="Bloomly logo" class="logo-image" decoding="async">'
+    );
     output = output.replace(
         /<!-- bloomly:blog-manifest:start -->[\s\S]*?<!-- bloomly:blog-manifest:end -->\s*/g,
         ''
