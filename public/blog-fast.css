@@ -268,9 +268,9 @@ a:hover {
 }
 
 .logo-image {
-    height: 38px;
+    height: 42px;
     width: auto;
-    max-width: min(160px, 46vw);
+    max-width: min(180px, 52vw);
 }
 
 .logo-text {

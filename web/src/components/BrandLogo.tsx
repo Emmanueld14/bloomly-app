@@ -16,9 +16,9 @@ export function BrandLogo({
       {/* Static brand mark served from site root */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src="/logo.svg"
+        src="/images/bloomly-wordmark.svg"
         alt="Bloomly logo"
-        className={imgClassName ?? "h-8 w-auto max-w-[150px] object-contain md:h-9"}
+        className={imgClassName ?? "h-9 w-auto max-w-[180px] object-contain md:h-10"}
         decoding="async"
       />
     </Link>
