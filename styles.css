@@ -3321,6 +3321,7 @@ a:hover {
     height: 100%;
     border-radius: 50%;
     object-fit: cover;
+    object-position: center;
     border: 2px solid rgba(var(--color-black-rgb), 0.06);
     background: var(--color-white);
     transition: transform 220ms var(--transition-base);
