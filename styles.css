@@ -321,92 +321,11 @@ a:hover {
     font-weight: 600;
 }
 
+/* Like/Comments editorial card styles live in /public/interactions-ui.css
+   (injected by blog-interactions.js so inlined blog CSS can't override them). */
 .post-interactions-section {
-    padding-top: 0;
+    padding: 2.5rem 0 3.5rem;
 }
-
-.post-interactions-card {
-    margin: 0 auto;
-    max-width: 720px;
-    border: 1px solid rgba(15, 23, 42, 0.08);
-    border-radius: 1rem;
-    background: #fff;
-    padding: 1.25rem 1.5rem 1.5rem;
-    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.04);
-}
-
-.post-like-row {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.75rem 1rem;
-    margin-bottom: 1.25rem;
-}
-
-.post-like-row .like-button.liked {
-    background: #ecfdf5;
-    border-color: #99f6e4;
-    color: #0f766e;
-}
-
-.post-auth-hint,
-.comment-login-hint {
-    margin: 0;
-    font-size: 0.9rem;
-    color: #64748b;
-}
-
-.comment-section h3 {
-    margin: 0 0 0.75rem;
-    font-size: 1.15rem;
-}
-
-.comment-form {
-    display: grid;
-    gap: 0.75rem;
-    margin-bottom: 1.25rem;
-}
-
-.comment-form label {
-    display: grid;
-    gap: 0.35rem;
-    font-size: 0.9rem;
-    color: #334155;
-}
-
-.comment-form input,
-.comment-form textarea {
-    width: 100%;
-    border: 1px solid #e2e8f0;
-    border-radius: 0.65rem;
-    padding: 0.65rem 0.75rem;
-    font: inherit;
-}
-
-.comment-message.is-error { color: #b91c1c; }
-.comment-message.is-success { color: #0f766e; }
-
-.comment-list {
-    display: grid;
-    gap: 0.85rem;
-}
-
-.comment-item {
-    border-top: 1px solid #f1f5f9;
-    padding-top: 0.85rem;
-}
-
-.comment-meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem 0.75rem;
-    margin-bottom: 0.35rem;
-    font-size: 0.85rem;
-}
-
-.comment-time { color: #94a3b8; }
-.comment-text { margin: 0; color: #334155; line-height: 1.55; }
-.comment-empty { color: #94a3b8; font-size: 0.95rem; }
 
 .nav-links a.active {
     color: var(--color-blue);

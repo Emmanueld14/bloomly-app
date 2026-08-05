@@ -250,7 +250,7 @@
         if (!document.querySelector('.post[data-post-id]')) return;
         if (document.querySelector('script[data-bloomly-interactions]')) return;
         const script = document.createElement('script');
-        script.src = '/public/blog-interactions.js?v=20260804c';
+        script.src = '/public/blog-interactions.js?v=20260805a';
         script.defer = true;
         script.setAttribute('data-bloomly-interactions', 'true');
         document.body.appendChild(script);

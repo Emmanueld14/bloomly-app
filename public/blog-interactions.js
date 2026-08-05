@@ -5,6 +5,9 @@
 (function () {
   "use strict";
 
+  const HEART_SVG =
+    '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21.2l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>';
+
   function waitForAuth(timeoutMs) {
     return new Promise((resolve) => {
       if (window.BloomlyAuth?.getState()?.ready) {
@@ -35,6 +38,15 @@
     return window.BloomlyProfile || null;
   }
 
+  function ensureInteractionStyles() {
+    if (document.querySelector('link[data-bloomly-interactions-ui]')) return;
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = "/public/interactions-ui.css?v=20260805a";
+    link.setAttribute("data-bloomly-interactions-ui", "true");
+    document.head.appendChild(link);
+  }
+
   function ensurePanel(postEl, postId) {
     let panel = postEl.querySelector("[data-post-interactions]");
     if (panel) return panel;
@@ -47,24 +59,33 @@
       <div class="container">
         <div class="post-interactions-card">
           <div class="post-like-row">
-            <button type="button" class="btn btn-secondary like-button" data-like-button aria-pressed="false">
+            <button type="button" class="like-button" data-like-button aria-pressed="false">
+              <span class="like-heart" aria-hidden="true">${HEART_SVG}</span>
               <span class="like-text">Like</span>
             </button>
             <span class="like-count" data-like-count>0 likes</span>
             <p class="post-auth-hint" data-auth-hint hidden></p>
           </div>
           <div class="comment-section">
-            <h3>Comments</h3>
+            <div class="comment-section-heading">
+              <h3 class="comment-section-title">Comments</h3>
+              <span class="comment-count-badge" data-comment-count>0</span>
+            </div>
             <p class="comment-login-hint" data-comment-login-hint hidden>
               <a data-comment-login-link href="/login/">Log in</a> to leave a comment.
             </p>
             <form class="comment-form" data-comment-form>
-              <p class="comment-as" data-comment-as hidden></p>
+              <div class="comment-author-chip" data-comment-as hidden>
+                <span class="bloomly-avatar bloomly-avatar--initials comment-author-chip-avatar" data-comment-as-avatar>B</span>
+                <span class="comment-author-chip-name" data-comment-as-name></span>
+              </div>
               <label>
                 <span>Comment</span>
                 <textarea name="comment" rows="3" maxlength="4000" required placeholder="Share a kind thought…"></textarea>
               </label>
-              <button type="submit" class="btn btn-primary">Post comment</button>
+              <button type="submit" class="btn btn-primary comment-submit-btn" data-comment-submit>
+                <span data-comment-submit-label>Post comment</span>
+              </button>
               <p class="comment-message" data-comment-message></p>
             </form>
             <div class="comment-list" data-comment-list></div>
@@ -99,6 +120,30 @@
       .replace(/"/g, "&quot;");
   }
 
+  function popElement(el) {
+    if (!el) return;
+    el.classList.remove("is-popping");
+    // Force reflow so repeated clicks re-trigger the animation.
+    void el.offsetWidth;
+    el.classList.add("is-popping");
+    window.setTimeout(() => el.classList.remove("is-popping"), 240);
+  }
+
+  function setCommentCount(badge, count) {
+    if (!badge) return;
+    badge.textContent = String(count);
+    badge.setAttribute("aria-label", `${count} comment${count === 1 ? "" : "s"}`);
+  }
+
+  function renderEmptyState(listEl) {
+    listEl.innerHTML = `
+      <div class="comment-empty-card comment-empty">
+        <span class="comment-empty-icon" aria-hidden="true">💬</span>
+        <p>No comments yet — be the first to share a kind thought</p>
+      </div>
+    `;
+  }
+
   async function loadProfilesByIds(client, ids) {
     const unique = Array.from(new Set((ids || []).filter(Boolean)));
     const map = {};
@@ -113,14 +158,12 @@
     return map;
   }
 
-  function renderComments(listEl, comments, profileMap) {
+  function renderComments(listEl, comments, profileMap, countBadge) {
     const h = helpers();
+    setCommentCount(countBadge, comments.length);
     listEl.innerHTML = "";
     if (!comments.length) {
-      const empty = document.createElement("p");
-      empty.className = "comment-empty";
-      empty.textContent = "No comments yet. Be the first to share.";
-      listEl.appendChild(empty);
+      renderEmptyState(listEl);
       return;
     }
     comments.forEach((comment) => {
@@ -156,6 +199,21 @@
     });
   }
 
+  function fillAuthorChip(chip, avatarEl, nameEl, profile, user) {
+    const h = helpers();
+    if (!chip || !h) return;
+    const name = h.displayName(profile, user);
+    chip.hidden = false;
+    if (nameEl) nameEl.textContent = "@" + name;
+    if (avatarEl) {
+      h.renderAvatarElement(avatarEl, {
+        username: profile?.username,
+        avatarUrl: profile?.avatar_url,
+        name,
+      });
+    }
+  }
+
   async function initPost(postEl, auth) {
     const postId = (postEl.getAttribute("data-post-id") || "").trim();
     if (!postId) return;
@@ -173,6 +231,11 @@
     const loginHint = panel.querySelector("[data-comment-login-hint]");
     const loginLink = panel.querySelector("[data-comment-login-link]");
     const commentAs = panel.querySelector("[data-comment-as]");
+    const commentAsAvatar = panel.querySelector("[data-comment-as-avatar]");
+    const commentAsName = panel.querySelector("[data-comment-as-name]");
+    const countBadge = panel.querySelector("[data-comment-count]");
+    const submitBtn = panel.querySelector("[data-comment-submit]");
+    const submitLabel = panel.querySelector("[data-comment-submit-label]");
 
     if (loginLink) loginLink.href = auth.loginUrl();
 
@@ -208,10 +271,7 @@
         form.hidden = false;
         if (loginHint) loginHint.hidden = true;
         if (authHint) authHint.hidden = true;
-        if (commentAs) {
-          commentAs.hidden = false;
-          commentAs.textContent = "Commenting as @" + h.displayName(state.profile, state.user);
-        }
+        fillAuthorChip(commentAs, commentAsAvatar, commentAsName, state.profile, state.user);
       }
     } else {
       form.hidden = true;
@@ -222,13 +282,17 @@
       }
     }
 
-    const updateLikeUI = () => {
+    const updateLikeUI = (animate) => {
       likeCountEl.textContent = `${likeCount} like${likeCount === 1 ? "" : "s"}`;
       likeButton.classList.toggle("liked", liked);
       likeButton.setAttribute("aria-pressed", liked ? "true" : "false");
       likeButton.querySelector(".like-text").textContent = liked ? "Liked" : "Like";
+      if (animate) {
+        popElement(likeButton);
+        popElement(likeCountEl);
+      }
     };
-    updateLikeUI();
+    updateLikeUI(false);
 
     likeButton.addEventListener("click", async () => {
       const authed = await auth.requireUser({
@@ -258,7 +322,7 @@
           { post_id: postId, count: likeCount },
           { onConflict: "post_id" }
         );
-        updateLikeUI();
+        updateLikeUI(true);
       } catch (err) {
         console.warn("Like failed", err);
         alert("Could not update like. Please try again.");
@@ -272,12 +336,12 @@
       .select("*")
       .eq("post_id", postId)
       .order("timestamp", { ascending: false });
-    const commentRows = comments || [];
+    let commentRows = comments || [];
     const profileMap = await loadProfilesByIds(
       client,
       commentRows.map((c) => c.user_id)
     );
-    renderComments(list, commentRows, profileMap);
+    renderComments(list, commentRows, profileMap, countBadge);
 
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
@@ -297,6 +361,13 @@
         return;
       }
 
+      submitBtn.disabled = true;
+      submitBtn.classList.add("is-loading");
+      submitBtn.classList.remove("is-success");
+      if (submitLabel) submitLabel.textContent = "Posting…";
+      messageEl.textContent = "";
+      messageEl.className = "comment-message";
+
       const { data: saved, error } = await client
         .from("comments")
         .insert({
@@ -308,27 +379,39 @@
         .select("*")
         .single();
 
+      submitBtn.classList.remove("is-loading");
+
       if (error || !saved) {
+        submitBtn.disabled = false;
+        if (submitLabel) submitLabel.textContent = "Post comment";
         messageEl.textContent = "Unable to save comment. Please try again.";
         messageEl.className = "comment-message is-error";
         return;
       }
 
-      const next = [saved].concat(commentRows);
+      commentRows = [saved].concat(commentRows);
       profileMap[authed.user.id] = {
         id: authed.user.id,
         username: authed.profile?.username,
         avatar_url: authed.profile?.avatar_url,
         display_name: authed.profile?.display_name,
       };
-      renderComments(list, next, profileMap);
+      renderComments(list, commentRows, profileMap, countBadge);
       form.querySelector('textarea[name="comment"]').value = "";
       messageEl.textContent = "Thanks! Your comment is now public.";
       messageEl.className = "comment-message is-success";
+      submitBtn.classList.add("is-success");
+      if (submitLabel) submitLabel.textContent = "Posted";
+      window.setTimeout(() => {
+        submitBtn.classList.remove("is-success");
+        submitBtn.disabled = false;
+        if (submitLabel) submitLabel.textContent = "Post comment";
+      }, 1200);
     });
   }
 
   async function init() {
+    ensureInteractionStyles();
     if (!window.BloomlyProfile) {
       await new Promise((resolve, reject) => {
         const el = document.createElement("script");
