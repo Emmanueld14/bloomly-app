@@ -160,8 +160,8 @@
       setText(avatarError, "", false);
       const file = avatarInput.files && avatarInput.files[0];
       if (!file) return;
-      if (file.size > 2 * 1024 * 1024) {
-        setText(avatarError, "Please choose an image under 2MB.", true);
+      if (file.size > 50 * 1024 * 1024) {
+        setText(avatarError, "Please choose an image under 50MB.", true);
         avatarInput.value = "";
         selectedFile = null;
         return;

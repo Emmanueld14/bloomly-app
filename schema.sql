@@ -87,7 +87,7 @@ values (
   'avatars',
   'avatars',
   true,
-  2097152,
+  52428800,
   array['image/jpeg', 'image/png', 'image/webp', 'image/gif']
 )
 on conflict (id) do update
