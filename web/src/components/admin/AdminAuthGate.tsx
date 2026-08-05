@@ -29,7 +29,7 @@ export function AdminAuthGate({ children }: { children: React.ReactNode }) {
 
         const { data, error: profileError } = await supabase
           .from("profiles")
-          .select("id, email, display_name, role, username, avatar_url")
+          .select("id, email, display_name, role, username, avatar_url, is_active")
           .eq("id", user.id)
           .maybeSingle();
 
@@ -46,10 +46,16 @@ export function AdminAuthGate({ children }: { children: React.ReactNode }) {
               username: "user_" + String(user.id).replace(/-/g, "").slice(0, 8),
               role: "user",
             })
-            .select("id, email, display_name, role, username, avatar_url")
+            .select("id, email, display_name, role, username, avatar_url, is_active")
             .single();
           if (insertError) throw insertError;
           nextProfile = created as Profile;
+        }
+
+        if (nextProfile.is_active === false) {
+          await supabase.auth.signOut();
+          router.replace("/login/?error=account_deactivated");
+          return;
         }
 
         if (nextProfile.role !== "admin") {

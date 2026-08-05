@@ -24,6 +24,19 @@ export function formatDate(value: string | null | undefined, opts?: Intl.DateTim
   });
 }
 
+export function formatDateTime(value: string | null | undefined) {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toLocaleString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
 export function readingTimeMinutes(content: string | null | undefined): number {
   const words = (content || "").trim().split(/\s+/).filter(Boolean).length;
   return Math.max(1, Math.ceil(words / 200));

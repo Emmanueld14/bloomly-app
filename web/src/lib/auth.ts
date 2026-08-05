@@ -9,6 +9,10 @@ export type Profile = {
   username: string | null;
   avatar_url: string | null;
   role: UserRole;
+  is_active?: boolean | null;
+  deactivated_at?: string | null;
+  created_at?: string | null;
+  updated_at?: string | null;
 };
 
 export async function getSessionUser() {
@@ -35,7 +39,9 @@ export async function getProfile(): Promise<{
 
   const { data, error } = await supabase
     .from("profiles")
-    .select("id, email, display_name, role, username, avatar_url")
+    .select(
+      "id, email, display_name, role, username, avatar_url, is_active, deactivated_at, created_at, updated_at"
+    )
     .eq("id", user.id)
     .maybeSingle();
 
@@ -56,7 +62,9 @@ export async function getProfile(): Promise<{
         username: defaultUsername,
         role: "user",
       })
-      .select("id, email, display_name, role, username, avatar_url")
+      .select(
+        "id, email, display_name, role, username, avatar_url, is_active, deactivated_at, created_at, updated_at"
+      )
       .single();
 
     if (insertError) {
@@ -70,7 +78,7 @@ export async function getProfile(): Promise<{
 
 export async function requireAdmin() {
   const { user, profile, error } = await getProfile();
-  if (!user || profile?.role !== "admin") {
+  if (!user || profile?.role !== "admin" || profile.is_active === false) {
     return { ok: false as const, user, profile, error };
   }
   return { ok: true as const, user, profile, error: null };

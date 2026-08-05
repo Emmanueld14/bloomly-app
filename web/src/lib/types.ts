@@ -47,4 +47,33 @@ export type BlogStats = {
   drafts: number;
   published: number;
   scheduled: number;
+  likes?: number;
+  commentsTotal?: number;
+  commentsHidden?: number;
+  emailSent?: number;
+  emailFailed?: number;
+};
+
+export type CommentStatus = "visible" | "hidden";
+
+export type BlogComment = {
+  id: number;
+  post_id: string;
+  nick: string | null;
+  text: string;
+  timestamp: string;
+  user_id: string | null;
+  status: CommentStatus | string | null;
+};
+
+export type EmailLog = {
+  id: number;
+  post_id: number;
+  email: string;
+  status: string;
+  timestamp: string;
+  attempts: number | null;
+  error_message: string | null;
+  retry_at: string | null;
+  posts?: { id: number; title: string | null; slug: string | null } | null;
 };
