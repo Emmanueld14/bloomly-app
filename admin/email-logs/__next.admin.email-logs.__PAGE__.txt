@@ -1,0 +1,27 @@
+1:"$Sreact.fragment"
+2:I[42334,["/_next/static/chunks/0ehjiuuxbbhq9.js","/_next/static/chunks/3qvlaw20-1fuj.js","/_next/static/chunks/336p40obytf08.js","/_next/static/chunks/1tcn6ylp3ewox.js"],"EmailLogsPageClient"]
+3:I[97367,["/_next/static/chunks/0ehjiuuxbbhq9.js"],"OutletBoundary"]
+4:"$Sreact.suspense"
+8:I[97367,["/_next/static/chunks/0ehjiuuxbbhq9.js"],"ViewportBoundary"]
+9:I[97367,["/_next/static/chunks/0ehjiuuxbbhq9.js"],"MetadataBoundary"]
+b:I[39756,["/_next/static/chunks/0ehjiuuxbbhq9.js"],"default"]
+c:I[37457,["/_next/static/chunks/0ehjiuuxbbhq9.js"],"default"]
+f:I[39756,["/_next/static/chunks/0ehjiuuxbbhq9.js"],"LoadingBoundaryProvider"]
+10:I[96527,["/_next/static/chunks/0ehjiuuxbbhq9.js","/_next/static/chunks/3qvlaw20-1fuj.js","/_next/static/chunks/336p40obytf08.js"],"AdminAuthGate"]
+11:I[67978,["/_next/static/chunks/0ehjiuuxbbhq9.js","/_next/static/chunks/3qvlaw20-1fuj.js","/_next/static/chunks/336p40obytf08.js"],"AdminNav"]
+13:I[22016,["/_next/static/chunks/0ehjiuuxbbhq9.js","/_next/static/chunks/0f_4ncal1hoog.js"],""]
+:HL["/_next/static/chunks/3yavsnrcepx2j.css","style"]
+7:X
+e:X
+e:C
+0:{"buildId":"6Ok5D4nttJMflHZl17xS8","data":[{"rsc":["$","$1","c",{"children":[["$","$L2",null,{}],[["$","script","script-0",{"src":"/_next/static/chunks/1tcn6ylp3ewox.js","async":true}]],["$","$L3",null,{"children":["$","$4",null,{"name":"Next.MetadataOutlet","children":"$@5"}]}]]}],"isPartial":"$@6","staleTime":"$7","varyParams":null},{"rsc":["$","$1","h",{"children":[null,["$","$L8",null,{"children":[["$","meta","0",{"charSet":"utf-8"}],["$","meta","1",{"name":"viewport","content":"width=device-width, initial-scale=1"}]]}],["$","div",null,{"hidden":true,"children":["$","$L9",null,{"children":["$","$4",null,{"name":"Next.Metadata","children":[["$","title","0",{"children":"Bloomly"}],["$","meta","1",{"name":"description","content":"Bloomly — a calm Kenyan mental wellness space for teens to read, reflect, and feel supported."}]]}]}]}],["$","meta",null,{"name":"next-size-adjust","content":""}]]}],"isPartial":"$@a","staleTime":"$7","varyParams":null},{"rsc":["$","$1","c",{"children":[null,["$","$Lb",null,{"parallelRouterKey":"children","template":["$","$Lc",null,{}]}]]}],"isPartial":"$@d","staleTime":"$7","varyParams":"$e"},{"rsc":["$","$Lf",null,{"loading":[["$","div","l",{"className":"flex min-h-[30vh] items-center justify-center text-sm text-gray-500","children":"Loading…"}],[],null],"children":["$","$1","c",{"children":[[["$","script","script-0",{"src":"/_next/static/chunks/3qvlaw20-1fuj.js","async":true}],["$","script","script-1",{"src":"/_next/static/chunks/336p40obytf08.js","async":true}]],["$","$L10",null,{"children":["$","div",null,{"className":"admin-shell","children":["$","div",null,{"className":"mx-auto flex min-h-screen max-w-7xl flex-col md:flex-row","children":[["$","$L11",null,{}],["$","div",null,{"className":"flex-1 px-4 py-6 md:px-8 md:py-8","children":["$","$Lb",null,{"parallelRouterKey":"children","template":["$","$Lc",null,{}]}]}]]}]}]}]]}]}],"isPartial":"$@12","staleTime":"$7","varyParams":null},{"rsc":["$","$1","c",{"children":[[["$","link","0",{"rel":"stylesheet","href":"/_next/static/chunks/3yavsnrcepx2j.css","precedence":"next"}],["$","script","script-0",{"src":"/_next/static/chunks/0ehjiuuxbbhq9.js","async":true}]],["$","html",null,{"lang":"en","className":"manrope_3753310a-module__O9yOzW__variable inter_ce929fb-module__qqrwVG__variable h-full","children":["$","body",null,{"className":"min-h-full antialiased","children":["$","$Lb",null,{"parallelRouterKey":"children","template":["$","$Lc",null,{}],"notFound":[["$","div",null,{"className":"site-gradient flex min-h-screen flex-col items-center justify-center px-5 text-center","children":[["$","h1",null,{"className":"font-[family-name:var(--font-manrope)] text-5xl font-extrabold text-[var(--fg)]","children":"404"}],["$","p",null,{"className":"mt-3 text-[var(--fg-muted)]","children":"That page isn’t here — let’s get you somewhere calmer."}],["$","$L13",null,{"href":"/","className":"mt-8 text-sm font-semibold text-[var(--accent-2)] hover:underline","children":"Back home"}]]}],[]]}]}]}]]}],"isPartial":"$@14","staleTime":"$7","varyParams":null}],"isUpgradeableISRFallback":false,"a":"$@15","rootVaryParams":null,"needsRuntimeRequest":"$@16"}
+5:null
+7:300
+16:true
+7:C
+15:0
+a:"$undefined"
+d:"$undefined"
+12:"$undefined"
+14:"$undefined"
+6:"$undefined"

@@ -36,9 +36,14 @@ export function AuthForm({
 
     const { data: profile } = await supabase
       .from("profiles")
-      .select("role, username")
+      .select("role, username, is_active")
       .eq("id", user.id)
       .maybeSingle();
+
+    if (profile?.is_active === false) {
+      await supabase.auth.signOut();
+      throw new Error("This account has been deactivated. Contact an admin.");
+    }
 
     const preferred =
       profile?.role === "admin"

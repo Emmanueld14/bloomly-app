@@ -51,14 +51,22 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(redirectUrl);
   }
 
-  if (isAdminRoute && user) {
+  if ((isAdminRoute || isAccountRoute) && user) {
     const { data: profile } = await supabase
       .from("profiles")
-      .select("role")
+      .select("role, is_active")
       .eq("id", user.id)
       .maybeSingle();
 
-    if (profile?.role !== "admin") {
+    if (profile?.is_active === false) {
+      await supabase.auth.signOut();
+      const redirectUrl = request.nextUrl.clone();
+      redirectUrl.pathname = "/login";
+      redirectUrl.searchParams.set("error", "account_deactivated");
+      return NextResponse.redirect(redirectUrl);
+    }
+
+    if (isAdminRoute && profile?.role !== "admin") {
       const redirectUrl = request.nextUrl.clone();
       redirectUrl.pathname = "/account";
       redirectUrl.searchParams.set("error", "admin_required");
@@ -69,9 +77,17 @@ export async function updateSession(request: NextRequest) {
   if (isAuthPage && user) {
     const { data: profile } = await supabase
       .from("profiles")
-      .select("role, username")
+      .select("role, username, is_active")
       .eq("id", user.id)
       .maybeSingle();
+
+    if (profile?.is_active === false) {
+      await supabase.auth.signOut();
+      const redirectUrl = request.nextUrl.clone();
+      redirectUrl.pathname = "/login";
+      redirectUrl.searchParams.set("error", "account_deactivated");
+      return NextResponse.redirect(redirectUrl);
+    }
 
     const redirectUrl = request.nextUrl.clone();
     const incomplete =

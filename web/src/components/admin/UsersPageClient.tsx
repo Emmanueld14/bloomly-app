@@ -24,7 +24,9 @@ export function UsersPageClient() {
       setCurrentUserId(user.id);
       const { data, error: fetchError } = await supabase
         .from("profiles")
-        .select("id, email, display_name, role, username, avatar_url")
+        .select(
+          "id, email, display_name, role, username, avatar_url, is_active, deactivated_at, created_at, updated_at"
+        )
         .order("created_at", { ascending: false });
       if (fetchError) {
         setError(fetchError.message);
@@ -43,7 +45,7 @@ export function UsersPageClient() {
       <div>
         <h1 className="text-2xl font-semibold text-gray-900">Users</h1>
         <p className="mt-1 text-sm text-gray-500">
-          Promote trusted accounts to admin. Everyone else stays a regular user.
+          Manage roles, usernames, and account status for Bloomly members.
         </p>
       </div>
       <UsersTable users={users} currentUserId={currentUserId} />

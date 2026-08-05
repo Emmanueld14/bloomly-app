@@ -17,6 +17,11 @@ function LoginInner() {
           NEXT_PUBLIC_SUPABASE_ANON_KEY.
         </p>
       ) : null}
+      {params.get("error") === "account_deactivated" ? (
+        <p className="mx-auto mb-4 max-w-md rounded-md border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-100">
+          This account has been deactivated. Contact an admin if you think this is a mistake.
+        </p>
+      ) : null}
       <AuthForm mode="login" nextPath={nextPath} />
     </div>
   );
