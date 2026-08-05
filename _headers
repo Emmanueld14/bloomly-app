@@ -30,10 +30,13 @@
   Cache-Control: public, max-age=300, must-revalidate
 
 /images/bloomly-wordmark.svg
+  Cache-Control: public, max-age=300, must-revalidate
+
+/images/bloomly-wordmark-v2.svg
   Cache-Control: public, max-age=604800, immutable
 
 /images/bloomly-wordmark.png
-  Cache-Control: public, max-age=604800, immutable
+  Cache-Control: public, max-age=300, must-revalidate
 
 /favicon.svg
   Cache-Control: public, max-age=604800, immutable

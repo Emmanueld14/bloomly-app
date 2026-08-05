@@ -273,7 +273,7 @@ function applyFastBlogHead(html) {
     );
     output = output.replace(
         /<img src="\/logo\.(?:png|svg)"[^>]*>/g,
-        '<img src="/images/bloomly-wordmark.svg" alt="Bloomly logo" class="logo-image" decoding="async">'
+        '<img src="/images/bloomly-wordmark-v2.svg" alt="Bloomly logo" class="logo-image" decoding="async">'
     );
     output = output.replace(
         /<!-- bloomly:blog-manifest:start -->[\s\S]*?<!-- bloomly:blog-manifest:end -->\s*/g,
