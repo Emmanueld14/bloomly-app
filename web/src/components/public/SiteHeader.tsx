@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { BrandLogo } from "@/components/BrandLogo";
 import { createClient } from "@/lib/supabase/client";
 import type { Profile } from "@/lib/auth";
@@ -10,28 +10,54 @@ import { displayName, initials, needsProfileSetup, profileSetupUrl } from "@/lib
 export function SiteHeader() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [email, setEmail] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const loadUserProfile = useCallback(async () => {
+    try {
+      const supabase = createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      
+      if (!user) {
+        setProfile(null);
+        setEmail(null);
+        setIsLoading(false);
+        return;
+      }
+      
+      setEmail(user.email || null);
+      const { data } = await supabase
+        .from("profiles")
+        .select("id, email, display_name, role, username, avatar_url")
+        .eq("id", user.id)
+        .maybeSingle();
+      setProfile(data as Profile | null);
+    } catch {
+      setProfile(null);
+      setEmail(null);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    async function load() {
-      try {
-        const supabase = createClient();
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
-        if (!user) return;
-        setEmail(user.email || null);
-        const { data } = await supabase
-          .from("profiles")
-          .select("id, email, display_name, role, username, avatar_url")
-          .eq("id", user.id)
-          .maybeSingle();
-        if (data) setProfile(data as Profile);
-      } catch {
-        // ignore header auth errors on public pages
+    const supabase = createClient();
+    
+    void loadUserProfile();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_IN" || event === "SIGNED_OUT" || event === "TOKEN_REFRESHED") {
+        void loadUserProfile();
       }
-    }
-    void load();
-  }, []);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [loadUserProfile]);
 
   const name = displayName(profile, email);
   const incomplete = needsProfileSetup(profile);
