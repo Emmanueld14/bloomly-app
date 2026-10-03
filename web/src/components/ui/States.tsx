@@ -1,9 +1,12 @@
 export function LoadingState({ label = "Loading…" }: { label?: string }) {
   return (
-    <div className="flex min-h-[40vh] items-center justify-center text-sm text-[var(--fg-muted)]">
-      <div className="flex items-center gap-3">
-        <span className="inline-block h-2 w-2 animate-pulse rounded-full bg-[var(--accent)]" />
-        {label}
+    <div className="flex min-h-[40vh] items-center justify-center">
+      <div className="flex flex-col items-center gap-4">
+        <div className="relative flex h-10 w-10 items-center justify-center">
+          <span className="absolute h-full w-full animate-ping rounded-full bg-[var(--accent)] opacity-20" />
+          <span className="relative h-3 w-3 rounded-full bg-[var(--accent)]" />
+        </div>
+        <span className="text-sm text-[var(--fg-muted)]">{label}</span>
       </div>
     </div>
   );

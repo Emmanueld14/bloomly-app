@@ -6,12 +6,15 @@
   --bg: #fafbfc;
   --bg-elevated: #ffffff;
   --fg: #1f2937;
-  --fg-muted: #5f6c7b;
+  --fg-muted: #64748b;
   --accent: #5bc0be;
   --accent-2: #4f7df3;
-  --accent-3: #46b4b0;
-  --border: #e7edf5;
-  --glow: rgba(91, 192, 190, 0.28);
+  --accent-3: #3da8a6;
+  --accent-soft: #e8f5f5;
+  --border: #e2e8f0;
+  --border-subtle: #f1f5f9;
+  --glow: rgba(91, 192, 190, 0.32);
+  --glow-strong: rgba(91, 192, 190, 0.45);
 
   --admin-bg: #f4f7fb;
   --admin-surface: #ffffff;
@@ -55,10 +58,11 @@ body {
 
 .site-gradient {
   background:
-    radial-gradient(ellipse 70% 45% at 12% 0%, rgba(168, 216, 248, 0.55), transparent 55%),
-    radial-gradient(ellipse 55% 40% at 92% 8%, rgba(91, 192, 190, 0.28), transparent 50%),
-    radial-gradient(ellipse 45% 30% at 50% 100%, rgba(79, 125, 243, 0.08), transparent 55%),
-    linear-gradient(180deg, #fafbfc 0%, #f1f5f9 45%, #fafbfc 100%);
+    radial-gradient(ellipse 80% 50% at 10% -5%, rgba(168, 216, 248, 0.6), transparent 50%),
+    radial-gradient(ellipse 60% 45% at 95% 5%, rgba(91, 192, 190, 0.35), transparent 45%),
+    radial-gradient(ellipse 50% 35% at 50% 100%, rgba(79, 125, 243, 0.1), transparent 50%),
+    radial-gradient(ellipse 40% 30% at 75% 60%, rgba(91, 192, 190, 0.08), transparent 50%),
+    linear-gradient(180deg, #fafbfc 0%, #f8fafc 35%, #f1f5f9 60%, #fafbfc 100%);
 }
 
 .noise {
@@ -184,7 +188,136 @@ body {
 
 .bloomly-card {
   border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.92);
-  border-radius: 1.1rem;
-  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.06);
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 1.25rem;
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.04),
+    0 4px 8px rgba(15, 23, 42, 0.04),
+    0 16px 32px rgba(15, 23, 42, 0.06),
+    0 32px 64px rgba(15, 23, 42, 0.04);
+  backdrop-filter: blur(8px);
+}
+
+.bloomly-card-elevated {
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.98) 0%,
+    rgba(255, 255, 255, 0.92) 100%
+  );
+  border-radius: 1.5rem;
+  box-shadow:
+    0 0 0 1px var(--border-subtle),
+    0 1px 3px rgba(15, 23, 42, 0.04),
+    0 8px 16px rgba(15, 23, 42, 0.06),
+    0 24px 48px rgba(15, 23, 42, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(12px);
+}
+
+.auth-input {
+  width: 100%;
+  border: 1.5px solid var(--border);
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem;
+  font-size: 0.9375rem;
+  color: var(--fg);
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.auth-input::placeholder {
+  color: var(--fg-muted);
+  opacity: 0.7;
+}
+
+.auth-input:hover {
+  border-color: var(--accent);
+  background: rgba(255, 255, 255, 0.95);
+}
+
+.auth-input:focus {
+  border-color: var(--accent);
+  background: #fff;
+  box-shadow:
+    0 0 0 4px var(--glow),
+    0 2px 8px rgba(91, 192, 190, 0.1);
+}
+
+.auth-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  border-radius: 0.75rem;
+  padding: 0.875rem 1.25rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(135deg, #4f7df3 0%, #5bc0be 50%, #3da8a6 100%);
+  background-size: 200% 200%;
+  background-position: 0% 50%;
+  box-shadow:
+    0 2px 4px rgba(79, 125, 243, 0.2),
+    0 4px 12px rgba(91, 192, 190, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+}
+
+.auth-btn:hover:not(:disabled) {
+  background-position: 100% 50%;
+  transform: translateY(-1px);
+  box-shadow:
+    0 4px 8px rgba(79, 125, 243, 0.25),
+    0 8px 20px rgba(91, 192, 190, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+.auth-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.auth-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.floating-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.5;
+  pointer-events: none;
+  animation: float 8s ease-in-out infinite;
+}
+
+.floating-orb-1 {
+  width: 300px;
+  height: 300px;
+  background: linear-gradient(135deg, rgba(91, 192, 190, 0.4), rgba(79, 125, 243, 0.3));
+  top: -100px;
+  left: -100px;
+  animation-delay: 0s;
+}
+
+.floating-orb-2 {
+  width: 200px;
+  height: 200px;
+  background: linear-gradient(135deg, rgba(79, 125, 243, 0.3), rgba(168, 216, 248, 0.4));
+  bottom: -50px;
+  right: -50px;
+  animation-delay: -4s;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(10px, -15px) scale(1.02);
+  }
+  66% {
+    transform: translate(-5px, 10px) scale(0.98);
+  }
 }
