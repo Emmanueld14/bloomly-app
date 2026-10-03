@@ -68,37 +68,66 @@ export function AuthForm({
 
     const supabase = createClient();
 
-    try {
-      if (mode === "login") {
-        const { error: signInError } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-        if (signInError) throw signInError;
-        router.replace(await resolveDestination());
-        router.refresh();
-      } else {
-        const { data, error: signUpError } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            data: { display_name: email.split("@")[0] },
-          },
-        });
-        if (signUpError) throw signUpError;
-        if (data.session) {
-          syncSessionToLocalStorage(data.session);
+    const maxRetries = 2;
+    let lastError: Error | null = null;
+
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        if (mode === "login") {
+          const { error: signInError } = await supabase.auth.signInWithPassword({
+            email,
+            password,
+          });
+          if (signInError) throw signInError;
           router.replace(await resolveDestination());
           router.refresh();
+          return;
         } else {
-          setMessage("Check your email to confirm your account, then sign in.");
+          const { data, error: signUpError } = await supabase.auth.signUp({
+            email,
+            password,
+            options: {
+              data: { display_name: email.split("@")[0] },
+            },
+          });
+          if (signUpError) throw signUpError;
+          if (data.session) {
+            syncSessionToLocalStorage(data.session);
+            router.replace(await resolveDestination());
+            router.refresh();
+          } else {
+            setMessage("Check your email to confirm your account, then sign in.");
+          }
+          return;
         }
+      } catch (err) {
+        lastError = err instanceof Error ? err : new Error("Authentication failed");
+        
+        const isNetworkError = 
+          lastError.message.toLowerCase().includes("failed to fetch") ||
+          lastError.message.toLowerCase().includes("network") ||
+          lastError.message.toLowerCase().includes("timeout") ||
+          lastError.message.toLowerCase().includes("connection");
+        
+        if (isNetworkError && attempt < maxRetries) {
+          await new Promise((resolve) => setTimeout(resolve, 1500 * (attempt + 1)));
+          continue;
+        }
+        break;
       }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Authentication failed");
-    } finally {
-      setLoading(false);
     }
+
+    if (lastError) {
+      const msg = lastError.message.toLowerCase();
+      if (msg.includes("failed to fetch") || msg.includes("network")) {
+        setError("Connection issue — please try again in a moment.");
+      } else if (msg.includes("invalid login credentials")) {
+        setError("Incorrect email or password. Please try again.");
+      } else {
+        setError(lastError.message);
+      }
+    }
+    setLoading(false);
   }
 
   return (

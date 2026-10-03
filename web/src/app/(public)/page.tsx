@@ -19,7 +19,7 @@ export default function HomePage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    async function load() {
+    async function load(retryCount = 0) {
       try {
         const supabase = createClient();
         const { data, error: fetchError } = await supabase
@@ -30,13 +30,28 @@ export default function HomePage() {
           .order("published_at", { ascending: false, nullsFirst: false })
           .limit(9);
         if (fetchError) {
-          setError(fetchError.message);
+          const isConnectionError = 
+            fetchError.message.toLowerCase().includes("failed to fetch") ||
+            fetchError.message.toLowerCase().includes("network");
+          
+          if (isConnectionError && retryCount < 2) {
+            await new Promise((r) => setTimeout(r, 1500 * (retryCount + 1)));
+            return load(retryCount + 1);
+          }
+          setError(isConnectionError ? "Connection issue — please refresh the page." : fetchError.message);
           setPosts([]);
           return;
         }
         setPosts((data || []) as unknown as PostWithRelations[]);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to load posts");
+        const msg = err instanceof Error ? err.message : "Failed to load posts";
+        const isConnectionError = msg.toLowerCase().includes("failed to fetch") || msg.toLowerCase().includes("network");
+        
+        if (isConnectionError && retryCount < 2) {
+          await new Promise((r) => setTimeout(r, 1500 * (retryCount + 1)));
+          return load(retryCount + 1);
+        }
+        setError(isConnectionError ? "Connection issue — please refresh the page." : msg);
         setPosts([]);
       }
     }

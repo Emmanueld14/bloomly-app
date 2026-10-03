@@ -23,31 +23,43 @@ function AccountInner() {
   const [profile, setProfile] = useState<Profile | null>(null);
 
   useEffect(() => {
-    async function load() {
-      const supabase = createClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) {
-        router.replace("/login/?next=/account/");
-        return;
-      }
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      syncSessionToLocalStorage(session);
+    async function load(retryCount = 0) {
+      try {
+        const supabase = createClient();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        if (!user) {
+          router.replace("/login/?next=/account/");
+          return;
+        }
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+        syncSessionToLocalStorage(session);
 
-      setEmail(user.email || "");
-      const { data } = await supabase
-        .from("profiles")
-        .select("id, email, display_name, role, username, avatar_url")
-        .eq("id", user.id)
-        .maybeSingle();
-      const nextProfile = (data as Profile) || null;
-      setProfile(nextProfile);
+        setEmail(user.email || "");
+        const { data } = await supabase
+          .from("profiles")
+          .select("id, email, display_name, role, username, avatar_url")
+          .eq("id", user.id)
+          .maybeSingle();
+        const nextProfile = (data as Profile) || null;
+        setProfile(nextProfile);
 
-      if (needsProfileSetup(nextProfile)) {
-        router.replace(profileSetupUrl("/account/"));
+        if (needsProfileSetup(nextProfile)) {
+          router.replace(profileSetupUrl("/account/"));
+        }
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : "";
+        const isConnectionError = 
+          msg.toLowerCase().includes("failed to fetch") || 
+          msg.toLowerCase().includes("network");
+        
+        if (isConnectionError && retryCount < 2) {
+          await new Promise((r) => setTimeout(r, 1500 * (retryCount + 1)));
+          return load(retryCount + 1);
+        }
       }
     }
     void load();
